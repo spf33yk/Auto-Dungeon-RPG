@@ -9,3 +9,5 @@
 
 - 今後は毎回、push後にGitHub Actionsの自動テスト成功とGitHub Pagesのデプロイ成功を確認し、公開URLで今回の変更を実操作テストする。ローカル確認やpush成功だけで「公開版に反映済み」と報告しない。
 - 公開版のテスト結果・確認したコミット・未確認事項はIMPLEMENTATION_NOTES.mdへ記録する。公開確認できない場合は、その制約を完了報告で明記する。
+
+- ブラウザ用JS・CSS変更後はnode scripts/update-assets.jsでindex.htmlの配信URLを更新し、node scripts/update-assets.js --checkを通す。公開版で古いキャッシュとの混在がないことも確認する。

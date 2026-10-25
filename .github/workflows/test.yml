@@ -17,5 +17,7 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Check browser asset versions
+        run: node scripts/update-assets.js --check
       - name: Run game tests
         run: node --test
