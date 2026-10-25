@@ -120,4 +120,4 @@ TRUEの50階構成は定数・案内に反映する。本編・息子との共�
 
 狭い2カラム画面にも対応するため、adventureをinline-sizeコンテナにし、ゲーム枠600px以下では上部を2行・上下96pxへ切り替える。通常は上下56px。letterboxのborderは0とし、主マップとの境界線を描かない。HUDの上下paddingを6px、2行時の行間を4pxに詰めて情報を収める。
 
-探索時のjournalはgrid-column:1／grid-row:2、expeditionはgrid-row:1/3とし、主画面の直下にログを置く。760px以下ではflexのorderをadventure:0、journal:1、expedition:2にする。DOM順もadventure→journal→expeditionへ合わせる。準備時の配置ルールと保存処理は維持する。
+探索時はjournalをadventureの末尾に置き、ゲームフレーム内で下部レターボックスの直後に表示する。journalの外枠・角丸・余白を除去し、上端の区切りだけを置く。expeditionは右列の1行目。renderで同じjournal要素を探索時はadventureへ、準備・目覚め時はworkspaceへ移す。ログや自動保存表示のIDとイベントは保持し、準備時の表示・保存処理も維持する。

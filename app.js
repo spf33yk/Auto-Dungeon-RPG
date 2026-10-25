@@ -103,7 +103,7 @@ function renderTab(){
 
 }
 function renderScreens(){
- const prep=state.phase==='prepare',awake=state.phase==='awakening',st=stats(state);$('workspace').dataset.screen=awake?'awakening':prep?'prepare':'explore';$('awakening-scene').hidden=!awake;$('game-icons').hidden=awake;document.querySelector('.journal').hidden=awake;
+ const prep=state.phase==='prepare',awake=state.phase==='awakening',st=stats(state);$('workspace').dataset.screen=awake?'awakening':prep?'prepare':'explore';$('awakening-scene').hidden=!awake;$('game-icons').hidden=awake;const journal=document.querySelector('.journal'),adventure=document.querySelector('.adventure');journal.hidden=awake;if(prep||awake){if(journal.parentElement!==$('workspace'))$('workspace').appendChild(journal);}else if(journal.parentElement!==adventure)adventure.appendChild(journal);
  $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=prep||awake;$('expedition').hidden=awake;$('live-order-panel').hidden=prep;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
  $('prepare-floor').textContent=`${floorLabel(state)}への支度`;
  const host=awake?$('awakening-start'):prep?$('launch-area'):$('notice-actions');if($('primary').parentElement!==host)host.prepend($('primary'));
