@@ -4,3 +4,5 @@
 - ソースと仕様書は同じコミットに含める。数値・取得条件・操作方法・既存セーブへの影響を実装と一致させる。
 - `DESIGN.md` は企画・物語・制作範囲、`SPEC.md` は詳細仕様、`SYSTEM_DESIGN.md` はシステム設計として分けて管理する。仮バランスは仮採用と明記する。
 - 検証結果と未確定事項は `IMPLEMENTATION_NOTES.md` に記録する。
+
+- 修正依頼を受けたらソースと各資料（DESIGN.md・SPEC.md・SYSTEM_DESIGN.md・IMPLEMENTATION_NOTES.md・README.md）の整合を確認し、該当する変更を同時に反映する。

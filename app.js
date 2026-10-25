@@ -1,3 +1,4 @@
+import {autoMapModel} from './map-view.js';
 import {memoryGroups,memoryLayout} from './skill-tree.js';
 import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment} from './debug-tools.js';
 import {W,H,skills,newGame,stats,price,upgrade,equip,tick,ascend,zoneFor,floorLabel,radius,canSee,gearById,gearStats,gearName,identify,uncurse,discard,synthesize,locked,codexRows,synthesisResult,sortedInventory,normalizeSave,orderDefinitions,orderById,orderCapacity,orderUnlocked,addOrder,editOrder,beginExploration,equipment,LAST_FLOOR,LETTER_FLOOR,nextStageHint} from './engine.js';
@@ -24,8 +25,8 @@ function draw(){ctx.fillStyle='#0c1416';ctx.fillRect(0,0,744,552);const theme=zo
 for(let y=0;y<H;y++)for(let x=0;x<W;x++){const seen=state.seen[y][x],floor=state.grid[y][x];if(!seen)continue;const px=x*24,py=y*24,n=(x*17+y*31+state.seed)%13;ctx.fillStyle=floor?theme.floorColor:theme.wallColor;ctx.fillRect(px,py,24,24);if(floor){ctx.fillStyle='#172722';ctx.fillRect(px,py,24,1);ctx.fillRect(px,py,1,24);if(n<4){ctx.fillStyle='#435044';ctx.fillRect(px+5+n,py+8,2,2);ctx.fillRect(px+15,py+16,3,1);}if(n===5){ctx.fillStyle='#354b39';ctx.fillRect(px+2,py+15,6,3);}}else{ctx.fillStyle=theme.wallColor;ctx.fillRect(px+1,py+1,22,3);ctx.fillStyle='#182925';ctx.fillRect(px,py+20,24,4);ctx.fillRect(px+11,py+4,2,16);}if(!visible(x,y)){ctx.fillStyle='#071111a8';ctx.fillRect(px,py,24,24);}}
 const stair=state.stairs;if(state.seen[stair.y][stair.x]){ctx.fillStyle='#88c2ac19';ctx.fillRect(stair.x*24-4,stair.y*24-4,32,32);sprite(ctx,'stairs',stair.x*24,stair.y*24);}
 for(const i of state.items)if(state.seen[i.y][i.x]){ctx.globalAlpha=visible(i.x,i.y)?1:.4;sprite(ctx,i.type==='letter'?'chest':i.type,i.x*24,i.y*24);if(i.type==='letter'){ctx.fillStyle='#d8ca8a';ctx.fillRect(i.x*24+10,i.y*24+5,4,4);}}ctx.globalAlpha=1;
-for(const t of state.traps||[])if(t.revealed&&state.seen[t.y][t.x]){ctx.fillStyle=t.spent?'#7e7769':'#d7b278';ctx.fillRect(t.x*24+6,t.y*24+14,12,3);ctx.fillStyle='#d1b88b';for(let i=0;i<3;i++)ctx.fillRect(t.x*24+7+i*4,t.y*24+10,2,4);}
-for(const e of state.enemies)if(visible(e.x,e.y)){const original={g:palette.g,l:palette.l,r:palette.r,p:palette.p};if(e.type==='slime'){palette.g=theme.wallColor;palette.l='#c0c7b1';}else{palette.r=theme.floorColor;palette.p=theme.wallColor;}sprite(ctx,e.type,e.x*24,e.y*24);Object.assign(palette,original);ctx.fillStyle='#a06c70';ctx.fillRect(e.x*24+6,e.y*24+21,12,2);}
+for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.fillStyle=t.spent?'#7e7769':'#d7b278';ctx.fillRect(t.x*24+6,t.y*24+14,12,3);ctx.fillStyle='#d1b88b';for(let i=0;i<3;i++)ctx.fillRect(t.x*24+7+i*4,t.y*24+10,2,4);}
+for(const e of state.enemies)if(visible(e.x,e.y)){const original={g:palette.g,l:palette.l,r:palette.r,p:palette.p};if(e.type==='slime'){palette.g=theme.wallColor;palette.l='#c0c7b1';}else{palette.r=theme.floorColor;palette.p=theme.wallColor;}sprite(ctx,e.type,e.x*24,e.y*24);if(e.boss){ctx.strokeStyle='#dfba6b';ctx.lineWidth=2;ctx.strokeRect(e.x*24-2,e.y*24-2,28,28);}Object.assign(palette,original);ctx.fillStyle='#a06c70';ctx.fillRect(e.x*24+6,e.y*24+21,12,2);}
 const progress=motion&&state.phase==='explore'?Math.min(1,(performance.now()-motion.time)/motion.duration):1;
 const eased=1-Math.pow(1-progress,3);
 const position=motion?{x:motion.from.x+(state.player.x-motion.from.x)*eased,y:motion.from.y+(state.player.y-motion.from.y)*eased}:state.player;
@@ -33,8 +34,11 @@ const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.play
 const hop=moving?Math.sin(progress*Math.PI)*2:0;
 ctx.fillStyle='#bfd49e20';ctx.fillRect(position.x*24-4,position.y*24-4,32,32);sprite(ctx,'skeleton',position.x*24,position.y*24-hop);
 if(state.gimmick?.id==='fog'){ctx.fillStyle='#a6bdc620';ctx.fillRect(0,0,744,552);}
+const bubble=$('thought-bubble');bubble.hidden=state.phase!=='explore';if(bubble.textContent!==state.intent)bubble.textContent=state.intent;bubble.style.left=Math.max(3,Math.min(55,position.x/W*100))+'%';bubble.style.top=Math.max(8,(position.y/H*100)-14)+'%';
+drawAutoMap();
 if(state.flash){ctx.fillStyle=state.flash.kind==='hurt'?'#e49a8c66':'#fff3b766';ctx.fillRect(state.flash.x*24,state.flash.y*24,24,24);}
 }
+function drawAutoMap(){const c=$('auto-map').getContext('2d'),model=autoMapModel(state,(x,y)=>canSee(state,x,y));c.clearRect(0,0,186,138);for(const tile of model.tiles){c.fillStyle=tile.walkable?'#96b6a3':'#355346';c.fillRect(tile.x*6,tile.y*6,5,5);}for(const m of model.markers){c.fillStyle=({player:'#fff3b0',enemy:'#e88b83',boss:'#f8aa49',stairs:'#9ddff2',item:'#dec68c',trap:'#f3a66d',spent:'#827b73'})[m.type];c.fillRect(m.x*6,m.y*6,6,6);}}
 function categoryTabs(type,selected,common=false){return `<div class="subtabs" role="group" aria-label="${type==='skill'?'スキル系統':'装備の種類'}">${(common?[['common','共通'],['weapon','武器'],['armor','防具']]:[['weapon','武器'],['armor','防具']]).map(([id,label])=>`<button data-category="${type}" data-value="${id}" aria-pressed="${selected===id}" class="${selected===id?'active':''}">${label}</button>`).join('')}</div>`;}
 function sortButtons(type,selected){return `<div class="sort-controls" role="group" aria-label="装備の並べ替え">${[['acquired','入手順'],['attack','攻撃力順'],['defense','防御力順']].map(([id,label])=>`<button data-sort="${type}" data-value="${id}" class="${selected===id?'active':''}" aria-pressed="${selected===id}">${label} ${id==='acquired'?'↑':'↓'}</button>`).join('')}</div>`;}
 function renderOrderEditor(host){const editable=['prepare','explore'].includes(state.phase);const signature=JSON.stringify([state.orders,state.levels,state.phase]);if(host.dataset.orderSignature===signature)return;host.dataset.orderSignature=signature;host.innerHTML=`<div data-order-editor><p class="section-caption">指示 ${state.orders.length} / ${orderCapacity(state)}枠 · 上から順に、条件を満たす指示を実行。<br>隣接敵への攻撃が基本。退避だけは戦闘より優先。<br>指揮の記憶で枠を拡張できます。</p>${state.orders.map((o,i)=>{const d=orderById[o.id];return `<article class="rule-card"><strong>${i+1}. ${d.name}</strong><small>${d.detail}</small>${d.param?`<label>条件 <input aria-label="${d.name}の条件" type="number" min="${d.min}" max="${d.max}" step="${d.step}" value="${o[d.param]}" data-rule-value="${i}" ${!editable?'disabled':''}> ${d.unit}</label>`:''}<div><button data-rule-op="up" data-index="${i}" aria-label="${d.name}を上へ" ${!editable||i===0?'disabled':''}>↑</button><button data-rule-op="down" data-index="${i}" aria-label="${d.name}を下へ" ${!editable||i===state.orders.length-1?'disabled':''}>↓</button><button data-rule-op="remove" data-index="${i}" ${!editable?'disabled':''}>外す</button></div></article>`;}).join('')}<label class="rule-add-label">追加する指示<select data-order-choice aria-label="追加する探索指示">${orderDefinitions.map(d=>`<option value="${d.id}" ${!orderUnlocked(state,d.id)||state.orders.some(o=>o.id===d.id)?'disabled':''}>${d.name}${!orderUnlocked(state,d.id)?'（要スキル）':state.orders.some(o=>o.id===d.id)?'（設定済）':''}</option>`).join('')}</select></label><button class="rule-add" data-rule-add ${state.orders.length>=orderCapacity(state)||!['prepare','explore'].includes(state.phase)?'disabled':''}>指示を追加</button><p class="section-caption">該当指示がなければ未踏の場所を調べ、探索後は階段へ戻ります。</p></div>`;}
@@ -45,8 +49,8 @@ const displayDefense=()=>state.gear.armor.identified?stats(state).defense:'？';
 function render(){
  const st=stats(state),prep=state.phase==='prepare',theme=zoneFor(state);renderScreens();
  $('floor-title').textContent=`${theme.name} · ${floorLabel(state)}`;
- $('zone').textContent=`区間 ${Math.floor((state.floor-1)/5)+1} / 6 · ${theme.layout.toUpperCase()}`;
- $('phase-label').textContent=({prepare:'準備中',explore:paused?'一時停止':'探索中',cleared:'踏破',dead:'記憶喪失',ending:'通常エンド'})[state.phase];
+ $('zone').textContent=`区間 ${Math.floor((state.floor-1)/5)+1} / 6 · ${state.bossFloor?'FIXED BOSS':theme.layout.toUpperCase()}`;
+ $('phase-label').textContent=({awakening:'目覚め',prepare:'準備中',explore:paused?'一時停止':'探索中',cleared:'踏破',dead:'記憶喪失',ending:'通常エンド'})[state.phase];
  $('floor-message').hidden=state.floor!==LETTER_FLOOR;$('floor-message').textContent='B15 ― 何か大事なものを忘れている気がする';
  $('turn').textContent=`TURN ${String(state.turn).padStart(3,'0')}`;
  $('hp-text').textContent=`${state.hp} / ${st.maxHp}`;$('hp-bar').style.width=`${state.hp/st.maxHp*100}%`;$('hp-bar').style.background=state.hp<st.maxHp*.3?'#bd8073':'#91ae88';
@@ -56,7 +60,7 @@ function render(){
  $('next-hint').hidden=!hint;if(hint)$('next-hint').innerHTML='<small>勇者の残響 — 階段に触れると、危険を察した記憶が蘇る</small><h3>'+esc(hint.title)+'</h3><p>'+esc(hint.text)+'</p>';
  $('field-gimmick').hidden=!state.gimmick||state.gimmick.id==='none';$('field-gimmick').textContent=state.gimmick&&state.gimmick.id!=='none'?'異変：'+state.gimmick.name+(state.gimmick.id==='fog'?' · 視界−2':''):'';
  const n=notices[state.phase];$('map-notice').innerHTML=n?`<strong>${n[0]}</strong><small>${n[1]}</small>`:paused?'<strong>ひと休み</strong><small>再開すると探索が続きます。</small>':'';
- $('primary').innerHTML=({prepare:'探索をはじめる <span>→</span>',explore:paused?'探索を再開 <span>▶</span>':'ひと休み <span>Ⅱ</span>',cleared:state.floor===LAST_FLOOR?'地上1Fへ <span>↑</span>':'次の階へ・準備 <span>↑</span>',dead:'B30で再び目覚める <span>↻</span>',ending:'次の旅をはじめる <span>↻</span>'})[state.phase];
+ $('primary').innerHTML=({awakening:'思い出す',prepare:'探索をはじめる <span>→</span>',explore:paused?'探索を再開 <span>▶</span>':'ひと休み <span>Ⅱ</span>',cleared:state.floor===LAST_FLOOR?'地上1Fへ <span>↑</span>':'次の階へ・準備 <span>↑</span>',dead:'B30で再び目覚める <span>↻</span>',ending:'次の旅をはじめる <span>↻</span>'})[state.phase];
  $('prep-note').textContent='強化・装備変更・鑑定・解呪・合成は準備中のみ。鑑定3pt／解呪5pt／合成は素材消費。';
  $('logs').innerHTML=state.logs.slice(0,30).map(l=>`<div class="log-row ${esc(l.type)}"><time>${String(l.turn).padStart(3,'0')}</time><span>${esc(l.text)}</span></div>`).join('');
  $('memory-count').textContent=`記憶の断片 ${state.memories.length} / 4 · 通常エンド ${state.profile.normalClears}回`;
@@ -98,10 +102,10 @@ function renderTab(){
 
 }
 function renderScreens(){
- const prep=state.phase==='prepare',st=stats(state);$('workspace').dataset.screen=prep?'prepare':'explore';
- $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=prep;$('expedition').hidden=false;$('live-order-panel').hidden=prep;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
+ const prep=state.phase==='prepare',awake=state.phase==='awakening',st=stats(state);$('workspace').dataset.screen=awake?'awakening':prep?'prepare':'explore';$('awakening-scene').hidden=!awake;document.querySelector('.header-right').hidden=awake;document.querySelector('.screen-heading').hidden=awake;document.querySelector('.journal').hidden=awake;
+ $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=prep||awake;$('expedition').hidden=awake;$('live-order-panel').hidden=prep;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
  $('screen-step').textContent=prep?'01 / 準備画面':'02 / 探索画面';$('screen-description').textContent=prep?`${zoneFor(state).name} · ${floorLabel(state)}への支度`:'行動と判断を見守る。指示はいつでも変更できます。';$('prepare-floor').textContent=`${floorLabel(state)}への支度`;
- const host=prep?$('launch-area'):document.querySelector('.playback');if($('primary').parentElement!==host)host.prepend($('primary'));
+ const host=awake?$('awakening-start'):prep?$('launch-area'):document.querySelector('.playback');if($('primary').parentElement!==host)host.prepend($('primary'));
  const visited=state.visited.flat().filter(Boolean).length;
  const summary=`<dl class="stat-list"><div><dt>HP</dt><dd>${state.hp} / ${st.maxHp}</dd></div><div><dt>攻撃力 / 防御力</dt><dd>${displayAttack()} / ${displayDefense()}</dd></div><div><dt>記憶のかけら</dt><dd id="shards">${state.shards} pt</dd></div><div><dt>武器</dt><dd>${esc(gearName(state.gear.weapon))}${state.gear.weapon.boundKnown?' · 呪い':''}</dd></div><div><dt>防具</dt><dd>${esc(gearName(state.gear.armor))}${state.gear.armor.boundKnown?' · 呪い':''}</dd></div><div><dt>指示枠 / 視界</dt><dd>${state.orders.length} / ${orderCapacity(state)}枠 · ${radius(state)}マス</dd></div><div><dt>再生の祈り</dt><dd>${state.levels.mend?(state.mended?'使用済み':'使用可能'):'未習得'}</dd></div></dl>`;
 
@@ -123,7 +127,7 @@ $('codex-body').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));renderTab();});
 document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{speed=Number(b.dataset.speed);document.querySelectorAll('[data-speed]').forEach(x=>x.classList.toggle('active',x===b));});
 function reset(){state=newGame(undefined,state.profile);paused=false;motion=null;last=performance.now();render();}
-$('primary').onclick=()=>{if(state.phase==='prepare'){beginExploration(state);paused=false;last=performance.now();tone();}else if(state.phase==='explore'){paused=!paused;last=performance.now();}else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();};
+$('primary').onclick=()=>{if(['awakening','prepare'].includes(state.phase)){beginExploration(state);paused=false;last=performance.now();tone();}else if(state.phase==='explore'){paused=!paused;last=performance.now();}else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();};
 $('restart').onclick=()=>{if(confirm('現在の能力・かけら・装備をリセットしてB30からやり直しますか？ 図鑑と通常エンド達成記録は残ります。'))reset();};$('prepare-restart').onclick=$('restart').onclick;
 $('sound').onclick=()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');tone(440);};
 $('monster-book').onclick=()=>showCodex('monsters');$('equipment-book').onclick=()=>showCodex('equipment');

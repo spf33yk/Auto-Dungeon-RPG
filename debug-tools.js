@@ -1,5 +1,5 @@
 import {makeFloor,stats,skills,log,createGear,acquire,gearById,gearName,LAST_FLOOR,LETTER_FLOOR} from './engine.js';
-export function debugJump(s,floor){if(!Number.isInteger(floor)||floor<1||floor>LAST_FLOOR)return false;s.floor=floor;s.phase='prepare';if(floor===LETTER_FLOOR)s.b15HintShown=false;makeFloor(s);s.hp=Math.max(1,Math.min(s.hp,stats(s).maxHp));s.debugUsed=true;log(s,`DEBUG：B${LAST_FLOOR+1-floor}へ移動。地形を再生成。`,'story');return true;}
+export function debugJump(s,floor){if(!Number.isInteger(floor)||floor<1||floor>LAST_FLOOR)return false;s.floor=floor;s.phase=floor===1?'awakening':'prepare';if(floor===LETTER_FLOOR)s.b15HintShown=false;makeFloor(s);s.hp=Math.max(1,Math.min(s.hp,stats(s).maxHp));s.debugUsed=true;log(s,`DEBUG：B${LAST_FLOOR+1-floor}へ移動。地形を再生成。`,'story');return true;}
 export function debugHeal(s){s.hp=stats(s).maxHp;s.debugUsed=true;log(s,'DEBUG：HPを全回復。','good');}
 export function debugShards(s,amount=100){if(!Number.isInteger(amount)||amount<1||amount>10000)return false;s.shards+=amount;s.debugUsed=true;log(s,`DEBUG：かけら +${amount}`,'good');return true;}
 export function debugSkills(s){for(const k of skills)if(!k.event||s.profile.normalClears)s.levels[k.id]=k.max;s.hp=stats(s).maxHp;s.debugUsed=true;log(s,'DEBUG：取得可能な全スキルを最大化。未達成イベントはロックを維持。','good');}
