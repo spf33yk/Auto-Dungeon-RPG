@@ -6,7 +6,7 @@
 
 - 40eaf29のPagesデプロイ成功と公開app.jsの休憩表示実装を確認。公開URL https://spf33yk.github.io/Auto-Dungeon-RPG/ でClear→B29準備→探索開始→ひとやすみを実操作し、中央の表示と下部の再開ボタンを確認。再開で非表示、再停止で再表示。停止中のTURN 099不変、コンソールerrorなし。公開版画像：rest-screen-github-pages.png。
 - 毎回のpush後に自動テスト成功・Pages成功・公開URLの実操作確認を行うルールをAGENTS.mdへ追加。ローカル／push成功のみで公開反映済みと報告しない。
-- .github/workflows/test.ymlを追加。push／PR／手動実行でNode.js 24のnode --testをGitHub Actions上で実行する。初回結果は確認後に記録する。
+- .github/workflows/test.ymlを追加。push／PR／手動実行でNode.js 24のnode --testをGitHub Actions上で実行する。初回6749ce8のGame testsは成功（run 40226594603、全78テスト対象）。同コミットのPagesデプロイも成功（run 40226593616）。確認結果：https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/40226594603 。
 
 ## ひとやすみ画面の復活（2026-10-26）
 
