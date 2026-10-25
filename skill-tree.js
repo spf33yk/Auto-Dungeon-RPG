@@ -1,7 +1,7 @@
 // Visual grouping does not change costs, prerequisites or skill effects.
 export const memoryGroups=[
  {id:'status',name:'ステータス',detail:'骸の基礎能力',ids:['vitality','power','guard','scout']},
- {id:'orders',name:'探索指示',detail:'行動の選択肢と指示枠',ids:['collect','chestSense','chestNear','exitLoot','exploreNear','exploration','commandSlots','exitTimed','survival','healEarly','exitLow','evasion','avoidGroup','huntAny','huntInjured','huntWeak','huntDanger']},
+ {id:'orders',name:'探索指示',detail:'行動の選択肢と指示枠',ids:['commandSlots']},
  {id:'skills',name:'スキル',detail:'戦術と自動発動',ids:['tactics','mend']},
  {id:'events',name:'イベント',detail:'鑑定・解呪・合成・絆',ids:['identify','uncurse','synthesis','bond']},
 ];
