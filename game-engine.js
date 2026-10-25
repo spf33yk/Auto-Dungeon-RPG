@@ -27,11 +27,25 @@ export function newGame(seed=Date.now()%10000000,profile=profileDefault()){
  for(const g of Object.values(s.gear)){g.acquiredOrder=s.nextAcquisition++;register(p.equipment,g.baseId);register(p.knownEquipment,g.baseId);}
  makeFloor(s);log(s,'目が覚めると、そこには骨だけの手があった。','story');log(s,'B30。失った記憶を力に変え、地上を目指す。');return s;
 }
+export function abandonRun(s){return s.phase==='prepare'?newGame(undefined,s.profile):null;}
 export function price(s,k){return k.cost+s.levels[k.id]*(k.costStep??4);}
 export function locked(s,k){return Boolean((k.requires&&!s.levels[k.requires])||(k.event&&!s.profile.normalClears));}
 export function upgrade(s,id){const k=skills.find(k=>k.id===id);if(!k||s.phase!=='prepare'||s.floor===1||locked(s,k)||s.levels[id]>=k.max||s.shards<price(s,k))return false;s.shards-=price(s,k);s.levels[id]++;if(id==='vitality')s.hp+=12;reveal(s);log(s,`「${k.name}」を思い出した。`,'good');return true;}
 export function setMode(s,mode){if(!['stairs','collect','explore'].includes(mode))return false;s.mode=mode;s.orders=(mode==='stairs'?['stairs']:mode==='collect'?['collect-items','stairs']:['explore-all','stairs']).map(makeOrder);return true;}
 export function equip(s,index){const g=s.inventory[index];if(s.phase!=='prepare'||!g)return false;const slot=gearById[g.baseId].slot;if(s.gear[slot].cursed){log(s,'呪いで装備を外せない。先に解呪が必要。','bad');return false;}const old=s.gear[slot];s.gear[slot]=g;s.inventory[index]=old;if(g.cursed)g.boundKnown=true;log(s,`${gearName(g)}を装備。${g.cursed?'呪いにより外せなくなった。':''}`,g.cursed?'bad':'good');return true;}
+export function equipBest(s){
+ if(s.phase!=='prepare')return false;
+ let changed=false;
+ for(const slot of ['weapon','armor']){
+  const current=s.gear[slot];if(current.cursed||!current.identified)continue;
+  const stat=slot==='weapon'?'attack':'defense';let score=gearStats(current)[stat],best=-1;
+  const candidates=s.inventory.map((g,index)=>({g,index})).filter(({g})=>gearById[g.baseId].slot===slot&&g.identified&&!g.cursed).sort((a,b)=>(a.g.acquiredOrder??a.index)-(b.g.acquiredOrder??b.index));
+  for(const {g,index} of candidates){const value=gearStats(g)[stat];if(value>score){score=value;best=index;}}
+  if(best>=0&&equip(s,best))changed=true;
+ }
+ if(!changed)log(s,'変更できる上位装備はありません。');
+ return changed;
+}
 export function getItem(s,ref){return typeof ref==='number'?s.inventory[ref]:s.gear[ref];}
 // Deferred until the post-TRUE endgame is designed. Legacy entry points cannot mutate story saves.
 export function identify(){return false;}

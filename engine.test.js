@@ -3,7 +3,7 @@ import {memoryGroups} from './skill-tree.js';
 import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment} from './debug-tools.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,stats,price,upgrade,equip,tick,ascend,makeFloor,W,H,zoneFor,floorLabel,createGear,gearStats,gearName,acquire,identify,uncurse,synthesize,discard,targetEnemy,monsters,codexRows,canSee,reveal,radius,setMode,validateSave,rollGear,random,synthesisResult,sortedInventory,normalizeSave,orderCapacity,addOrder,editOrder,makeOrder,CHEST_CHANCE,beginExploration,notifyB15,skills,orderDefinitions,orderUnlocked,BALANCE,incomingDamage,LAST_FLOOR,LETTER_FLOOR,TRUE_FLOORS,fieldPlan,nextStageHint,zoneIndexForFloor,bossForFloor} from './engine.js';
+import {newGame,abandonRun,stats,price,upgrade,equip,equipBest,tick,ascend,makeFloor,W,H,zoneFor,floorLabel,createGear,gearStats,gearName,acquire,identify,uncurse,synthesize,discard,targetEnemy,monsters,codexRows,canSee,reveal,radius,setMode,validateSave,rollGear,random,synthesisResult,sortedInventory,normalizeSave,orderCapacity,addOrder,editOrder,makeOrder,CHEST_CHANCE,beginExploration,notifyB15,skills,orderDefinitions,orderUnlocked,BALANCE,incomingDamage,LAST_FLOOR,LETTER_FLOOR,TRUE_FLOORS,fieldPlan,nextStageHint,zoneIndexForFloor,bossForFloor} from './engine.js';
 
 function preparedGame(seed){const s=newGame(seed);s.floor=2;s.phase='prepare';makeFloor(s);return s;}
 function arena(s){s.grid=Array.from({length:H},(_,y)=>Array.from({length:W},(_,x)=>x>0&&x<W-1&&y>0&&y<H-1?1:0));s.seen=s.grid.map(r=>r.map(()=>false));s.visited=s.grid.map(r=>r.map(()=>false));s.player={x:5,y:5};s.stairs={x:25,y:18};s.items=[];s.enemies=[];s.phase='explore';reveal(s);}
@@ -117,3 +117,23 @@ test('v7 migration refunds retired skills once and cleans owned and unopened gea
 });
 
 test('existing v8 scout levels use new sight with no retroactive point charge',()=>{const old=preparedGame(21);old.levels.scout=3;old.shards=17;const before=JSON.stringify(old),restored=normalizeSave(old);assert.equal(JSON.stringify(old),before);assert.deepEqual(restored,old);assert.equal(restored.shards,17);assert.equal(radius(restored),7);assert.equal(upgrade(restored,'scout'),false);restored.shards=34;assert.equal(upgrade(restored,'scout'),true);assert.equal(radius(restored),8);assert.equal(restored.shards,0);assert.equal(radius(normalizeSave(restored)),8);});
+
+test('best equipment selects both slots by actual enhanced stats without spending shards or turns',()=>{
+ const s=preparedGame(13);acquire(s,createGear('weapon-1',{plus:3}));acquire(s,createGear('weapon-2'));acquire(s,createGear('armor-1',{plus:3}));acquire(s,createGear('armor-2'));
+ const points=s.shards,turn=s.turn,count=s.inventory.length,weapon=s.inventory[0],armor=s.inventory[2],oldWeapon=s.gear.weapon,oldArmor=s.gear.armor;
+ assert.equal(equipBest(s),true);assert.equal(s.gear.weapon,weapon);assert.equal(s.gear.armor,armor);assert.ok(s.inventory.includes(oldWeapon)&&s.inventory.includes(oldArmor));assert.equal(s.shards,points);assert.equal(s.turn,turn);assert.equal(s.inventory.length,count);
+ assert.equal(equipBest(s),false);assert.equal(s.gear.weapon,weapon);s.phase='explore';const before=JSON.stringify(s);assert.equal(equipBest(s),false);assert.equal(JSON.stringify(s),before);
+});
+
+test('best equipment keeps ties equipped and chooses older inventory ties while skipping unsupported gear',()=>{
+ const s=preparedGame(14);const older=createGear('weapon-1',{plus:3}),newer=createGear('weapon-2',{plus:1});acquire(s,older);acquire(s,newer);s.inventory.reverse();
+ acquire(s,createGear('weapon-9'));s.inventory.at(-1).identified=false;acquire(s,createGear('weapon-8'));s.inventory.at(-1).cursed=true;
+ assert.equal(equipBest(s),true);assert.equal(s.gear.weapon,older);assert.equal(equipBest(s),false);assert.equal(s.gear.weapon,older);
+ s.gear.weapon.cursed=true;acquire(s,createGear('weapon-9'));assert.equal(equipBest(s),false);assert.equal(s.gear.weapon,older);
+});
+
+test('abandoning a prepared journey resets only run progress and preserves records without altering the old save',()=>{
+ const s=preparedGame(22);s.profile.normalClears=2;acquire(s,createGear('weapon-3',{plus:2}));s.shards=82;s.levels.power=3;s.letter=true;s.memories=['test memory'];
+ const before=JSON.stringify(s),next=abandonRun(s);assert.ok(next);assert.equal(JSON.stringify(s),before);assert.equal(next.floor,1);assert.equal(next.phase,'awakening');assert.equal(next.shards,12);assert.equal(next.hp,54);assert.equal(next.inventory.length,0);assert.equal(next.levels.power,0);assert.equal(next.letter,false);assert.deepEqual(next.memories,[]);assert.equal(next.profile.normalClears,2);assert.ok(next.profile.knownEquipment.includes('weapon-3'));assert.equal(next.profile.runs,s.profile.runs+1);assert.notEqual(next.profile,s.profile);assert.ok(validateSave(next));
+ s.phase='explore';const exploring=JSON.stringify(s);assert.equal(abandonRun(s),null);assert.equal(JSON.stringify(s),exploring);
+});
