@@ -118,7 +118,7 @@ export function tick(s){
  const bossAlive=s.enemies.some(e=>e.boss);
  if(bossAlive&&key(s.player)===key(s.stairs))s.intent='階段は封印中。中ボスを倒す必要がある';
  const done=Boolean(action?.exit)&&!bossAlive;
- if(done&&key(s.player)===key(s.stairs)){const reward=8+Math.floor(s.floor/3);s.shards+=reward;s.phase='cleared';s.nextHint=nextStageHint(s);log(s,`${floorLabel(s)}踏破。かけら +${reward}`,'good');if(memories[s.floor]){s.memories.push(memories[s.floor]);log(s,memories[s.floor],'story');}}
+ if(done&&key(s.player)===key(s.stairs)){const reward=8+Math.floor(s.floor/3);s.shards+=reward;s.phase='cleared';s.nextHint=nextStageHint(s);log(s,`${floorLabel(s)} Clear。かけら +${reward}`,'good');if(memories[s.floor]){s.memories.push(memories[s.floor]);log(s,memories[s.floor],'story');}}
 }
 export function ascend(s){if(s.phase!=='cleared')return false;if(s.floor===LAST_FLOOR){s.phase='ending';s.profile.normalClears++;log(s,'地上1F。息子は剣を抜いた。「父の仇……魔物め」','story');log(s,'届かなかった声。砕けた骸は、再び深淵へ沈む。','story');return true;}s.floor++;s.phase='prepare';makeFloor(s);s.hp=Math.min(stats(s).maxHp,s.hp+Math.ceil(stats(s).maxHp*BALANCE.restRatio));log(s,`${floorLabel(s)}へ。休息して次の探索に備える。`,'good');return true;}
 export function codexRows(s,kind){if(kind==='monsters')return monsters.map(m=>s.profile.monsters.includes(m.id)?{name:m.name,attack:m.attack,defense:m.defense,zone:zones[m.zone].name,known:true}:{known:false});return equipment.map(g=>s.profile.knownEquipment.includes(g.id)&&s.profile.equipment.includes(g.id)?{name:g.name,attack:g.attack,defense:g.defense,slot:g.slot,acquiredOrder:s.profile.equipment.indexOf(g.id),known:true}:{known:false,slot:g.slot});}

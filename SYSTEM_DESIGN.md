@@ -1,6 +1,6 @@
 # 骸の旅路 ― システム設計書
 
-更新：2026-10-25。詳細数値と機能の正本は[SPEC.md](SPEC.md)、世界観・企画は[DESIGN.md](DESIGN.md)。
+更新：2026-10-26。詳細数値と機能の正本は[SPEC.md](SPEC.md)、世界観・企画は[DESIGN.md](DESIGN.md)。
 
 ## 構成
 
@@ -91,3 +91,9 @@ TRUEの50階構成は定数・案内に反映する。本編・息子との共�
 - cameraForは主人公の補間座標と有効radiusから縦2×ceil(radius)+3マスの投影を返す。app.jsはCanvasをsave→scale→translateで世界座標へ変換し、地形・品物・敵・主人公・攻撃フラッシュを同じカメラで描く。restore後に画面全体の霧を描く。
 - miniMapGeometryはセル4／6pxと外周1pxを含む幅・高さ・境界配列を返し、drawMiniMapは地形→グリッド→セル内マーカーの順に描く。表示モデルは従来の発見・可視情報境界を維持。CSS縮小は行わない。
 - ステータス帯をマップ直上へ移動し、hud-floor／hud-shardsと既存HP・ATK・DEFをrenderで同期する。Chatはマップ直下で通常の文書フローに置く。ResizeObserverは停止中もカメラとミニマップサイズを再描画する。保存v8とゲームロジックは変更しない。
+
+## Clear表示とヒントの統合（2026-10-26）
+
+- app.jsはphase=clearedの表示をClearとし、既存nextHintまたはnextStageHintの結果をmap-notice内のclear-hintへ描画する。独立next-hint要素と描画・CSSを除去。死亡／通常エンドも同じ終了メッセージ内に補足する。
+- 保存内のヒントは変換せず、title先頭の「次は」を表示時のみ除去し、文字列はHTMLエスケープする。ゲーム判定・報酬・v8保存は変更なし。過去ログは維持し、新規成功ログのみClear表記。
+- index.htmlから冒頭のsubtitle要素を削除し、CSSで見出し・イントロ・主領域の余白を詰める。

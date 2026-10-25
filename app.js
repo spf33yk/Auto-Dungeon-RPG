@@ -73,17 +73,16 @@ function render(){
  const st=stats(state),prep=state.phase==='prepare',theme=zoneFor(state);renderScreens();
  $('floor-title').textContent=`${theme.name} · ${floorLabel(state)}`;
  $('zone').textContent=`区間 ${Math.floor((state.floor-1)/5)+1} / 6 · ${state.bossFloor?'FIXED BOSS':theme.layout.toUpperCase()}`;
- $('phase-label').textContent=({awakening:'目覚め',prepare:'準備中',explore:paused?'一時停止':'探索中',cleared:'踏破',dead:'記憶喪失',ending:'通常エンド'})[state.phase];
+ $('phase-label').textContent=({awakening:'目覚め',prepare:'準備中',explore:paused?'一時停止':'探索中',cleared:'Clear',dead:'記憶喪失',ending:'通常エンド'})[state.phase];
  $('floor-message').hidden=state.floor!==LETTER_FLOOR;$('floor-message').textContent='B15 ― 何か大事なものを忘れている気がする';
  $('turn').textContent=`TURN ${String(state.turn).padStart(3,'0')}`;
  $('hud-floor').textContent=floorLabel(state);$('hud-shards').textContent=state.shards;
  $('hp-text').textContent=`${state.hp} / ${st.maxHp}`;$('hp-bar').style.width=`${state.hp/st.maxHp*100}%`;$('hp-bar').style.background=state.hp<st.maxHp*.3?'#bd8073':'#91ae88';
  $('atk').textContent=displayAttack();$('def').textContent=displayDefense();$('shards').innerHTML=`${state.shards} <em>pt</em>`;$('intent').textContent=prep?'出発の準備をしています':state.intent;
- const notices={cleared:[`${floorLabel(state)} 踏破`,state.floor===LAST_FLOOR?'階段の先に、地上の光が見える。':'かけらを手に入れた。次の階の準備へ。'],dead:['途切れた記憶','骸は崩れ、再び最深部へ。図鑑の記録は残ります。'],ending:['届かなかった声','「父の仇……魔物め」<br>息子の剣が、骸を貫いた。<br>父だと伝える声は、もう出なかった。<br><br>記憶を失い、再びB30へ。<br>通常エンド達成 · 次の旅ではB15の手紙を開けられます。']};
+ const notices={cleared:[`${floorLabel(state)} Clear`,state.floor===LAST_FLOOR?'階段の先に、地上の光が見える。':'記憶のかけらを手に入れた。次の階の準備へ。'],dead:['途切れた記憶','骸は崩れ、再び最深部へ。図鑑の記録は残ります。'],ending:['届かなかった声','「父の仇……魔物め」<br>息子の剣が、骸を貫いた。<br>父だと伝える声は、もう出なかった。<br><br>記憶を失い、再びB30へ。<br>通常エンド達成 · 次の旅ではB15の手紙を開けられます。']};
  const hint=['cleared','dead','ending'].includes(state.phase)?(state.nextHint||nextStageHint(state)):null;
- $('next-hint').hidden=!hint;if(hint)$('next-hint').innerHTML='<small>勇者の残響 — 階段に触れると、危険を察した記憶が蘇る</small><h3>'+esc(hint.title)+'</h3><p>'+esc(hint.text)+'</p>';
  $('field-gimmick').hidden=!state.gimmick||state.gimmick.id==='none';$('field-gimmick').textContent=state.gimmick&&state.gimmick.id!=='none'?'異変：'+state.gimmick.name+(state.gimmick.id==='fog'?' · 視界−2':''):'';
- const n=notices[state.phase];$('map-notice').innerHTML=n?`<strong>${n[0]}</strong><small>${n[1]}</small>`:paused?'<strong>ひと休み</strong><small>再開すると探索が続きます。</small>':'';
+ const n=notices[state.phase];$('map-notice').classList.toggle('has-hint',Boolean(n&&hint));$('map-notice').innerHTML=n?`<strong>${n[0]}</strong><small>${n[1]}</small>${hint?'<div class="clear-hint"><h3>'+esc(hint.title.replace(/^次は/,''))+'</h3><p>'+esc(hint.text)+'</p></div>':''}`:paused?'<strong>ひと休み</strong><small>再開すると探索が続きます。</small>':'';
  $('primary').innerHTML=({awakening:'思い出す',prepare:'探索をはじめる <span>→</span>',explore:paused?'探索を再開 <span>▶</span>':'ひと休み <span>Ⅱ</span>',cleared:state.floor===LAST_FLOOR?'地上1Fへ <span>↑</span>':'次の階へ・準備 <span>↑</span>',dead:'B30で再び目覚める <span>↻</span>',ending:'次の旅をはじめる <span>↻</span>'})[state.phase];
  $('prep-note').textContent='能力強化・指示枠の拡張・スキル習得・装備変更は準備中のみ。';
  $('logs').innerHTML=state.logs.slice(0,30).map(l=>`<div class="log-row ${esc(l.type)}"><time>${String(l.turn).padStart(3,'0')}</time><span>${esc(l.text)}</span></div>`).join('');
@@ -118,7 +117,7 @@ function renderScreens(){
  const visited=state.visited.flat().filter(Boolean).length;
  const summary=`<dl class="stat-list"><div><dt>HP</dt><dd>${state.hp} / ${st.maxHp}</dd></div><div><dt>攻撃力 / 防御力</dt><dd>${displayAttack()} / ${displayDefense()}</dd></div><div><dt>記憶のかけら</dt><dd id="shards">${state.shards} pt</dd></div><div><dt>武器</dt><dd>${esc(gearName(state.gear.weapon))}${state.gear.weapon.boundKnown?' · 呪い':''}</dd></div><div><dt>防具</dt><dd>${esc(gearName(state.gear.armor))}${state.gear.armor.boundKnown?' · 呪い':''}</dd></div><div><dt>指示枠 / 視界</dt><dd>${state.orders.length} / ${orderCapacity(state)}枠 · ${radius(state)}マス</dd></div><div><dt>再生の祈り</dt><dd>${state.levels.mend?(state.mended?'使用済み':'使用可能'):'未習得'}</dd></div></dl>`;
 
- $('expedition-summary').innerHTML=summary+`<div class="current-action"><small>今の判断</small><p>${esc(prep?'出発の準備をしています':state.intent)}</p></div><dl class="stat-list"><div><dt>踏破した床 / この階の撃破</dt><dd>${visited}マス / ${state.floorKills}体</dd></div><div><dt>所持品 / 手紙</dt><dd>${state.inventory.length}個 / ${state.letter?'入手済':'未入手'}</dd></div></dl><h3>習得した記憶</h3><p class="section-caption">${skills.filter(k=>state.levels[k.id]).map(k=>k.name+(k.max>1?' Lv.'+state.levels[k.id]:'')).join(' / ')||'未習得'}</p>`;
+ $('expedition-summary').innerHTML=summary+`<div class="current-action"><small>今の判断</small><p>${esc(prep?'出発の準備をしています':state.intent)}</p></div><dl class="stat-list"><div><dt>探索済みの床 / この階の撃破</dt><dd>${visited}マス / ${state.floorKills}体</dd></div><div><dt>所持品 / 手紙</dt><dd>${state.inventory.length}個 / ${state.letter?'入手済':'未入手'}</dd></div></dl><h3>習得した記憶</h3><p class="section-caption">${skills.filter(k=>state.levels[k.id]).map(k=>k.name+(k.max>1?' Lv.'+state.levels[k.id]:'')).join(' / ')||'未習得'}</p>`;
  renderOrderEditor($('live-orders'));
 }
 function openDialog(id){if(!document.querySelector('dialog[open]'))dialogWasPaused=paused;paused=true;$(id).showModal();}
