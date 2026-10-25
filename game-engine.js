@@ -12,7 +12,7 @@ export function random(seed){let a=seed>>>0;return()=>{a+=0x6D2B79F5;let t=Math.
 export function profileDefault(){return {normalClears:0,runs:0,monsters:[],equipment:[],knownEquipment:[]};}
 export function zoneFor(s){return zones[Math.min(9,zoneIndexForFloor(s.floor))];}
 export function floorLabel(s){return s.phase==='ending'?'地上 1F':`B${LAST_FLOOR+1-s.floor}`;}
-export function radius(s){return Math.max(2,4+s.levels.scout*.5-(s.gimmick?.id==='fog'?2:0));}
+export function radius(s){return Math.max(2,4+s.levels.scout-(s.gimmick?.id==='fog'?2:0));}
 export function log(s,text,type=''){s.logs.unshift({text,type,turn:s.turn});s.logs=s.logs.slice(0,60);}
 function register(list,id){if(!list.includes(id))list.push(id);}
 export function createGear(baseId,{plus=0,cursed=false,identified=true}={}){if(!gearById[baseId])throw Error('Unknown equipment');return {baseId,plus,cursed,identified,boundKnown:false};}
@@ -27,7 +27,7 @@ export function newGame(seed=Date.now()%10000000,profile=profileDefault()){
  for(const g of Object.values(s.gear)){g.acquiredOrder=s.nextAcquisition++;register(p.equipment,g.baseId);register(p.knownEquipment,g.baseId);}
  makeFloor(s);log(s,'目が覚めると、そこには骨だけの手があった。','story');log(s,'B30。失った記憶を力に変え、地上を目指す。');return s;
 }
-export function price(s,k){return k.cost+s.levels[k.id]*4;}
+export function price(s,k){return k.cost+s.levels[k.id]*(k.costStep??4);}
 export function locked(s,k){return Boolean((k.requires&&!s.levels[k.requires])||(k.event&&!s.profile.normalClears));}
 export function upgrade(s,id){const k=skills.find(k=>k.id===id);if(!k||s.phase!=='prepare'||s.floor===1||locked(s,k)||s.levels[id]>=k.max||s.shards<price(s,k))return false;s.shards-=price(s,k);s.levels[id]++;if(id==='vitality')s.hp+=12;reveal(s);log(s,`「${k.name}」を思い出した。`,'good');return true;}
 export function setMode(s,mode){if(!['stairs','collect','explore'].includes(mode))return false;s.mode=mode;s.orders=(mode==='stairs'?['stairs']:mode==='collect'?['collect-items','stairs']:['explore-all','stairs']).map(makeOrder);return true;}
@@ -92,7 +92,7 @@ export function makeFloor(s){
 export function route(s,test,{start=s.player,known=true,blocked=new Set()}={}){const q=[start],prev=new Map([[key(start),null]]);for(let i=0;i<q.length;i++){const p=q[i];if(test(p)){if(i===0)return start;let end=p;while(prev.get(key(end))!==start)end=prev.get(key(end));return end;}for(const [dx,dy]of dirs){const n={x:p.x+dx,y:p.y+dy},k=key(n);if(s.grid[n.y]?.[n.x]&&(!known||s.seen[n.y][n.x])&&!prev.has(k)&&!blocked.has(k)){prev.set(k,p);q.push(n);}}}return null;}
 export function targetEnemy(s){const near=dirs.map(([dx,dy])=>s.enemies.find(e=>e.x===s.player.x+dx&&e.y===s.player.y+dy)).filter(Boolean);if(!s.levels.tactics)return near[0];const atk=stats(s).attack;return near.sort((a,b)=>Number(b.hp<=Math.max(1,atk-b.defense))-Number(a.hp<=Math.max(1,atk-a.defense))||b.attack-a.attack)[0];}
 function obtainable(s,i){return i.type!=='letter'||Boolean(s.profile.normalClears&&!s.letter);}
-function pickup(s){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);if(item.type==='potion'){const heal=Math.min(stats(s).maxHp-s.hp,BALANCE.springHeal);s.hp+=heal;log(s,`回復の泉。HP +${heal}`,'good');}else if(item.type==='letter'){s.letter=true;log(s,'息子への手紙を入手した。TRUEルートの物語は今後追加。','story');}else{acquire(s,item.gear);s.shards+=2;log(s,`宝箱から${gearName(item.gear)}を入手。かけら +2`,'good');}}
+function pickup(s){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);if(item.type==='potion'){const heal=Math.min(stats(s).maxHp-s.hp,BALANCE.springHeal);s.hp+=heal;log(s,`回復の泉。HP +${heal}`,'good');}else if(item.type==='letter'){s.letter=true;log(s,'息子への手紙を入手した。TRUEルートの物語は今後追加。','story');}else{acquire(s,item.gear);s.shards+=2;log(s,`宝箱から${gearName(item.gear)}を入手。記憶の欠片 +2`,'good');}}
 const memories={6:'かつて、この手は誰かを守るために剣を握っていた。',12:'「父さん、帰ってくるよね」――小さな手の温もりが蘇る。',18:'魔王は告げた。「息子の命が惜しければ、記憶を捨てろ」',24:'忘れていた名前よりも先に、帰る理由を思い出した。'};
 export function tick(s){
  if(s.phase!=='explore')return;notifyB15(s);s.turn++;s.steps++;s.flash=null;reveal(s);const st=stats(s);
@@ -101,7 +101,7 @@ export function tick(s){
  const adjacentEnemy=targetEnemy(s);
  const emergency=adjacentEnemy?chooseOrder(s,{route,canSee,stats,obtainable},true):null;
  const enemy=emergency?null:adjacentEnemy;let action=emergency;s.activeOrder=null;
- if(enemy){const damage=Math.max(1,st.attack-enemy.defense);enemy.hp-=damage;s.flash={x:enemy.x,y:enemy.y,kind:'hit'};s.intent=s.levels.tactics?`戦術判断：${enemy.name}を優先`:`隣接する${enemy.name}と交戦`;if(s.levels.tactics)log(s,s.intent);if(enemy.hp<=0){s.enemies=s.enemies.filter(e=>e!==enemy);s.kills++;s.floorKills++;s.shards+=enemy.boss?8:1;log(s,`${enemy.name}を倒した。かけら +${enemy.boss?8:1}`,'good');if(enemy.boss)log(s,'門番の封印が解けた。階段を上れる。','story');}}
+ if(enemy){const damage=Math.max(1,st.attack-enemy.defense);enemy.hp-=damage;s.flash={x:enemy.x,y:enemy.y,kind:'hit'};s.intent=s.levels.tactics?`戦術判断：${enemy.name}を優先`:`隣接する${enemy.name}と交戦`;if(s.levels.tactics)log(s,s.intent);if(enemy.hp<=0){s.enemies=s.enemies.filter(e=>e!==enemy);s.kills++;s.floorKills++;s.shards+=enemy.boss?8:1;log(s,`${enemy.name}を倒した。記憶の欠片 +${enemy.boss?8:1}`,'good');if(enemy.boss)log(s,'門番の封印が解けた。階段を上れる。','story');}}
  else {
   action ||= chooseOrder(s,{route,canSee,stats,obtainable});
   if(!action){const next=route(s,p=>dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false))||route(s,p=>!s.visited[p.y][p.x]);action=next?{next,intent:'基本行動：視界の先を調べる'}:{next:route(s,p=>key(p)===key(s.stairs)),exit:true,intent:'基本行動：探索を終え、階段へ'};}
@@ -118,7 +118,7 @@ export function tick(s){
  const bossAlive=s.enemies.some(e=>e.boss);
  if(bossAlive&&key(s.player)===key(s.stairs))s.intent='階段は封印中。中ボスを倒す必要がある';
  const done=Boolean(action?.exit)&&!bossAlive;
- if(done&&key(s.player)===key(s.stairs)){const reward=8+Math.floor(s.floor/3);s.shards+=reward;s.phase='cleared';s.nextHint=nextStageHint(s);log(s,`${floorLabel(s)} Clear。かけら +${reward}`,'good');if(memories[s.floor]){s.memories.push(memories[s.floor]);log(s,memories[s.floor],'story');}}
+ if(done&&key(s.player)===key(s.stairs)){const reward=8+Math.floor(s.floor/3);s.shards+=reward;s.phase='cleared';s.nextHint=nextStageHint(s);log(s,`${floorLabel(s)} Clear。記憶の欠片 +${reward}`,'good');if(memories[s.floor]){s.memories.push(memories[s.floor]);log(s,memories[s.floor],'story');}}
 }
 export function ascend(s){if(s.phase!=='cleared')return false;if(s.floor===LAST_FLOOR){s.phase='ending';s.profile.normalClears++;log(s,'地上1F。息子は剣を抜いた。「父の仇……魔物め」','story');log(s,'届かなかった声。砕けた骸は、再び深淵へ沈む。','story');return true;}s.floor++;s.phase='prepare';makeFloor(s);s.hp=Math.min(stats(s).maxHp,s.hp+Math.ceil(stats(s).maxHp*BALANCE.restRatio));log(s,`${floorLabel(s)}へ。休息して次の探索に備える。`,'good');return true;}
 export function codexRows(s,kind){if(kind==='monsters')return monsters.map(m=>s.profile.monsters.includes(m.id)?{name:m.name,attack:m.attack,defense:m.defense,zone:zones[m.zone].name,known:true}:{known:false});return equipment.map(g=>s.profile.knownEquipment.includes(g.id)&&s.profile.equipment.includes(g.id)?{name:g.name,attack:g.attack,defense:g.defense,slot:g.slot,acquiredOrder:s.profile.equipment.indexOf(g.id),known:true}:{known:false,slot:g.slot});}

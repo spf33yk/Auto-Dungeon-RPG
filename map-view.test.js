@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';
 
 test('zoom camera fits every sight radius and follows fractional positions at map edges',()=>{
- for(const sight of [2,2.5,4,4.5,5,5.5,6])for(const p of [{x:1,y:1},{x:15.25,y:11.5},{x:29,y:21}]){
+ for(const sight of [2,3,4,5,6,7,8])for(const p of [{x:1,y:1},{x:15.25,y:11.5},{x:29,y:21}]){
   const c=cameraFor(p,sight),center={x:(p.x+.5)*24,y:(p.y+.5)*24};
   assert.ok(c.rows<23&&c.columns<31); // Never show the entire 31×23 field.
   assert.ok(c.scale>1);
