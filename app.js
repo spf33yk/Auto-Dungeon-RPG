@@ -1,4 +1,5 @@
 import {autoMapModel} from './map-view.js';
+import {thoughtText,thoughtPlacement} from './thought-view.js';
 import {memoryGroups,memoryLayout} from './skill-tree.js';
 import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment} from './debug-tools.js';
 import {W,H,skills,newGame,stats,price,upgrade,equip,tick,ascend,zoneFor,floorLabel,radius,canSee,gearById,gearStats,gearName,identify,uncurse,discard,synthesize,locked,codexRows,synthesisResult,sortedInventory,normalizeSave,orderDefinitions,orderById,orderCapacity,orderUnlocked,addOrder,editOrder,beginExploration,equipment,LAST_FLOOR,LETTER_FLOOR,nextStageHint} from './engine.js';
@@ -34,7 +35,13 @@ const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.play
 const hop=moving?Math.sin(progress*Math.PI)*2:0;
 ctx.fillStyle='#bfd49e20';ctx.fillRect(position.x*24-4,position.y*24-4,32,32);sprite(ctx,'skeleton',position.x*24,position.y*24-hop);
 if(state.gimmick?.id==='fog'){ctx.fillStyle='#a6bdc620';ctx.fillRect(0,0,744,552);}
-const bubble=$('thought-bubble');bubble.hidden=state.phase!=='explore';if(bubble.textContent!==state.intent)bubble.textContent=state.intent;bubble.style.left=Math.max(3,Math.min(55,position.x/W*100))+'%';bubble.style.top=Math.max(8,(position.y/H*100)-14)+'%';
+const bubble=$('thought-bubble');bubble.hidden=state.phase!=='explore';
+if(!bubble.hidden){
+ const text=thoughtText(state.intent);if(bubble.textContent!==text)bubble.textContent=text;
+ const canvas=$('map'),width=canvas.clientWidth,height=canvas.clientHeight;
+ const placement=thoughtPlacement({x:(position.x+.5)*width/W,y:(position.y*24-hop)*height/canvas.height,spriteHeight:height/H,width,height,bubbleWidth:bubble.offsetWidth,bubbleHeight:bubble.offsetHeight});
+ bubble.style.left=placement.left+'px';bubble.style.top=placement.top+'px';bubble.style.setProperty('--tail-x',placement.tail+'px');bubble.classList.toggle('below',placement.below);
+}
 drawAutoMap();
 if(state.flash){ctx.fillStyle=state.flash.kind==='hurt'?'#e49a8c66':'#fff3b766';ctx.fillRect(state.flash.x*24,state.flash.y*24,24,24);}
 }
@@ -140,5 +147,6 @@ $('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-d
  motion=null;render();debugStatus(message);});
 $('debug-import').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const loaded=normalizeSave(JSON.parse(await file.text()));if(!loaded)throw Error('このゲームの有効なセーブではありません');if(confirm('選択したセーブで現在の進行と図鑑・達成記録を置き換えますか？')){try{localStorage.setItem(key+'-before-import',JSON.stringify(state));}catch{}state=loaded;motion=null;paused=true;dialogWasPaused=true;render();debugStatus('セーブを読み込みました');}}catch(err){debugStatus('読み込み失敗：'+err.message);}e.target.value='';};
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
-function loop(t){if(state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]')&&t-last>420/speed){last=t;const old=state.phase;motion={from:{...state.player},time:t,duration:reducedMotion.matches?1:Math.min(190,340/speed)};tick(state);if(state.flash?.kind==='hit')tone(180);if(state.phase!==old){motion=null;tone(state.phase==='dead'?110:660);}render();}if(state.phase==='explore'&&!paused)draw();requestAnimationFrame(loop);}
+function loop(t){if(state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]')&&t-last>420/speed){last=t;const old=state.phase;motion={from:{...state.player},time:t,duration:reducedMotion.matches?1:Math.min(190,340/speed)};tick(state);if(state.flash?.kind==='hit')tone(180);if(state.phase!==old){motion=null;tone(state.phase==='dead'?110:660);}render();}if(state.phase==='explore'&&(!paused||motion&&t-motion.time<motion.duration+50))draw();requestAnimationFrame(loop);}
+new ResizeObserver(()=>draw()).observe($('map'));
 sprite($('portrait').getContext('2d'),'skeleton',4,3,48);sprite($('camp-portrait').getContext('2d'),'skeleton',12,8,96);render();requestAnimationFrame(loop);
