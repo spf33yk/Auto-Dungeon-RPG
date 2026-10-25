@@ -12,7 +12,7 @@ export function random(seed){let a=seed>>>0;return()=>{a+=0x6D2B79F5;let t=Math.
 export function profileDefault(){return {normalClears:0,runs:0,monsters:[],equipment:[],knownEquipment:[]};}
 export function zoneFor(s){return zones[Math.min(9,zoneIndexForFloor(s.floor))];}
 export function floorLabel(s){return s.phase==='ending'?'地上 1F':`B${LAST_FLOOR+1-s.floor}`;}
-export function radius(s){return Math.max(2,4+s.levels.scout-(s.gimmick?.id==='fog'?2:0));}
+export function radius(s){return Math.max(2,3+s.levels.scout-(s.gimmick?.id==='fog'?2:0));}
 export function log(s,text,type=''){s.logs.unshift({text,type,turn:s.turn});s.logs=s.logs.slice(0,60);}
 function register(list,id){if(!list.includes(id))list.push(id);}
 export function createGear(baseId,{plus=0,cursed=false,identified=true}={}){if(!gearById[baseId])throw Error('Unknown equipment');return {baseId,plus,cursed,identified,boundKnown:false};}

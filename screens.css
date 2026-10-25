@@ -61,3 +61,6 @@ body{background:var(--bg)}header{background:#2c2e32;border-color:var(--line)}.pa
 
 /* The adventure frame contains the map, letterboxes, and log. */
 .adventure>.journal{border:0;border-top:1px solid var(--line);border-radius:0;margin:0}.workspace[data-screen=explore] .expedition{grid-row:1}
+
+/* Seven single-line log entries plus vertical padding; wrapped entries grow naturally. */
+#logs{height:240px;padding-top:8px;padding-bottom:8px}.log-row{min-height:32px;line-height:17px;padding-top:7px;padding-bottom:7px}
