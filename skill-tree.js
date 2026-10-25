@@ -2,5 +2,4 @@
 export const memoryGroups=[
  {id:'status',name:'ステータス',ids:['vitality','power','guard','scout']},
  {id:'orders',name:'探索指示枠',ids:['commandSlots']},
- {id:'skills',name:'スキル',ids:['tactics','mend']},
 ];

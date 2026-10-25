@@ -16,7 +16,7 @@ export const minibosses=[
  {id:'boss-b20',name:'封門の骸騎士',basement:20,zone:3,type:'brute',hp:88,attack:15,defense:4,period:2,color:['#89634b','#dfbc79']},
  {id:'boss-b10',name:'霧冠の番人',basement:10,zone:6,type:'brute',hp:136,attack:23,defense:7,period:2,color:['#654b7c','#c9b6e5']},
 ];
-export const monsters = species.flatMap((names,z)=>names.map((name,k)=>({id:`enemy-${z}-${k}`,name,zone:z,type:k?'brute':'slime',hp:(k?19:11)+z*4,attack:(k?7:4)+Math.floor(z*2.75),defense:Math.floor(z*.8)+(k?1:0),period:k?2:1,color:k?['#966e68','#c7aba0']:['#507f69','#a2c6a5']}))).concat(minibosses);
+export const monsters = species.flatMap((names,z)=>names.map((name,k)=>({id:`enemy-${z}-${k}`,name,zone:z,type:k?'brute':'slime',hp:(k?19:11)+z*4,attack:(k?8:5)+Math.floor(z*2.75),defense:Math.floor(z*.8)+(k?1:0),period:k?2:1,color:k?['#966e68','#c7aba0']:['#507f69','#a2c6a5']}))).concat(minibosses);
 const weapons=['錆びた剣','銅の剣','鉄の剣','炉鍛の剣','氷晶の剣','魔導の剣','茨の剣','騎士の剣','月影の剣','黎明の剣'];
 const armors=['ほころびた外套','旅人の外套','鉄の胸当て','炉鍛の鎧','氷晶の鎧','魔導の外套','樹皮の鎧','騎士の鎧','月影の鎧','黎明の鎧'];
 export const equipment = [...weapons.map((name,rank)=>({id:`weapon-${rank}`,name,slot:'weapon',rank,attack:2+rank*2,defense:0})),...armors.map((name,rank)=>({id:`armor-${rank}`,name,slot:'armor',rank,attack:0,defense:rank*2}))];
@@ -26,8 +26,23 @@ export const skills = [
   {id:'vitality',group:'能力',name:'生命の記憶',icon:'♥',detail:'最大HP +12、HPも12回復。',cost:5,max:5},
   {id:'power',category:'weapon',group:'能力',name:'剣技の記憶',icon:'⚔',detail:'攻撃力 +2。',cost:6,max:5},
   {id:'guard',category:'armor',group:'能力',name:'守護の記憶',icon:'◇',detail:'防御力 +1。',cost:6,max:4},
-  {id:'tactics',group:'戦術',name:'戦術判断の記憶',icon:'◈',detail:'倒し切れる敵、攻撃力の高い敵を優先。',cost:8,max:1},
   {id:'scout',group:'索敵',name:'感覚の記憶',icon:'◉',detail:'視界半径 +1マス。4段階。',cost:10,costStep:8,max:4},
   {id:'commandSlots',group:'指示',name:'指揮の記憶',icon:'☷',detail:'設定できる探索指示 +1枠。初期2枠、最大8枠。',cost:6,max:6},
-  {id:'mend',group:'生存',name:'再生の祈り',icon:'✚',detail:'HP35%以下で40%回復。各階1回。',cost:10,max:1,requires:'guard'},
 ];
+
+// Provisional loot balance. Each enemy owns a rate and an explicit weighted item pool.
+export const rewardDefinitions=[
+ {id:'mend',kind:'skill',name:'再生の祈り',detail:'HP35%以下で最大HP40%回復。各階1回。敵のドロップから取得。'},
+ {id:'critical',kind:'skill',name:'会心の記憶',detail:'各打撃で10%の確率で与ダメージ1.5倍（切上げ）。'},
+ {id:'leech',kind:'skill',name:'吸命の記憶',detail:'実際に与えたダメージの5%を回復（切捨て、最大HPまで）。'},
+ {id:'double-strike',kind:'skill',name:'追撃の記憶',detail:'通常打撃の後に5%の確率で追加の1打。同ターン1回まで。'},
+ {id:'warp',kind:'order',name:'窮地の転移',detail:'指定HP以下で敵が見えるとランダムな床へ転移。各階1回。指示枠への設定が必要。'},
+ {id:'avoid-traps',kind:'order',name:'罠を見切る',detail:'既知の未作動罠を避けて進む。通過時も罠を作動させない。指示枠への設定が必要。'},
+];
+export const rewardById=Object.fromEntries(rewardDefinitions.map(r=>[r.id,r]));
+export const chestRewards=[{id:'critical',weight:30},{id:'leech',weight:25},{id:'double-strike',weight:20},{id:'warp',weight:15},{id:'avoid-traps',weight:10}];
+export const enemyDropTables=Object.fromEntries(monsters.map(m=>{
+ const boss=m.id.startsWith('boss-'),gearWeight=boss?79:87;
+ const weights=equipment.map(g=>1/Math.pow(1+Math.abs(g.rank-m.zone),4)),total=weights.reduce((a,b)=>a+b,0);
+ return [m.id,{rate:boss?1:m.type==='brute'?.30:.22,entries:[...equipment.map((g,i)=>({type:'gear',id:g.id,weight:gearWeight*weights[i]/total})),{type:'key',weight:boss?20:12},{type:'reward',id:'mend',weight:1}]}];
+}));
