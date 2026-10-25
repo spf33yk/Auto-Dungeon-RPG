@@ -30,8 +30,4 @@ export const skills = [
   {id:'scout',group:'索敵',name:'感覚の記憶',icon:'◉',detail:'視界半径 +0.5マス。4段階。',cost:5,max:4},
   {id:'commandSlots',group:'指示',name:'指揮の記憶',icon:'☷',detail:'設定できる探索指示 +1枠。初期2枠、最大8枠。',cost:6,max:6},
   {id:'mend',group:'生存',name:'再生の祈り',icon:'✚',detail:'HP35%以下で40%回復。各階1回。',cost:10,max:1,requires:'guard'},
-  {id:'identify',group:'道具',name:'鑑定の記憶',icon:'⌕',detail:'準備中の鑑定を解放。1個3pt。',cost:5,max:1},
-  {id:'uncurse',group:'道具',name:'解呪の記憶',icon:'☼',detail:'準備中の解呪を解放。1個5pt。',cost:5,max:1},
-  {id:'synthesis',group:'道具',name:'合成の記憶',icon:'⚒',detail:'同名の鑑定済み装備を合成。',cost:8,max:1,requires:'identify'},
-  {id:'bond',group:'イベント',name:'絆の記憶',icon:'❖',detail:'B15の手紙の宝箱を開封。TRUE本編は後続制作。',cost:15,max:1,event:true},
 ];
