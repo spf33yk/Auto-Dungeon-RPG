@@ -22,7 +22,7 @@ const thoughts={
  'hunt-any':'敵がいる。近づいて倒そう。'
 };
 
-// Keep technical intent and combat logs intact; translate only the thought chat.
+// Keep technical intent and combat logs intact; translate only the thought subtitle.
 export function thoughtText(intent=''){
  const order=orderDefinitions.find(o=>intent===`指示：${o.name}`);
  if(order)return thoughts[order.id];
@@ -33,10 +33,4 @@ export function thoughtText(intent=''){
  if(intent==='階段を封じる門番の気配')return '何かいる……あいつが階段を守っているのか。';
  if(intent==='基本行動：探索を終え、階段へ')return 'ひと通り調べたな。階段へ戻ろう。';
  return 'この先には、何があるんだろう。';
-}
-
-export function appendThought(history,intent,turn){
- const text=thoughtText(intent);
- if(history.at(-1)?.text===text)return history;
- return [...history,{text,turn}].slice(-30);
 }

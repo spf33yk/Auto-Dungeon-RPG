@@ -11,7 +11,7 @@
 | orders.js | 全19指示の条件・優先順位・枠数・移動先判断。全指示を初期利用可能とする |
 | map-view.js | 発見済み地形・公開マーカー、グリッド描画、視界に合わせる追従カメラ |
 | game-engine.js | 探索・戦闘・装備・育成・ステージ生成・イベント発動・セーブ移行 |
-| thought-view.js | intentの自然な独り言への変換と連続重複を除くChat履歴 |
+| thought-view.js | intentの自然な独り言字幕への変換 |
 | engine.js | エンジン機能の公開入口 |
 | skill-tree.js | 本編7項目の3分類一覧。グラフ・ノード座標は持たない |
 | debug-tools.js | 階移動・能力変更・装備生成 |
@@ -76,7 +76,7 @@ TRUEの50階構成は定数・案内に反映する。本編・息子との共�
 - B20とB10はdata.jsのminibossesを共通マスタに追加する。makeBossFloorが固定地形・固定座標を生成。bossフラグを持つ生存敵がいれば階段判定を止める。
 - fieldPlanは中ボス階を先に判定し、予告と実配置の一致を保つ。通常罠は異変なしの階で独立乱数から抽選する。
 - autoMapModelはseenを元に地形を返す。敵は現在の可視判定、トラップハウスは全罠公開という例外を明示する。主画面とオートマップで同じ罠条件を使う。
-- thought-view.jsのthoughtTextがintentを独り言へ変換し、appendThoughtが30件上限・連続重複なしの履歴を返す。app.jsは新規判断時だけChatのDOMを追加し、role=logで通知。履歴はUIのメモリだけに置き、階／旅変更で消去する。吹き出しの座標計算とDOMは廃止。
+- thought-view.jsのthoughtTextがintentを独り言へ変換。app.jsは下部帯のthought-subtitleを現在の字幕1件で更新し、role=statusで通知する。旧Chat履歴・吹き出しの座標計算とDOMは廃止。
 - v6→v7は罠表示を更新し、開始前のB30だけawakeningへ移す。現在階の地形は再生成せず、固定中ボス階は次回生成から適用する。
 
 ## 本編機能の整理（2026-10-25）
@@ -90,7 +90,7 @@ TRUEの50階構成は定数・案内に反映する。本編・息子との共�
 
 - cameraForは主人公の補間座標と有効radiusから縦2×ceil(radius)+3マスの投影を返す。app.jsはCanvasをsave→scale→translateで世界座標へ変換し、地形・品物・敵・主人公・攻撃フラッシュを同じカメラで描く。restore後に画面全体の霧を描く。
 - miniMapGeometryはセル4／6pxと外周1pxを含む幅・高さ・境界配列を返し、drawMiniMapは地形→グリッド→セル内マーカーの順に描く。表示モデルは従来の発見・可視情報境界を維持。CSS縮小は行わない。
-- ステータス帯をマップ直上へ移動し、hud-floor／hud-shardsと既存HP・ATK・DEFをrenderで同期する。Chatはマップ直下で通常の文書フローに置く。ResizeObserverは停止中もカメラとミニマップサイズを再描画する。保存v8とゲームロジックは変更しない。
+- ステータス帯をマップ直上へ移動し、hud-floor／hud-shardsと既存HP・ATK・DEFをrenderで同期する。字幕はマップ下部の帯で通常の文書フローに置く。ResizeObserverは停止中もカメラとミニマップサイズを再描画する。保存v8とゲームロジックは変更しない。
 
 ## Clear表示とヒントの統合（2026-10-26）
 
@@ -104,3 +104,10 @@ TRUEの50階構成は定数・案内に反映する。本編・息子との共�
 - HUDのhud-sightと右カードの視界専用行へ同じradiusを表示。旧ログの通貨名は描画時のみ統一。保存内の文言は変更しない。
 - introとscreen-headingを削除し、app.jsも削除要素への参照を除去。brand-groupに英語名と横並びサブタイトル、header-rightにoptions-openを配置。目覚めではgame-iconsだけを隠し、オプションを残す。
 - options-dialog内にdebug-openを移動。既存openDialog／finishDialogを再利用し、ネスト中は探索停止と元の停止状態を保つ。すべてのダイアログが閉じた時だけ元へ戻る。
+
+## 上下帯と進行ボタンの整理（2026-10-26）
+
+- dungeon-viewport内にstage-band-top／map-wrap／stage-band-bottomを配置し、上下帯は--stage-band-heightを共用。速度の幅をミニマップパネル幅へ同期する。canvasカメラ座標・地形生成は変更しない。
+- 単一のprimaryをフェイズに応じてawakening-start／launch-area／notice-actionsへ移動する。notice-copy（終了文）とnotice-hintだけinnerHTMLを更新し、ボタンを含むnotice-actionsのDOMを再生成しない。これによりハンドラと単一ボタンを維持する。
+- pause-toggleは探索中のみ表示する別ボタン。同じクリック処理でpausedを反転し、ひとやすみ／探索を再開を切り替える。中央の休止オーバーレイは廃止。旧restart・prepare-restart・playback・map-bottom・thought-chatは除去する。
+- CSSの仮グレーテーマはUIに適用し、区間のCanvas配色は維持。保存形式はv8のまま。

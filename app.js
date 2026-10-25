@@ -1,12 +1,11 @@
 import {autoMapModel,cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';
-import {appendThought} from './thought-view.js';
+import {thoughtText} from './thought-view.js';
 import {memoryGroups} from './skill-tree.js';
 import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment} from './debug-tools.js';
 import {W,H,skills,newGame,stats,price,upgrade,equip,tick,ascend,zoneFor,floorLabel,radius,canSee,gearById,gearStats,gearName,discard,locked,codexRows,sortedInventory,normalizeSave,orderDefinitions,orderById,orderCapacity,orderUnlocked,addOrder,editOrder,beginExploration,equipment,LAST_FLOOR,LETTER_FLOOR,nextStageHint} from './engine.js';
 const $=id=>document.getElementById(id), key='abyss-normal-v2';
-let state,tab='skills',speed=1,paused=false,last=0,sound=false,audio,motion=null,dialogWasPaused=false,gearSlot='weapon',gearSorts={weapon:'acquired',armor:'acquired'},codexKind='monsters',codexSlot='weapon',codexSorts={weapon:'acquired',armor:'acquired'};
+let state,tab='orders',speed=1,paused=false,last=0,sound=false,audio,motion=null,dialogWasPaused=false,gearSlot='weapon',gearSorts={weapon:'acquired',armor:'acquired'},codexKind='monsters',codexSlot='weapon',codexSorts={weapon:'acquired',armor:'acquired'};
 
-let thoughtHistory=[],thoughtStage='';
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 try{const data=JSON.parse(localStorage.getItem(key));state=normalizeSave(data);if(state){paused=state.phase==='explore';if(data.version!==state.version){try{const backup=key+'-v'+data.version+'-before-ui';if(!localStorage.getItem(backup))localStorage.setItem(backup,JSON.stringify(data));}catch{}}}}catch{}
 state ||= newGame();
@@ -48,19 +47,11 @@ function drawAutoMap(){
  const canvas=$('auto-map'),geometry=miniMapGeometry(W,H,$('map').clientWidth<420?4:6);
  if(canvas.width!==geometry.width||canvas.height!==geometry.height){canvas.width=geometry.width;canvas.height=geometry.height;}
  drawMiniMap(canvas.getContext('2d'),autoMapModel(state,(x,y)=>canSee(state,x,y)),geometry);
+ const viewport=document.querySelector('.dungeon-viewport'),width=canvas.parentElement.offsetWidth+'px';if(viewport.style.getPropertyValue('--minimap-width')!==width)viewport.style.setProperty('--minimap-width',width);
 }
-function renderThoughtChat(){
- const stage=state.seed+':'+state.profile.runs+':'+state.floor;
- if(stage!==thoughtStage){thoughtStage=stage;thoughtHistory=[];$('thought-messages').replaceChildren();}
- $('thought-chat').hidden=['awakening','prepare'].includes(state.phase);
- if($('thought-chat').hidden)return;
- const next=appendThought(thoughtHistory,state.intent,state.turn);if(next===thoughtHistory)return;
- thoughtHistory=next;
- const row=document.createElement('div');row.className='thought-message';
- const time=document.createElement('time');time.textContent='TURN '+String(state.turn).padStart(3,'0');
- const message=document.createElement('p');message.textContent=thoughtHistory.at(-1).text;
- row.append(time,message);const feed=$('thought-messages');feed.append(row);
- while(feed.children.length>30)feed.firstElementChild.remove();feed.scrollTop=feed.scrollHeight;
+function renderThoughtSubtitle(){
+ const text=thoughtText(state.intent),subtitle=$('thought-subtitle');
+ if(subtitle.textContent!==text)subtitle.textContent=text;
 }
 function categoryTabs(type,selected,common=false){return `<div class="subtabs" role="group" aria-label="${type==='skill'?'スキル系統':'装備の種類'}">${(common?[['common','共通'],['weapon','武器'],['armor','防具']]:[['weapon','武器'],['armor','防具']]).map(([id,label])=>`<button data-category="${type}" data-value="${id}" aria-pressed="${selected===id}" class="${selected===id?'active':''}">${label}</button>`).join('')}</div>`;}
 function sortButtons(type,selected){return `<div class="sort-controls" role="group" aria-label="装備の並べ替え">${[['acquired','入手順'],['attack','攻撃力順'],['defense','防御力順']].map(([id,label])=>`<button data-sort="${type}" data-value="${id}" class="${selected===id?'active':''}" aria-pressed="${selected===id}">${label} ${id==='acquired'?'↑':'↓'}</button>`).join('')}</div>`;}
@@ -82,13 +73,16 @@ function render(){
  const notices={cleared:[`${floorLabel(state)} Clear`,state.floor===LAST_FLOOR?'階段の先に、地上の光が見える。':'記憶の欠片を手に入れた。次の階の準備へ。'],dead:['途切れた記憶','骸は崩れ、再び最深部へ。図鑑の記録は残ります。'],ending:['届かなかった声','「父の仇……魔物め」<br>息子の剣が、骸を貫いた。<br>父だと伝える声は、もう出なかった。<br><br>記憶を失い、再びB30へ。<br>通常エンド達成 · 次の旅ではB15の手紙を開けられます。']};
  const hint=['cleared','dead','ending'].includes(state.phase)?(state.nextHint||nextStageHint(state)):null;
  $('field-gimmick').hidden=!state.gimmick||state.gimmick.id==='none';$('field-gimmick').textContent=state.gimmick&&state.gimmick.id!=='none'?'異変：'+state.gimmick.name+(state.gimmick.id==='fog'?' · 視界−2':''):'';
- const n=notices[state.phase];$('map-notice').classList.toggle('has-hint',Boolean(n&&hint));$('map-notice').innerHTML=n?`<strong>${n[0]}</strong><small>${n[1]}</small>${hint?'<div class="clear-hint"><h3>'+esc(hint.title.replace(/^次は/,''))+'</h3><p>'+esc(hint.text)+'</p></div>':''}`:paused?'<strong>ひと休み</strong><small>再開すると探索が続きます。</small>':'';
- $('primary').innerHTML=({awakening:'思い出す',prepare:'探索をはじめる <span>→</span>',explore:paused?'探索を再開 <span>▶</span>':'ひと休み <span>Ⅱ</span>',cleared:state.floor===LAST_FLOOR?'地上1Fへ <span>↑</span>':'次の階へ・準備 <span>↑</span>',dead:'B30で再び目覚める <span>↻</span>',ending:'次の旅をはじめる <span>↻</span>'})[state.phase];
+ const n=notices[state.phase];$('map-notice').hidden=!n;$('map-notice').classList.toggle('has-hint',Boolean(n&&hint));
+ $('notice-copy').innerHTML=n?'<strong>'+n[0]+'</strong><small>'+n[1]+'</small>':'';
+ $('notice-hint').innerHTML=hint?'<div class="clear-hint"><h3>'+esc(hint.title.replace(/^次は/,''))+'</h3><p>'+esc(hint.text)+'</p></div>':'';
+ $('primary').innerHTML=({awakening:'思い出す',prepare:'探索を始める',cleared:state.floor===LAST_FLOOR?'地上1Fへ':'準備画面へ',dead:'B30で再び目覚める',ending:'次の旅をはじめる'})[state.phase]||'';
+ $('primary').hidden=state.phase==='explore';$('pause-toggle').hidden=state.phase!=='explore';$('pause-toggle').textContent=paused?'探索を再開':'ひとやすみ';
  $('prep-note').textContent='能力強化・指示枠の拡張・スキル習得・装備変更は準備中のみ。';
  $('logs').innerHTML=state.logs.slice(0,30).map(l=>`<div class="log-row ${esc(l.type)}"><time>${String(l.turn).padStart(3,'0')}</time><span>${esc(l.text.replace(/記憶のかけら|かけら/g,'記憶の欠片'))}</span></div>`).join('');
  $('memory-count').textContent=`記憶の断片 ${state.memories.length} / 4 · 通常エンド ${state.profile.normalClears}回`;
  $('memory-quote').textContent=state.memories.at(-1)||'名前も、顔も、思い出せない。それでも、帰らなければ。';
- renderTab();renderThoughtChat();draw();save();
+ renderTab();renderThoughtSubtitle();draw();save();
 }
 function itemCard(g,ref,equipped=false){
  const b=gearById[g.baseId],st=gearStats(g),target=typeof ref==='number'?'i'+ref:ref;
@@ -96,7 +90,7 @@ function itemCard(g,ref,equipped=false){
 }
 function renderMemories(){
  const focused=document.activeElement?.dataset.upgrade;
- $('tab-content').innerHTML='<div class="memory-toolbar"><span>記憶の樹 <b>'+state.shards+' pt</b></span><small>難易度：深淵</small></div><p class="section-caption">記憶の欠片で能力を育て、指示枠やスキルを習得できます。探索指示は全19種類から選べます。</p>'+memoryGroups.map(group=>'<section class="memory-list-group"><h3>'+group.name+'</h3>'+group.ids.map(id=>{
+ $('tab-content').innerHTML='<div class="memory-toolbar"><span>スキルツリー <b>'+state.shards+' pt</b></span><small>難易度：深淵</small></div><p class="section-caption">記憶の欠片で能力を育て、指示枠やスキルを習得できます。探索指示は全19種類から選べます。</p>'+memoryGroups.map(group=>'<section class="memory-list-group"><h3>'+group.name+'</h3>'+group.ids.map(id=>{
   const k=skills.find(k=>k.id===id),lv=state.levels[id],max=lv>=k.max,dep=skills.find(p=>p.id===k.requires),disabled=max||locked(state,k)||state.floor===1||state.phase!=='prepare'||state.shards<price(state,k);
   const status=max?'習得済み':locked(state,k)?'未解放':state.floor===1?'B29から習得可能':state.shards<price(state,k)?'記憶の欠片不足':'習得する';
   return '<article class="memory-list-card"><span class="skill-icon" aria-hidden="true">'+k.icon+'</span><div><strong>'+esc(k.name)+' <small>Lv.'+lv+' / '+k.max+'</small></strong><p>'+esc(k.detail)+'</p>'+(dep?'<small>前提：'+esc(dep.name)+' Lv.1</small>':'')+'</div><button data-upgrade="'+id+'" '+(disabled?'disabled':'')+' aria-label="'+esc(k.name+' '+status)+'">'+status+(max?'':' · '+price(state,k)+' pt')+'</button></article>';
@@ -113,7 +107,7 @@ function renderScreens(){
  const prep=state.phase==='prepare',awake=state.phase==='awakening',st=stats(state);$('workspace').dataset.screen=awake?'awakening':prep?'prepare':'explore';$('awakening-scene').hidden=!awake;$('game-icons').hidden=awake;document.querySelector('.journal').hidden=awake;
  $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=prep||awake;$('expedition').hidden=awake;$('live-order-panel').hidden=prep;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
  $('prepare-floor').textContent=`${floorLabel(state)}への支度`;
- const host=awake?$('awakening-start'):prep?$('launch-area'):document.querySelector('.playback');if($('primary').parentElement!==host)host.prepend($('primary'));
+ const host=awake?$('awakening-start'):prep?$('launch-area'):$('notice-actions');if($('primary').parentElement!==host)host.prepend($('primary'));
  const visited=state.visited.flat().filter(Boolean).length;
  const summary=`<dl class="stat-list"><div><dt>HP</dt><dd>${state.hp} / ${st.maxHp}</dd></div><div><dt>攻撃力 / 防御力</dt><dd>${displayAttack()} / ${displayDefense()}</dd></div><div><dt>記憶の欠片</dt><dd id="shards">${state.shards} pt</dd></div><div><dt>武器</dt><dd>${esc(gearName(state.gear.weapon))}${state.gear.weapon.boundKnown?' · 呪い':''}</dd></div><div><dt>防具</dt><dd>${esc(gearName(state.gear.armor))}${state.gear.armor.boundKnown?' · 呪い':''}</dd></div><div><dt>指示枠</dt><dd>${state.orders.length} / ${orderCapacity(state)}枠</dd></div><div><dt>視界範囲</dt><dd>半径${radius(state)}マス</dd></div><div><dt>再生の祈り</dt><dd>${state.levels.mend?(state.mended?'使用済み':'使用可能'):'未習得'}</dd></div></dl>`;
 
@@ -133,8 +127,8 @@ $('codex-body').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));renderTab();});
 document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{speed=Number(b.dataset.speed);document.querySelectorAll('[data-speed]').forEach(x=>x.classList.toggle('active',x===b));});
 function reset(){state=newGame(undefined,state.profile);paused=false;motion=null;last=performance.now();render();}
-$('primary').onclick=()=>{if(['awakening','prepare'].includes(state.phase)){beginExploration(state);paused=false;last=performance.now();tone();}else if(state.phase==='explore'){paused=!paused;last=performance.now();}else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();};
-$('restart').onclick=()=>{if(confirm('現在の能力・記憶の欠片・装備をリセットしてB30からやり直しますか？ 図鑑と通常エンド達成記録は残ります。'))reset();};$('prepare-restart').onclick=$('restart').onclick;
+$('primary').onclick=()=>{if(state.phase==='explore')return;if(['awakening','prepare'].includes(state.phase)){beginExploration(state);paused=false;last=performance.now();tone();}else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();};
+$('pause-toggle').onclick=()=>{if(state.phase!=='explore')return;paused=!paused;last=performance.now();render();};
 $('sound').onclick=()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');tone(440);};
 $('monster-book').onclick=()=>showCodex('monsters');$('equipment-book').onclick=()=>showCodex('equipment');
 $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dialog').close();$('guide-start').onclick=()=>$('dialog').close();
