@@ -22,7 +22,7 @@ const thoughts={
  'hunt-any':'敵がいる。近づいて倒そう。'
 };
 
-// Keep technical intent and combat logs intact; translate only the speech bubble.
+// Keep technical intent and combat logs intact; translate only the thought chat.
 export function thoughtText(intent=''){
  const order=orderDefinitions.find(o=>intent===`指示：${o.name}`);
  if(order)return thoughts[order.id];
@@ -35,11 +35,8 @@ export function thoughtText(intent=''){
  return 'この先には、何があるんだろう。';
 }
 
-// Coordinates are CSS pixels in the rendered canvas, including the sprite's hop.
-export function thoughtPlacement({x,y,width,height,bubbleWidth,bubbleHeight,spriteHeight=0}){
- const margin=6,gap=10;
- const left=Math.max(margin,Math.min(width-bubbleWidth-margin,x-bubbleWidth/2));
- const below=y-bubbleHeight-gap<margin;
- const top=Math.max(margin,Math.min(height-bubbleHeight-margin,below?y+spriteHeight+gap:y-bubbleHeight-gap));
- return {left,top,below,tail:Math.max(10,Math.min(bubbleWidth-10,x-left))};
+export function appendThought(history,intent,turn){
+ const text=thoughtText(intent);
+ if(history.at(-1)?.text===text)return history;
+ return [...history,{text,turn}].slice(-30);
 }

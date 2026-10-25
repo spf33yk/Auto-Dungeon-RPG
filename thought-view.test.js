@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {thoughtText,thoughtPlacement} from './thought-view.js';
+import {thoughtText,appendThought} from './thought-view.js';
 import {orderDefinitions} from './orders.js';
 
 test('all selectable instructions have distinct natural thoughts without technical labels',()=>{
@@ -12,19 +12,11 @@ test('all selectable instructions have distinct natural thoughts without technic
  assert.match(thoughtText('階段は封印中。中ボスを倒す必要がある'),/門番/);
 });
 
-test('bubble tracks the hero across desktop and mobile edges, switching below at top',()=>{
- for(const width of [280,360,744])for(const bubbleWidth of [120,135,210]){
-  const height=width*23/31,bubbleHeight=55;
-  for(const x of [width/31,width/2,width*30/31])for(const y of [0,height/2,height-24]){
-   const p=thoughtPlacement({x,y,width,height,bubbleWidth,bubbleHeight,spriteHeight:height/23});
-   assert.ok(p.left>=6&&p.left+bubbleWidth<=width-6);
-   assert.ok(p.top>=6&&p.top+bubbleHeight<=height-6);
-   assert.equal(p.below,y<65);
-   assert.ok(p.tail>=10&&p.tail<=bubbleWidth-10);
-   if(x===width/2)assert.equal(p.left+p.tail,x);
-   if(y===0)assert.ok(p.top>=height/23+10);
-  }
- }
- const p=thoughtPlacement({x:650,y:350,width:744,height:552,bubbleWidth:135,bubbleHeight:40});
- assert.equal(p.left+p.tail,650); // No former 55% cap on right-side movement.
+test('thought chat suppresses consecutive repeats and keeps the latest thirty decisions',()=>{
+ const empty=[],first=appendThought(empty,'視界の先を調べる',1);
+ assert.deepEqual(empty,[]);assert.equal(first.length,1);assert.equal(first[0].turn,1);
+ assert.equal(appendThought(first,'基本行動：視界の先を調べる',2),first);
+ let history=first;for(let i=2;i<=40;i++)history=appendThought(history,i%2?'指示：階段を発見したら向かう':'隣接する墓地スライムと交戦',i);
+ assert.equal(history.length,30);assert.equal(history[0].turn,11);assert.equal(history.at(-1).turn,40);
+ assert.equal(first.length,1);assert.ok(!history.some(row=>/戦術判断：|指示：/.test(row.text)));
 });
