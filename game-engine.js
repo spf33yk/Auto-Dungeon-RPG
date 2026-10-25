@@ -35,7 +35,7 @@ export function abandonRun(s){return s.phase==='prepare'?newGame(undefined,s.pro
 export function price(s,k){return k.cost+s.levels[k.id]*(k.costStep??4);}
 export function locked(s,k){return Boolean((k.requires&&!s.levels[k.requires])||(k.event&&!s.profile.normalClears));}
 export function upgrade(s,id){const k=skills.find(k=>k.id===id);if(!k||s.phase!=='prepare'||s.floor===1||locked(s,k)||s.levels[id]>=k.max||s.shards<price(s,k))return false;s.shards-=price(s,k);s.levels[id]++;if(id==='vitality')s.hp+=12;reveal(s);log(s,`「${k.name}」を思い出した。`,'good');return true;}
-export function setMode(s,mode){if(!['stairs','collect','explore'].includes(mode))return false;s.mode=mode;s.orders=(mode==='stairs'?['stairs']:mode==='collect'?['collect-items','stairs']:['explore-all','stairs']).map(makeOrder);return true;}
+export function setMode(s,mode){if(s.phase!=='prepare')return false;if(!['stairs','collect','explore'].includes(mode))return false;s.mode=mode;s.orders=(mode==='stairs'?['stairs']:mode==='collect'?['collect-items','stairs']:['explore-all','stairs']).map(makeOrder);return true;}
 export function equip(s,index){const g=s.inventory[index];if(s.phase!=='prepare'||!g)return false;const slot=gearById[g.baseId].slot;if(s.gear[slot].cursed){log(s,'呪いで装備を外せない。先に解呪が必要。','bad');return false;}const old=s.gear[slot];s.gear[slot]=g;s.inventory[index]=old;if(g.cursed)g.boundKnown=true;log(s,`${gearName(g)}を装備。${g.cursed?'呪いにより外せなくなった。':''}`,g.cursed?'bad':'good');return true;}
 export function equipBest(s){
  if(s.phase!=='prepare')return false;
@@ -111,7 +111,7 @@ export function makeFloor(s){
 export function route(s,test,{start=s.player,known=true,blocked=new Set()}={}){const q=[start],prev=new Map([[key(start),null]]);for(let i=0;i<q.length;i++){const p=q[i];if(test(p)){if(i===0)return start;let end=p;while(prev.get(key(end))!==start)end=prev.get(key(end));return end;}for(const [dx,dy]of dirs){const n={x:p.x+dx,y:p.y+dy},k=key(n);if(s.grid[n.y]?.[n.x]&&(!known||s.seen[n.y][n.x])&&!prev.has(k)&&!blocked.has(k)){prev.set(k,p);q.push(n);}}}return null;}
 export function targetEnemy(s){const near=dirs.map(([dx,dy])=>s.enemies.find(e=>e.x===s.player.x+dx&&e.y===s.player.y+dy)).filter(Boolean);if(!activeOrders(s).some(o=>o.id==='tactics'))return near[0];const atk=stats(s).attack;return near.sort((a,b)=>Number(b.hp<=Math.max(1,atk-b.defense))-Number(a.hp<=Math.max(1,atk-a.defense))||b.attack-a.attack)[0];}
 export function obtainable(s,i){return i.type==='letter'?Boolean(s.profile.normalClears&&!s.letter):i.type==='chest'&&i.locked?s.keys>0:true;}
-function receiveReward(s,id){const fresh=grantReward(s,id);log(s,fresh?'「'+rewardById[id].name+'」を手に入れた。'+(rewardById[id].kind==='order'?'探索指示に設定できる。':'この旅で使用できる。'):'「'+rewardById[id].name+'」は取得済み。記憶の欠片 +5','good');}
+function receiveReward(s,id){const fresh=grantReward(s,id);log(s,fresh?'「'+rewardById[id].name+'」を手に入れた。'+(rewardById[id].kind==='order'?'次の準備で探索指示に設定できる。':'この旅で使用できる。'):'「'+rewardById[id].name+'」は取得済み。記憶の欠片 +5','good');}
 function pickup(s){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent=item.type==='letter'?'封じられた宝箱。まだ思い出せない':'鍵が足りない。今は開けられない';return;}s.items=s.items.filter(i=>i!==item);
  if(item.type==='potion'||item.type==='herb'){const heal=Math.min(stats(s).maxHp-s.hp,item.type==='herb'?10:BALANCE.springHeal);s.hp+=heal;log(s,(item.type==='herb'?'薬草':'回復の泉')+'。HP +'+heal,'good');}
  else if(item.type==='fragment'){s.shards+=3;log(s,'床の記憶の欠片を拾った。+3','good');}

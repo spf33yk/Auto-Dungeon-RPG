@@ -37,7 +37,7 @@ test('duplicates give five fragments without stacking; new journeys keep only co
 });
 
 test('special orders must be obtained and configured in an available slot',()=>{
- const s=arena();assert.equal(orderUnlocked(s,'tactics'),true);assert.equal(addOrder(s,'warp'),false);grantReward(s,'warp');assert.equal(addOrder(s,'warp'),true);assert.equal(s.orders.length,2);grantReward(s,'avoid-traps');assert.equal(addOrder(s,'avoid-traps'),false);
+ const s=arena();s.phase='prepare';assert.equal(orderUnlocked(s,'tactics'),true);assert.equal(addOrder(s,'warp'),false);grantReward(s,'warp');assert.equal(addOrder(s,'warp'),true);assert.equal(s.orders.length,2);grantReward(s,'avoid-traps');assert.equal(addOrder(s,'avoid-traps'),false);
 });
 
 test('warp is once per floor, preserves saved usage, and resets on the next floor',()=>{
