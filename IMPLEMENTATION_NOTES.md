@@ -6,6 +6,8 @@
 - 探索ログは通常60px、800px以下48px、480px以下42px。行高20／16／14pxと余白0で常時3表示行を確保。長文は折り返し、本文削除や1行省略はせず、既存のスクロール・末尾追従を維持。
 - 既存保存v10・ゲーム数値・準備ログ・入室済みMAPの公開条件は維持。検証・公開結果は以下に追記する。
 - ローカル全96テスト成功、配信URL整合とgit diff --check成功。実ブラウザのPC幅でログ60px／行高20px、552px幅で48px／16pxを実測。360×700のiframeで上部2段・共通SVG・下部1行操作・3行分のログを確認し、モンスター図鑑の開閉に成功。ローカル探索再開→即休止も確認。実機iPhone/Safariは未確認。
+- 公開確認コミットc6954d9。GitHub Actions Game tests [40309739304](https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/40309739304)全96件成功、Pages [40309738424](https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/40309738424)成功。公開PC版でログ60px／行高20px、4アイコン32px角・同じ上端位置・SVG配信を確認。歯車の開閉・探索再開→休止も成功し、B27・TURN190・HP34/54を維持。
+- 公開URLを393×700のiframeでも読み込み、上部2段と3行の本文、操作欄との分離、モンスター図鑑の開閉を確認。この別保存領域ではB30新規開始→TURN19・HP50/54で休止。PCと両タブのコンソールエラーなし。証跡：mobile-hud-public.png、aligned-hud-public-pc.png。iframe幅の確認であり、実機iPhone/Safariのフォント・タッチ・安全領域は未確認。
 
 更新：2026-10-26。現行仕様はSPEC.md、企画はDESIGN.md、構造はSYSTEM_DESIGN.md。
 
