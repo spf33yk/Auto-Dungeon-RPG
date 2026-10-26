@@ -67,7 +67,7 @@ test('saved RNG state produces identical future loot and combat after reload',()
 });
 
 test('v8 migration refunds retired purchases once and keeps legacy boxes and records',()=>{
- const old=arena();old.version=8;old.levels.tactics=1;old.levels.mend=1;old.items=[{x:7,y:5,type:'chest',gear:{baseId:'weapon-3',plus:0,identified:true,cursed:false}}];for(const k of ['abilities','unlockedOrders','keys','rngState','warped'])delete old[k];delete old.profile.skills;const before=JSON.stringify(old),s=normalizeSave(old);assert.equal(JSON.stringify(old),before);assert.equal(s.version,10);assert.equal(s.shards,old.shards+18);assert.ok(s.abilities.includes('mend'));assert.ok(s.orders.some(o=>o.effect.id==='tactics'));assert.equal(s.items[0].locked,false);assert.equal(s.levels.tactics,undefined);assert.equal(s.levels.mend,undefined);assert.deepEqual(normalizeSave(s),s);
+ const old=arena();old.version=8;old.levels.tactics=1;old.levels.mend=1;old.items=[{x:7,y:5,type:'chest',gear:{baseId:'weapon-3',plus:0,identified:true,cursed:false}}];for(const k of ['abilities','unlockedOrders','keys','rngState','warped'])delete old[k];delete old.profile.skills;const before=JSON.stringify(old),s=normalizeSave(old);assert.equal(JSON.stringify(old),before);assert.equal(s.version,11);assert.equal(s.shards,old.shards+18);assert.ok(s.abilities.includes('mend'));assert.ok(s.orders.some(o=>o.effect.id==='tactics'));assert.equal(s.items[0].locked,false);assert.equal(s.levels.tactics,undefined);assert.equal(s.levels.mend,undefined);assert.deepEqual(normalizeSave(s),s);
  const full=structuredClone(old);full.orders=['stairs','collect-items'].map(makeOrder);assert.equal(normalizeSave(full).orders.length,2);
 });
 

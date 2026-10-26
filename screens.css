@@ -80,6 +80,10 @@ body.exploring .field-log-host .journal{background:transparent;border:0;border-r
 @media(pointer:coarse) and (orientation:landscape){body.exploring .hud-overlay .icon-button{width:36px;height:36px}body.exploring .hud-overlay .pause-toggle{min-height:36px}.hud-overlay .speed button{min-height:32px}}
 
 /* Aligned HUD groups and three visible text lines in the exploration log. */
+.level-vitals{flex:0 0 64px;min-width:0;color:#fff}
+.level-vitals strong{display:block;font:12px/1.5 monospace;white-space:nowrap}
+.exp-track{height:5px;margin:5px 0 0;background:#0006;overflow:hidden}
+#exp-bar{height:100%;width:0;background:#d5b76d;transition:width .2s}
 .utility-controls .icon-button{display:inline-flex;align-items:center;justify-content:center;padding:0;flex:none;line-height:1}
 .utility-controls .icon-button svg{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 body.exploring .hud-overlay-top{padding-top:0;flex-wrap:nowrap;top:10px}
@@ -92,7 +96,7 @@ body.exploring .field-log-host .log-row{display:block;min-height:var(--log-line)
 body.exploring .field-log-host .log-row span{display:block;min-width:0;line-height:inherit}
 @container(max-width:800px){
  body.exploring .hud-overlay-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}
- body.exploring .floor-health{grid-column:1/-1;display:grid;grid-template-columns:max-content minmax(80px,140px);gap:12px;align-items:center}
+ body.exploring .floor-health{grid-column:1/-1;display:grid;grid-template-columns:max-content 54px minmax(80px,140px);gap:12px;align-items:center}
  body.exploring .floor-health .player-vitals{min-width:0}
  body.exploring #hud-tools{justify-self:start}
  body.exploring .hud-fragments{margin:0;justify-self:end;align-self:center}
@@ -104,7 +108,8 @@ body.exploring .field-log-host .log-row span{display:block;min-width:0;line-heig
 }
 @container(max-width:480px){
  body.exploring .hud-overlay-top{top:6px;gap:4px 8px}
- body.exploring .floor-health{gap:8px;grid-template-columns:max-content minmax(70px,100px)}
+ body.exploring .floor-health{gap:7px;grid-template-columns:max-content 38px minmax(70px,100px)}
+ body.exploring .level-vitals strong{font-size:10px;line-height:15px}
  body.exploring .floor-health .hud-stage-title{font-size:11px;line-height:16px}
  body.exploring .floor-health .player-name strong,body.exploring .floor-health .player-name span{font-size:10px}
  body.exploring .hud-overlay .icon-button{width:26px;height:26px}

@@ -13,10 +13,10 @@ export const zones = [
 ].map(([name,id,floorColor,wallColor,layout],index)=>({name,id,floorColor,wallColor,layout,index}));
 const species = [['墓地スライム','骨の番兵'],['水路ヒル','水門の守り手'],['洞窟コウモリ','岩の巨兵'],['火の精','炉の鎧兵'],['氷の精','凍てつく騎士'],['魔導の影','書庫の番人'],['毒胞子','根の巨人'],['城塞の亡霊','重装の番兵'],['月影の獣','影の騎士'],['門の使い魔','黎明の守護者']];
 export const minibosses=[
- {id:'boss-b20',name:'封門の骸騎士',basement:20,zone:3,type:'brute',hp:88,attack:15,defense:4,period:2,color:['#89634b','#dfbc79']},
- {id:'boss-b10',name:'霧冠の番人',basement:10,zone:6,type:'brute',hp:136,attack:23,defense:7,period:2,color:['#654b7c','#c9b6e5']},
+ {id:'boss-b20',name:'封門の骸騎士',basement:20,zone:3,type:'brute',experience:25,hp:88,attack:15,defense:4,period:2,color:['#89634b','#dfbc79']},
+ {id:'boss-b10',name:'霧冠の番人',basement:10,zone:6,type:'brute',experience:45,hp:136,attack:23,defense:7,period:2,color:['#654b7c','#c9b6e5']},
 ];
-export const monsters = species.flatMap((names,z)=>names.map((name,k)=>({id:`enemy-${z}-${k}`,name,zone:z,type:k?'brute':'slime',hp:(k?19:11)+z*4,attack:(k?8:5)+Math.floor(z*2.75),defense:Math.floor(z*.8)+(k?1:0),period:k?2:1,color:k?['#966e68','#c7aba0']:['#507f69','#a2c6a5']}))).concat(minibosses);
+export const monsters = species.flatMap((names,z)=>names.map((name,k)=>({id:`enemy-${z}-${k}`,name,zone:z,type:k?'brute':'slime',experience:3+z*2+(k?2:0),hp:(k?19:11)+z*4,attack:(k?8:5)+Math.floor(z*2.75),defense:Math.floor(z*.8)+(k?1:0),period:k?2:1,color:k?['#966e68','#c7aba0']:['#507f69','#a2c6a5']}))).concat(minibosses);
 const weapons=['錆びた剣','銅の剣','鉄の剣','炉鍛の剣','氷晶の剣','魔導の剣','茨の剣','騎士の剣','月影の剣','黎明の剣'];
 const armors=['ほころびた外套','旅人の外套','鉄の胸当て','炉鍛の鎧','氷晶の鎧','魔導の外套','樹皮の鎧','騎士の鎧','月影の鎧','黎明の鎧'];
 export const equipment = [...weapons.map((name,rank)=>({id:`weapon-${rank}`,name,slot:'weapon',rank,attack:2+rank*2,defense:0})),...armors.map((name,rank)=>({id:`armor-${rank}`,name,slot:'armor',rank,attack:0,defense:rank*2}))];
