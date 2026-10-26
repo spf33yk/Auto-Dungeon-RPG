@@ -78,3 +78,46 @@ body.exploring .transparent-view .automap-overlay{max-width:var(--minimap-limit,
 body.exploring .field-log-host .journal{background:transparent;border:0;border-radius:0;box-shadow:none;overflow:visible}body.exploring .field-log-host .panel-heading{display:none}body.exploring .field-log-host #logs{padding:0 2px;scrollbar-width:none;background:transparent;text-shadow:0 1px 3px #000,0 0 5px #000}body.exploring .field-log-host #logs::-webkit-scrollbar{display:none}body.exploring .field-log-host .log-row{border:0;color:#fff;padding:3px 0}body.exploring .field-log-host .log-row.good{color:#d2e6bc}body.exploring .field-log-host .log-row.bad{color:#f0b4a7}body.exploring .field-log-host .log-row.story{color:#f1dfbd}body.exploring .field-log-host .log-row time{display:none}body.exploring .transparent-view .automap-overlay{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}.mobile-display{display:none;position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10;max-width:90vw;padding:10px 16px;border:1px solid #9ca8b7;border-radius:4px;background:#202832;color:#fff;font-size:12px}#fullscreen-status{margin:8px 0}.hud-overlay-top{padding-top:env(safe-area-inset-top)}body.exploring .hud-overlay{left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right))}body.exploring .hud-overlay-bottom{bottom:max(10px,env(safe-area-inset-bottom))}body.exploring .field-log-host{right:max(12px,env(safe-area-inset-right))}
 @media(pointer:coarse) and (orientation:portrait){body.exploring .mobile-display:not([hidden]){display:block}}
 @media(pointer:coarse) and (orientation:landscape){body.exploring .hud-overlay .icon-button{width:36px;height:36px}body.exploring .hud-overlay .pause-toggle{min-height:36px}.hud-overlay .speed button{min-height:32px}}
+
+/* Aligned HUD groups and three visible text lines in the exploration log. */
+.utility-controls .icon-button{display:inline-flex;align-items:center;justify-content:center;padding:0;flex:none;line-height:1}
+.utility-controls .icon-button svg{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+body.exploring .hud-overlay-top{padding-top:0;flex-wrap:nowrap;top:10px}
+body.exploring .hud-overlay{left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right))}
+body.exploring .hud-overlay-bottom{bottom:10px}
+body.exploring .hud-bottom-controls{flex-wrap:nowrap;align-items:center}
+body.exploring .field-log-host{--log-line:20px;width:min(480px,48%);right:max(10px,env(safe-area-inset-right))}
+body.exploring .field-log-host #logs{height:calc(var(--log-line) * 3);padding:0;line-height:var(--log-line);scroll-snap-type:y proximity}
+body.exploring .field-log-host .log-row{display:block;min-height:var(--log-line);padding:0;line-height:var(--log-line);font-size:12px;scroll-snap-align:start;overflow-wrap:anywhere}
+body.exploring .field-log-host .log-row span{display:block;min-width:0;line-height:inherit}
+@container(max-width:800px){
+ body.exploring .hud-overlay-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}
+ body.exploring .floor-health{grid-column:1/-1;display:grid;grid-template-columns:max-content minmax(80px,140px);gap:12px;align-items:center}
+ body.exploring .floor-health .player-vitals{min-width:0}
+ body.exploring #hud-tools{justify-self:start}
+ body.exploring .hud-fragments{margin:0;justify-self:end;align-self:center}
+ body.exploring .hud-overlay-bottom{display:grid;grid-template-columns:minmax(0,1fr);gap:5px}
+ body.exploring .thought-stack{width:auto;min-width:0}
+ body.exploring .hud-bottom-controls{justify-content:flex-end;gap:7px}
+ body.exploring .field-log-host{--log-line:16px;width:65%}
+ body.exploring .field-log-host .log-row{font-size:10px}
+}
+@container(max-width:480px){
+ body.exploring .hud-overlay-top{top:6px;gap:4px 8px}
+ body.exploring .floor-health{gap:8px;grid-template-columns:max-content minmax(70px,100px)}
+ body.exploring .floor-health .hud-stage-title{font-size:11px;line-height:16px}
+ body.exploring .floor-health .player-name strong,body.exploring .floor-health .player-name span{font-size:10px}
+ body.exploring .hud-overlay .icon-button{width:26px;height:26px}
+ body.exploring .utility-controls .icon-button svg{width:17px;height:17px}
+ body.exploring .hud-overlay .utility-controls{gap:6px}
+ body.exploring .hud-overlay-bottom{bottom:6px;gap:4px}
+ body.exploring .memory-subtitle,body.exploring .hud-overlay-bottom .thought-subtitle{font-size:9px;line-height:13px;max-height:13px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ body.exploring .hud-bottom-controls{gap:5px;justify-content:flex-end}
+ body.exploring .hud-value{gap:3px}
+ body.exploring .hud-value small{font-size:7px}
+ body.exploring .hud-value b,body.exploring .hud-turn{font-size:8px}
+ body.exploring .hud-overlay .speed button{min-height:25px;padding:3px;font-size:8px}
+ body.exploring .hud-overlay .pause-toggle{min-width:64px;min-height:27px;font-size:8px;padding:3px}
+ body.exploring .field-log-host{--log-line:14px;width:72%}
+ body.exploring .field-log-host .log-row{font-size:9px}
+}
