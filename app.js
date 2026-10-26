@@ -86,10 +86,18 @@ function render(){
  $('primary').innerHTML=({awakening:'思い出す',prepare:'探索を始める',cleared:state.floor===LAST_FLOOR?'地上1Fへ':'準備画面へ',dead:'B30で再び目覚める',ending:'次の旅をはじめる'})[state.phase]||'';
  $('primary').hidden=state.phase==='explore';$('pause-toggle').hidden=state.phase!=='explore';$('pause-toggle').textContent=paused?'探索を再開':'ひとやすみ';
  $('prep-note').textContent='能力強化・指示枠の拡張・装備変更は準備中のみ。取得した再生・転移は準備でカード指示に設定。';
- $('logs').innerHTML=state.logs.slice(0,30).map(l=>`<div class="log-row ${esc(l.type)}"><time>${String(l.turn).padStart(3,'0')}</time><span>${esc(l.text.replace(/記憶のかけら|かけら/g,'記憶の欠片'))}</span></div>`).join('');
+ renderJourneyLog();
  $('memory-count').textContent=`記憶の断片 ${state.memories.length} / 4 · 通常エンド ${state.profile.normalClears}回`;
  $('memory-quote').textContent=state.memories.at(-1)||'名前も、顔も、思い出せない。それでも、帰らなければ。';
  renderTab();renderThoughtSubtitle();draw();save();
+}
+function renderJourneyLog(){
+ const host=$('logs'),overlay=document.body.classList.contains('exploring'),rows=state.logs.slice(0,30),signature=JSON.stringify([overlay,rows]);
+ if(host.dataset.signature===signature)return;
+ const modeChanged=host.dataset.overlay!==String(overlay),follow=host.scrollHeight-host.clientHeight-host.scrollTop<8||modeChanged,top=host.scrollTop;
+ host.dataset.signature=signature;host.dataset.overlay=String(overlay);
+ host.innerHTML=(overlay?rows.reverse():rows).map(l=>`<div class="log-row ${esc(l.type)}"><time>${String(l.turn).padStart(3,'0')}</time><span>${esc(l.text.replace(/記憶のかけら|かけら/g,'記憶の欠片'))}</span></div>`).join('');
+ host.scrollTop=overlay&&follow?host.scrollHeight:modeChanged?0:top;
 }
 function itemCard(g,ref,equipped=false){
  const b=gearById[g.baseId],st=gearStats(g),target=typeof ref==='number'?'i'+ref:ref;
@@ -111,8 +119,8 @@ function renderTab(){
 
 }
 function renderScreens(){
- const prep=state.phase==='prepare',awake=state.phase==='awakening',st=stats(state);$('workspace').dataset.screen=awake?'awakening':prep?'prepare':'explore';$('awakening-scene').hidden=!awake;$('game-icons').hidden=awake;const journal=document.querySelector('.journal');journal.hidden=awake;const journalHost=prep||awake?$('workspace'):$('log-dialog-content');if(journal.parentElement!==journalHost)journalHost.appendChild(journal);const toolsHost=prep||awake?$('header-tools'):$('hud-tools');if($('utility-controls').parentElement!==toolsHost)toolsHost.appendChild($('utility-controls'));
- $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=prep||awake;$('expedition').hidden=awake;$('live-order-panel').hidden=prep;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
+ const prep=state.phase==='prepare',awake=state.phase==='awakening',st=stats(state);$('workspace').dataset.screen=awake?'awakening':prep?'prepare':'explore';document.body.classList.toggle('exploring',!prep&&!awake);$('awakening-scene').hidden=!awake;$('game-icons').hidden=awake;const journal=document.querySelector('.journal');journal.hidden=awake;const journalHost=prep||awake?$('workspace'):$('field-log-host');if(journal.parentElement!==journalHost)journalHost.appendChild(journal);const toolsHost=prep||awake?$('header-tools'):$('hud-tools');if($('utility-controls').parentElement!==toolsHost)toolsHost.appendChild($('utility-controls'));
+ $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=prep||awake;$('expedition').hidden=awake;const statusHost=prep||awake?$('workspace'):$('status-dialog-content');if($('expedition').parentElement!==statusHost)statusHost.appendChild($('expedition'));$('status-open').hidden=prep||awake;$('live-order-panel').hidden=prep;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
  $('prepare-floor').textContent=`${floorLabel(state)}への支度`;
  const host=awake?$('awakening-start'):prep?$('launch-area'):$('notice-actions');if($('primary').parentElement!==host)host.prepend($('primary'));
  const visited=state.visited.flat().filter(Boolean).length;
@@ -144,7 +152,7 @@ $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dial
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',finishDialog));
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.phase==='explore'){paused=true;dialogWasPaused=true;render();}});
 function debugStatus(message=''){ $('debug-status').textContent=`${floorLabel(state)} · HP ${state.hp}/${stats(state).maxHp} · ${state.shards}pt${state.debugUsed?' · DEBUG操作済み':''}${message?' — '+message:''}`;}
-$('log-open').onclick=()=>openDialog('log-dialog');
+$('status-open').onclick=()=>openDialog('status-dialog');
 $('sound-volume').oninput=e=>{volume=Number(e.target.value);$('volume-value').textContent=volume+'%';};
 $('sound-volume').onchange=()=>tone(440);
 $('options-open').onclick=()=>openDialog('options-dialog');
@@ -155,5 +163,5 @@ $('debug-import').onchange=async e=>{const file=e.target.files[0];if(!file)retur
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 function loop(t){if(state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]')&&t-last>420/speed){last=t;const old=state.phase;motion={from:{...state.player},time:t,duration:reducedMotion.matches?1:Math.min(190,340/speed)};tick(state);if(Math.abs(state.player.x-motion.from.x)+Math.abs(state.player.y-motion.from.y)>1)motion=null;if(state.flash?.kind==='hit')tone(180);if(state.phase!==old){motion=null;tone(state.phase==='dead'?110:660);}render();}if(state.phase==='explore'&&(!paused||motion&&t-motion.time<motion.duration+50))draw();requestAnimationFrame(loop);}
 new ResizeObserver(()=>draw()).observe($('map'));
-const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap');wrap.style.setProperty('--hud-top-space',($('hud-top').offsetHeight+20)+'px');wrap.style.setProperty('--hud-bottom-space',($('hud-bottom').offsetHeight+20)+'px');});hudObserver.observe($('hud-top'));hudObserver.observe($('hud-bottom'));
+const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap');wrap.style.setProperty('--hud-top-space',($('hud-top').offsetHeight+20)+'px');wrap.style.setProperty('--hud-bottom-space',($('hud-bottom').offsetHeight+20)+'px');const available=wrap.clientHeight-$('hud-top').offsetHeight-$('hud-bottom').offsetHeight-$('field-log-host').offsetHeight-52;wrap.style.setProperty('--minimap-limit',Math.max(48,(available-22)*31/23)+'px');});hudObserver.observe($('hud-top'));hudObserver.observe($('hud-bottom'));hudObserver.observe($('field-log-host'));
 sprite($('portrait').getContext('2d'),'skeleton',4,3,48);sprite($('camp-portrait').getContext('2d'),'skeleton',12,8,96);render();requestAnimationFrame(loop);

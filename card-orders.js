@@ -18,7 +18,7 @@ export const actionCards=[
  {id:'collect-items',name:'品物を取得',detail:'入手可能な品物へ向かう。'},
  {id:'heal-item',name:'回復品を取得',detail:'泉や薬草へ向かう。'},
  {id:'letter',name:'手紙の箱を開ける',detail:'物語条件を満たす手紙の箱へ向かう。'},
- {id:'frontier',name:'視界の先を調べる',detail:'未発見の地形に接する床を調べる。'},
+ {id:'frontier',name:'視界の先を調べる',detail:'未発見の地形に接する未踏の床を調べる。'},
  {id:'explore-all',name:'未踏の床を調べる',detail:'まだ歩いていない床を調べる。'},
  {id:'retreat',name:'敵から離れる',detail:'敵が見えるとき、危険の少ない隣の床へ退避。'},
  {id:'attack',name:'敵を攻撃',detail:'選んだ敵へ接近し、隣接したら攻撃。',enemy:true},
@@ -126,7 +126,9 @@ export function chooseCardOrder(s,ctx){
    if(next&&danger(next)<danger(s.player))return {...base,next,flee:true};
   }else if(['frontier','explore-all'].includes(effect.id)){
    const range=r.conditions.find(c=>c.id==='range')?.value??Infinity;
-   const next=seek(p=>dist(s.player,p)<=range&&(effect.id==='frontier'?dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false):!s.visited[p.y][p.x]));
+   const nearby=visible.filter(e=>dist(s.player,e)<=range),combat=nearby.length?seek(p=>dist(s.player,p)<=range&&nearby.some(e=>dist(p,e)===1)):null;
+   if(combat)return {...base,next:combat,intent:'進路の敵に向き合う'};
+   const next=seek(p=>dist(s.player,p)<=range&&(effect.id==='frontier'?!s.visited[p.y][p.x]&&dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false):!s.visited[p.y][p.x]));
    if(next)return {...base,next};
   }else{
    const next=seek(p=>targets.some(t=>key(t)===key(p)));

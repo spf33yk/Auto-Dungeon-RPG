@@ -151,7 +151,7 @@ export function tick(s){
  else {
   action ||= chooseOrder(s,{route,canSee,stats,obtainable});
   if(!action){const visible=s.enemies.filter(e=>canSee(s,e.x,e.y)),next=visible.length?route(s,p=>visible.some(e=>distance(p,e)===1),{blocked:new Set(visible.map(key))}):null;if(next)action={next,intent:'進路の敵に向き合う'};}
-  if(!action){const next=route(s,p=>dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false))||route(s,p=>!s.visited[p.y][p.x]);action=next?{next,intent:'基本行動：視界の先を調べる'}:{next:route(s,p=>key(p)===key(s.stairs)),exit:true,intent:'基本行動：探索を終え、階段へ'};}
+  if(!action){const next=route(s,p=>!s.visited[p.y][p.x]&&dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false))||route(s,p=>!s.visited[p.y][p.x]);action=next?{next,intent:'基本行動：視界の先を調べる'}:{next:route(s,p=>key(p)===key(s.stairs)),exit:true,intent:'基本行動：探索を終え、階段へ'};}
   if(action.skill==='mend'){s.hp=Math.min(st.maxHp,s.hp+Math.ceil(st.maxHp*.4));s.mended=true;s.intent=action.intent;s.activeOrder='cards';log(s,'再生の祈りが発動した。','good');}
   if(action.warp){action.next=warpDestination(s);s.warped=true;log(s,'窮地の転移。見知らぬ場所へ逃れた。','good');}
   if(action.next){s.player={...action.next};s.intent=action.intent;s.activeOrder=action.id||null;reveal(s);}

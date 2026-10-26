@@ -1,7 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,W,H,reveal,canSee,stats,route,obtainable,tick,upgrade,normalizeSave,validateSave,createCardRule,cardCapacity,addCardRule,replaceCardRule,validCardRule,chooseCardOrder,cardModifier,legacyToCards} from './engine.js';
+import {newGame,makeFloor,createGear,W,H,reveal,canSee,stats,route,obtainable,tick,upgrade,normalizeSave,validateSave,createCardRule,cardCapacity,addCardRule,replaceCardRule,validCardRule,chooseCardOrder,cardModifier,legacyToCards} from './engine.js';
 const ctx={canSee,stats,route,obtainable};
+test('moving enemies cannot make frontier navigation oscillate forever on the final floor',()=>{
+ const s=newGame(181975);s.floor=30;Object.assign(s.levels,{power:5,guard:4,vitality:5,scout:4});s.hp=stats(s).maxHp;
+ s.gear.weapon=createGear('weapon-9',{plus:20});s.gear.armor=createGear('armor-9',{plus:20});makeFloor(s);s.phase='explore';
+ s.orders=[createCardRule(),createCardRule('self',[],'action','frontier')];
+ let turns=0;while(s.phase==='explore'&&turns++<1000)tick(s);
+ assert.equal(s.phase,'cleared');assert.deepEqual(s.player,s.stairs);
+});
+test('frontier cards with maximum sight finish varied maps instead of waiting at visited boundaries',()=>{
+ for(const seed of [1,8,11])for(const floor of [1,10,16,30]){
+  const s=newGame(seed);s.floor=floor;s.levels.scout=4;makeFloor(s);s.enemies=[];s.traps=[];s.phase='explore';
+  s.orders=[createCardRule('self',[],'action','frontier'),createCardRule()];
+  let turns=0;while(s.phase==='explore'&&turns++<2000)tick(s);
+  assert.equal(s.phase,'cleared',`seed ${seed}, floor ${floor}`);assert.deepEqual(s.player,s.stairs);
+ }
+});
 const rule=(conditions=[],id='stairs',kind='action',target='self')=>createCardRule(target,conditions,kind,id);
 function arena(){const s=newGame(42);s.floor=2;s.phase='prepare';s.grid=Array.from({length:H},(_,y)=>Array.from({length:W},(_,x)=>+(x>0&&y>0&&x<W-1&&y<H-1)));s.seen=s.grid.map(r=>r.map(()=>false));s.visited=s.grid.map(r=>r.map(()=>false));s.player={x:5,y:5};s.stairs={x:7,y:5};s.enemies=[];s.items=[];s.traps=[];s.gimmick={id:'none'};reveal(s);return s;}
 test('HP and current visibility must both match the stair rule',()=>{const s=arena();s.orders=[rule([{id:'hp-below',value:50},{id:'visible'}])];s.hp=28;assert.equal(chooseCardOrder(s,ctx),null);s.hp=27;assert.deepEqual(chooseCardOrder(s,ctx).next,{x:6,y:5});s.stairs={x:15,y:5};for(let x=5;x<=15;x++)s.seen[5][x]=true;assert.equal(chooseCardOrder(s,ctx),null);s.orders[0].conditions.pop();assert.ok(chooseCardOrder(s,ctx));});

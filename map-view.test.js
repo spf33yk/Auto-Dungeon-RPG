@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 test('portrait and landscape cameras fit the full sight range without stretching tiles',()=>{
- for(const [width,height] of [[744,552],[744,912],[320,380]])for(const sight of [2,3,7]){
+ for(const [width,height] of [[744,552],[744,912],[320,380],[1280,720],[360,202.5]])for(const sight of [2,3,7]){
   const p={x:15.5,y:10.25},c=cameraFor(p,sight,width,height),center={x:(p.x+.5)*24,y:(p.y+.5)*24};
   for(const [dx,dy]of [[sight,0],[-sight,0],[0,sight],[0,-sight]]){
    const x=(center.x+dx*24-c.left)*c.scale,y=(center.y+dy*24-c.top)*c.scale;
