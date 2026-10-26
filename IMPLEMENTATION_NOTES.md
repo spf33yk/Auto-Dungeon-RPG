@@ -11,7 +11,8 @@
 - ローカルnode --testは全96件成功。入室・退出・JSON復帰、未入室の地形／マーカー非公開、48生成フロア、描画の透明部分とグリッド、全画面API拒否・向き固定不可を検証。既存92件も成功。update-assets.js --check、JS構文、git diff --check成功。
 - 実ブラウザ：1280×720、720×405、360×700のiframeで内容だけのログ・MAPを確認。PCの実Fullscreen APIで開始（:fullscreen=1）・終了に成功。向き固定未対応の案内を確認。ブラウザエラーなし。
 - 未確認：実機Android/iPhoneの横向き固定・タッチ。画面幅検証やAPIモック試験とは区別し、対応は能力検出で判断する。保存v10を維持し、既存visitedから表示を再構成。新保存項目・ポイント精算・階再生成は不要。
-- 公開確認はpush後に追記する。
+- 公開確認コミット1c8fd1f。GitHub Actions Game tests [40304059089](https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/40304059089)全96件成功、Pages [40304057925](https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/40304057925)成功。
+- 公開版実操作：ログ本文だけの表示とMAP見出し0個、両領域の透明背景・枠0pxを確認。全画面の開始（:fullscreen=1）・終了、向き固定未対応の案内を確認。再読込後も既存保存から入室済みの部屋がMAPに残る。再開・休止後もB27・TURN190・HP34/54を維持。コンソールエラーなし。証跡：content-only-map-public.png。実機スマホの向き固定・タッチは未確認。
 
 ## 探索一画面化・チャットログ（2026-10-26）
 
