@@ -27,16 +27,18 @@ test('zoom camera fits every sight radius and follows fractional positions at ma
  assert.ok(cameraFor({x:10,y:10},6).scale<cameraFor({x:10,y:10},4).scale);
 });
 
-test('minimap draws all 32×24 boundaries and markers leave grid pixels intact',()=>{
+test('minimap leaves undiscovered cells transparent and preserves mapped grid boundaries',()=>{
  for(const cell of [4,6]){
   const g=miniMapGeometry(31,23,cell),pixels=new Map();
-  const ctx={fillStyle:'',fillRect(x,y,w,h){
+  const ctx={fillStyle:'',clearRect(){pixels.clear();},fillRect(x,y,w,h){
    for(let cy=y;cy<y+h;cy++)for(let cx=x;cx<x+w;cx++)pixels.set(cx+','+cy,this.fillStyle);
   }};
   drawMiniMap(ctx,{tiles:[{x:0,y:0,walkable:true},{x:30,y:22,walkable:true}],markers:[{x:0,y:0,type:'player'},{x:30,y:22,type:'boss'}]},g);
   assert.equal(g.vertical.length,32);assert.equal(g.horizontal.length,24);
-  for(const x of g.vertical)for(let y=0;y<g.height;y++)assert.equal(pixels.get(x+','+y),'#40574a');
-  for(const y of g.horizontal)for(let x=0;x<g.width;x++)assert.equal(pixels.get(x+','+y),'#40574a');
+  for(const [tx,ty]of [[0,0],[30,22]])for(let n=0;n<=cell;n++){
+   for(const [x,y]of [[tx*cell+n,ty*cell],[tx*cell+n,(ty+1)*cell],[tx*cell,ty*cell+n],[(tx+1)*cell,ty*cell+n]])assert.equal(pixels.get(x+','+y),'#40574a');
+  }
+  assert.equal(pixels.has((15*cell)+','+(10*cell)),false);
   assert.equal(pixels.get('1,1'),'#fff3b0');
   assert.equal(pixels.get((30*cell+1)+','+(22*cell+1)),'#ffb44e');
  }
