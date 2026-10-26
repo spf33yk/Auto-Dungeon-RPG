@@ -27,16 +27,17 @@ export const skills = [
   {id:'power',category:'weapon',group:'能力',name:'剣技の記憶',icon:'⚔',detail:'攻撃力 +2。',cost:6,max:5},
   {id:'guard',category:'armor',group:'能力',name:'守護の記憶',icon:'◇',detail:'防御力 +1。',cost:6,max:4},
   {id:'scout',group:'索敵',name:'感覚の記憶',icon:'◉',detail:'視界半径 +1マス。4段階。',cost:10,costStep:8,max:4},
+  {id:'cardSlots',group:'指示',name:'思考の記憶',icon:'▣',detail:'1行に置けるカード +1枚。初期4枚、最大6枚。',cost:8,costStep:8,max:2},
   {id:'commandSlots',group:'指示',name:'指揮の記憶',icon:'☷',detail:'設定できる探索指示 +1枠。初期2枠、最大8枠。',cost:6,max:6},
 ];
 
 // Provisional loot balance. Each enemy owns a rate and an explicit weighted item pool.
 export const rewardDefinitions=[
- {id:'mend',kind:'skill',name:'再生の祈り',detail:'HP35%以下で最大HP40%回復。各階1回。敵のドロップから取得。'},
+ {id:'mend',kind:'skill',name:'再生の祈り',detail:'条件カードに従い最大HP40%回復。各階1回、1ターン使用。敵ドロップで取得し、準備でスキルカードを設定。'},
  {id:'critical',kind:'skill',name:'会心の記憶',detail:'各打撃で10%の確率で与ダメージ1.5倍（切上げ）。'},
  {id:'leech',kind:'skill',name:'吸命の記憶',detail:'実際に与えたダメージの5%を回復（切捨て、最大HPまで）。'},
  {id:'double-strike',kind:'skill',name:'追撃の記憶',detail:'通常打撃の後に5%の確率で追加の1打。同ターン1回まで。'},
- {id:'warp',kind:'order',name:'窮地の転移',detail:'指定HP以下で敵が見えるとランダムな床へ転移。各階1回。指示枠への設定が必要。'},
+ {id:'warp',kind:'order',name:'窮地の転移',detail:'敵が見え、設定したカード条件が成立するとランダムな床へ転移。各階1回。スキルカードとして設定が必要。'},
  {id:'avoid-traps',kind:'order',name:'罠を見切る',detail:'既知の未作動罠を避けて進む。通過時も罠を作動させない。指示枠への設定が必要。'},
 ];
 export const rewardById=Object.fromEntries(rewardDefinitions.map(r=>[r.id,r]));

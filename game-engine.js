@@ -1,3 +1,5 @@
+import {createCardRule,legacyToCards,validCardRule,chooseCardOrder,cardModifier} from './card-orders.js';
+export * from './card-orders.js';
 import {nextRandom,rollEnemyDrop,rollChestReward,grantReward} from './drop-system.js';
 export {nextRandom,rollEnemyDrop,rollChestReward,grantReward};
 import {rewardDefinitions,rewardById,enemyDropTables,chestRewards} from './data.js';
@@ -27,7 +29,7 @@ export const incomingDamage=(attack,defense)=>Math.max(1,Math.ceil(attack*.2),at
 export function stats(s){const w=gearStats(s.gear.weapon),a=gearStats(s.gear.armor);return {maxHp:54+s.levels.vitality*12,attack:7+s.levels.power*2+w.attack+a.attack,defense:1+s.levels.guard+w.defense+a.defense};}
 export function newGame(seed=Date.now()%10000000,profile=profileDefault()){
  const p=structuredClone(profile);p.skills??=[];p.runs++;
- const s={version:9,keys:0,abilities:[],unlockedOrders:[],rngState:seed>>>0,warped:false,nextAcquisition:0,b15HintShown:false,orders:[makeOrder('stairs')],seed,floor:1,phase:'awakening',hp:54,shards:12,levels:Object.fromEntries(skills.map(k=>[k.id,0])),gear:{weapon:createGear('weapon-0'),armor:createGear('armor-0')},inventory:[],mode:'stairs',turn:0,kills:0,logs:[],memories:[],profile:p,letter:false};
+ const s={version:10,keys:0,abilities:[],unlockedOrders:[],rngState:seed>>>0,warped:false,nextAcquisition:0,b15HintShown:false,orders:[createCardRule()],seed,floor:1,phase:'awakening',hp:54,shards:12,levels:Object.fromEntries(skills.map(k=>[k.id,0])),gear:{weapon:createGear('weapon-0'),armor:createGear('armor-0')},inventory:[],mode:'stairs',turn:0,kills:0,logs:[],memories:[],profile:p,letter:false};
  for(const g of Object.values(s.gear)){g.acquiredOrder=s.nextAcquisition++;register(p.equipment,g.baseId);register(p.knownEquipment,g.baseId);}
  makeFloor(s);log(s,'目が覚めると、そこには骨だけの手があった。','story');log(s,'B30。失った記憶を力に変え、地上を目指す。');return s;
 }
@@ -109,7 +111,8 @@ export function makeFloor(s){
 }
 // Route planning traverses only discovered walkable tiles. No hidden enemy data.
 export function route(s,test,{start=s.player,known=true,blocked=new Set()}={}){const q=[start],prev=new Map([[key(start),null]]);for(let i=0;i<q.length;i++){const p=q[i];if(test(p)){if(i===0)return start;let end=p;while(prev.get(key(end))!==start)end=prev.get(key(end));return end;}for(const [dx,dy]of dirs){const n={x:p.x+dx,y:p.y+dy},k=key(n);if(s.grid[n.y]?.[n.x]&&(!known||s.seen[n.y][n.x])&&!prev.has(k)&&!blocked.has(k)){prev.set(k,p);q.push(n);}}}return null;}
-export function targetEnemy(s){const near=dirs.map(([dx,dy])=>s.enemies.find(e=>e.x===s.player.x+dx&&e.y===s.player.y+dy)).filter(Boolean);if(!activeOrders(s).some(o=>o.id==='tactics'))return near[0];const atk=stats(s).attack;return near.sort((a,b)=>Number(b.hp<=Math.max(1,atk-b.defense))-Number(a.hp<=Math.max(1,atk-a.defense))||b.attack-a.attack)[0];}
+function modifierActive(s,id){return s.orders.some(o=>o.cards)?cardModifier(s,id,{canSee,stats,obtainable}):activeOrders(s).some(o=>o.id===id);}
+export function targetEnemy(s){const near=dirs.map(([dx,dy])=>s.enemies.find(e=>e.x===s.player.x+dx&&e.y===s.player.y+dy)).filter(Boolean);if(!modifierActive(s,'tactics'))return near[0];const atk=stats(s).attack;return near.sort((a,b)=>Number(b.hp<=Math.max(1,atk-b.defense))-Number(a.hp<=Math.max(1,atk-a.defense))||b.attack-a.attack)[0];}
 export function obtainable(s,i){return i.type==='letter'?Boolean(s.profile.normalClears&&!s.letter):i.type==='chest'&&i.locked?s.keys>0:true;}
 function receiveReward(s,id){const fresh=grantReward(s,id);log(s,fresh?'「'+rewardById[id].name+'」を手に入れた。'+(rewardById[id].kind==='order'?'次の準備で探索指示に設定できる。':'この旅で使用できる。'):'「'+rewardById[id].name+'」は取得済み。記憶の欠片 +5','good');}
 function pickup(s){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent=item.type==='letter'?'封じられた宝箱。まだ思い出せない':'鍵が足りない。今は開けられない';return;}s.items=s.items.filter(i=>i!==item);
@@ -137,16 +140,19 @@ function warpDestination(s){const cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W
 const memories={6:'かつて、この手は誰かを守るために剣を握っていた。',12:'「父さん、帰ってくるよね」――小さな手の温もりが蘇る。',18:'魔王は告げた。「息子の命が惜しければ、記憶を捨てろ」',24:'忘れていた名前よりも先に、帰る理由を思い出した。'};
 export function tick(s){
  if(s.phase!=='explore')return;notifyB15(s);s.turn++;s.steps++;s.flash=null;reveal(s);const st=stats(s);
- if(s.abilities.includes('mend')&&!s.mended&&s.hp<=st.maxHp*.35){s.hp=Math.min(st.maxHp,s.hp+Math.ceil(st.maxHp*.4));s.mended=true;log(s,'再生の祈りが発動した。','good');}
  if(s.retreatCooldown>0)s.retreatCooldown--;
+ const sealedStart=s.enemies.some(e=>e.boss)&&key(s.player)===key(s.stairs);
+ const cardPlan=s.orders.some(o=>o.cards)?chooseCardOrder(s,{route,canSee,stats,obtainable}):null;
  const adjacentEnemy=targetEnemy(s);
- const emergency=adjacentEnemy?chooseOrder(s,{route,canSee,stats,obtainable},true):null;
- const enemy=emergency?null:adjacentEnemy;let action=emergency;s.activeOrder=null;
- if(enemy){const tactical=activeOrders(s).some(o=>o.id==='tactics');s.intent=tactical?`戦術判断：${enemy.name}を優先`:`隣接する${enemy.name}と交戦`;if(tactical)log(s,s.intent);attackEnemy(s,enemy);}
+ const emergency=!s.orders.some(o=>o.cards)&&adjacentEnemy?chooseOrder(s,{route,canSee,stats,obtainable},true):null;
+ const escapePlan=cardPlan&&(cardPlan.skill||cardPlan.warp||cardPlan.flee);
+ const enemy=cardPlan?.enemy||(escapePlan||emergency?null:adjacentEnemy);let action=cardPlan||emergency;s.activeOrder=null;
+ if(enemy){const tactical=modifierActive(s,'tactics');s.intent=tactical?`戦術判断：${enemy.name}を優先`:`隣接する${enemy.name}と交戦`;if(tactical)log(s,s.intent);attackEnemy(s,enemy);}
  else {
   action ||= chooseOrder(s,{route,canSee,stats,obtainable});
   if(!action){const visible=s.enemies.filter(e=>canSee(s,e.x,e.y)),next=visible.length?route(s,p=>visible.some(e=>distance(p,e)===1),{blocked:new Set(visible.map(key))}):null;if(next)action={next,intent:'進路の敵に向き合う'};}
   if(!action){const next=route(s,p=>dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false))||route(s,p=>!s.visited[p.y][p.x]);action=next?{next,intent:'基本行動：視界の先を調べる'}:{next:route(s,p=>key(p)===key(s.stairs)),exit:true,intent:'基本行動：探索を終え、階段へ'};}
+  if(action.skill==='mend'){s.hp=Math.min(st.maxHp,s.hp+Math.ceil(st.maxHp*.4));s.mended=true;s.intent=action.intent;s.activeOrder='cards';log(s,'再生の祈りが発動した。','good');}
   if(action.warp){action.next=warpDestination(s);s.warped=true;log(s,'窮地の転移。見知らぬ場所へ逃れた。','good');}
   if(action.next){s.player={...action.next};s.intent=action.intent;s.activeOrder=action.id||null;reveal(s);}
   if(action.flee){s.retreatTurns++;if(s.retreatTurns>=4){s.retreatTurns=0;s.retreatCooldown=6;}}else s.retreatTurns=0;
@@ -155,21 +161,21 @@ export function tick(s){
  const house=s.gimmick?.room;
  if(house&&!s.gimmick.triggered&&s.player.x>=house.x&&s.player.x<house.x+house.w&&s.player.y>=house.y&&s.player.y<house.y+house.h){s.gimmick.triggered=true;log(s,s.gimmick.name+'！','bad');if(s.gimmick.id==='monsters')for(const e of s.enemies)if(e.house)e.aggro=true;}
  const trap=s.traps?.find(t=>!t.spent&&t.x===s.player.x&&t.y===s.player.y);
- if(trap&&activeOrders(s).some(o=>o.id==='avoid-traps'))log(s,'罠を見切り、踏み抜かずに進んだ。','good');
- if(trap&&!activeOrders(s).some(o=>o.id==='avoid-traps')){trap.spent=true;trap.revealed=true;const damage=Math.max(1,Math.ceil(st.maxHp*.08));s.hp=Math.max(0,s.hp-damage);s.flash={...s.player,kind:'hurt'};log(s,'棘の罠。'+damage+'ダメージ。','bad');if(s.hp===0){s.phase='dead';s.nextHint=nextStageHint(s);log(s,'罠で骨が崩れた。再び最深部へ。','story');return;}}
+ if(trap&&modifierActive(s,'avoid-traps'))log(s,'罠を見切り、踏み抜かずに進んだ。','good');
+ if(trap&&!modifierActive(s,'avoid-traps')){trap.spent=true;trap.revealed=true;const damage=Math.max(1,Math.ceil(st.maxHp*.08));s.hp=Math.max(0,s.hp-damage);s.flash={...s.player,kind:'hurt'};log(s,'棘の罠。'+damage+'ダメージ。','bad');if(s.hp===0){s.phase='dead';s.nextHint=nextStageHint(s);log(s,'罠で骨が崩れた。再び最深部へ。','story');return;}}
  for(const e of s.enemies){if(distance(e,s.player)<=6&&lineOfSight(s,e,s.player))e.aggro=true;if((e.house&&!s.gimmick?.triggered)||!e.aggro||s.turn%e.period!==0)continue;if(distance(e,s.player)===1){const damage=incomingDamage(e.attack,st.defense);s.hp-=damage;s.flash={...s.player,kind:'hurt'};log(s,`${e.name}の攻撃。${damage}ダメージ。`,'bad');if(s.hp<=0){s.hp=0;s.phase='dead';s.nextHint=nextStageHint(s);log(s,'骨が崩れた。記憶を失い、再び最深部へ。','story');return;}}else{const next=route(s,p=>distance(p,s.player)===1,{start:e,known:false,blocked:new Set(s.enemies.filter(o=>o!==e).map(key))});if(next&&key(next)!==key(s.player)){e.x=next.x;e.y=next.y;}}}
  reveal(s);
  const bossAlive=s.enemies.some(e=>e.boss);
- if(bossAlive&&key(s.player)===key(s.stairs))s.intent='階段は封印中。中ボスを倒す必要がある';
+ if(bossAlive&&(sealedStart||key(s.player)===key(s.stairs)))s.intent='階段は封印中。中ボスを倒す必要がある';
  const done=Boolean(action?.exit)&&!bossAlive;
  if(done&&key(s.player)===key(s.stairs)){const reward=8+Math.floor(s.floor/3);s.shards+=reward;s.phase='cleared';s.nextHint=nextStageHint(s);log(s,`${floorLabel(s)} Clear。記憶の欠片 +${reward}`,'good');if(memories[s.floor]){s.memories.push(memories[s.floor]);log(s,memories[s.floor],'story');}}
 }
 export function ascend(s){if(s.phase!=='cleared')return false;if(s.floor===LAST_FLOOR){s.phase='ending';s.profile.normalClears++;log(s,'地上1F。息子は剣を抜いた。「父の仇……魔物め」','story');log(s,'届かなかった声。砕けた骸は、再び深淵へ沈む。','story');return true;}s.floor++;s.phase='prepare';makeFloor(s);s.hp=Math.min(stats(s).maxHp,s.hp+Math.ceil(stats(s).maxHp*BALANCE.restRatio));log(s,`${floorLabel(s)}へ。休息して次の探索に備える。`,'good');return true;}
 export function codexRows(s,kind){if(kind==='skills')return rewardDefinitions.map(r=>s.profile.skills.includes(r.id)?{...r,known:true,owned:(r.kind==='skill'?s.abilities:s.unlockedOrders).includes(r.id)}:{known:false});if(kind==='monsters')return monsters.map(m=>s.profile.monsters.includes(m.id)?{name:m.name,attack:m.attack,defense:m.defense,zone:zones[m.zone].name,known:true}:{known:false});return equipment.map(g=>s.profile.knownEquipment.includes(g.id)&&s.profile.equipment.includes(g.id)?{name:g.name,attack:g.attack,defense:g.defense,slot:g.slot,acquiredOrder:s.profile.equipment.indexOf(g.id),known:true}:{known:false,slot:g.slot});}
-export function validateSave(s){return Boolean(s?.version===9&&Number.isInteger(s.keys)&&s.keys>=0&&Number.isInteger(s.rngState)&&s.rngState>=0&&s.rngState<=4294967295&&typeof s.warped==='boolean'&&Array.isArray(s.abilities)&&s.abilities.every(id=>rewardById[id]?.kind==='skill')&&new Set(s.abilities).size===s.abilities.length&&Array.isArray(s.unlockedOrders)&&s.unlockedOrders.every(id=>rewardById[id]?.kind==='order')&&new Set(s.unlockedOrders).size===s.unlockedOrders.length&&Number.isInteger(s.nextAcquisition)&&s.nextAcquisition>=0&&Array.isArray(s.logs)&&Array.isArray(s.enemies)&&Array.isArray(s.items)&&s.items.every(i=>i&&Number.isInteger(i.x)&&Number.isInteger(i.y)&&i.x>=0&&i.x<W&&i.y>=0&&i.y<H&&(['potion','herb','fragment','key','letter'].includes(i.type)||i.type==='gear'&&gearById[i.gear?.baseId]||i.type==='reward'&&rewardById[i.rewardId]||i.type==='chest'&&(i.gear?gearById[i.gear.baseId]:Boolean(rewardById[i.rewardId]&&i.locked===true))))&&Array.isArray(s.memories)&&Number.isInteger(s.floor)&&s.floor>=1&&s.floor<=LAST_FLOOR&&['awakening','prepare','explore','cleared','dead','ending'].includes(s.phase)&&s.grid?.length===H&&s.grid.every(r=>r.length===W)&&s.seen?.length===H&&s.visited?.length===H&&s.levels&&skills.every(k=>Number.isInteger(s.levels[k.id])&&s.levels[k.id]>=0&&s.levels[k.id]<=k.max)&&Array.isArray(s.orders)&&s.orders.length<=orderCapacity(s)&&s.orders.every(o=>orderUnlocked(s,o.id)&&(!orderById[o.id].param||(Number.isFinite(o[orderById[o.id].param])&&o[orderById[o.id].param]>=orderById[o.id].min&&o[orderById[o.id].param]<=orderById[o.id].max)))&&s.profile&&['monsters','equipment','knownEquipment','skills'].every(k=>Array.isArray(s.profile[k]))&&s.profile.skills.every(id=>rewardById[id])&&s.gear&&Object.values(s.gear).every(g=>gearById[g.baseId])&&Array.isArray(s.inventory)&&s.inventory.every(g=>gearById[g.baseId]));}
+export function validateSave(s){return Boolean(s?.version===10&&Number.isInteger(s.keys)&&s.keys>=0&&Number.isInteger(s.rngState)&&s.rngState>=0&&s.rngState<=4294967295&&typeof s.warped==='boolean'&&Array.isArray(s.abilities)&&s.abilities.every(id=>rewardById[id]?.kind==='skill')&&new Set(s.abilities).size===s.abilities.length&&Array.isArray(s.unlockedOrders)&&s.unlockedOrders.every(id=>rewardById[id]?.kind==='order')&&new Set(s.unlockedOrders).size===s.unlockedOrders.length&&Number.isInteger(s.nextAcquisition)&&s.nextAcquisition>=0&&Array.isArray(s.logs)&&Array.isArray(s.enemies)&&Array.isArray(s.items)&&s.items.every(i=>i&&Number.isInteger(i.x)&&Number.isInteger(i.y)&&i.x>=0&&i.x<W&&i.y>=0&&i.y<H&&(['potion','herb','fragment','key','letter'].includes(i.type)||i.type==='gear'&&gearById[i.gear?.baseId]||i.type==='reward'&&rewardById[i.rewardId]||i.type==='chest'&&(i.gear?gearById[i.gear.baseId]:Boolean(rewardById[i.rewardId]&&i.locked===true))))&&Array.isArray(s.memories)&&Number.isInteger(s.floor)&&s.floor>=1&&s.floor<=LAST_FLOOR&&['awakening','prepare','explore','cleared','dead','ending'].includes(s.phase)&&s.grid?.length===H&&s.grid.every(r=>r.length===W)&&s.seen?.length===H&&s.visited?.length===H&&s.levels&&skills.every(k=>Number.isInteger(s.levels[k.id])&&s.levels[k.id]>=0&&s.levels[k.id]<=k.max)&&Array.isArray(s.orders)&&s.orders.length<=orderCapacity(s)&&s.orders.every(o=>validCardRule(s,o))&&s.profile&&['monsters','equipment','knownEquipment','skills'].every(k=>Array.isArray(s.profile[k]))&&s.profile.skills.every(id=>rewardById[id])&&s.gear&&Object.values(s.gear).every(g=>gearById[g.baseId])&&Array.isArray(s.inventory)&&s.inventory.every(g=>gearById[g.baseId]));}
 
 export function normalizeSave(input){
- if(!input||![2,3,4,5,6,7,8,9].includes(input.version))return null;const s=structuredClone(input);
+ if(!input||![2,3,4,5,6,7,8,9,10].includes(input.version))return null;const s=structuredClone(input);
  if(s.version===2){for(const k of skills)s.levels[k.id]??=0;s.orders=(s.mode==='collect'?['collect-items','stairs']:s.mode==='explore'?['explore-all','stairs']:['stairs']).map(makeOrder);s.retreatTurns=0;s.retreatCooldown=0;s.activeOrder=null;}
  if(s.version<4){
   // Exact acquisition timestamps did not exist before v4. Keep a stable inferred order.
@@ -206,6 +212,11 @@ export function normalizeSave(input){
   // Existing generated gear chests remain free legacy chests. New floors use locked reward chests.
   for(const i of s.items)if(i.type==='chest'&&i.gear)i.locked=false;
   s.version=9;log(s,'ドロップ版へ移行。旧戦術・再生の費用 '+refund+'pt を返還。新しい階から鍵付き宝箱が出現。','story');
+ }
+ if(s.version<10){
+  s.levels.cardSlots=0;s.orders=s.orders.map(legacyToCards);
+  if(s.abilities.includes('mend')&&s.orders.length<orderCapacity(s))s.orders.unshift(createCardRule('self',[{id:'hp-below',value:35}],'skill','mend'));
+  s.version=10;log(s,'カード指示へ移行。再生の祈りは条件を組んで発動。設定は準備中に変更できる。','story');
  }
  return validateSave(s)?s:null;
 }
