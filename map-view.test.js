@@ -1,5 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+test('portrait and landscape cameras fit the full sight range without stretching tiles',()=>{
+ for(const [width,height] of [[744,552],[744,912],[320,380]])for(const sight of [2,3,7]){
+  const p={x:15.5,y:10.25},c=cameraFor(p,sight,width,height),center={x:(p.x+.5)*24,y:(p.y+.5)*24};
+  for(const [dx,dy]of [[sight,0],[-sight,0],[0,sight],[0,-sight]]){
+   const x=(center.x+dx*24-c.left)*c.scale,y=(center.y+dy*24-c.top)*c.scale;
+   assert.ok(x>=0&&x<=width&&y>=0&&y<=height);
+  }
+  assert.ok(Math.abs(c.scale*24-Math.min(width,height)/(2*Math.ceil(sight)+3))<1e-8);
+ }
+});
 import {cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';
 
 test('zoom camera fits every sight radius and follows fractional positions at map edges',()=>{

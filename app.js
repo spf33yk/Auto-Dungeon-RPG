@@ -5,13 +5,13 @@ import {memoryGroups} from './skill-tree.js';
 import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment} from './debug-tools.js';
 import {W,H,skills,newGame,abandonRun,stats,price,upgrade,equip,equipBest,tick,ascend,zoneFor,floorLabel,radius,canSee,gearById,gearStats,gearName,discard,locked,codexRows,sortedInventory,normalizeSave,orderDefinitions,orderById,orderCapacity,cardCapacity,orderUnlocked,addOrder,editOrder,beginExploration,equipment,LAST_FLOOR,LETTER_FLOOR,nextStageHint,rewardDefinitions,grantReward} from './engine.js';
 const $=id=>document.getElementById(id), key='abyss-normal-v2';
-let state,tab='orders',speed=1,paused=false,last=0,sound=false,audio,motion=null,dialogWasPaused=false,gearSlot='weapon',gearSorts={weapon:'acquired',armor:'acquired'},codexKind='monsters',codexSlot='weapon',codexSorts={weapon:'acquired',armor:'acquired'};
+let state,tab='orders',speed=1,paused=false,last=0,sound=false,volume=35,audio,motion=null,dialogWasPaused=false,gearSlot='weapon',gearSorts={weapon:'acquired',armor:'acquired'},codexKind='monsters',codexSlot='weapon',codexSorts={weapon:'acquired',armor:'acquired'};
 
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 try{const data=JSON.parse(localStorage.getItem(key));state=normalizeSave(data);if(state){paused=state.phase==='explore';if(data.version!==state.version){try{const backup=key+'-v'+data.version+'-before-ui';if(!localStorage.getItem(backup))localStorage.setItem(backup,JSON.stringify(data));}catch{}}}}catch{}
 state ||= newGame();
 function save(){try{localStorage.setItem(key,JSON.stringify(state));$('save-status').textContent='端末に保存済み';}catch{$('save-status').textContent='保存できません（空き容量・設定）';}}
-function tone(freq=330){if(!sound)return;try{audio ||= new AudioContext();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(.035,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.15);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+.15);}catch{}}
+function tone(freq=330){if(!sound||volume===0)return;try{audio ||= new AudioContext();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(volume/100*.1,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.15);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+.15);}catch{}}
 // Every sprite is an original pixel matrix. No external game assets are used.
 const sprites={
  skeleton:['....hhhhh...','...hbbbbb h..'.replace(' ',''),'...hbdbdbh..','...hbbbbbh..','....hdddh...','.....bb.....','...aabbaa...','..a.abb.a.s.','..a.abb.a.s.','....aaa...s.','....b.b.....','...bb.bb....'],
@@ -30,13 +30,14 @@ const palette={h:'#57695a',b:'#e2dfbd',d:'#27352f',a:'#899e85',s:'#b8b2a1',g:'#3
 function sprite(ctx,type,x,y,size=24){const rows=sprites[type]||sprites.reward;const scale=size/12;for(let py=0;py<rows.length;py++)for(let px=0;px<rows[py].length;px++){const c=rows[py][px];if(c!=='.'&&palette[c]){ctx.fillStyle=palette[c];ctx.fillRect(x+px*scale,y+py*scale,Math.ceil(scale),Math.ceil(scale));}}}
 const ctx=$('map').getContext('2d');ctx.imageSmoothingEnabled=false;
 function draw(){
-ctx.fillStyle='#0c1416';ctx.fillRect(0,0,744,552);const theme=zoneFor(state);const visible=(x,y)=>canSee(state,x,y);
+const map=$('map'),box=map.getBoundingClientRect();if(box.width>0&&box.height>0){const height=Math.round(744*box.height/box.width);if(map.height!==height){map.height=height;ctx.imageSmoothingEnabled=false;}}
+ctx.fillStyle='#0c1416';ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);const theme=zoneFor(state);const visible=(x,y)=>canSee(state,x,y);
 const progress=motion&&state.phase==='explore'?Math.min(1,(performance.now()-motion.time)/motion.duration):1;
 const eased=1-Math.pow(1-progress,3);
 const position=motion?{x:motion.from.x+(state.player.x-motion.from.x)*eased,y:motion.from.y+(state.player.y-motion.from.y)*eased}:state.player;
 const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y);
 const hop=moving?Math.sin(progress*Math.PI)*2:0;
-const camera=cameraFor(position,radius(state));
+const camera=cameraFor(position,radius(state),ctx.canvas.width,ctx.canvas.height);
 ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);
 
 for(let y=0;y<H;y++)for(let x=0;x<W;x++){const seen=state.seen[y][x],floor=state.grid[y][x];if(!seen)continue;const px=x*24,py=y*24,n=(x*17+y*31+state.seed)%13;ctx.fillStyle=floor?theme.floorColor:theme.wallColor;ctx.fillRect(px,py,24,24);if(floor){ctx.fillStyle='#172722';ctx.fillRect(px,py,24,1);ctx.fillRect(px,py,1,24);if(n<4){ctx.fillStyle='#435044';ctx.fillRect(px+5+n,py+8,2,2);ctx.fillRect(px+15,py+16,3,1);}if(n===5){ctx.fillStyle='#354b39';ctx.fillRect(px+2,py+15,6,3);}}else{ctx.fillStyle=theme.wallColor;ctx.fillRect(px+1,py+1,22,3);ctx.fillStyle='#182925';ctx.fillRect(px,py+20,24,4);ctx.fillRect(px+11,py+4,2,16);}if(!visible(x,y)){ctx.fillStyle='#071111a8';ctx.fillRect(px,py,24,24);}}
@@ -47,7 +48,7 @@ for(const e of state.enemies)if(visible(e.x,e.y)){const original={g:palette.g,l:
 ctx.fillStyle='#bfd49e20';ctx.fillRect(position.x*24-4,position.y*24-4,32,32);sprite(ctx,'skeleton',position.x*24,position.y*24-hop);
 if(state.flash){ctx.fillStyle=state.flash.kind==='hurt'?'#e49a8c66':'#fff3b766';ctx.fillRect(state.flash.x*24,state.flash.y*24,24,24);}
 ctx.restore();
-if(state.gimmick?.id==='fog'){ctx.fillStyle='#a6bdc620';ctx.fillRect(0,0,744,552);}
+if(state.gimmick?.id==='fog'){ctx.fillStyle='#a6bdc620';ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);}
 drawAutoMap();
 }
 function drawAutoMap(){
@@ -69,11 +70,10 @@ const displayDefense=()=>state.gear.armor.identified?stats(state).defense:'？';
 function render(){
  const st=stats(state),prep=state.phase==='prepare',theme=zoneFor(state);renderScreens();
  $('floor-title').textContent=`${theme.name} · ${floorLabel(state)}`;
- $('zone').textContent=`区間 ${Math.floor((state.floor-1)/5)+1} / 6 · ${state.bossFloor?'FIXED BOSS':theme.layout.toUpperCase()}`;
  $('phase-label').textContent=({awakening:'目覚め',prepare:'準備中',explore:paused?'一時停止':'探索中',cleared:'Clear',dead:'記憶喪失',ending:'通常エンド'})[state.phase];
  $('floor-message').hidden=state.floor!==LETTER_FLOOR;$('floor-message').textContent='B15 ― 何か大事なものを忘れている気がする';
  $('turn').textContent=`TURN ${String(state.turn).padStart(3,'0')}`;
- $('hud-floor').textContent=floorLabel(state);$('hud-shards').textContent=state.shards;$('hud-sight').textContent=radius(state)+'マス';
+ $('hud-shards').textContent=state.shards;$('hud-sight').textContent=radius(state)+'マス';
  $('hp-text').textContent=`${state.hp} / ${st.maxHp}`;$('hp-bar').style.width=`${state.hp/st.maxHp*100}%`;$('hp-bar').style.background=state.hp<st.maxHp*.3?'#bd8073':'#91ae88';
  $('atk').textContent=displayAttack();$('def').textContent=displayDefense();$('shards').innerHTML=`${state.shards} <em>pt</em>`;$('intent').textContent=prep?'出発の準備をしています':state.intent;
  const notices={cleared:[`${floorLabel(state)} Clear`,state.floor===LAST_FLOOR?'階段の先に、地上の光が見える。':'記憶の欠片を手に入れた。次の階の準備へ。'],dead:['途切れた記憶','骸は崩れ、再び最深部へ。図鑑の記録は残ります。'],ending:['届かなかった声','「父の仇……魔物め」<br>息子の剣が、骸を貫いた。<br>父だと伝える声は、もう出なかった。<br><br>記憶を失い、再びB30へ。<br>通常エンド達成 · 次の旅ではB15の手紙を開けられます。']};
@@ -111,7 +111,7 @@ function renderTab(){
 
 }
 function renderScreens(){
- const prep=state.phase==='prepare',awake=state.phase==='awakening',st=stats(state);$('workspace').dataset.screen=awake?'awakening':prep?'prepare':'explore';$('awakening-scene').hidden=!awake;$('game-icons').hidden=awake;const journal=document.querySelector('.journal'),adventure=document.querySelector('.adventure');journal.hidden=awake;if(prep||awake){if(journal.parentElement!==$('workspace'))$('workspace').appendChild(journal);}else if(journal.parentElement!==adventure)adventure.appendChild(journal);
+ const prep=state.phase==='prepare',awake=state.phase==='awakening',st=stats(state);$('workspace').dataset.screen=awake?'awakening':prep?'prepare':'explore';$('awakening-scene').hidden=!awake;$('game-icons').hidden=awake;const journal=document.querySelector('.journal');journal.hidden=awake;const journalHost=prep||awake?$('workspace'):$('log-dialog-content');if(journal.parentElement!==journalHost)journalHost.appendChild(journal);const toolsHost=prep||awake?$('header-tools'):$('hud-tools');if($('utility-controls').parentElement!==toolsHost)toolsHost.appendChild($('utility-controls'));
  $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=prep||awake;$('expedition').hidden=awake;$('live-order-panel').hidden=prep;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
  $('prepare-floor').textContent=`${floorLabel(state)}への支度`;
  const host=awake?$('awakening-start'):prep?$('launch-area'):$('notice-actions');if($('primary').parentElement!==host)host.prepend($('primary'));
@@ -138,12 +138,15 @@ $('primary').onclick=()=>{if(state.phase==='explore')return;if(['awakening','pre
 $('abandon-run').onclick=()=>{if(state.phase==='prepare')openDialog('abandon-dialog');};
 $('confirm-abandon').onclick=()=>{const next=abandonRun(state);if(!next)return;$('abandon-dialog').close();reset(next);};
 $('pause-toggle').onclick=()=>{if(state.phase!=='explore')return;paused=!paused;last=performance.now();render();};
-$('sound').onclick=()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');tone(440);};
+$('sound').onclick=()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');$('sound').textContent='効果音：'+(sound?'ON':'OFF');tone(440);};
 $('skill-book').onclick=()=>showCodex('skills');$('monster-book').onclick=()=>showCodex('monsters');$('equipment-book').onclick=()=>showCodex('equipment');
 $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dialog').close();$('guide-start').onclick=()=>$('dialog').close();
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',finishDialog));
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.phase==='explore'){paused=true;dialogWasPaused=true;render();}});
 function debugStatus(message=''){ $('debug-status').textContent=`${floorLabel(state)} · HP ${state.hp}/${stats(state).maxHp} · ${state.shards}pt${state.debugUsed?' · DEBUG操作済み':''}${message?' — '+message:''}`;}
+$('log-open').onclick=()=>openDialog('log-dialog');
+$('sound-volume').oninput=e=>{volume=Number(e.target.value);$('volume-value').textContent=volume+'%';};
+$('sound-volume').onchange=()=>tone(440);
 $('options-open').onclick=()=>openDialog('options-dialog');
 $('debug-open').onclick=()=>{$('debug-floor').innerHTML=Array.from({length:LAST_FLOOR},(_,i)=>`<option value="${i+1}" ${state.floor===i+1?'selected':''}>B${LAST_FLOOR-i}</option>`).join('');$('debug-gear').innerHTML=equipment.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');$('debug-reward').innerHTML=rewardDefinitions.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');debugStatus();openDialog('debug-dialog');};
 $('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-debug]');if(!b)return;let message='';switch(b.dataset.debug){case'jump':debugJump(state,Number($('debug-floor').value));break;case'next':debugJump(state,Math.min(LAST_FLOOR,state.floor+1));break;case'previous':debugJump(state,Math.max(1,state.floor-1));break;case'heal':debugHeal(state);break;case'shards':debugShards(state);break;case'skills':debugSkills(state);break;case'keys':state.keys+=3;state.debugUsed=true;message='鍵を3個追加';break;case'reward':{const id=$('debug-reward').value;grantReward(state,id);state.debugUsed=true;message='報酬を取得';break;}case'equipment':if(!debugEquipment(state,$('debug-gear').value,{plus:Number($('debug-plus').value),identified:true}))message='強化値は0〜20の整数にしてください';break;case'export':{const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`abyss-save-${floorLabel(state).replace(/ /g,'-')}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);message='セーブを書き出しました';break;}case'reset-run':if(confirm('現在の旅を初期化しますか？ 図鑑と通常エンド達成は残します。'))reset();break;case'reset-all':if(confirm('このゲームの全セーブ・図鑑・通常エンド達成・旧版・バックアップを削除します。元に戻せません。初期化しますか？')){try{for(const k of Object.keys(localStorage))if(k===key||k.startsWith(key+'-')||k==='abyss-prototype-v1')localStorage.removeItem(k);state=newGame();motion=null;paused=true;message='全データを初期化しました';}catch{message='保存領域にアクセスできず初期化できませんでした';}}break;}
@@ -152,4 +155,5 @@ $('debug-import').onchange=async e=>{const file=e.target.files[0];if(!file)retur
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 function loop(t){if(state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]')&&t-last>420/speed){last=t;const old=state.phase;motion={from:{...state.player},time:t,duration:reducedMotion.matches?1:Math.min(190,340/speed)};tick(state);if(Math.abs(state.player.x-motion.from.x)+Math.abs(state.player.y-motion.from.y)>1)motion=null;if(state.flash?.kind==='hit')tone(180);if(state.phase!==old){motion=null;tone(state.phase==='dead'?110:660);}render();}if(state.phase==='explore'&&(!paused||motion&&t-motion.time<motion.duration+50))draw();requestAnimationFrame(loop);}
 new ResizeObserver(()=>draw()).observe($('map'));
+const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap');wrap.style.setProperty('--hud-top-space',($('hud-top').offsetHeight+20)+'px');wrap.style.setProperty('--hud-bottom-space',($('hud-bottom').offsetHeight+20)+'px');});hudObserver.observe($('hud-top'));hudObserver.observe($('hud-bottom'));
 sprite($('portrait').getContext('2d'),'skeleton',4,3,48);sprite($('camp-portrait').getContext('2d'),'skeleton',12,8,96);render();requestAnimationFrame(loop);
