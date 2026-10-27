@@ -351,3 +351,9 @@
 
 ## 2026-10-27 両タイトルv3動画
 提供MOVは両方ProRes 4444 yuva444p12le、1920×1080、30fps、14秒。先頭フレームを確認し、背景を含まない透過エフェクトと判断。静止背景・ロゴを残してそれぞれ専用動画を重ねる。両方loopを維持し、版変更時にURL・MP4代替・透過判定を更新する。旧配信用動画をv3へ置き換える。原MOVはDesktopに維持。検証は後述。
+
+### 両タイトルv3・公開検証
+- 対象コミット7ff08b5。Game tests 40520348875、Pages 40520347957はいずれもsuccess。ローカル117件・asset URL --check成功。
+- 公開版で骸title-mukuro-v3.webm?v=cb09a993a9d1、倅title-segare-v3.webm?v=0aee553c04f9を確認。両方duration=14、loop=true、paused=false。再生位置は骸3.9871→2.5322、倅4.0527→2.5905へ折返し、ended=falseのまま再生継続。スクリーンショットtest-results/v3-mukuro-public.jpg、v3-segare-public.jpg。
+- 公開版でLoadGame後paused=true。倅の公開画面を1280×720・360×700・1280×360へ変更してロゴ位置45%／17.53%／幅51%と動画再生が維持されることを確認、コンソールエラーなし。ローカルで骸→倅の動画切替も確認。
+- ローカル非透過入力fixtureで倅／骸を切り替え、各版に対応するMP4代替とloop再生・screen合成を確認。実機iPhone/Safariは未確認。WebMは骸5366599 bytes、倅5840910 bytes、MP4代替は骸1899992 bytes、倅2214353 bytes。原MOVは変更なし。
