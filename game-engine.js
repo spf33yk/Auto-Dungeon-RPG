@@ -65,7 +65,7 @@ export function sortedInventory(s,slot,sort='acquired'){return s.inventory.map((
 export function notifyB15(s){if(s.floor===LETTER_FLOOR&&!s.b15HintShown){s.b15HintShown=true;log(s,'何か大事なものを忘れている気がする','story');return true;}return false;}
 export function beginExploration(s){if(!['awakening','prepare'].includes(s.phase))return false;s.phase='explore';notifyB15(s);return true;}
 export function lineOfSight(s,a,b){let x=a.x,y=a.y;const dx=Math.abs(b.x-x),dy=Math.abs(b.y-y),sx=Math.sign(b.x-x),sy=Math.sign(b.y-y);let err=dx-dy;while(x!==b.x||y!==b.y){const twice=2*err;let nx=x,ny=y;if(twice>-dy){err-=dy;nx+=sx;}if(twice<dx){err+=dx;ny+=sy;}if(nx!==x&&ny!==y&&!s.grid[y]?.[nx]&&!s.grid[ny]?.[x])return false;x=nx;y=ny;if(x===b.x&&y===b.y)return true;if(!s.grid[y]?.[x])return false;}return true;}
-export function canSee(s,x,y){return Math.hypot(x-s.player.x,y-s.player.y)<=radius(s)&&lineOfSight(s,s.player,{x,y});}
+export function canSee(s,x,y){return Math.max(Math.abs(x-s.player.x),Math.abs(y-s.player.y))<=radius(s)&&lineOfSight(s,s.player,{x,y});}
 export function reveal(s){for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(canSee(s,x,y))s.seen[y][x]=true;s.visited[s.player.y][s.player.x]=true;for(const e of s.enemies)if(canSee(s,e.x,e.y))register(s.profile.monsters,e.baseId);}
 export function rollGear(floor,rng){const z=Math.min(9,zoneIndexForFloor(floor));const slot=rng()<.5?'weapon':'armor';const pool=equipment.filter(g=>g.slot===slot);const weights=pool.map(g=>1/Math.pow(1+Math.abs(g.rank-z),4));let pick=rng()*weights.reduce((a,b)=>a+b,0),base=pool[pool.length-1];for(let i=0;i<pool.length;i++){pick-=weights[i];if(pick<0){base=pool[i];break;}}const enhanced=rng()<.12,plus=enhanced?1+Math.floor(rng()*3):0;
  // Preserve the previous random sequence without spawning cursed or unidentified gear.
@@ -221,5 +221,5 @@ export function normalizeSave(input){
   s.version=10;log(s,'カード指示へ移行。再生の祈りは条件を組んで発動。設定は準備中に変更できる。','story');
  }
  if(s.version<11){s.level=1;s.experience=0;s.version=11;}s.damageEvents=[];
- return validateSave(s)?s:null;
+ if(!validateSave(s))return null;reveal(s);return s;
 }

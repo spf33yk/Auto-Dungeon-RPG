@@ -10,7 +10,7 @@ export function autoMapModel(s,visible){
  markers.push({...s.player,type:'player'});return {tiles,markers};
 }
 
-// The camera follows the interpolated hero; padding keeps the full sight circle on screen.
+// The camera follows the interpolated hero; padding keeps the full sight square on screen.
 export function cameraFor(position,sight,width=744,height=552){
  const rows=2*Math.ceil(sight)+3,scale=Math.min(width,height)/(rows*24);
  return {scale,left:(position.x+.5)*24-width/scale/2,top:(position.y+.5)*24-height/scale/2,rows:height/(24*scale),columns:width/(24*scale)};

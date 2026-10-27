@@ -118,7 +118,7 @@ test('v7 migration refunds retired skills once and cleans owned and unopened gea
  assert.deepEqual(normalizeSave(m),m);assert.ok(validateSave(m));
 });
 
-test('existing v8 scout levels use new sight with no retroactive point charge',()=>{const old=preparedGame(21);old.levels.scout=3;old.shards=17;const before=JSON.stringify(old),restored=normalizeSave(old);assert.equal(JSON.stringify(old),before);assert.deepEqual(restored,old);assert.equal(restored.shards,17);assert.equal(radius(restored),6);assert.equal(upgrade(restored,'scout'),false);restored.shards=34;assert.equal(upgrade(restored,'scout'),true);assert.equal(radius(restored),7);assert.equal(restored.shards,0);assert.equal(radius(normalizeSave(restored)),7);});
+test('existing v8 scout levels use new sight with no retroactive point charge',()=>{const old=preparedGame(21);old.levels.scout=3;old.shards=17;const before=JSON.stringify(old),restored=normalizeSave(old);assert.equal(JSON.stringify(old),before);const expected=structuredClone(old);reveal(expected);assert.deepEqual(restored,expected);assert.equal(restored.shards,17);assert.equal(radius(restored),6);assert.equal(upgrade(restored,'scout'),false);restored.shards=34;assert.equal(upgrade(restored,'scout'),true);assert.equal(radius(restored),7);assert.equal(restored.shards,0);assert.equal(radius(normalizeSave(restored)),7);});
 
 test('best equipment selects both slots by actual enhanced stats without spending shards or turns',()=>{
  const s=preparedGame(13);acquire(s,createGear('weapon-1',{plus:3}));acquire(s,createGear('weapon-2'));acquire(s,createGear('armor-1',{plus:3}));acquire(s,createGear('armor-2'));

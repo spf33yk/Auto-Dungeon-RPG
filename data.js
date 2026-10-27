@@ -26,7 +26,7 @@ export const skills = [
   {id:'vitality',group:'能力',name:'生命の記憶',icon:'♥',detail:'最大HP +12、HPも12回復。',cost:5,max:5},
   {id:'power',category:'weapon',group:'能力',name:'剣技の記憶',icon:'⚔',detail:'攻撃力 +2。',cost:6,max:5},
   {id:'guard',category:'armor',group:'能力',name:'守護の記憶',icon:'◇',detail:'防御力 +1。',cost:6,max:4},
-  {id:'scout',group:'索敵',name:'感覚の記憶',icon:'◉',detail:'視界半径 +1マス。4段階。',cost:10,costStep:8,max:4},
+  {id:'scout',group:'索敵',name:'感覚の記憶',icon:'◉',detail:'視界半径 +1マス（四角形）。4段階。壁の向こうは見えない。',cost:10,costStep:8,max:4},
   {id:'cardSlots',group:'指示',name:'思考の記憶',icon:'▣',detail:'1行に置けるカード +1枚。初期4枚、最大6枚。',cost:8,costStep:8,max:2},
   {id:'commandSlots',group:'指示',name:'指揮の記憶',icon:'☷',detail:'設定できる探索指示 +1枠。初期2枠、最大8枠。',cost:6,max:6},
 ];
