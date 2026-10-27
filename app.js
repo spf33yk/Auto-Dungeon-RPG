@@ -112,13 +112,16 @@ function render(){
  $('awakening-copy').textContent=openingThought(runClears);
  renderTab();renderThoughtSubtitle();draw();renderTitle();if(!showingTitle)save();
 }
-function syncTitleEffect(){const video=$('title-fx');video.hidden=openingVariant(state.profile)!=='mukuro';if(showingTitle&&openingVariant(state.profile)==='mukuro'&&!document.hidden){if(video.paused)video.play().catch(()=>{});}else video.pause();}
+function syncTitleEffect(){
+ const video=$('title-fx'),variant=openingVariant(state.profile);
+ if(video.dataset.variant!==variant){video.pause();video.dataset.variant=variant;delete video.dataset.fallbackActive;video.classList.remove('is-screen-fallback');video.dataset.fallback=video.dataset[variant+'Fallback'];video.src=video.dataset[variant];video.load();}
+ if(showingTitle&&!document.hidden){if(video.paused)video.play().catch(()=>{});}else video.pause();
+}
 const titleEffect=$('title-fx');
 function useTitleEffectFallback(){if(titleEffect.dataset.fallbackActive)return;titleEffect.dataset.fallbackActive='true';titleEffect.classList.add('is-screen-fallback');titleEffect.src=titleEffect.dataset.fallback;titleEffect.load();syncTitleEffect();}
-function checkTitleEffectAlpha(){if(titleEffect.dataset.fallbackActive)return;try{const probe=document.createElement('canvas');probe.width=probe.height=1;const c=probe.getContext('2d',{willReadFrequently:true});c.drawImage(titleEffect,0,0,1,1,0,0,1,1);if(c.getImageData(0,0,1,1).data[3]===255)useTitleEffectFallback();}catch{useTitleEffectFallback();}}
-titleEffect.addEventListener('loadeddata',checkTitleEffectAlpha,{once:true});
+function checkTitleEffectAlpha(){if(titleEffect.dataset.fallbackActive||titleEffect.readyState<2)return;try{const probe=document.createElement('canvas');probe.width=probe.height=1;const c=probe.getContext('2d',{willReadFrequently:true});c.drawImage(titleEffect,0,0,1,1,0,0,1,1);if(c.getImageData(0,0,1,1).data[3]===255)useTitleEffectFallback();}catch{useTitleEffectFallback();}}
+titleEffect.addEventListener('loadeddata',checkTitleEffectAlpha);
 titleEffect.addEventListener('error',useTitleEffectFallback);
-titleEffect.querySelector('source').addEventListener('error',useTitleEffectFallback);
 if(titleEffect.readyState>=2)checkTitleEffectAlpha();
 document.addEventListener('visibilitychange',syncTitleEffect);
 $('title-scene').addEventListener('pointerdown',syncTitleEffect);
