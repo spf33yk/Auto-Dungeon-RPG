@@ -322,3 +322,9 @@
 - 数値・変換結果・公開検証は確認後に追記。
 
 - 確定配置は背景・ロゴ→エフェクト→ボタン。倅版では非表示・停止。ローカル117テストとasset URL検証成功。WebM 5102383 bytes、MP4代替1808478 bytes。ローカルで透過再生、z-index 1/2/3、NewGame後停止、タイトル復帰再開、倅版非表示を確認。
+
+### タイトル動画・公開検証結果
+- 対象コミット2feedba。Game tests 40511702941、Pages 40511700327はいずれもsuccess。
+- 公開版で1920×1080・14秒・muted/loop・透過WebMの新ハッシュURLを確認。再生位置12.077秒→10.7997秒への折返しと再生継続を確認。LoadGame実行後はpaused=true。背景とロゴの上で粒子が動き、メニューボタンを操作できる。証跡：test-results/title-fx-public.jpg。
+- 公開版の別保存領域で倅版はhidden=true/paused=true、骸版へ切替後はhidden=false/paused=falseを確認。360px幅で動画360×203、メニュー操作可能、コンソールエラーなし。
+- ローカルの非透過入力fixtureでMP4代替への切替・screen合成・再生を確認。実機iPhone/Safariの再生と負荷は未検証（代替はアルファ合成と色が完全一致しない）。
