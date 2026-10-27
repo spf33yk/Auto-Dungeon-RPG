@@ -126,3 +126,53 @@ body.exploring .field-log-host .log-row span{display:block;min-width:0;line-heig
  body.exploring .field-log-host{--log-line:14px;width:72%}
  body.exploring .field-log-host .log-row{font-size:9px}
 }
+
+/* Slightly larger field HUD and right-aligned, transient journey messages. */
+body.exploring .field-log-host{width:min(540px,55%);text-align:right}
+body.exploring .field-log-host.is-expired{visibility:hidden;pointer-events:none}
+body.exploring .floor-health .hud-stage-title{font-size:17px}
+body.exploring .level-vitals strong{font-size:13px}
+body.exploring .hud-overlay .player-name strong,body.exploring .hud-overlay .player-name span{font-size:13px}
+body.exploring .exp-track,body.exploring .hud-overlay .hp-track{height:6px}
+body.exploring .hud-overlay .icon-button{width:35px;height:35px}
+body.exploring .utility-controls .icon-button svg{width:21px;height:21px}
+body.exploring .hud-fragments small{font-size:11px}
+body.exploring .hud-fragments b{font-size:15px}
+body.exploring .memory-subtitle{font-size:13px}
+body.exploring .thought-stack .thought-subtitle{font-size:14px}
+body.exploring .hud-value small{font-size:10px}
+body.exploring .hud-value b{font-size:13px}
+body.exploring .hud-turn{font-size:12px}
+body.exploring .hud-overlay .speed button{font-size:11px;min-height:32px}
+body.exploring .hud-overlay .pause-toggle{font-size:12px;min-height:38px;min-width:90px}
+body.exploring .transparent-view .automap-overlay{width:clamp(88px,26%,230px);max-width:var(--minimap-limit,230px)}
+@container(max-width:800px){
+ body.exploring .floor-health .hud-stage-title{font-size:14px}
+ body.exploring .memory-subtitle{font-size:12px}
+ body.exploring .thought-stack .thought-subtitle{font-size:12px}
+ body.exploring .field-log-host{width:68%}
+ body.exploring .transparent-view .automap-overlay{width:clamp(88px,26%,170px)}
+}
+@container(max-width:480px){
+ body.exploring .floor-health{grid-template-columns:max-content 42px minmax(62px,100px);gap:6px}
+ body.exploring .floor-health .hud-stage-title{font-size:12px;line-height:17px}
+ body.exploring .level-vitals strong{font-size:11px;line-height:16px}
+ body.exploring .hud-overlay .player-name strong,body.exploring .hud-overlay .player-name span{font-size:11px}
+ body.exploring .hud-overlay .icon-button{width:28px;height:28px}
+ body.exploring .utility-controls .icon-button svg{width:18px;height:18px}
+ body.exploring .hud-fragments small{font-size:9px}
+ body.exploring .hud-fragments b{font-size:11px}
+ body.exploring .memory-subtitle,body.exploring .thought-stack .thought-subtitle{font-size:10px;line-height:14px;max-height:14px}
+ body.exploring .hud-bottom-controls{gap:4px}
+ body.exploring .hud-value small{font-size:8px}
+ body.exploring .hud-value b,body.exploring .hud-turn{font-size:9px}
+ body.exploring .hud-overlay .speed button{font-size:9px;min-height:27px;padding:3px}
+ body.exploring .hud-overlay .pause-toggle{font-size:9px;min-height:29px;min-width:68px;padding:3px}
+ body.exploring .field-log-host{width:74%}
+ body.exploring .transparent-view .automap-overlay{width:70px}
+}
+@container(max-width:360px){
+ body.exploring .hud-bottom-controls{gap:2px}
+ body.exploring .hud-value{gap:2px}
+ body.exploring .hud-overlay .pause-toggle{min-width:62px}
+}

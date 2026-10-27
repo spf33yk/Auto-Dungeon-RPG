@@ -1,4 +1,5 @@
 import {requestLandscapeDisplay} from './display-mode.js';
+import {createLogVisibility} from './log-visibility.js';
 import {queueDamage,damageFrame} from './damage-view.js';
 import {renderCardEditor,handleCardClick,handleCardChange} from './card-editor.js';
 import {autoMapModel,cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';
@@ -7,6 +8,10 @@ import {memoryGroups} from './skill-tree.js';
 import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment} from './debug-tools.js';
 import {W,H,skills,newGame,abandonRun,stats,price,upgrade,equip,equipBest,tick,ascend,zoneFor,floorLabel,radius,canSee,gearById,gearStats,gearName,discard,locked,codexRows,sortedInventory,normalizeSave,orderDefinitions,orderById,orderCapacity,cardCapacity,orderUnlocked,addOrder,editOrder,beginExploration,equipment,LAST_FLOOR,LETTER_FLOOR,nextStageHint,rewardDefinitions,grantReward,experienceToNext,MAX_LEVEL,HP_PER_LEVEL,gainExperience} from './engine.js';
 const $=id=>document.getElementById(id), key='abyss-normal-v2';
+const fieldLogVisibility=createLogVisibility({
+ show:()=>{$('field-log-host').classList.remove('is-expired');$('field-log-host').removeAttribute('aria-hidden');},
+ hide:()=>{$('field-log-host').classList.add('is-expired');$('field-log-host').setAttribute('aria-hidden','true');}
+});
 let autoDisplayAttempted=false,ownsFullscreen=false,lockedOrientation=false;
 let damagePopups=[],damageScene='';
 let state,tab='orders',speed=1,paused=false,last=0,sound=false,volume=35,audio,motion=null,dialogWasPaused=false,gearSlot='weapon',gearSorts={weapon:'acquired',armor:'acquired'},codexKind='monsters',codexSlot='weapon',codexSorts={weapon:'acquired',armor:'acquired'};
@@ -66,7 +71,7 @@ function drawAutoMap(){
  drawMiniMap(canvas.getContext('2d'),autoMapModel(state,(x,y)=>canSee(state,x,y)),geometry);
 }
 function renderThoughtSubtitle(){
- const text=thoughtText(state.intent),subtitle=$('thought-subtitle');
+ const text='▶ '+thoughtText(state.intent),subtitle=$('thought-subtitle');
  if(subtitle.textContent!==text)subtitle.textContent=text;
 }
 function categoryTabs(type,selected,common=false){return `<div class="subtabs" role="group" aria-label="${type==='skill'?'スキル系統':'装備の種類'}">${(common?[['common','共通'],['weapon','武器'],['armor','防具']]:[['weapon','武器'],['armor','防具']]).map(([id,label])=>`<button data-category="${type}" data-value="${id}" aria-pressed="${selected===id}" class="${selected===id?'active':''}">${label}</button>`).join('')}</div>`;}
@@ -103,6 +108,7 @@ function render(){
 }
 function renderJourneyLog(){
  const host=$('logs'),overlay=document.body.classList.contains('exploring'),rows=state.logs.slice(0,30),signature=JSON.stringify([overlay,rows]);
+ fieldLogVisibility.sync(overlay,JSON.stringify(rows));
  if(host.dataset.signature===signature)return;
  const modeChanged=host.dataset.overlay!==String(overlay),follow=host.scrollHeight-host.clientHeight-host.scrollTop<8||modeChanged,top=host.scrollTop;
  host.dataset.signature=signature;host.dataset.overlay=String(overlay);
@@ -183,5 +189,5 @@ $('debug-import').onchange=async e=>{const file=e.target.files[0];if(!file)retur
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 function loop(t){if(state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]')&&t-last>420/speed){last=t;const old=state.phase;motion={from:{...state.player},time:t,duration:reducedMotion.matches?1:Math.min(190,340/speed)};tick(state);damagePopups=queueDamage(damagePopups,state.damageEvents||[],t);if(Math.abs(state.player.x-motion.from.x)+Math.abs(state.player.y-motion.from.y)>1)motion=null;if(state.flash?.kind==='hit')tone(180);if(state.phase!==old){motion=null;tone(state.phase==='dead'?110:660);}render();}if(state.phase==='explore'&&(!paused||motion&&t-motion.time<motion.duration+50)||damagePopups.length)draw();requestAnimationFrame(loop);}
 new ResizeObserver(()=>draw()).observe($('map'));
-const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap');wrap.style.setProperty('--hud-top-space',($('hud-top').offsetHeight+20)+'px');wrap.style.setProperty('--hud-bottom-space',($('hud-bottom').offsetHeight+20)+'px');const available=wrap.clientHeight-$('hud-top').offsetHeight-$('hud-bottom').offsetHeight-$('field-log-host').offsetHeight-52;wrap.style.setProperty('--minimap-limit',Math.max(48,(available-22)*31/23)+'px');});hudObserver.observe($('hud-top'));hudObserver.observe($('hud-bottom'));hudObserver.observe($('field-log-host'));
+const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap'),gap=wrap.clientWidth<=480?8:20;wrap.style.setProperty('--hud-top-space',($('hud-top').offsetHeight+gap)+'px');wrap.style.setProperty('--hud-bottom-space',($('hud-bottom').offsetHeight+gap)+'px');const available=wrap.clientHeight-$('hud-top').offsetHeight-$('hud-bottom').offsetHeight-$('field-log-host').offsetHeight-52;wrap.style.setProperty('--minimap-limit',Math.max(64,(available-22)*31/23)+'px');});hudObserver.observe($('hud-top'));hudObserver.observe($('hud-bottom'));hudObserver.observe($('field-log-host'));
 sprite($('portrait').getContext('2d'),'skeleton',4,3,48);sprite($('camp-portrait').getContext('2d'),'skeleton',12,8,96);render();requestAnimationFrame(loop);
