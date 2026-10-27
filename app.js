@@ -4,6 +4,7 @@ import {queueDamage,damageFrame} from './damage-view.js';
 import {renderCardEditor,handleCardClick,handleCardChange,installCardDragging} from './card-editor.js';
 import {autoMapModel,cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';
 import {thoughtText} from './thought-view.js';
+import {displayStoryText,openingThought,letterFloorThought} from './story-text.js';
 import {memoryGroups} from './skill-tree.js';
 import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment} from './debug-tools.js';
 import {W,H,skills,newGame,abandonRun,stats,price,upgrade,equip,equipBest,tick,ascend,zoneFor,floorLabel,radius,canSee,gearById,gearStats,gearName,discard,locked,codexRows,sortedInventory,normalizeSave,orderDefinitions,orderById,orderCapacity,cardCapacity,orderUnlocked,addOrder,editOrder,beginExploration,equipment,LAST_FLOOR,LETTER_FLOOR,nextStageHint,rewardDefinitions,grantReward,experienceToNext,MAX_LEVEL,HP_PER_LEVEL,gainExperience} from './engine.js';
@@ -83,27 +84,29 @@ const displayAttack=()=>state.gear.weapon.identified?stats(state).attack:'？';
 const displayDefense=()=>state.gear.armor.identified?stats(state).defense:'？';
 function render(){
  const st=stats(state),prep=state.phase==='prepare',theme=zoneFor(state);renderScreens();
+ const runClears=Math.max(0,state.profile.normalClears-(state.phase==='ending'?1:0));
  $('floor-title').textContent=`${theme.name} · ${floorLabel(state)}`;
  $('phase-label').textContent=({awakening:'目覚め',prepare:'準備中',explore:paused?'一時停止':'探索中',cleared:'Clear',dead:'記憶喪失',ending:'通常エンド'})[state.phase];
- $('floor-message').hidden=state.floor!==LETTER_FLOOR;$('floor-message').textContent='B15 ― 何か大事なものを忘れている気がする';
+ $('floor-message').hidden=state.floor!==LETTER_FLOOR;$('floor-message').textContent='B15 ― '+letterFloorThought(state.profile.normalClears);
  $('turn').textContent=`TURN ${String(state.turn).padStart(3,'0')}`;
  $('hud-shards').textContent=state.shards;$('hud-sight').textContent=radius(state)+'マス';
  $('level-text').textContent='Lv.'+state.level;const expNeed=experienceToNext(state.level);$('exp-bar').style.width=(expNeed?state.experience/expNeed*100:100)+'%';$('level-vitals').setAttribute('aria-label',`レベル${state.level}、経験値${state.experience}、次のレベルまで${expNeed?expNeed-state.experience:0}`);$('level-vitals').title=state.level===MAX_LEVEL?'最大レベル':`EXP ${state.experience} / ${expNeed}`;
  $('hp-text').textContent=`${state.hp} / ${st.maxHp}`;$('hp-bar').style.width=`${state.hp/st.maxHp*100}%`;$('hp-bar').style.background=state.hp<st.maxHp*.3?'#bd8073':'#91ae88';
  $('atk').textContent=displayAttack();$('def').textContent=displayDefense();$('shards').innerHTML=`${state.shards} <em>pt</em>`;$('intent').textContent=prep?'出発の準備をしています':state.intent;
- const notices={cleared:[`${floorLabel(state)} Clear`,state.floor===LAST_FLOOR?'階段の先に、地上の光が見える。':'記憶の欠片を手に入れた。次の階の準備へ。'],dead:['途切れた記憶','骸は崩れ、再び最深部へ。図鑑の記録は残ります。'],ending:['届かなかった声','「父の仇……魔物め」<br>息子の剣が、骸を貫いた。<br>父だと伝える声は、もう出なかった。<br><br>記憶を失い、再びB30へ。<br>通常エンド達成 · 次の旅ではB15の手紙を開けられます。']};
+ const notices={cleared:[`${floorLabel(state)} Clear`,state.floor===LAST_FLOOR?'階段の先に、地上の光が見える。':'記憶の欠片を手に入れた。次の階の準備へ。'],dead:['途切れた旅','骸は崩れ、再び最深部へ。図鑑の記録は残ります。'],ending:['届かなかった声',state.profile.normalClears===1?'「魔物か」<br>若者は剣を抜き、骸を打ち倒した。<br>自分が誰なのかも知らぬまま、旅は終わった。<br><br>闇の中で、失われた記憶が戻り始める。<br>通常エンド達成 · 次の旅ではB15の手紙を開けられます。':'「魔物か」<br>若者は剣を抜き、骸を打ち倒した。<br>この先の物語は、まだ実装されていません。']};
  const hint=['cleared','dead','ending'].includes(state.phase)?(state.nextHint||nextStageHint(state)):null;
  $('field-gimmick').hidden=!state.gimmick||state.gimmick.id==='none';$('field-gimmick').textContent=state.gimmick&&state.gimmick.id!=='none'?'異変：'+state.gimmick.name+(state.gimmick.id==='fog'?' · 視界−2':''):'';
  const resting=state.phase==='explore'&&paused&&!document.querySelector('dialog[open]');
  const n=notices[state.phase]||(resting?['ひとやすみ','少し骨を休めよう。下の「探索を再開」で旅を続けられます。']:null);$('map-notice').hidden=!n;$('map-notice').classList.toggle('has-hint',Boolean(n&&hint));
  $('notice-copy').innerHTML=n?'<strong>'+n[0]+'</strong><small>'+n[1]+'</small>':'';
- $('notice-hint').innerHTML=hint?'<div class="clear-hint"><h3>'+esc(hint.title.replace(/^次は/,''))+'</h3><p>'+esc(hint.text)+'</p></div>':'';
+ $('notice-hint').innerHTML=hint?'<div class="clear-hint"><h3>'+esc(displayStoryText(hint.title.replace(/^次は/,''),state.profile.normalClears))+'</h3><p>'+esc(displayStoryText(hint.text,state.profile.normalClears))+'</p></div>':'';
  $('primary').innerHTML=({awakening:'思い出す',prepare:'探索を始める',cleared:state.floor===LAST_FLOOR?'地上1Fへ':'準備画面へ',dead:'B30で再び目覚める',ending:'次の旅をはじめる'})[state.phase]||'';
  $('primary').hidden=state.phase==='explore';$('pause-toggle').hidden=state.phase!=='explore';$('pause-toggle').textContent=paused?'探索を再開':'ひとやすみ';
  $('prep-note').textContent='能力強化・指示枠の拡張・装備変更は準備中のみ。取得した再生・転移は準備でカード指示に設定。';
  renderJourneyLog();
  $('memory-count').textContent=`記憶の断片 ${state.memories.length} / 4 · 通常エンド ${state.profile.normalClears}回`;
- $('memory-quote').textContent=state.memories.at(-1)||'名前も、顔も、思い出せない。それでも、帰らなければ。';
+ $('memory-quote').textContent=displayStoryText(state.memories.at(-1)||openingThought(runClears),runClears);
+ $('awakening-copy').textContent=openingThought(runClears);
  renderTab();renderThoughtSubtitle();draw();save();
 }
 function renderJourneyLog(){
@@ -112,7 +115,8 @@ function renderJourneyLog(){
  if(host.dataset.signature===signature)return;
  const modeChanged=host.dataset.overlay!==String(overlay),follow=host.scrollHeight-host.clientHeight-host.scrollTop<8||modeChanged,top=host.scrollTop;
  host.dataset.signature=signature;host.dataset.overlay=String(overlay);
- host.innerHTML=(overlay?rows.reverse():rows).map(l=>`<div class="log-row ${esc(l.type)}"><time>${String(l.turn).padStart(3,'0')}</time><span>${esc(l.text.replace(/記憶のかけら|かけら/g,'記憶の欠片'))}</span></div>`).join('');
+ const runClears=Math.max(0,state.profile.normalClears-(state.phase==='ending'?1:0));
+ host.innerHTML=(overlay?rows.reverse():rows).map(l=>`<div class="log-row ${esc(l.type)}"><time>${String(l.turn).padStart(3,'0')}</time><span>${esc(displayStoryText(l.text,runClears).replace(/記憶のかけら|かけら/g,'記憶の欠片'))}</span></div>`).join('');
  host.scrollTop=overlay&&follow?host.scrollHeight:modeChanged?0:top;
 }
 function itemCard(g,ref,equipped=false){

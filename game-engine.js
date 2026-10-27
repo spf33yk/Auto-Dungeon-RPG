@@ -1,4 +1,5 @@
 import {createCardRule,legacyToCards,validCardRule,chooseCardOrder,cardModifier} from './card-orders.js';
+import {storyFragment,letterFloorThought} from './story-text.js';
 import {MAX_LEVEL,HP_PER_LEVEL,experienceToNext,gainExperience} from './progression.js';
 export {MAX_LEVEL,HP_PER_LEVEL,experienceToNext,gainExperience};
 export * from './card-orders.js';
@@ -6,8 +7,8 @@ import {nextRandom,rollEnemyDrop,rollChestReward,grantReward} from './drop-syste
 export {nextRandom,rollEnemyDrop,rollChestReward,grantReward};
 import {rewardDefinitions,rewardById,enemyDropTables,chestRewards} from './data.js';
 export {rewardDefinitions,rewardById,enemyDropTables,chestRewards};
-import {NORMAL_FLOORS,TRUE_FLOORS,LETTER_FLOOR,fieldPlan,nextStageHint,zoneIndexForFloor,bossForFloor} from './field-events.js';
-export {NORMAL_FLOORS,TRUE_FLOORS,LETTER_FLOOR,fieldPlan,nextStageHint,zoneIndexForFloor,bossForFloor};
+import {NORMAL_FLOORS,LETTER_FLOOR,fieldPlan,nextStageHint,zoneIndexForFloor,bossForFloor} from './field-events.js';
+export {NORMAL_FLOORS,LETTER_FLOOR,fieldPlan,nextStageHint,zoneIndexForFloor,bossForFloor};
 import {orderDefinitions,orderById,orderCapacity,makeOrder,orderUnlocked,addOrder,editOrder,activeOrders,chooseOrder} from './orders.js';
 export {orderDefinitions,orderById,orderCapacity,makeOrder,orderUnlocked,addOrder,editOrder,activeOrders};
 import {zones,monsters,equipment,gearById,monsterById,skills} from './data.js';
@@ -33,7 +34,7 @@ export function newGame(seed=Date.now()%10000000,profile=profileDefault()){
  const p=structuredClone(profile);p.skills??=[];p.runs++;
  const s={version:11,level:1,experience:0,damageEvents:[],keys:0,abilities:[],unlockedOrders:[],rngState:seed>>>0,warped:false,nextAcquisition:0,b15HintShown:false,orders:[createCardRule()],seed,floor:1,phase:'awakening',hp:54,shards:12,levels:Object.fromEntries(skills.map(k=>[k.id,0])),gear:{weapon:createGear('weapon-0'),armor:createGear('armor-0')},inventory:[],mode:'stairs',turn:0,kills:0,logs:[],memories:[],profile:p,letter:false};
  for(const g of Object.values(s.gear)){g.acquiredOrder=s.nextAcquisition++;register(p.equipment,g.baseId);register(p.knownEquipment,g.baseId);}
- makeFloor(s);log(s,'目が覚めると、そこには骨だけの手があった。','story');log(s,'B30。失った記憶を力に変え、地上を目指す。');return s;
+ makeFloor(s);log(s,'目が覚めると、そこには骨だけの手があった。','story');log(s,p.normalClears?'息子に会いたい。今度こそ、あの手紙を届けよう。':'なぜだろう。上へ行かなければならない気がする。','story');return s;
 }
 export function abandonRun(s){return s.phase==='prepare'?newGame(undefined,s.profile):null;}
 export function price(s,k){return k.cost+s.levels[k.id]*(k.costStep??4);}
@@ -62,7 +63,7 @@ export function discard(s,index){const g=s.inventory[index];if(s.phase!=='prepar
 export function synthesisResult(a,b){if(!a||!b||a===b||!a.identified||!b.identified||a.cursed||b.cursed||a.baseId!==b.baseId)return null;if((a.plus===0)!==(b.plus===0))return null;const result=a.plus===0?1:a.plus+b.plus;return result<=SYNTHESIS_CAP?result:null;}
 export function synthesize(){return false;}
 export function sortedInventory(s,slot,sort='acquired'){return s.inventory.map((g,index)=>({g,index})).filter(({g})=>gearById[g.baseId].slot===slot).sort((a,b)=>sort==='acquired'?(a.g.acquiredOrder??a.index)-(b.g.acquiredOrder??b.index):Number(b.g.identified)-Number(a.g.identified)||(a.g.identified&&b.g.identified?gearStats(b.g)[sort]-gearStats(a.g)[sort]:0)||(a.g.acquiredOrder??a.index)-(b.g.acquiredOrder??b.index));}
-export function notifyB15(s){if(s.floor===LETTER_FLOOR&&!s.b15HintShown){s.b15HintShown=true;log(s,'何か大事なものを忘れている気がする','story');return true;}return false;}
+export function notifyB15(s){if(s.floor===LETTER_FLOOR&&!s.b15HintShown){s.b15HintShown=true;log(s,letterFloorThought(s.profile.normalClears),'story');return true;}return false;}
 export function beginExploration(s){if(!['awakening','prepare'].includes(s.phase))return false;s.phase='explore';notifyB15(s);return true;}
 export function lineOfSight(s,a,b){let x=a.x,y=a.y;const dx=Math.abs(b.x-x),dy=Math.abs(b.y-y),sx=Math.sign(b.x-x),sy=Math.sign(b.y-y);let err=dx-dy;while(x!==b.x||y!==b.y){const twice=2*err;let nx=x,ny=y;if(twice>-dy){err-=dy;nx+=sx;}if(twice<dx){err+=dx;ny+=sy;}if(nx!==x&&ny!==y&&!s.grid[y]?.[nx]&&!s.grid[ny]?.[x])return false;x=nx;y=ny;if(x===b.x&&y===b.y)return true;if(!s.grid[y]?.[x])return false;}return true;}
 export function canSee(s,x,y){return Math.max(Math.abs(x-s.player.x),Math.abs(y-s.player.y))<=radius(s)&&lineOfSight(s,s.player,{x,y});}
@@ -123,7 +124,7 @@ function pickup(s){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y
  else if(item.type==='key'){s.keys++;log(s,'古びた鍵を拾った。所持 '+s.keys+'個','good');}
  else if(item.type==='gear'){acquire(s,item.gear);log(s,gearName(item.gear)+'を拾った。','good');}
  else if(item.type==='reward')receiveReward(s,item.rewardId);
- else if(item.type==='letter'){s.letter=true;log(s,'息子への手紙を入手した。TRUEルートの物語は今後追加。','story');}
+ else if(item.type==='letter'){s.letter=true;log(s,'古びた手紙を手に取った。今度こそ、届けよう。','story');}
  else if(item.type==='chest'){if(item.locked){s.keys--;log(s,'鍵を1個使い、宝箱を開けた。','good');}if(item.gear){acquire(s,item.gear);s.shards+=2;log(s,'旧宝箱から'+gearName(item.gear)+'を入手。記憶の欠片 +2','good');}else receiveReward(s,item.rewardId);}
 }
 export function dropFromEnemy(s,e){const rng=()=>nextRandom(s),drop=rollEnemyDrop(e.baseId,rng);if(!drop)return null;
@@ -139,7 +140,6 @@ export function attackEnemy(s,enemy){
  if(enemy.hp<=0){s.enemies=s.enemies.filter(e=>e!==enemy);s.kills++;s.floorKills++;const exp=s.level<MAX_LEVEL?(monsterById[enemy.baseId||enemy.id]?.experience??3):0;const gained=gainExperience(s,exp);if(exp)log(s,`経験値 +${exp}`,'good');if(gained)log(s,`レベルアップ！ Lv.${s.level}。HP +${gained*HP_PER_LEVEL}`,'good');s.shards+=enemy.boss?8:1;log(s,enemy.name+'を倒した。記憶の欠片 +'+(enemy.boss?8:1),'good');dropFromEnemy(s,enemy);if(enemy.boss)log(s,'門番の封印が解けた。階段を上れる。','story');}
 }
 function warpDestination(s){const cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(s.grid[y][x]&&key({x,y})!==key(s.player)&&key({x,y})!==key(s.stairs)&&!s.enemies.some(e=>e.x===x&&e.y===y))cells.push({x,y});return cells.length?cells[Math.floor(nextRandom(s)*cells.length)]:null;}
-const memories={6:'かつて、この手は誰かを守るために剣を握っていた。',12:'「父さん、帰ってくるよね」――小さな手の温もりが蘇る。',18:'魔王は告げた。「息子の命が惜しければ、記憶を捨てろ」',24:'忘れていた名前よりも先に、帰る理由を思い出した。'};
 export function tick(s){
  if(s.phase!=='explore')return;notifyB15(s);s.turn++;s.steps++;s.flash=null;s.damageEvents=[];reveal(s);const st=stats(s);
  if(s.retreatCooldown>0)s.retreatCooldown--;
@@ -165,14 +165,14 @@ export function tick(s){
  const trap=s.traps?.find(t=>!t.spent&&t.x===s.player.x&&t.y===s.player.y);
  if(trap&&modifierActive(s,'avoid-traps'))log(s,'罠を見切り、踏み抜かずに進んだ。','good');
  if(trap&&!modifierActive(s,'avoid-traps')){trap.spent=true;trap.revealed=true;const damage=Math.max(1,Math.ceil(st.maxHp*.08));s.hp=Math.max(0,s.hp-damage);s.damageEvents.push({...s.player,damage,hero:true});s.flash={...s.player,kind:'hurt'};log(s,'棘の罠。'+damage+'ダメージ。','bad');if(s.hp===0){s.phase='dead';s.nextHint=nextStageHint(s);log(s,'罠で骨が崩れた。再び最深部へ。','story');return;}}
- for(const e of s.enemies){if(distance(e,s.player)<=6&&lineOfSight(s,e,s.player))e.aggro=true;if((e.house&&!s.gimmick?.triggered)||!e.aggro||s.turn%e.period!==0)continue;if(distance(e,s.player)===1){const damage=incomingDamage(e.attack,st.defense);s.hp-=damage;s.damageEvents.push({...s.player,damage,hero:true});s.flash={...s.player,kind:'hurt'};log(s,`${e.name}の攻撃。${damage}ダメージ。`,'bad');if(s.hp<=0){s.hp=0;s.phase='dead';s.nextHint=nextStageHint(s);log(s,'骨が崩れた。記憶を失い、再び最深部へ。','story');return;}}else{const next=route(s,p=>distance(p,s.player)===1,{start:e,known:false,blocked:new Set(s.enemies.filter(o=>o!==e).map(key))});if(next&&key(next)!==key(s.player)){e.x=next.x;e.y=next.y;}}}
+ for(const e of s.enemies){if(distance(e,s.player)<=6&&lineOfSight(s,e,s.player))e.aggro=true;if((e.house&&!s.gimmick?.triggered)||!e.aggro||s.turn%e.period!==0)continue;if(distance(e,s.player)===1){const damage=incomingDamage(e.attack,st.defense);s.hp-=damage;s.damageEvents.push({...s.player,damage,hero:true});s.flash={...s.player,kind:'hurt'};log(s,`${e.name}の攻撃。${damage}ダメージ。`,'bad');if(s.hp<=0){s.hp=0;s.phase='dead';s.nextHint=nextStageHint(s);log(s,'骨が崩れた。再び最深部へ。','story');return;}}else{const next=route(s,p=>distance(p,s.player)===1,{start:e,known:false,blocked:new Set(s.enemies.filter(o=>o!==e).map(key))});if(next&&key(next)!==key(s.player)){e.x=next.x;e.y=next.y;}}}
  reveal(s);
  const bossAlive=s.enemies.some(e=>e.boss);
  if(bossAlive&&(sealedStart||key(s.player)===key(s.stairs)))s.intent='階段は封印中。中ボスを倒す必要がある';
  const done=Boolean(action?.exit)&&!bossAlive;
- if(done&&key(s.player)===key(s.stairs)){const reward=8+Math.floor(s.floor/3);s.shards+=reward;s.phase='cleared';s.nextHint=nextStageHint(s);log(s,`${floorLabel(s)} Clear。記憶の欠片 +${reward}`,'good');if(memories[s.floor]){s.memories.push(memories[s.floor]);log(s,memories[s.floor],'story');}}
+ if(done&&key(s.player)===key(s.stairs)){const reward=8+Math.floor(s.floor/3);s.shards+=reward;s.phase='cleared';s.nextHint=nextStageHint(s);log(s,`${floorLabel(s)} Clear。記憶の欠片 +${reward}`,'good');const memory=storyFragment(s.floor,s.profile.normalClears);if(memory){s.memories.push(memory);log(s,memory,'story');}}
 }
-export function ascend(s){if(s.phase!=='cleared')return false;if(s.floor===LAST_FLOOR){s.phase='ending';s.profile.normalClears++;log(s,'地上1F。息子は剣を抜いた。「父の仇……魔物め」','story');log(s,'届かなかった声。砕けた骸は、再び深淵へ沈む。','story');return true;}s.floor++;s.phase='prepare';makeFloor(s);s.hp=Math.min(stats(s).maxHp,s.hp+Math.ceil(stats(s).maxHp*BALANCE.restRatio));log(s,`${floorLabel(s)}へ。休息して次の探索に備える。`,'good');return true;}
+export function ascend(s){if(s.phase!=='cleared')return false;if(s.floor===LAST_FLOOR){s.phase='ending';s.profile.normalClears++;log(s,'地上で、若者が剣を抜いた。「魔物か」','story');log(s,'骸は言葉を伝えられないまま、若者の剣に倒れた。','story');return true;}s.floor++;s.phase='prepare';makeFloor(s);s.hp=Math.min(stats(s).maxHp,s.hp+Math.ceil(stats(s).maxHp*BALANCE.restRatio));log(s,`${floorLabel(s)}へ。休息して次の探索に備える。`,'good');return true;}
 export function codexRows(s,kind){if(kind==='skills')return rewardDefinitions.map(r=>s.profile.skills.includes(r.id)?{...r,known:true,owned:(r.kind==='skill'?s.abilities:s.unlockedOrders).includes(r.id)}:{known:false});if(kind==='monsters')return monsters.map(m=>s.profile.monsters.includes(m.id)?{name:m.name,attack:m.attack,defense:m.defense,zone:zones[m.zone].name,known:true}:{known:false});return equipment.map(g=>s.profile.knownEquipment.includes(g.id)&&s.profile.equipment.includes(g.id)?{name:g.name,attack:g.attack,defense:g.defense,slot:g.slot,acquiredOrder:s.profile.equipment.indexOf(g.id),known:true}:{known:false,slot:g.slot});}
 export function validateSave(s){return Boolean(s?.version===11&&Number.isInteger(s.level)&&s.level>=1&&s.level<=MAX_LEVEL&&Number.isSafeInteger(s.experience)&&s.experience>=0&&(s.level===MAX_LEVEL?s.experience===0:s.experience<experienceToNext(s.level))&&Number.isInteger(s.keys)&&s.keys>=0&&Number.isInteger(s.rngState)&&s.rngState>=0&&s.rngState<=4294967295&&typeof s.warped==='boolean'&&Array.isArray(s.abilities)&&s.abilities.every(id=>rewardById[id]?.kind==='skill')&&new Set(s.abilities).size===s.abilities.length&&Array.isArray(s.unlockedOrders)&&s.unlockedOrders.every(id=>rewardById[id]?.kind==='order')&&new Set(s.unlockedOrders).size===s.unlockedOrders.length&&Number.isInteger(s.nextAcquisition)&&s.nextAcquisition>=0&&Array.isArray(s.logs)&&Array.isArray(s.enemies)&&Array.isArray(s.items)&&s.items.every(i=>i&&Number.isInteger(i.x)&&Number.isInteger(i.y)&&i.x>=0&&i.x<W&&i.y>=0&&i.y<H&&(['potion','herb','fragment','key','letter'].includes(i.type)||i.type==='gear'&&gearById[i.gear?.baseId]||i.type==='reward'&&rewardById[i.rewardId]||i.type==='chest'&&(i.gear?gearById[i.gear.baseId]:Boolean(rewardById[i.rewardId]&&i.locked===true))))&&Array.isArray(s.memories)&&Number.isInteger(s.floor)&&s.floor>=1&&s.floor<=LAST_FLOOR&&['awakening','prepare','explore','cleared','dead','ending'].includes(s.phase)&&s.grid?.length===H&&s.grid.every(r=>r.length===W)&&s.seen?.length===H&&s.visited?.length===H&&s.levels&&skills.every(k=>Number.isInteger(s.levels[k.id])&&s.levels[k.id]>=0&&s.levels[k.id]<=k.max)&&Array.isArray(s.orders)&&s.orders.length<=orderCapacity(s)&&s.orders.every(o=>validCardRule(s,o))&&s.profile&&['monsters','equipment','knownEquipment','skills'].every(k=>Array.isArray(s.profile[k]))&&s.profile.skills.every(id=>rewardById[id])&&s.gear&&Object.values(s.gear).every(g=>gearById[g.baseId])&&Array.isArray(s.inventory)&&s.inventory.every(g=>gearById[g.baseId]));}
 

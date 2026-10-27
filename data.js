@@ -1,15 +1,15 @@
 // Balance values are provisional. IDs are shared by combat, inventory and codices.
 export const zones = [
-  ['忘却の地下墓地','crypt', '#293a32','#56614b','rooms'],
-  ['苔むす水路','water', '#234247','#3e6661','channels'],
+  ['忘れられた地下墓所','crypt', '#293a32','#56614b','rooms'],
+  ['苔むした水路','water', '#234247','#3e6661','channels'],
   ['崩れた鉱山','mine', '#40382d','#776246','caves'],
-  ['灼熱の炉跡','forge', '#482f2b','#845046','hall'],
-  ['凍りついた聖堂','frost', '#304352','#708597','cross'],
+  ['燃え盛る炉跡','forge', '#482f2b','#845046','hall'],
+  ['凍てついた聖堂','frost', '#304352','#708597','cross'],
   ['封じられた書庫','library', '#3d3245','#70617f','rooms'],
-  ['毒霧の庭園','garden', '#34442d','#69764d','caves'],
+  ['毒の庭園','garden', '#34442d','#69764d','caves'],
   ['沈黙の城塞','fortress', '#364049','#6a7279','hall'],
   ['月影の回廊','moon', '#34334e','#77729a','channels'],
-  ['黎明への門','dawn', '#484638','#8d8665','cross'],
+  ['暁への門','dawn', '#484638','#8d8665','cross'],
 ].map(([name,id,floorColor,wallColor,layout],index)=>({name,id,floorColor,wallColor,layout,index}));
 const species = [['墓地スライム','骨の番兵'],['水路ヒル','水門の守り手'],['洞窟コウモリ','岩の巨兵'],['火の精','炉の鎧兵'],['氷の精','凍てつく騎士'],['魔導の影','書庫の番人'],['毒胞子','根の巨人'],['城塞の亡霊','重装の番兵'],['月影の獣','影の騎士'],['門の使い魔','黎明の守護者']];
 export const minibosses=[
