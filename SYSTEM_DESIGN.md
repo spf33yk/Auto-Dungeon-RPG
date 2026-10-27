@@ -1,5 +1,9 @@
 # 骸の旅路 ― システム設計書
 
+## 図鑑・デバッグのスクロール領域（2026-10-27）
+
+codex-dialogとdebug-dialogをscroll-dialogとして共通化する。閉じるボタンをdialog-toolbar、既存本文をdialog-scroll-contentで囲み、開いたdialogを縦方向flexにする。外枠のoverflowをhidden、本文のmin-heightを0・overflowをautoにして、高さ85dvh内で本文のみをスクロールする。44px角の閉じるボタンはスクロール領域の外側に置く。既存ID・data-close・イベント委譲は維持し、JSの閉じる処理や保存形式を変更しない。
+
 ## 物語文章と表記（2026-10-27）
 
 story-text.jsが初回と通常エンド達成後の回想、開始時の思考、B15の思考を定義する。game-engine.jsは既存のプロフィールnormalClearsを参照し、同じ階クリア時に文章を保存する。app.jsは旧回想・ログ・保存済み次階ヒントを表示時に変換し、元のv11データは変更しない。階層名は既存zone IDを保ちdata.jsの表示名だけ変更する。旧50階共闘は現行の物語方針から外れたため、未使用の階数定数を削除する。
