@@ -112,7 +112,18 @@ function render(){
  $('awakening-copy').textContent=openingThought(runClears);
  renderTab();renderThoughtSubtitle();draw();renderTitle();if(!showingTitle)save();
 }
+function syncTitleEffect(){const video=$('title-fx');video.hidden=openingVariant(state.profile)!=='mukuro';if(showingTitle&&openingVariant(state.profile)==='mukuro'&&!document.hidden){if(video.paused)video.play().catch(()=>{});}else video.pause();}
+const titleEffect=$('title-fx');
+function useTitleEffectFallback(){if(titleEffect.dataset.fallbackActive)return;titleEffect.dataset.fallbackActive='true';titleEffect.classList.add('is-screen-fallback');titleEffect.src=titleEffect.dataset.fallback;titleEffect.load();syncTitleEffect();}
+function checkTitleEffectAlpha(){if(titleEffect.dataset.fallbackActive)return;try{const probe=document.createElement('canvas');probe.width=probe.height=1;const c=probe.getContext('2d',{willReadFrequently:true});c.drawImage(titleEffect,0,0,1,1,0,0,1,1);if(c.getImageData(0,0,1,1).data[3]===255)useTitleEffectFallback();}catch{useTitleEffectFallback();}}
+titleEffect.addEventListener('loadeddata',checkTitleEffectAlpha,{once:true});
+titleEffect.addEventListener('error',useTitleEffectFallback);
+titleEffect.querySelector('source').addEventListener('error',useTitleEffectFallback);
+if(titleEffect.readyState>=2)checkTitleEffectAlpha();
+document.addEventListener('visibilitychange',syncTitleEffect);
+$('title-scene').addEventListener('pointerdown',syncTitleEffect);
 function renderTitle(){
+ syncTitleEffect();
  const variant=openingVariant(state.profile),name=variant==='segare'?'倅の旅路':'骸の旅路';
  $('title-scene').dataset.variant=variant;$('title-name').textContent=name;document.title=name+' — 記憶の迷宮';
  for(const id of ['title-background','title-logo']){const el=$(id),src=el.dataset[variant];if(el.getAttribute('src')!==src)el.src=src;}

@@ -244,3 +244,9 @@ display-mode.jsはユーザー操作からrequestFullscreenを先に要求し、
 
 ## Full HD描画
 主Canvas #mapは1920×1080固定。drawで表示領域比から内部高さを再設定しない。cameraForには同Canvas寸法を渡すため、視界半径と表示マス数を保った描画倍率を得る。CSSによる端末サイズへの縮小を継続。タイトル背景は1920×1080PNG、原本は別名で保持。
+
+
+## タイトル動画の層とライフサイクル
+#title-fxは背景・ロゴより上、メニューより下の装飾video（z-index:2、ロゴ:1、メニュー:3）。title-contentにはスタッキングコンテキストを作らない。pointer-events:noneで背後の操作を妨げない。syncTitleEffectをrenderTitle・visibilitychange・タイトルpointerdownから呼び、showingTitleかつ骸版かつdocument非表示でない場合だけplayする。play拒否は捕捉してタイトル操作を継続し、非表示時はpauseする。配信動画もupdate-assets.jsのバイナリハッシュ対象とする。
+
+透過互換：WebMの最初のフレーム左上（元素材では透明）のアルファ値で透過デコードを確認する。不透明または再生非対応／取得失敗時はH.264 MP4の黒背景版＋CSS screen合成へ切り替える。代替合成は元のアルファ合成と完全一致しない。代替版も失敗した場合は背景・ロゴ・メニューだけで操作を継続する。両配信動画は1920×1080・30fps・14秒、音声なし。
