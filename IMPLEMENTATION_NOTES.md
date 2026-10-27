@@ -357,3 +357,7 @@
 - 公開版で骸title-mukuro-v3.webm?v=cb09a993a9d1、倅title-segare-v3.webm?v=0aee553c04f9を確認。両方duration=14、loop=true、paused=false。再生位置は骸3.9871→2.5322、倅4.0527→2.5905へ折返し、ended=falseのまま再生継続。スクリーンショットtest-results/v3-mukuro-public.jpg、v3-segare-public.jpg。
 - 公開版でLoadGame後paused=true。倅の公開画面を1280×720・360×700・1280×360へ変更してロゴ位置45%／17.53%／幅51%と動画再生が維持されることを確認、コンソールエラーなし。ローカルで骸→倅の動画切替も確認。
 - ローカル非透過入力fixtureで倅／骸を切り替え、各版に対応するMP4代替とloop再生・screen合成を確認。実機iPhone/Safariは未確認。WebMは骸5366599 bytes、倅5840910 bytes、MP4代替は骸1899992 bytes、倅2214353 bytes。原MOVは変更なし。
+
+
+## 2026-10-27 開始前ティザー
+提供「骸の旅路_ティザー映像.mp4」はH.264、1280×720、24fps、12.041667秒、音声トラックなし。再圧縮せずfaststartへ再格納してart/journey-teaser.mp4に保存。新規／再開の確定後にループせず1回再生、終了前の進行・保存を防止。skip・Esc・失敗時の遷移も追加。原本はDesktopに保持。検証結果は後述。

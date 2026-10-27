@@ -16,7 +16,7 @@ const fieldLogVisibility=createLogVisibility({
 });
 let autoDisplayAttempted=false,ownsFullscreen=false,lockedOrientation=false;
 let damagePopups=[],damageScene='';
-let showingTitle=true,hasSave=false;
+let showingTitle=true,hasSave=false,pendingJourney=null;
 let state,tab='orders',speed=1,paused=false,last=0,sound=false,volume=35,audio,motion=null,dialogWasPaused=false,gearSlot='weapon',gearSorts={weapon:'acquired',armor:'acquired'},codexKind='monsters',codexSlot='weapon',codexSorts={weapon:'acquired',armor:'acquired'};
 
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -115,7 +115,7 @@ function render(){
 function syncTitleEffect(){
  const video=$('title-fx'),variant=openingVariant(state.profile);
  if(video.dataset.variant!==variant){video.pause();video.dataset.variant=variant;delete video.dataset.fallbackActive;video.classList.remove('is-screen-fallback');video.dataset.fallback=video.dataset[variant+'Fallback'];video.src=video.dataset[variant];video.load();}
- if(showingTitle&&!document.hidden){if(video.paused)video.play().catch(()=>{});}else video.pause();
+ if(showingTitle&&!pendingJourney&&!document.hidden){if(video.paused)video.play().catch(()=>{});}else video.pause();
 }
 const titleEffect=$('title-fx');
 function useTitleEffectFallback(){if(titleEffect.dataset.fallbackActive)return;titleEffect.dataset.fallbackActive='true';titleEffect.classList.add('is-screen-fallback');titleEffect.src=titleEffect.dataset.fallback;titleEffect.load();syncTitleEffect();}
@@ -187,11 +187,24 @@ $('codex-body').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));renderTab();});
 document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{speed=Number(b.dataset.speed);document.querySelectorAll('[data-speed]').forEach(x=>x.classList.toggle('active',x===b));});
 function reset(next=newGame(undefined,state.profile)){state=next;paused=false;motion=null;last=performance.now();render();}
-function startNewJourney(){showingTitle=false;reset(hasSave?newGame(undefined,state.profile):state);}
+function playJourneyTeaser(done){
+ if(pendingJourney)return;
+ pendingJourney=done;paused=true;dialogWasPaused=true;document.body.classList.add('watching-teaser');$('teaser-scene').hidden=false;$('teaser-retry').hidden=true;
+ const video=$('journey-teaser');if(video.error){finishJourneyTeaser();return;}video.currentTime=0;syncTitleEffect();video.play().catch(()=>{$('teaser-retry').hidden=false;});$('teaser-skip').focus();
+}
+function finishJourneyTeaser(){if(!pendingJourney)return;const done=pendingJourney;pendingJourney=null;$('journey-teaser').pause();$('teaser-scene').hidden=true;document.body.classList.remove('watching-teaser');done();}
+$('journey-teaser').addEventListener('ended',finishJourneyTeaser);
+$('journey-teaser').addEventListener('error',()=>{if(pendingJourney)finishJourneyTeaser();});
+$('teaser-skip').onclick=finishJourneyTeaser;
+$('teaser-retry').onclick=()=>{$('journey-teaser').play().then(()=>{$('teaser-retry').hidden=true;}).catch(()=>{});};
+document.addEventListener('keydown',e=>{if(pendingJourney&&e.key==='Escape')finishJourneyTeaser();});
+document.addEventListener('visibilitychange',()=>{if(!pendingJourney)return;const video=$('journey-teaser');if(document.hidden)video.pause();else video.play().catch(()=>{$('teaser-retry').hidden=false;});});
+function startNewJourney(){playJourneyTeaser(()=>{showingTitle=false;reset(hasSave?newGame(undefined,state.profile):state);});}
+
 $('title-new').onclick=()=>{if(hasSave)openDialog('new-game-dialog');else startNewJourney();};
-$('confirm-new-game').onclick=()=>{const next=newGame(undefined,state.profile);$('new-game-dialog').close();showingTitle=false;reset(next);};
+$('confirm-new-game').onclick=()=>{$('new-game-dialog').close();startNewJourney();};
 $('title-load').onclick=()=>{if(hasSave)openDialog('load-game-dialog');};
-$('confirm-load-game').onclick=()=>{if(!hasSave)return;$('load-game-dialog').close();showingTitle=false;paused=state.phase==='explore';dialogWasPaused=paused;last=performance.now();render();};
+$('confirm-load-game').onclick=()=>{if(!hasSave)return;$('load-game-dialog').close();playJourneyTeaser(()=>{showingTitle=false;paused=state.phase==='explore';dialogWasPaused=paused;last=performance.now();render();});};
 $('title-option').onclick=()=>openDialog('options-dialog');
 $('return-title').onclick=()=>{paused=true;dialogWasPaused=true;save();showingTitle=true;motion=null;$('options-dialog').close();render();};
 $('primary').onclick=()=>{if(state.phase==='explore')return;if(['awakening','prepare'].includes(state.phase)){beginExploration(state);paused=false;last=performance.now();tone();}else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();if(state.phase==='explore')tryMobileDisplay();};

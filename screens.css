@@ -318,3 +318,10 @@ body.opening>header,body.opening>main,body.opening>.mobile-display{display:none!
 .title-fx{z-index:2;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
 
 .title-fx.is-screen-fallback{mix-blend-mode:screen}
+
+/* One-shot cinematic; the game remains on its paused title until completion. */
+.teaser-scene{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#000}
+.teaser-scene video{display:block;width:100%;height:100%;object-fit:contain}
+.teaser-actions{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));display:flex;gap:10px}
+.teaser-actions button{background:#15191de6;border:1px solid #b8b5a9;color:#eee;padding:10px 14px;min-height:42px}
+body.watching-teaser .title-scene{visibility:hidden}

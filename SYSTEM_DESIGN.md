@@ -260,3 +260,7 @@ display-mode.jsはユーザー操作からrequestFullscreenを先に要求し、
 
 ## v3動画切替
 syncTitleEffectでopeningVariantからvideoのdata-mukuro/data-segareを選ぶ。版が変わった時だけsrc/loadを更新し、fallbackActiveとscreen合成を解除、対応するMP4代替URLを選び直す。loadeddataで毎回透過を確認する（readyState<2は除外）。loop/muted/playsinlineは同一video上で両版とも維持。
+
+
+## 開始前映像の遷移
+pendingJourneyに開始／再開コールバックを保持し、playJourneyTeaserで全画面セクションを表示する。showingTitleは終了までtrueとしてtick／自動保存を防ぐ。ended・skip・Escape・メディアerrorはfinishJourneyTeaserに集約し、pendingJourneyを先にnullにして二重実行を防止。タイトルのエフェクト再生条件にも!pendingJourneyを追加。映像終了時に初めて新規resetまたは保存フェイズのrenderを行う。
