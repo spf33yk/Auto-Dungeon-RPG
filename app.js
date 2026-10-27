@@ -175,7 +175,8 @@ function reset(next=newGame(undefined,state.profile)){state=next;paused=false;mo
 function startNewJourney(){showingTitle=false;reset(hasSave?newGame(undefined,state.profile):state);}
 $('title-new').onclick=()=>{if(hasSave)openDialog('new-game-dialog');else startNewJourney();};
 $('confirm-new-game').onclick=()=>{const next=newGame(undefined,state.profile);$('new-game-dialog').close();showingTitle=false;reset(next);};
-$('title-load').onclick=()=>{if(!hasSave)return;showingTitle=false;paused=state.phase==='explore';dialogWasPaused=paused;last=performance.now();render();};
+$('title-load').onclick=()=>{if(hasSave)openDialog('load-game-dialog');};
+$('confirm-load-game').onclick=()=>{if(!hasSave)return;$('load-game-dialog').close();showingTitle=false;paused=state.phase==='explore';dialogWasPaused=paused;last=performance.now();render();};
 $('title-option').onclick=()=>openDialog('options-dialog');
 $('return-title').onclick=()=>{paused=true;dialogWasPaused=true;save();showingTitle=true;motion=null;$('options-dialog').close();render();};
 $('primary').onclick=()=>{if(state.phase==='explore')return;if(['awakening','prepare'].includes(state.phase)){beginExploration(state);paused=false;last=performance.now();tone();}else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();if(state.phase==='explore')tryMobileDisplay();};
