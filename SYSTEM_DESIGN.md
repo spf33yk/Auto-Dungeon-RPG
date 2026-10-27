@@ -1,5 +1,13 @@
 # 骸の旅路 ― システム設計書
 
+## タイトルと上部HUDの共通化（2026-10-27）
+
+タイトルはエンジンphaseと分離した一時状態showingTitleで表示し、起動時はtrue。保存状態は読み込んで保持し、LoadGameでshowingTitleを解除する。タイトル中はループでtickせず、renderから自動保存しない。有効な保存の存在はhasSaveで管理し、NewGameは上書き確認後にnewGameへ進む。タイトルへ戻る場合は停止して既存状態を保存する。
+
+opening.jsのopeningVariantがprofile.trueEndingから版を選び、app.jsがHTMLの画像data属性にある配信URLを参照する。初回は選択した背景とロゴのdecode完了も待ち、起動時の旧UI非表示を維持する。update-assets.jsは4画像にもバイナリの内容ハッシュを付ける。保存v11のprofile.trueEndingを真偽値で検証し、旧保存はfalseを補完。デバッグでのみ切替可能とし、ascendの通常エンド処理は変更しない。
+
+上部HUDはbody:is(.preparing,.exploring) #hud-topの共通ルールで文字・バー・アイコン・レイアウトを定義する。ResizeObserverがHUDの実測高からworkspaceの--shared-hud-spaceを更新し、準備パネルがHUDに重ならないようにする。
+
 ## 初回描画の公開タイミング（2026-10-27）
 
 index.htmlのhtmlにdata-startupを付け、外部CSSより前のインラインCSSで読み込み表示以外の要素を隠す。opacityとvisibilityでレイアウト寸法を残し、保存読込・renderScreens・Canvas描画・ResizeObserverの計算を隠れた状態で実行する。インラインのmoduleスクリプトがimport map経由でapp.jsを動的importし、成功後に2回のrequestAnimationFrameを待ってdata-startupと読み込み表示を解除する。外部スクリプト取得失敗もcatchし、再読み込みボタンを表示する。保存形式とapp.jsの状態復帰処理は変更しない。
