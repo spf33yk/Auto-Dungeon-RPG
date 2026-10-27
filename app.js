@@ -189,6 +189,7 @@ document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{speed=Number
 function reset(next=newGame(undefined,state.profile)){state=next;paused=false;motion=null;last=performance.now();render();}
 function playJourneyTeaser(done){
  if(pendingJourney)return;
+ if(openingVariant(state.profile)!=='mukuro'){done();return;}
  pendingJourney=done;paused=true;dialogWasPaused=true;document.body.classList.add('watching-teaser');$('teaser-scene').hidden=false;$('teaser-retry').hidden=true;
  const video=$('journey-teaser');if(video.error){finishJourneyTeaser();return;}video.currentTime=0;syncTitleEffect();video.play().catch(()=>{$('teaser-retry').hidden=false;});$('teaser-skip').focus();
 }
