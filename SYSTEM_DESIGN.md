@@ -250,3 +250,6 @@ display-mode.jsはユーザー操作からrequestFullscreenを先に要求し、
 #title-fxは背景・ロゴより上、メニューより下の装飾video（z-index:2、ロゴ:1、メニュー:3）。title-contentにはスタッキングコンテキストを作らない。pointer-events:noneで背後の操作を妨げない。syncTitleEffectをrenderTitle・visibilitychange・タイトルpointerdownから呼び、showingTitleかつ骸版かつdocument非表示でない場合だけplayする。play拒否は捕捉してタイトル操作を継続し、非表示時はpauseする。配信動画もupdate-assets.jsのバイナリハッシュ対象とする。
 
 透過互換：WebMの最初のフレーム左上（元素材では透明）のアルファ値で透過デコードを確認する。不透明または再生非対応／取得失敗時はH.264 MP4の黒背景版＋CSS screen合成へ切り替える。代替合成は元のアルファ合成と完全一致しない。代替版も失敗した場合は背景・ロゴ・メニューだけで操作を継続する。両配信動画は1920×1080・30fps・14秒、音声なし。
+
+
+タイトルシーンをinline-sizeコンテナにし、ロゴ枠とメニューを共通シーンに対する絶対配置へ変更。title-contentのflex中央揃えによるロゴ位置計算とviewportベースのタイトルメディアクエリを廃止。cqwはシーン幅を参照する。動画と背景の100%表示に対しロゴも一定の正規化座標で追従する。
