@@ -148,3 +148,6 @@ LoadGame後に保存階層・レベルを確認し、「旅を再開する」で
 
 
 タイトルのロゴとエフェクトは16:9画面内の同じ位置関係で拡大縮小します。ウィンドウサイズ変更でもボタンの大きさにロゴ位置が影響されないようにしています。
+
+
+動画制作向けの下地画像はart/title-video-base/のmukuro-background-logo-1920x1080.pngとsegare-background-logo-1920x1080.pngです。両方1920×1080、ボタンと動画エフェクトを含みません。書き出しはSharpのある環境でnode scripts/export-title-backgrounds.js（または第1引数にSharpモジュールのファイルパスを指定）。

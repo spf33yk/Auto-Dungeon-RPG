@@ -253,3 +253,6 @@ display-mode.jsはユーザー操作からrequestFullscreenを先に要求し、
 
 
 タイトルシーンをinline-sizeコンテナにし、ロゴ枠とメニューを共通シーンに対する絶対配置へ変更。title-contentのflex中央揃えによるロゴ位置計算とviewportベースのタイトルメディアクエリを廃止。cqwはシーン幅を参照する。動画と背景の100%表示に対しロゴも一定の正規化座標で追従する。
+
+
+動画制作下地の生成はscripts/export-title-backgrounds.js。screens.cssのtitle-logo-frame配置（left/top/width/aspect-ratio）を読み取り、元画像を再生成せず合成する。Sharpは制作時だけ必要、ゲーム実行時の依存は追加しない。暗幕とロゴ影は現在のタイトル装飾に合わせる。
