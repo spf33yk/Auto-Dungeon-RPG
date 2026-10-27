@@ -369,3 +369,6 @@
 - 公開版の別保存領域で倅のLoadGame確定／NewGame確定ともティザーhidden=true、time=0を確認。骸へ切替後、確認キャンセルは再生なし、新規確定で映像が約0秒から再生。終了時ended=true/time=12.041667、画面非表示となり目覚めへ遷移。再開確定でも再生し、スキップでゲームへ移行。
 - 再生中はbodyがopening watching-teaserでタイトル動画も停止し、ゲーム進行前の状態を保持。映像はloop=false。新ハッシュURLjourney-teaser.mp4?v=275dc7bf8cadを確認。証跡：test-results/journey-teaser-public.jpg。
 - 公開360×700表示で全画面映像とスキップの画面内配置（右端344・下端684）・タップ操作を確認。コンソールエラーなし。実機iPhoneの全画面挙動とSafariは未確認。
+
+## 2026-10-27 開始前映像の差替え
+ユーザー指定のNewGame_12s_1080p.mp4へ差替え。H.264、1920×1080、24fps、12秒、音声なし。再圧縮せずfaststartへ再格納。骸限定・新規／再開確定後・1回再生・終了／スキップ後の遷移は変更なし。原本はDesktopに保持。公開検証は後述。
