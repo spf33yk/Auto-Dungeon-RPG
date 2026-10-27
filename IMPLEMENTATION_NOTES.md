@@ -363,3 +363,9 @@
 提供「骸の旅路_ティザー映像.mp4」はH.264、1280×720、24fps、12.041667秒、音声トラックなし。再圧縮せずfaststartへ再格納してart/journey-teaser.mp4に保存。新規／再開の確定後にループせず1回再生、終了前の進行・保存を防止。skip・Esc・失敗時の遷移も追加。原本はDesktopに保持。検証結果は後述。
 
 - 追加指定によりティザーは骸のみ。倅は入口で即コールバックを実行し省略する（倅の背景v3エフェクトには影響なし）。
+
+### 開始前ティザー・公開検証
+- 確認コミット77e3e42。Game tests 40523745352・Pages 40523744444はsuccess。前段e91a858もGame tests 40523484630・Pages 40523482081はsuccess。ローカル117件とasset URL --check成功。
+- 公開版の別保存領域で倅のLoadGame確定／NewGame確定ともティザーhidden=true、time=0を確認。骸へ切替後、確認キャンセルは再生なし、新規確定で映像が約0秒から再生。終了時ended=true/time=12.041667、画面非表示となり目覚めへ遷移。再開確定でも再生し、スキップでゲームへ移行。
+- 再生中はbodyがopening watching-teaserでタイトル動画も停止し、ゲーム進行前の状態を保持。映像はloop=false。新ハッシュURLjourney-teaser.mp4?v=275dc7bf8cadを確認。証跡：test-results/journey-teaser-public.jpg。
+- 公開360×700表示で全画面映像とスキップの画面内配置（右端344・下端684）・タップ操作を確認。コンソールエラーなし。実機iPhoneの全画面挙動とSafariは未確認。
