@@ -4,7 +4,8 @@
 
 - 原因：HTMLの初期状態がdata-screen=prepareで、bodyのexploring/preparingがapp.jsの保存読込・renderまで付かず、その間だけ旧サイズの準備UIが描画される構造だった。
 - 外部CSS読込前のインラインCSSで読み込み表示以外を隠し、import map経由のapp.js初期化と2回の描画フレーム後にゲーム画面を表示。エラー時は再読み込み操作、JavaScript無効時は説明を表示。保存データ・ゲームロジックへの変更なし。
-- ローカル全114テスト・配信URL整合・diff検査成功。別ポートのテスト用サーバーでapp.jsを8秒遅延させ、requestAnimationFrameごとのDOM確認で目覚め・準備・探索の初期化前のUI露出が0回であることを確認。探索の再読み込みも同様。準備と目覚めは専用テスト保存キーを使い、旧iframeの保存イベントの影響を分離した。503エラーの模擬試験では、ゲームUIを隠したまま失敗文と再読み込みボタンを表示。実機スマホの再読み込みは未確認。公開確認はpush後に記録する。
+- ローカル全114テスト・配信URL整合・diff検査成功。別ポートのテスト用サーバーでapp.jsを8秒遅延させ、requestAnimationFrameごとのDOM確認で目覚め・準備・探索の初期化前のUI露出が0回であることを確認。探索の再読み込みも同様。準備と目覚めは専用テスト保存キーを使い、旧iframeの保存イベントの影響を分離した。503エラーの模擬試験では、ゲームUIを隠したまま失敗文と再読み込みボタンを表示。実機スマホの再読み込みは未確認。
+- 公開確認コミット111025b。[Game tests](https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/40466320781)と[Pages](https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/40466320403)成功。公開HTMLはローカルと一致。新規表示で「読み込み中…」だけの状態を確認後、1280×720の探索表示へ復帰。2回再読み込みして、data-startup解除・読み込み表示非表示・exploringクラスと1280×720を確認。B26・TURN313・HP8/57の休止状態を維持し、オプションの開閉も確認。コンソールエラーなし。証跡：test-results/startup-public.jpg。
 
 ## 図鑑・デバッグの×ボタン固定（2026-10-27）
 
