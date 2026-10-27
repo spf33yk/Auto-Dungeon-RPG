@@ -5,6 +5,8 @@
 - 思考字幕の表示だけに「▶ 」を追加。探索ログは内容更新または探索画面への移動で表示し、更新がない実時間3秒後にaria-hiddenを含めて非表示。内容更新で再表示し時間を更新。休止中・ダイアログ中も時間は経過し、準備ログは常時表示。履歴と保存v11は維持。
 - ログ領域を右端へ寄せ、文章を右揃え。上下HUDとMAPを画面幅に応じ少し拡大し、320pxでは間隔を縮める。旧余白20pxを480px以下は8pxに縮め、ログが上下HUDへ重なりにくくする。
 - ローカル全106件成功。新規2件で3秒・更新による延長・同じ内容の再描画・準備への移行・古いタイマーの無効化を検証。実ブラウザで▶、右寄せ、3秒経過後のvisibility/aria-hidden、デバッグの新規ログによる再表示を確認。1280×720でMAP幅230px・思考14px・右寄せログ幅540px、320×640／360×700／720×405の枠でUIとMAPを確認。実機iPhone/Androidは未確認。公開確認はpush後に追記する。
+- 公開確認コミット0769441。GitHub Actions Game tests [40425537099](https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/40425537099)全106件成功、Pages [40425536728](https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/40425536728)成功。公開HTMLのimportmap・CSS・app.js配信URLがローカルと一致し、新しいlog-visibility.jsも含むことを確認。
+- 公開PC版で▶、右揃え、3秒後のvisibility:hidden・aria-hidden、MAP幅230px、思考14pxを確認。再開→即休止後はB26・TURN313・HP8/57を維持。393pxの別保存領域ではB29探索を開始→休止、3秒後にログが消え、デバッグ回復の新ログで再表示することを確認。最終B29・TURN33・HP57/57で休止。両タブのコンソールエラーなし。証跡：transient-log-public.png。実機スマホの表示・操作は未確認。
 
 ## 正方形の視界（2026-10-27）
 
