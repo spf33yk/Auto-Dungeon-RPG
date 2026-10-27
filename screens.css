@@ -176,3 +176,79 @@ body.exploring .transparent-view .automap-overlay{width:clamp(88px,26%,230px);ma
  body.exploring .hud-value{gap:2px}
  body.exploring .hud-overlay .pause-toggle{min-width:62px}
 }
+
+/* Preparation shares the exploration surface and its HUD; panels remain scrollable. */
+body.preparing{overflow:hidden;background:#070b0d}
+body.preparing>header,body.preparing footer{display:none}
+body.preparing main{position:fixed;inset:0;max-width:none;margin:0;padding:0;display:grid;place-items:center}
+body.preparing .workspace{position:relative;display:block;width:min(100dvw,calc(100dvh * 16 / 9));height:min(100dvh,calc(100dvw * 9 / 16));margin:0}
+body.preparing .adventure{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:0;overflow:hidden}
+body.preparing .dungeon-viewport,body.preparing .transparent-view .map-wrap{width:100%;height:100%;min-height:0;aspect-ratio:16/9}
+body.preparing .map-vignette{background:#080d0c99;box-shadow:inset 0 0 60px 10px #080f11a0}
+body.preparing .hud-overlay-top{display:flex;gap:16px;align-items:center;top:10px;padding:0}
+body.preparing .hud-overlay-bottom,body.preparing .automap-overlay,body.preparing .hud-alerts,body.preparing .map-notice,body.preparing .field-log-host{display:none}
+body.preparing .workspace[data-screen=prepare] .prepare-scene{position:absolute;z-index:6;inset:62px 12px 10px;display:flex;flex-direction:column;align-items:stretch;padding:0;background:#1b221ec4;border:1px solid #69716b;border-radius:5px;overflow:hidden}
+body.preparing .prepare-scene .panel-heading{min-height:0;padding:7px 14px;flex:none}
+body.preparing .prepare-scene .panel-heading h2{font-size:15px;margin:0}
+body.preparing .preparation-launch{flex:none;display:flex;align-items:center;gap:8px;padding:5px 14px}
+body.preparing .prepare-scene .launch-area{display:flex;align-items:stretch;gap:6px;margin:0;padding:0;width:auto;max-width:none}
+body.preparing .prepare-scene .launch-area #primary{flex:none;width:auto;padding:7px 14px;font-size:11px}
+body.preparing .prepare-scene .launch-area .secondary{padding:7px 10px;font-size:11px;white-space:nowrap}
+body.preparing .preparation-launch .prep-foot{padding:0;flex:1;min-width:0}
+body.preparing .prepare-scene .tabs{flex:none;width:auto;margin:0 14px}
+body.preparing .prepare-scene .tabs button{padding:6px 0}
+body.preparing .prepare-scene.preparation #tab-content{flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;padding:10px 14px}
+body.preparing .expedition{grid-column:auto;grid-row:auto}
+#prep-journal-dialog .journal{margin:0}
+
+/* Card list and rule board: the cards can be dragged or selected and placed. */
+.card-board{height:100%;min-height:0;display:flex;flex-direction:column;gap:6px}
+.card-board-info,.card-help{font-size:10px;line-height:1.5;color:#c4c9c5;margin:0}
+.card-workspace{display:grid;grid-template-columns:minmax(180px,30%) minmax(0,1fr);gap:10px;flex:1;min-height:0}
+.card-library,.card-rules{min-width:0;min-height:0;border:1px solid #59635c;background:#111a18bd;border-radius:4px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.card-library-heading,.card-rules-heading{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px}
+.card-library-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
+.card-library-tabs button,.card-rules-heading button,.board-rule .card-rule-heading button,.condition-remove{border:1px solid #77807b;background:#343d38;color:#fff;border-radius:3px;padding:5px;font-size:10px}
+.card-library-tabs button.active{border-color:#d5c48d;background:#5b5949}
+.card-library-tabs button{white-space:nowrap;letter-spacing:0}
+.card-library-list,.card-rules{overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.card-library-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:5px;align-content:start}
+.palette-card,.board-slot{border:1px solid #7d9487;border-radius:4px;background:#34463c;color:#fff;text-align:left;padding:7px;font:inherit;font-size:11px;line-height:1.35;min-width:0;touch-action:pan-y;user-select:none;cursor:grab}
+.palette-card:disabled{opacity:.4;cursor:not-allowed}.palette-card small{font-size:9px}
+.palette-card.selected-card,.board-slot.selected-card,.row-handle.selected-card{outline:2px solid #e8d48d;outline-offset:1px}
+.board-rule{flex:none;border:1px solid #67746a;background:#252f2ad9;border-radius:4px;padding:7px}
+.board-rule .card-rule-heading{display:flex;gap:5px;align-items:center}
+.board-rule .card-rule-heading .row-handle{flex:1;text-align:left;touch-action:none;cursor:grab}
+.board-rule .card-rule-heading span{font-size:10px;color:#c4c9c5}
+.board-slots{display:flex;flex-wrap:wrap;align-items:stretch;gap:5px;padding:6px 2px}
+.board-slot{flex:0 0 112px;display:flex;flex-direction:column;gap:3px;min-height:50px}
+.board-slot small{font-size:9px;color:#cddbd1}.board-slot.condition{background:#514b35;border-color:#b5a96e}.board-slot.effect{background:#3d4656;border-color:#98a8c4}
+.board-slot.empty{background:#1b2420;border-style:dashed;justify-content:center;text-align:center;flex-basis:70px}
+.condition-wrap{position:relative;flex:0 0 112px;display:flex;flex-direction:column;gap:3px}.condition-wrap .board-slot{flex:auto;width:100%}
+.condition-remove{position:absolute;right:2px;top:2px;padding:0 4px}.card-value{font-size:9px;color:#e5e7dd}.card-value input{width:55px;background:#202a25;border:1px solid #7d867a;color:#fff;padding:3px;font:11px monospace}
+.board-rule .card-rule-preview{font-size:10px;line-height:1.4;margin:1px 0 0;padding:4px;background:transparent}
+.card-drag-ghost{position:fixed;z-index:9999;top:0;left:0;pointer-events:none;max-width:180px;padding:8px;background:#475b4e;color:white;border:1px solid #d6c98d;border-radius:4px;font-size:11px;box-shadow:0 2px 8px #0009}
+@media(max-width:800px){
+ body.preparing .hud-overlay-top{flex-wrap:wrap;gap:5px 10px}.preparing .floor-health{flex-basis:100%;gap:7px}.preparing .floor-health .hud-stage-title{font-size:12px}.preparing .floor-health .player-vitals{flex-basis:100px;min-width:65px}.preparing .hud-fragments{margin-left:auto}
+ body.preparing .workspace[data-screen=prepare] .prepare-scene{inset:82px 8px 8px}
+ body.preparing .preparation-launch{padding:4px 8px}.preparing .prep-foot{display:none}
+ body.preparing .prepare-scene .tabs{margin:0 8px}.preparing .prepare-scene.preparation #tab-content{padding:6px 8px}
+ .card-workspace{grid-template-columns:minmax(115px,34%) minmax(0,1fr);gap:5px}.card-library,.card-rules{padding:5px;gap:4px}.card-library-list{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+ body.preparing .hud-overlay{left:6px;right:6px}.preparing .hud-overlay-top{top:5px;gap:3px}.preparing .floor-health .hud-stage-title{font-size:10px}.preparing .level-vitals{flex-basis:38px}.preparing .level-vitals strong,.preparing .player-name strong,.preparing .player-name span{font-size:9px}.preparing .hud-overlay .icon-button{width:25px;height:25px}.preparing .utility-controls{gap:4px}.preparing .hud-fragments small{font-size:8px}.preparing .hud-fragments b{font-size:10px}
+ body.preparing .workspace[data-screen=prepare] .prepare-scene{inset:65px 6px 5px}body.preparing .prepare-scene .panel-heading{padding:3px 7px}body.preparing .prepare-scene .panel-heading h2{font-size:11px}body.preparing .tag{font-size:8px}
+ body.preparing .preparation-launch{padding:3px 6px}body.preparing .prepare-scene .launch-area{gap:3px}body.preparing .prepare-scene .launch-area #primary,body.preparing .prepare-scene .launch-area .secondary{padding:5px 6px;font-size:9px}
+ body.preparing .prepare-scene .tabs{margin:0 6px}body.preparing .prepare-scene .tabs button{padding:3px 0;font-size:9px}body.preparing .prepare-scene.preparation #tab-content{padding:4px 6px}
+ .card-board{height:auto}.card-board-info,.card-board>.card-help{display:none}.card-workspace{height:160px;min-height:120px;flex:none}
+ .card-board-info,.card-help{font-size:8px;line-height:1.3}.card-workspace{grid-template-columns:minmax(98px,35%) minmax(0,1fr);gap:4px}.card-library-heading,.card-rules-heading{font-size:9px}.card-library-tabs button,.card-rules-heading button,.board-rule .card-rule-heading button{padding:3px;font-size:8px}.palette-card,.board-slot{padding:5px;font-size:9px}.board-slot,.condition-wrap{flex-basis:85px}.board-slot{min-height:40px}.board-slot.empty{flex-basis:52px}.board-rule{padding:4px}.board-rule .card-rule-preview{font-size:9px}.card-value input{width:40px}
+}
+@media(max-width:600px) and (orientation:portrait){
+ body.preparing .workspace{width:100dvw;height:100dvh}
+ body.preparing .dungeon-viewport,body.preparing .transparent-view .map-wrap{aspect-ratio:auto}
+ body.preparing .hud-overlay{left:max(6px,env(safe-area-inset-left));right:max(6px,env(safe-area-inset-right))}
+ body.preparing .workspace[data-screen=prepare] .prepare-scene{bottom:max(5px,env(safe-area-inset-bottom))}
+ body.preparing .prepare-scene .launch-area #primary,body.preparing .prepare-scene .launch-area .secondary{font-size:10px;min-height:32px}
+ .card-workspace{height:min(55dvh,420px)}
+ .palette-card,.board-slot{font-size:10px;min-height:34px}
+}
