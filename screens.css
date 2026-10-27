@@ -321,7 +321,8 @@ body.opening>header,body.opening>main,body.opening>.mobile-display{display:none!
 
 /* One-shot cinematic; the game remains on its paused title until completion. */
 .teaser-scene{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#000}
-.teaser-scene video{display:block;width:100%;height:100%;object-fit:contain}
+.teaser-frame{position:relative;width:min(100dvw,calc(100dvh * 16 / 9));height:min(100dvh,calc(100dvw * 9 / 16));min-width:0;min-height:0;overflow:hidden}
+.teaser-frame video{position:absolute;inset:0;display:block;width:100%;height:100%;min-width:0;min-height:0;object-fit:contain;object-position:center}
 .teaser-actions{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));display:flex;gap:10px}
 .teaser-actions button{background:#15191de6;border:1px solid #b8b5a9;color:#eee;padding:10px 14px;min-height:42px}
 body.watching-teaser .title-scene{visibility:hidden}

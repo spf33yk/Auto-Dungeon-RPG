@@ -268,3 +268,5 @@ pendingJourneyに開始／再開コールバックを保持し、playJourneyTeas
 playJourneyTeaserの入口でopeningVariantがmukuro以外なら映像UIを表示せずコールバックを即実行する。タイトルの版は新規初期化前の達成記録で判定。
 
 開始前映像の配信ファイルjourney-teaser.mp4はNewGame_12s_1080p.mp4の再格納版（1920×1080・24fps・12秒・音声なし）に更新。遷移と骸限定判定は変更しない。
+
+teaser-sceneは黒いviewportオーバーレイ、teaser-frameはタイトルと同じ16:9寸法の中央枠。videoとteaser-actionsを同じ枠の子要素とする。videoをabsolute inset:0、min-width/min-height:0で配置し、メディアの固有サイズとgridの最小サイズに依存させない。
