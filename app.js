@@ -43,7 +43,8 @@ function sprite(ctx,type,x,y,size=24){const rows=sprites[type]||sprites.reward;c
 const ctx=$('map').getContext('2d');ctx.imageSmoothingEnabled=false;
 function draw(){
 const scene=state.seed+':'+state.floor;if(damageScene!==scene){damagePopups=[];damageScene=scene;}
-const map=$('map'),box=map.getBoundingClientRect();if(box.width>0&&box.height>0){const height=Math.round(744*box.height/box.width);if(map.height!==height){map.height=height;ctx.imageSmoothingEnabled=false;}}
+// Fixed Full HD drawing surface; CSS scales the 16:9 scene to the device.
+const map=$('map');if(map.width!==1920||map.height!==1080){map.width=1920;map.height=1080;ctx.imageSmoothingEnabled=false;}
 ctx.fillStyle='#0c1416';ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);const theme=zoneFor(state);const visible=(x,y)=>canSee(state,x,y);
 const progress=motion&&state.phase==='explore'?Math.min(1,(performance.now()-motion.time)/motion.duration):1;
 const eased=1-Math.pow(1-progress,3);

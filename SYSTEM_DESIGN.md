@@ -240,3 +240,7 @@ display-mode.jsはユーザー操作からrequestFullscreenを先に要求し、
 
 ### タイトルの再開確認
 共通ロゴ枠はaspect-ratio:2.5、画像はobject-fit:contain。LoadGameではload-game-dialogを開き、confirm-load-gameでshowingTitleを解除する。既存dialog-closeとabandon-confirm-actionsを共用し、キャンセルでは旅の状態を変更しない。
+
+
+## Full HD描画
+主Canvas #mapは1920×1080固定。drawで表示領域比から内部高さを再設定しない。cameraForには同Canvas寸法を渡すため、視界半径と表示マス数を保った描画倍率を得る。CSSによる端末サイズへの縮小を継続。タイトル背景は1920×1080PNG、原本は別名で保持。
