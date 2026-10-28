@@ -6,7 +6,7 @@ import {MEMORY_SHADE,dimmedWallTileset,floorLight,actorFootOffset,renderSightSta
 import {standingBox,sceneDrawOrder,drawFootShadow} from './scene-depth.js';
 import {drawProp} from './prop-view.js';
 import {drawCryptTile,drawRaisedWall} from './terrain-view.js';
-import {requestLandscapeDisplay} from './display-mode.js';
+import {requestLandscapeDisplay,sceneLayout} from './display-mode.js';
 import {openingVariant} from './opening.js';
 import {createLogVisibility} from './log-visibility.js';
 import {queueDamage,damageFrame} from './damage-view.js';
@@ -206,7 +206,7 @@ function renderTab(){
 }
 function renderScreens(){
  const prep=state.phase==='prepare',awake=state.phase==='awakening',st=stats(state);$('workspace').dataset.screen=awake?'awakening':prep?'prepare':'explore';document.body.classList.toggle('opening',showingTitle);$('title-scene').hidden=!showingTitle;document.body.classList.toggle('exploring',!showingTitle&&!prep&&!awake);document.body.classList.toggle('preparing',!showingTitle&&prep);$('awakening-scene').hidden=!awake;$('game-icons').hidden=awake;const journal=document.querySelector('.journal');journal.hidden=awake;const journalHost=awake?$('workspace'):prep?$('prep-journal-content'):$('field-log-host');if(journal.parentElement!==journalHost)journalHost.appendChild(journal);const toolsHost=awake?$('header-tools'):$('hud-tools');if($('utility-controls').parentElement!==toolsHost)toolsHost.appendChild($('utility-controls'));
- $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=awake;$('expedition').hidden=awake;const statusHost=awake?$('workspace'):$('status-dialog-content');if($('expedition').parentElement!==statusHost)statusHost.appendChild($('expedition'));$('status-open').hidden=awake;$('fullscreen-open').hidden=prep||awake;$('mobile-display').hidden=prep||awake;if((prep||awake)&&ownsFullscreen&&document.fullscreenElement)document.exitFullscreen?.().catch(()=>{});$('live-order-panel').hidden=prep;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
+ $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=awake;$('expedition').hidden=awake;const statusHost=awake?$('workspace'):$('status-dialog-content');if($('expedition').parentElement!==statusHost)statusHost.appendChild($('expedition'));$('status-open').hidden=awake;$('fullscreen-open').hidden=false;$('mobile-display').hidden=true;$('live-order-panel').hidden=prep;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
  $('prepare-floor').textContent=`${floorLabel(state)}への支度`;
  const host=awake?$('awakening-start'):prep?$('launch-area'):$('notice-actions');if($('primary').parentElement!==host)host.prepend($('primary'));
  const visited=state.visited.flat().filter(Boolean).length;
@@ -214,7 +214,7 @@ function renderScreens(){
 
  $('expedition-summary').innerHTML=summary+`<div class="current-action"><small>今の判断</small><p>${esc(prep?'出発の準備をしています':state.intent)}</p></div><dl class="stat-list"><div><dt>探索済みの床 / この階の撃破</dt><dd>${visited}マス / ${state.floorKills}体</dd></div><div><dt>所持品 / 手紙</dt><dd>${state.inventory.length}個 / ${state.letter?'入手済':'未入手'}</dd></div></dl><h3>習得した記憶</h3><p class="section-caption">${skills.filter(k=>state.levels[k.id]).map(k=>k.name+(k.max>1?' Lv.'+state.levels[k.id]:'')).join(' / ')||'未習得'}</p><h3>この旅で得たスキル・特殊指示</h3><p class="section-caption">${[...state.abilities,...state.unlockedOrders].map(id=>esc(rewardDefinitions.find(r=>r.id===id).name)).join(' / ')||'未取得'}<br>特殊指示は準備中に探索指示へ設定して使います。</p>`;
  renderOrderEditor($('live-orders'));
- $('status-open').hidden=showingTitle||awake;$('fullscreen-open').hidden=showingTitle||prep||awake;$('mobile-display').hidden=showingTitle||prep||awake;$('return-title').hidden=showingTitle;
+ $('status-open').hidden=showingTitle||awake;$('fullscreen-open').hidden=false;$('mobile-display').hidden=true;$('return-title').hidden=showingTitle;
 }
 function openDialog(id){if(!document.querySelector('dialog[open]'))dialogWasPaused=paused;paused=true;$(id).showModal();if(state.phase==='explore')render();}
 function finishDialog(){if(!document.querySelector('dialog[open]')){paused=dialogWasPaused;last=performance.now();render();}}
@@ -242,12 +242,12 @@ $('teaser-skip').onclick=finishJourneyTeaser;
 $('teaser-retry').onclick=()=>{$('journey-teaser').play().then(()=>{$('teaser-retry').hidden=true;}).catch(()=>{});};
 document.addEventListener('keydown',e=>{if(pendingJourney&&e.key==='Escape')finishJourneyTeaser();});
 document.addEventListener('visibilitychange',()=>{if(!pendingJourney)return;const video=$('journey-teaser');if(document.hidden)video.pause();else video.play().catch(()=>{$('teaser-retry').hidden=false;});});
-function startNewJourney(){playJourneyTeaser(()=>{showingTitle=false;reset(hasSave?newGame(undefined,state.profile):state);});}
+function startNewJourney(){tryMobileDisplay();playJourneyTeaser(()=>{showingTitle=false;reset(hasSave?newGame(undefined,state.profile):state);});}
 
 $('title-new').onclick=()=>{if(hasSave)openDialog('new-game-dialog');else startNewJourney();};
 $('confirm-new-game').onclick=()=>{$('new-game-dialog').close();startNewJourney();};
 $('title-load').onclick=()=>{if(hasSave)openDialog('load-game-dialog');};
-$('confirm-load-game').onclick=()=>{if(!hasSave)return;$('load-game-dialog').close();playJourneyTeaser(()=>{showingTitle=false;paused=state.phase==='explore';dialogWasPaused=paused;last=performance.now();render();});};
+$('confirm-load-game').onclick=()=>{if(!hasSave)return;tryMobileDisplay();$('load-game-dialog').close();playJourneyTeaser(()=>{showingTitle=false;paused=state.phase==='explore';dialogWasPaused=paused;last=performance.now();render();});};
 $('title-option').onclick=()=>openDialog('options-dialog');
 $('return-title').onclick=()=>{paused=true;dialogWasPaused=true;save();showingTitle=true;motion=null;$('options-dialog').close();render();};
 $('primary').onclick=()=>{if(state.phase==='explore')return;if(['awakening','prepare'].includes(state.phase)){beginExploration(state);paused=false;last=performance.now();tone();}else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();if(state.phase==='explore')tryMobileDisplay();};
@@ -263,15 +263,22 @@ $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dial
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',finishDialog));
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.phase==='explore'){paused=true;dialogWasPaused=true;render();}});
 function debugStatus(message=''){ $('debug-status').textContent=`${floorLabel(state)} · Lv.${state.level} · EXP ${state.experience} · HP ${state.hp}/${stats(state).maxHp} · ${state.shards}pt${state.debugUsed?' · DEBUG操作済み':''}${message?' — '+message:''}`;}
-function displayMessage(text){$('fullscreen-status').textContent=text;$('mobile-display').textContent=text||'横向きで全画面表示';}
+function displayMessage(text){$('fullscreen-status').textContent=text;$('landscape-status').textContent=text||'端末を横向きにしてください。';$('mobile-display').textContent=text||'横向きで全画面表示';}
 async function enterDisplay(){
  const result=await requestLandscapeDisplay(document.documentElement,screen.orientation);ownsFullscreen=result.fullscreen;lockedOrientation=result.landscape;
- displayMessage(result.landscape?'横向きの全画面表示中です。':result.fullscreen?'全画面表示中です。端末を横向きにしてください。':'端末を横向きにしてください（全画面表示はこのブラウザで利用できません）。');
+ displayMessage(result.landscape?'横向きの全画面表示中です。':result.fullscreen?'全画面表示中です。端末を横向きにしてください。':'全画面に切り替えられませんでした。端末を横向きにして続けてください。');
  $('fullscreen-open').textContent=result.fullscreen?'全画面表示を終了':'横向きで全画面表示';
 }
-function tryMobileDisplay(){if(!autoDisplayAttempted&&matchMedia('(pointer: coarse)').matches){autoDisplayAttempted=true;void enterDisplay();}}
+function tryMobileDisplay(){if(!autoDisplayAttempted&&matchMedia('(pointer: coarse)').matches&&!document.fullscreenElement){autoDisplayAttempted=true;void enterDisplay();}}
 $('fullscreen-open').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen?.().catch(()=>{});else void enterDisplay();};
 $('mobile-display').onclick=()=>void enterDisplay();
+$('landscape-fullscreen').onclick=()=>{autoDisplayAttempted=true;void enterDisplay();};
+$('landscape-gate').addEventListener('cancel',e=>{if(document.documentElement.dataset.landscapeRequired==='true')e.preventDefault();});
+function syncSceneViewport(){
+ const layout=sceneLayout(innerWidth,innerHeight,matchMedia('(pointer: coarse)').matches),root=document.documentElement;root.style.setProperty('--game-scene-scale',layout.scale);root.dataset.landscapeRequired=String(layout.portrait);
+ const gate=$('landscape-gate');if(layout.portrait&&!gate.open){paused=true;dialogWasPaused=true;gate.showModal();if(state.phase==='explore')render();}else if(!layout.portrait&&gate.open)gate.close();
+}
+addEventListener('resize',syncSceneViewport);window.visualViewport?.addEventListener('resize',syncSceneViewport);document.addEventListener('fullscreenchange',syncSceneViewport);syncSceneViewport();
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){if(lockedOrientation)screen.orientation?.unlock?.();lockedOrientation=false;ownsFullscreen=false;$('fullscreen-open').textContent='横向きで全画面表示';displayMessage('横向きで全画面表示');}});
 $('status-open').onclick=()=>openDialog('status-dialog');
 $('prepare-status').onclick=()=>openDialog('status-dialog');

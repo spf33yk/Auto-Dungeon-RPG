@@ -316,7 +316,7 @@ wall-tileset.jsのwallDrawBoxが真上の床に接する壁を前景壁として
 
 exploration-forecast.jsは本編tickを使う複製シミュレーション、集計、指示構成の注意判定を担当。24ターンごとにイベントループへ制御を戻し、試行間もyieldする。app.jsは指示・育成・装備・HP・所持品等のシグネチャとチケットで同一結果をキャッシュし、編集・タブ遷移・出発時に古い計算をキャンセル。予測に永続化やworker用の別ロジックを持たせず、本番の乱数を消費しない。
 
-ui-settings.jsはミニマップの選択値を別キーへ保存し、htmlのdata-minimap-sizeとCSS変数で描画幅を切り替える。storage拒否・破損は中へ戻す。ネイティブCanvasのセルは6pxとし、CSS拡大で3サイズを表示。準備パネルをinline-sizeコンテナにしてモバイルの2列＋下部予測を適用する。
+ui-settings.jsはミニマップの選択値を別キーへ保存し、htmlのdata-minimap-sizeとCSS変数で描画幅を切り替える。storage拒否・破損は中へ戻す。ネイティブCanvasのセルは6pxとし、CSS拡大で3サイズを表示。準備パネルをinline-sizeコンテナとし、PC・スマホとも共通論理幅で3列を適用する。
 
 card-editor.jsは表示順とフレーム識別を分離し、カード配置APIは維持。状態タブへ既存サマリーを複製する際はid属性を除いて重複を防ぐ。entrance-view.jsは描画用surfaceから入口の壁セルを判定し、grid参照が変わった時だけキャッシュを作り直す。入口素材のURLはindexのdata-entrancesから取得し、update-assets.jsで内容ハッシュを更新する。preparation-ui.test.jsで設定保持／破損・予測集計／キャンセル／非変更・入口判定／床非配置・PNG寸法／透過／容量を検証。
 
@@ -331,3 +331,7 @@ build-entrance-tileset.jsは任意フォルダのPNG検証と画像ハッシュ�
 wallNeighborMaskが描画用surfaceの4隣接からビットを生成し、drawWallPartsが定義のtiles[mask]を1回描画する。validateWallTilesetは新形式と旧wall-parts形式を分岐検証する。16番号・順序・寸法・範囲を検証し、旧定義の互換テストはparts-tileset-v1.jsonを使う。
 
 build-wall-autotiles.jsが専用32pxパーツから16チップを構成する。build-wall-tileset.jsはJSONに指定したPNGを検証し、固定のatlas-32.pngファイル名へ依存しない。wall-autotile.test.jsは全16番号・斜め非依存・画像選択・定義拒否条件・接続辺の最終PNG画素一致を検証する。
+
+## 共通仮想画面と端末方向（2026-10-28）
+display-mode.jsのsceneLayoutが1280×720の論理寸法・等比倍率・タッチ縦向き判定を返す。app.jsはresize／visualViewport.resize／fullscreenchangeでCSS変数--game-scene-scaleを更新する。screens.cssはmainとworkspaceを固定論理寸法にし、中央基準のtransformで表示する。コンテナ幅はPCとスマホで共通となり、HUDと準備3列を同じ規則で描画する。
+縦向き案内はnative dialogで背景操作を止め、探索をpausedにする。横向きへ戻った際も自動で探索を再開しない。全画面要求はユーザー操作から実行し、準備遷移時の自動exitFullscreenを廃止。保存モデル・描画Canvas寸法・素材形式は変更しない。

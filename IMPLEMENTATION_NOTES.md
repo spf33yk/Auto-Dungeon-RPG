@@ -500,3 +500,10 @@ wall-autotile／wall-tilesetの関連10件が成功。全16番号の選択、斜
 ### 最終検証
 
 wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が成功（test-results/wall-autotile-tests.log）。build-wall-tileset.jsと配信URL--check成功。ローカル確認用横通路で新JSON・16チップの読込、接続辺、入口装飾、前景壁が床へ張り出さない表示を確認。警告・エラーなし。証跡はGit対象外のtest-results/wall-autotile-preview.png。元の32pxパーツ・保存v12・ゲーム進行は維持。新PNGは4693 bytes。実機Safariと公開版走行は未確認。
+
+## PC・スマホの共通横画面（2026-10-28）
+- 対象：探索／準備を1280×720から等比表示。スマホでも3列、縦向き回転案内、準備移行時の全画面維持。保存v12変更なし。
+- ローカル：node --test display-mode.test.js preparation-ui.test.js card-placement.test.js の13件成功。app.js構文、配信ハッシュ更新とcheckを確認。
+- UI：740×416の横持ち相当と1280×720のPCで編集3列の論理幅が一致（309／567／334px）。全景が収まり、縮小後のドラッグで第3行を第1行へ移動できる。PCブラウザで全画面→探索→準備→探索の維持と手動終了を確認。
+- 未確認：実機スマホ／Safariのネイティブ全画面と横向き固定。縦向き判定は単体テストで確認。検証iframeではブラウザ操作補助のMutationObserverエラーが出るが、ゲーム側に同処理はない。
+- 公開確認：本変更のpush後にActions・Pages・公開UIを確認して追記する。
