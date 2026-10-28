@@ -5,6 +5,8 @@
 
 原案は内蔵image_genで生成し、元の大きな画像はGit対象外のart/local-originals/crypt-props-source.pngへ保持。透過の薄い縁を整理し64px原本を作り、nearest-neighborで32px版を作る。Sharpは制作時だけ必要。再生成：node scripts/build-crypt-props.js（第1引数にSharpのモジュールパス指定も可）。
 
-容量：原本12182 bytes＋配信3879 bytes＝16061 bytes。両PNGの合計64KiB以下をテストする。生成原案はGitへ含めない。
+容量：原本10801 bytes＋配信3464 bytes＝14265 bytes。両PNGの合計64KiB以下をテストする。生成原案はGitへ含めない。
 
 生成プロンプト要約：既存の地下墓所石タイルを色の参考に、3×2セルの64pxドット絵。閉じた木の宝箱、上向きへ登る石階段、錆びた短剣、革と鎖の胸当て、丸い墓石と割れた墓石。灰・苔緑・茶・鈍い金。背景透明、文字・キャラクターなし、見下ろし視点、明瞭な輪郭。
+
+2026-10-28改訂：宝箱は蓋と短い正面が見える形、階段は左から右へ登る横向きに変更。再生成画像からこの2セルだけを採用し、他4セルは維持。元画像はGit対象外のart/local-originals/props-perspective-source.png。ゲーム側の大きな黄色い錠前描画は削除し、絵に含まれる留め金を使用する。PROMPT.mdに変更指示を記録。

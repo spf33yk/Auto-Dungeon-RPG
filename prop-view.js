@@ -1,2 +1,2 @@
 export const PROP_FRAMES={chest:[0,0],stairs:[1,0],gear:[2,0],armor:[0,1],tombstone:[1,1],'tombstone-cracked':[2,1]};
-export function drawProp(ctx,atlas,type,x,y,size=24){const cell=PROP_FRAMES[type];if(!cell||!atlas.complete||atlas.naturalWidth!==96||atlas.naturalHeight!==64)return false;ctx.imageSmoothingEnabled=false;ctx.drawImage(atlas,cell[0]*32,cell[1]*32,32,32,x,y,size,size);return true;}
+export function drawProp(ctx,atlas,type,x,y,size=24,height=size){const cell=PROP_FRAMES[type];if(!cell||!atlas.complete||atlas.naturalWidth!==96||atlas.naturalHeight!==64)return false;ctx.imageSmoothingEnabled=false;ctx.drawImage(atlas,cell[0]*32,cell[1]*32,32,32,x,y,size,height);return true;}

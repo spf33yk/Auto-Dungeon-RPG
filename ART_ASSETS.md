@@ -66,3 +66,7 @@
 
 ## 小物アトラス採用（2026-10-28）
 art/props/master-64.pngは192×128、atlas-32.pngは96×64、3列×2行。宝箱・上り階段・武器・防具・墓石2種。原本12182 bytes、配信3879 bytes、合計16061 bytes。大きな生成原案はGit対象外のart/local-originals/crypt-props-source.pngへ保持。内蔵image_genで生成後、透過縁とセル余白を整理し、nearest-neighborで配信版を作成。生成条件と再生成手順はart/props/README.md。キャラクター素材は本変更に含めない。
+
+## 立体壁・小物の改訂（2026-10-28）
+
+地下墓所の床・壁を周期模様にし、64px・32px双方の対向辺を統一。宝箱と横向き階段の2セルを内蔵image_genで改訂し、装備・墓石は既存セルを維持。詳細な変更指示はart/props/PROMPT.md。原本2枚＋配信2枚で計22362 bytes（従来35226 bytesから12864 bytes削減）。大きな生成原案・検証画像はGitへ含めない。全エリアの壁立体化と足元順の描画はコードで行う。
