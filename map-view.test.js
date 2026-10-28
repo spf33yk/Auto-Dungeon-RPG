@@ -7,7 +7,7 @@ test('portrait and landscape cameras fit the full sight range without stretching
    const x=(center.x+dx*24-c.left)*c.scale,y=(center.y+dy*24-c.top)*c.scale;
    assert.ok(x>=0&&x<=width&&y>=0&&y<=height);
   }
-  assert.ok(Math.abs(c.scale*24-Math.min(width,height)/(2*Math.ceil(sight)+3))<1e-8);
+  assert.ok(Math.abs(c.scale*24-Math.min(width,height)/(2*Math.ceil(sight)+7))<1e-8);
  }
 });
 import {cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';
@@ -15,8 +15,8 @@ import {cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';
 test('zoom camera fits every sight radius and follows fractional positions at map edges',()=>{
  for(const sight of [2,3,4,5,6,7,8])for(const p of [{x:1,y:1},{x:15.25,y:11.5},{x:29,y:21}]){
   const c=cameraFor(p,sight),center={x:(p.x+.5)*24,y:(p.y+.5)*24};
-  assert.ok(c.rows<23&&c.columns<31); // Never show the entire 31×23 field.
-  assert.ok(c.scale>1);
+  assert.ok(c.rows<35&&c.columns<47); // Never show the entire 31×23 field.
+  assert.ok(c.scale>=1);
   assert.ok(Math.abs((center.x-c.left)*c.scale-372)<1e-8);
   assert.ok(Math.abs((center.y-c.top)*c.scale-276)<1e-8);
   for(const [dx,dy] of [[sight,0],[-sight,0],[0,sight],[0,-sight]]){

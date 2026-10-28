@@ -4,7 +4,7 @@ function connected(grid,start){const q=[start],seen=new Set([key(start)]);for(le
 // Called only for a newly generated crypt, after enemies, drops and traps are placed.
 export function placeCryptObstacles(s,rooms){
  s.obstacles=[];const occupied=new Set([s.player,s.stairs,...s.items,...s.enemies,...s.traps].map(key));
- for(const r of rooms){const candidates=[];
+ for(const r of rooms){if(s.obstacles.length>=6)break;const candidates=[];
   for(let y=r.y+1;y<r.y+r.h-1;y++)for(let x=r.x+1;x<r.x+r.w-1;x++){
    if(occupied.has(x+','+y)||Math.max(Math.abs(x-s.player.x),Math.abs(y-s.player.y))<=1||Math.abs(x-s.stairs.x)+Math.abs(y-s.stairs.y)<2)continue;
    let open=true;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(!s.grid[y+dy]?.[x+dx])open=false;

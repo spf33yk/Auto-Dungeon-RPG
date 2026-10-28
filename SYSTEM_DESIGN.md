@@ -299,3 +299,11 @@ wall-tileset.jsがJSON検証・画像実寸確認・theme登録・接続パー�
 scene-lighting.jsが暗色アトラス生成／キャッシュ、床の公開区分、描画用視界座標、透明行を除く接地補正を担当。専用アトラス全体にsource-atopで暗色を一度重ね、wall-tileset.jsはImageまたはCanvasを同じ矩形で描く。透過輪郭は保持。壁の明暗は床パスでなく壁パスへ適用し、視界外壁を薄い透明画像にしない。
 
 描画用の視界stateは補間中の最寄り整数マスを持つ浅いコピーとし、元のstateは変更しない。画面外の壁はカリング。未発見床の非表示とMAP・AIのcanSeeを維持。scene-lighting.test.jsで暗色処理の合成方法とキャッシュ、未発見床、遮蔽・視界半径・非変更、透明行の異なるユニットと影の接地一致を検証。
+
+## 拡張グリッドと保存v12（2026-10-28・現行）
+
+game-engine.jsの新規グリッドは47×35、通常階のroomsは9矩形。1マス通路の接続に追加経路を設ける。移行では現在階を再生成せずversionを12へ進める。validMapShapeは新旧の寸法と配列形状、任意roomsの範囲を検証する。reveal・warpDestination・app描画・miniMapGeometryは保存中のgrid実寸を使用。map-discovery.jsはroomsがある場合に明示的な部屋単位で入室を判定し、旧セーブには従来の推定方式を残す。
+
+sceneDrawOrderは壁・小物を足元順に描いた後、視界内のキャラクターを足元順に描く。透過による遮蔽回避は削除。floorLightは視界内／薄暗い視界外の2区分になり、地形の表示とゲームの発見情報を分離する。cameraForの余裕を7行へ変更。壁の専用定義rise=.75と32×56セルにレンダラーが追従する。
+
+壁の32pxアトラスを直接編集し、build-wall-tileset.jsはPNGヘッダ実寸とtileSize32の検証、画像ハッシュ更新のみを行う（Sharp不要）。64px原本は互換資料として保管。expanded-map.test.jsで拡張寸法・独立部屋・狭い通路・階段経路・旧寸法保存と次階拡張を確認し、既存の接続／全30階走破／移行／MAP／描画のテストも更新する。

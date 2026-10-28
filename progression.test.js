@@ -15,7 +15,7 @@ test('character levels use remaining experience and grow only HP, including mult
 });
 test('old save gains Lv1 without retroactive growth and v11 round-trips or rejects corrupt progression',()=>{
  const old=newGame(991);old.version=10;delete old.level;delete old.experience;old.kills=200;old.hp=21;
- const s=normalizeSave(old);assert.equal(s.level,1);assert.equal(s.experience,0);assert.equal(s.hp,21);assert.equal(s.version,11);
+ const s=normalizeSave(old);assert.equal(s.level,1);assert.equal(s.experience,0);assert.equal(s.hp,21);assert.equal(s.version,12);
  for(const key of ['grid','gear','profile','shards','rngState','kills'])assert.deepEqual(s[key],old[key]);
  gainExperience(s,12);assert.ok(validateSave(s));assert.deepEqual(normalizeSave(s),s);
  for(const [level,experience]of [[0,0],[31,0],[1,-1],[1,10],[30,1],[1,Infinity]])assert.equal(normalizeSave({...s,level,experience}),null);

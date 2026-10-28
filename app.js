@@ -1,6 +1,6 @@
 import {loadWallTilesets} from './wall-tileset.js';
 import {MEMORY_SHADE,dimmedWallTileset,floorLight,actorFootOffset,renderSightState} from './scene-lighting.js';
-import {standingBox,sortByFoot,foregroundWallOpacity,drawFootShadow} from './scene-depth.js';
+import {standingBox,sceneDrawOrder,drawFootShadow} from './scene-depth.js';
 import {drawProp} from './prop-view.js';
 import {drawCryptTile,drawRaisedWall} from './terrain-view.js';
 import {requestLandscapeDisplay} from './display-mode.js';
@@ -59,7 +59,7 @@ function draw(){
  const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y),hop=moving?Math.sin(progress*Math.PI)*2:0;
  const camera=cameraFor(position,radius(state),map.width,map.height);ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);
  const graves=new Set((state.obstacles||[]).map(o=>o.x+','+o.y)),surface=state.grid.map((r,y)=>r.map((v,x)=>(v||graves.has(x+','+y))?1:0)),queue=[];
- for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+ for(let y=0;y<state.grid.length;y++)for(let x=0;x<state.grid[y].length;x++){
   if((x+1)*24<camera.left||x*24>camera.left+map.width/camera.scale||(y+1)*24<camera.top||(y-1)*24>camera.top+map.height/camera.scale)continue;
   const floor=Boolean(surface[y][x]),light=floorLight(state.seen[y][x],visible(x,y));if(floor&&light==='hidden')continue;const px=x*24,py=y*24,n=(x*17+y*31+state.seed)%13;
   if(!(floor&&theme.id==='crypt'&&drawCryptTile(ctx,cryptAtlas,surface,x,y,state.seed,24,true))){
@@ -67,14 +67,14 @@ function draw(){
    if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+5+n,py+8,2,2);}
   }
   if(floor&&light==='memory'){ctx.fillStyle=MEMORY_SHADE;ctx.fillRect(px,py,24,24);}
-  if(!floor)queue.push({footY:(y+1)*24,layer:0,x,draw(){ctx.save();ctx.globalAlpha=foregroundWallOpacity(x,y,position);const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,light==='visible'?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme);ctx.restore();}});
+  if(!floor)queue.push({footY:(y+1)*24,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,light==='visible'?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme);ctx.restore();}});
  }
  const stair=state.stairs;if(state.seen[stair.y][stair.x]){ctx.save();ctx.globalAlpha=visible(stair.x,stair.y)?1:.4;sprite(ctx,'stairs',stair.x*24,stair.y*24);ctx.restore();}
  for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;ctx.fillStyle=t.spent?'#7e7769':'#d7b278';ctx.fillRect(t.x*24+6,t.y*24+14,12,3);ctx.fillStyle='#d1b88b';for(let i=0;i<3;i++)ctx.fillRect(t.x*24+7+i*4,t.y*24+10,2,4);ctx.restore();}
  function entity(o,type,{standing=false,layer=1,hero=false,enemy=false}={}){
   const at=hero?position:o,box=standing?standingBox(at.x,at.y):{x:at.x*24,y:at.y*24,width:24,height:24,footY:(at.y+1)*24};
+  if(standing||type==='chest'){ctx.save();ctx.globalAlpha=hero||visible(o.x,o.y)?1:.4;drawFootShadow(ctx,at.x,at.y);ctx.restore();}
   queue.push({footY:box.footY,layer,x:at.x,draw(){ctx.save();ctx.globalAlpha=hero||visible(o.x,o.y)?1:.4;
-   if(standing||type==='chest')drawFootShadow(ctx,at.x,at.y);
    const oldPalette={g:palette.g,l:palette.l,r:palette.r,p:palette.p};if(enemy){if(type==='slime'){palette.g=theme.wallColor;palette.l='#c0c7b1';}else{palette.r=theme.floorColor;palette.p=theme.wallColor;}}
    const footOffset=(hero||enemy)?actorFootOffset(sprites[type],box.height):0;
    sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
@@ -87,7 +87,7 @@ function draw(){
  for(const i of state.items)if(state.seen[i.y][i.x])entity(i,i.type==='letter'?'chest':i.type==='gear'&&gearById[i.gear.baseId].slot==='armor'?'armor':i.type);
  for(const e of state.enemies)if(visible(e.x,e.y))entity(e,e.type,{standing:true,layer:2,enemy:true});
  entity(state.player,'skeleton',{standing:true,layer:3,hero:true});
- for(const object of sortByFoot(queue))object.draw();
+ for(const object of sceneDrawOrder(queue))object.draw();
  if(state.flash){ctx.fillStyle=state.flash.kind==='hurt'?'#e49a8c55':'#fff3b755';ctx.fillRect(state.flash.x*24,state.flash.y*24,24,24);}
  const now=performance.now();damagePopups=damagePopups.filter(p=>damageFrame(p,now).alive);
  for(const p of damagePopups){if(!p.hero&&!visible(p.x,p.y))continue;const frame=damageFrame(p,now),at=p.hero?position:p;ctx.save();ctx.globalAlpha=frame.alpha;ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=2.5;ctx.strokeStyle='#200909';ctx.fillStyle='#ff5656';const x=at.x*24+12,y=at.y*24-7-frame.rise;ctx.strokeText(String(p.damage),x,y);ctx.fillText(String(p.damage),x,y);ctx.restore();}
@@ -95,7 +95,7 @@ function draw(){
 }
 
 function drawAutoMap(){
- const canvas=$('auto-map'),geometry=miniMapGeometry(W,H,$('map').clientWidth<420?4:6);
+ const canvas=$('auto-map'),geometry=miniMapGeometry(state.grid[0].length,state.grid.length,$('map').clientWidth<420?4:6);
  if(canvas.width!==geometry.width||canvas.height!==geometry.height){canvas.width=geometry.width;canvas.height=geometry.height;}
  drawMiniMap(canvas.getContext('2d'),autoMapModel(state,(x,y)=>canSee(state,x,y)),geometry);
 }

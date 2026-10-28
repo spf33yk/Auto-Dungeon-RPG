@@ -4,8 +4,8 @@ test('wall shade uses the sprite alpha and caches an independent opaque-color at
  const ops=[],ctx={drawImage(...a){ops.push(['image',...a]);},fillRect(...a){ops.push(['shade',this.globalCompositeOperation,this.fillStyle,...a]);}},canvas={getContext:()=>ctx},source={naturalWidth:128,naturalHeight:144},set={definition:{id:'crypt'},image:source};
  const dark=dimmedWallTileset(set,()=>canvas);assert.equal(dark.definition,set.definition);assert.equal(dark.image,canvas);assert.equal(canvas.width,128);assert.equal(canvas.height,144);assert.deepEqual(ops[1],['shade','source-atop',MEMORY_SHADE,0,0,128,144]);assert.equal(ctx.globalCompositeOperation,'source-over');assert.equal(dimmedWallTileset(set,()=>{throw Error('Should be cached');}),dark);assert.equal(dimmedWallTileset(null),null);assert.equal(set.image,source);
 });
-test('unvisited floors stay hidden while explored floors retain the same sight-based shade',()=>{
- assert.equal(floorLight(false,false),'hidden');assert.equal(floorLight(false,true),'hidden');assert.equal(floorLight(true,false),'memory');assert.equal(floorLight(true,true),'visible');
+test('all out-of-sight terrain remains dim without affecting discovery',()=>{
+ assert.equal(floorLight(false,false),'memory');assert.equal(floorLight(false,true),'visible');assert.equal(floorLight(true,false),'memory');assert.equal(floorLight(true,true),'visible');
 });
 test('visual sight follows the rendered tile without changing AI range or seeing through walls',()=>{
  const s=newGame(4);s.player={x:4,y:4};s.grid=Array.from({length:10},()=>Array(10).fill(1));s.grid[4][5]=0;const before=JSON.stringify(s);

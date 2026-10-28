@@ -4,8 +4,7 @@ import {autoMapModel} from './map-view.js';
 import {newGame,makeFloor,random,zoneFor} from './engine.js';
 test('generated room sectors never expose unentered neighboring rooms',()=>{
  for(let seed=1;seed<=8;seed++)for(const floor of [1,6,12,17,22,27]){
-  const s=newGame(seed);s.floor=floor;makeFloor(s);const layout=zoneFor(s).layout,rng=random(seed+floor*997);
-  const rooms=Array.from({length:6},(_,i)=>{const w=layout==='hall'?8:layout==='channels'?4:4+Math.floor(rng()*4),h=layout==='hall'?7:layout==='channels'?4:4+Math.floor(rng()*4);return {x:1+i%3*10+Math.floor(rng()*2),y:2+Math.floor(i/3)*11+Math.floor(rng()*2),w,h};});
+  const s=newGame(seed);s.floor=floor;makeFloor(s);const rooms=s.rooms;
   const tiles=new Set(autoMapModel(s,()=>false).tiles.map(t=>`${t.x},${t.y}`));
   for(const r of rooms){
    const entered=s.player.x>=r.x&&s.player.x<r.x+r.w&&s.player.y>=r.y&&s.player.y<r.y+r.h;

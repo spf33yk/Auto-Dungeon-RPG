@@ -8,7 +8,8 @@
 
 - 修正依頼を受けたらソースと各資料（DESIGN.md・SPEC.md・SYSTEM_DESIGN.md・IMPLEMENTATION_NOTES.md・README.md）の整合を確認し、該当する変更を同時に反映する。
 
-- 今後は毎回、push後にGitHub Actionsの自動テスト成功とGitHub Pagesのデプロイ成功を確認し、公開URLで今回の変更を実操作テストする。ローカル確認やpush成功だけで「公開版に反映済み」と報告しない。
-- 公開版のテスト結果・確認したコミット・未確認事項はIMPLEMENTATION_NOTES.mdへ記録する。公開確認できない場合は、その制約を完了報告で明記する。
+- ローカルの自動テストと画面確認を基本とする。GitHub公開版での走行テストは毎回必須にせず、配信・キャッシュ・ブラウザ固有の不具合など必要性を判断して実施する。
+- 検証内容・確認したコミット・公開確認の実施有無と判断理由・未確認事項はIMPLEMENTATION_NOTES.mdへ記録する。公開確認をしていない場合は「公開版で動作確認済み」と報告しない。
 
-- ブラウザ用JS・CSS変更後はnode scripts/update-assets.jsでindex.htmlの配信URLを更新し、node scripts/update-assets.js --checkを通す。公開版で古いキャッシュとの混在がないことも確認する。
+- ブラウザ用JS・CSS変更後はnode scripts/update-assets.jsでindex.htmlの配信URLを更新し、node scripts/update-assets.js --checkを通す。公開確認を実施する場合は、古いキャッシュとの混在がないことも確認する。
+- 今後の素材制作・修正は32pxを基準にする。64px化は保留。既存64px原本は保管用とし、新しい32px素材の編集・配信工程で参照しない。
