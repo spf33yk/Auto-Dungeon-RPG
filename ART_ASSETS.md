@@ -70,3 +70,7 @@ art/props/master-64.pngは192×128、atlas-32.pngは96×64、3列×2行。宝箱
 ## 立体壁・小物の改訂（2026-10-28）
 
 地下墓所の床・壁を周期模様にし、64px・32px双方の対向辺を統一。宝箱と横向き階段の2セルを内蔵image_genで改訂し、装備・墓石は既存セルを維持。詳細な変更指示はart/props/PROMPT.md。原本2枚＋配信2枚で計22362 bytes（従来35226 bytesから12864 bytes削減）。大きな生成原案・検証画像はGitへ含めない。全エリアの壁立体化と足元順の描画はコードで行う。
+
+## 壁専用ドット絵（2026-10-28）
+
+art/terrain/walls/crypt/master-64.png（256×288px、11065 bytes）、atlas-32.png（128×144px、3803 bytes）、tileset.jsonを追加。原本＋配信合計14868 bytes。上面・正面・左右側面の4種類を内蔵image_genで新規生成し、接続端別に計12セルへ整えた。旧床・平面壁画像は流用していない。生成原案はGit対象外のart/local-originals/wall-surfaces-source.png。全文プロンプトは同フォルダのPROMPT.md。汎用フォーマット、JSONスキーマ、複製テンプレート、再生成手順はart/terrain/walls/FORMAT.mdを参照。

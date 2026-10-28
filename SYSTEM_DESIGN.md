@@ -284,6 +284,12 @@ roomMapTilesは墓石マスを部屋形状の判定時だけ床として扱い�
 
 ## 描画の奥行き（2026-10-28）
 
-app.jsは平面地形・階段・罠を先に描き、scene-depth.jsの足元ソートで立体壁と各エンティティを描く。terrain-view.jsが壁上面・境界正面・連続側面を担当。描画用surfaceは墓石の下を床として復元し、0/1で保持するがstate.gridを書き換えない。standingBoxは足元を保持して高さだけ伸ばす。主人公に重なる手前壁の透明度を計算し、ダメージ数字は高くなった頭上へ移す。
+app.jsは平面地形・階段・罠を先に描き、scene-depth.jsの足元ソートで立体壁と各エンティティを描く。wall-tileset.jsが専用の壁上面・境界正面・連続側面の画像選択を担当（後述のwall-parts/v1参照）。描画用surfaceは墓石の下を床として復元し、0/1で保持するがstate.gridを書き換えない。standingBoxは足元を保持して高さだけ伸ばす。主人公に重なる手前壁の透明度を計算し、ダメージ数字は高くなった頭上へ移す。
 
-scripts/lib/tile-edges.jsで同系統の配信用端画素を揃える。scene-depth.test.jsとtest-support/png.jsで64px／32px原本・配信PNGの全バリアントの辺一致、透過余白、描画順、足元、壁面接続を検証する。画像生成原案はGit対象外、通常プレイ時に制作依存ライブラリは不要。
+scripts/lib/tile-edges.jsで同系統の配信用端画素を揃える。scene-depth.test.js・wall-tileset.test.jsとtest-support/png.jsで64px／32px原本・配信PNGの全バリアントの辺一致、透過余白、描画順、足元、壁面接続を検証する。画像生成原案はGit対象外、通常プレイ時に制作依存ライブラリは不要。
+
+## wall-parts/v1（2026-10-28・現行）
+
+wall-tileset.jsがJSON検証・画像実寸確認・theme登録・接続パーツ選択・drawImageを担当。app.jsのdata-wallsに空白区切りで定義URLを登録し、テーマ用または*既定セットを選ぶ。terrain-view.jsは専用素材描画と読み込み失敗時の単色表示のみを担当し、旧アトラスを壁面に渡さない。
+
+原本→配信生成はscripts/build-wall-tileset.js。画像ハッシュをtileset.jsonに書き、update-assets.jsが画像ハッシュを検証したうえでindexの定義URLを更新する。形式説明・JSONスキーマ・複製用テンプレートはart/terrain/walls/に配置。wall-tileset.test.jsが版・欠落・範囲・接続端・描画元・URL解決・エリア上書き・透過・継ぎ目・容量を検証する。

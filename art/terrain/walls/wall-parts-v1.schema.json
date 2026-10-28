@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "wall-parts/v1",
+  "type": "object",
+  "required": ["format", "version", "id", "themes", "image", "tileSize", "rise", "width", "height", "parts"],
+  "properties": {
+    "format": {"const": "wall-parts"},
+    "version": {"const": 1},
+    "id": {"type": "string", "minLength": 1},
+    "themes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "image": {"type": "string", "minLength": 1},
+    "tileSize": {"type": "integer", "minimum": 8},
+    "rise": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+    "width": {"type": "integer", "minimum": 1},
+    "height": {"type": "integer", "minimum": 1},
+    "parts": {
+      "type": "object",
+      "required": ["cap", "front", "leftStart", "leftMiddle", "leftEnd", "leftSingle", "rightStart", "rightMiddle", "rightEnd", "rightSingle"],
+      "additionalProperties": {
+        "type": "array", "minItems": 1,
+        "items": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "integer", "minimum": 0}}
+      }
+    }
+  }
+}
