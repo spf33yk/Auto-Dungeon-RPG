@@ -74,3 +74,7 @@ art/props/master-64.pngは192×128、atlas-32.pngは96×64、3列×2行。宝箱
 ## 壁専用ドット絵（2026-10-28）
 
 art/terrain/walls/crypt/master-64.png（256×288px、11065 bytes）、atlas-32.png（128×144px、3803 bytes）、tileset.jsonを追加。原本＋配信合計14868 bytes。上面・正面・左右側面の4種類を内蔵image_genで新規生成し、接続端別に計12セルへ整えた。旧床・平面壁画像は流用していない。生成原案はGit対象外のart/local-originals/wall-surfaces-source.png。全文プロンプトは同フォルダのPROMPT.md。汎用フォーマット、JSONスキーマ、複製テンプレート、再生成手順はart/terrain/walls/FORMAT.mdを参照。
+
+## 視界外壁の描画補正（2026-10-28）
+
+壁の原画・配信PNGは変更なし。scene-lighting.jsで既存の専用壁アトラスへ暗色を重ねたCanvasを実行時にキャッシュする。明暗用のPNG追加や素材容量増加なし。骸・魔物の仮ドット絵は下端透明行を除いた接地位置へ描画補正する。

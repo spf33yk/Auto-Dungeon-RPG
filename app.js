@@ -1,4 +1,5 @@
 import {loadWallTilesets} from './wall-tileset.js';
+import {MEMORY_SHADE,dimmedWallTileset,floorLight,actorFootOffset,renderSightState} from './scene-lighting.js';
 import {standingBox,sortByFoot,foregroundWallOpacity,drawFootShadow} from './scene-depth.js';
 import {drawProp} from './prop-view.js';
 import {drawCryptTile,drawRaisedWall} from './terrain-view.js';
@@ -51,32 +52,35 @@ let wallSets=new Map();const wallAssetsReady=loadWallTilesets($('map').dataset.w
 function draw(){
  const scene=state.seed+':'+state.floor;if(damageScene!==scene){damagePopups=[];damageScene=scene;}
  const map=$('map');if(map.width!==1920||map.height!==1080){map.width=1920;map.height=1080;ctx.imageSmoothingEnabled=false;}
- ctx.fillStyle='#0c1416';ctx.fillRect(0,0,map.width,map.height);const theme=zoneFor(state),visible=(x,y)=>canSee(state,x,y);
+ ctx.fillStyle='#0c1416';ctx.fillRect(0,0,map.width,map.height);const theme=zoneFor(state);
  const progress=motion&&state.phase==='explore'?Math.min(1,(performance.now()-motion.time)/motion.duration):1,eased=1-Math.pow(1-progress,3);
  const position=motion?{x:motion.from.x+(state.player.x-motion.from.x)*eased,y:motion.from.y+(state.player.y-motion.from.y)*eased}:state.player;
+ const sightState=renderSightState(state,position),visible=(x,y)=>canSee(sightState,x,y);
  const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y),hop=moving?Math.sin(progress*Math.PI)*2:0;
  const camera=cameraFor(position,radius(state),map.width,map.height);ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);
  const graves=new Set((state.obstacles||[]).map(o=>o.x+','+o.y)),surface=state.grid.map((r,y)=>r.map((v,x)=>(v||graves.has(x+','+y))?1:0)),queue=[];
  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
-  if(!state.seen[y][x])continue;const floor=Boolean(surface[y][x]),px=x*24,py=y*24,n=(x*17+y*31+state.seed)%13;
+  if((x+1)*24<camera.left||x*24>camera.left+map.width/camera.scale||(y+1)*24<camera.top||(y-1)*24>camera.top+map.height/camera.scale)continue;
+  const floor=Boolean(surface[y][x]),light=floorLight(state.seen[y][x],visible(x,y));if(floor&&light==='hidden')continue;const px=x*24,py=y*24,n=(x*17+y*31+state.seed)%13;
   if(!(floor&&theme.id==='crypt'&&drawCryptTile(ctx,cryptAtlas,surface,x,y,state.seed,24,true))){
    ctx.fillStyle=floor?theme.floorColor:'#0c1416';ctx.fillRect(px,py,24,24);
    if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+5+n,py+8,2,2);}
   }
-  if(!visible(x,y)){ctx.fillStyle='#071111a8';ctx.fillRect(px,py,24,24);}
-  if(!floor)queue.push({footY:(y+1)*24,layer:0,x,draw(){ctx.save();ctx.globalAlpha=(visible(x,y)?1:.4)*foregroundWallOpacity(x,y,position);drawRaisedWall(ctx,wallSets.get(theme.id)||wallSets.get('*'),surface,x,y,state.seed,theme);ctx.restore();}});
+  if(floor&&light==='memory'){ctx.fillStyle=MEMORY_SHADE;ctx.fillRect(px,py,24,24);}
+  if(!floor)queue.push({footY:(y+1)*24,layer:0,x,draw(){ctx.save();ctx.globalAlpha=foregroundWallOpacity(x,y,position);const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,light==='visible'?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme);ctx.restore();}});
  }
- const stair=state.stairs;if(state.seen[stair.y][stair.x])sprite(ctx,'stairs',stair.x*24,stair.y*24);
- for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.fillStyle=t.spent?'#7e7769':'#d7b278';ctx.fillRect(t.x*24+6,t.y*24+14,12,3);ctx.fillStyle='#d1b88b';for(let i=0;i<3;i++)ctx.fillRect(t.x*24+7+i*4,t.y*24+10,2,4);}
+ const stair=state.stairs;if(state.seen[stair.y][stair.x]){ctx.save();ctx.globalAlpha=visible(stair.x,stair.y)?1:.4;sprite(ctx,'stairs',stair.x*24,stair.y*24);ctx.restore();}
+ for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;ctx.fillStyle=t.spent?'#7e7769':'#d7b278';ctx.fillRect(t.x*24+6,t.y*24+14,12,3);ctx.fillStyle='#d1b88b';for(let i=0;i<3;i++)ctx.fillRect(t.x*24+7+i*4,t.y*24+10,2,4);ctx.restore();}
  function entity(o,type,{standing=false,layer=1,hero=false,enemy=false}={}){
   const at=hero?position:o,box=standing?standingBox(at.x,at.y):{x:at.x*24,y:at.y*24,width:24,height:24,footY:(at.y+1)*24};
   queue.push({footY:box.footY,layer,x:at.x,draw(){ctx.save();ctx.globalAlpha=hero||visible(o.x,o.y)?1:.4;
    if(standing||type==='chest')drawFootShadow(ctx,at.x,at.y);
    const oldPalette={g:palette.g,l:palette.l,r:palette.r,p:palette.p};if(enemy){if(type==='slime'){palette.g=theme.wallColor;palette.l='#c0c7b1';}else{palette.r=theme.floorColor;palette.p=theme.wallColor;}}
-   sprite(ctx,type,box.x,box.y-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
+   const footOffset=(hero||enemy)?actorFootOffset(sprites[type],box.height):0;
+   sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
    // The chest artwork supplies its own latch: no oversized yellow lock rectangle.
    if(o.type==='letter'){ctx.fillStyle='#292a26';ctx.fillRect(box.x+15,box.y+3,8,6);ctx.fillStyle='#e4dfc3';ctx.fillRect(box.x+16,box.y+4,6,4);}
-   if(enemy){if(o.boss){ctx.strokeStyle='#dfba6b';ctx.lineWidth=1;ctx.strokeRect(box.x-1,box.y-1,box.width+2,box.height+2);}ctx.fillStyle='#a06c70';ctx.fillRect(box.x+6,box.y-3,12,2);}
+   if(enemy){if(o.boss){ctx.strokeStyle='#dfba6b';ctx.lineWidth=1;ctx.strokeRect(box.x-1,box.y+footOffset-1,box.width+2,box.height+2);}ctx.fillStyle='#a06c70';ctx.fillRect(box.x+6,box.y+footOffset-3,12,2);}
    ctx.restore();}});
  }
  for(const o of state.obstacles||[])if(state.seen[o.y][o.x])entity(o,o.variant?'tombstone-cracked':'tombstone',{standing:true});

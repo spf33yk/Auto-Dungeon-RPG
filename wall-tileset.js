@@ -20,7 +20,7 @@ export function wallPartNames(grid,x,y){
 }
 export function wallVariant(x,y,seed,count){let h=Math.imul(x+1,73856093)^Math.imul(y+1,19349663)^(seed|0);h^=h>>>13;return (h>>>0)%count;}
 export function drawWallParts(ctx,tileset,grid,x,y,seed,size=24){
- const d=tileset?.definition,image=tileset?.image;if(!d||!image?.complete||image.naturalWidth!==d.width||image.naturalHeight!==d.height)return false;
+ const d=tileset?.definition,image=tileset?.image;if(!d||!image||image.complete===false||(image.naturalWidth??image.width)!==d.width||(image.naturalHeight??image.height)!==d.height)return false;
  ctx.imageSmoothingEnabled=false;
  for(const name of wallPartNames(grid,x,y)){const choices=d.parts[name],f=choices[wallVariant(x,y,seed,choices.length)];ctx.drawImage(image,...f,x*size,(y-d.rise)*size,size,size*(1+d.rise));}
  return true;
