@@ -490,3 +490,13 @@ node --testは150件成功（preparation-all-tests.log）。その後の表示�
 entrance-parts/v1を実装し、既存PNGをJSON定義から読み込む構成へ移行。任意配置・複数バリアント・theme上書き、テンプレート・スキーマ・検証ビルド・画像／JSONの配信ハッシュを追加。32px PNG・ゲーム進行・保存の変更なし。
 
 node --test entrance-format.test.js preparation-ui.test.js wall-tileset.test.js：15件成功。build-entrance-tileset.js実行、update-assets.js／--check成功。ローカルの確認用横通路で同じ入口の外観と読み込みを確認、警告・エラーなし。証跡はGit対象外のtest-results/entrance-format-preview.png。読み込み形式と描画定義のみの変更なので関連テストに限定し、全階走破と公開版走行は省略。実機Safariは未確認。資料も同じコミットへ更新する。
+
+## 壁16パターンの自動接続（今回のコミット・2026-10-28）
+
+4方向ビット判定と16チップのJSON対応、専用32pxパーツからの構成、旧形式の互換読み込みを実装。元PNGとゲームロジックを変えず、新規auto16アトラス4693 bytesを配信。現行FORMAT.md、テンプレート、スキーマ、各資料を同期。8方向47パターンは未実装の別拡張と明記。
+
+wall-autotile／wall-tilesetの関連10件が成功。全16番号の選択、斜め非依存、マップ外、定義の欠落と範囲、同じ露出条件の接続辺の最終PNG画素一致を検証。配信URL整合と最終描画確認は下記へ追記。保存v12・歩行・視界への変更がないため全階走破と公開版走行は省略する。
+
+### 最終検証
+
+wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が成功（test-results/wall-autotile-tests.log）。build-wall-tileset.jsと配信URL--check成功。ローカル確認用横通路で新JSON・16チップの読込、接続辺、入口装飾、前景壁が床へ張り出さない表示を確認。警告・エラーなし。証跡はGit対象外のtest-results/wall-autotile-preview.png。元の32pxパーツ・保存v12・ゲーム進行は維持。新PNGは4693 bytes。実機Safariと公開版走行は未確認。

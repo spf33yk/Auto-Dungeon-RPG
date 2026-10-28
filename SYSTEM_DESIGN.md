@@ -325,3 +325,9 @@ card-editor.jsは表示順とフレーム識別を分離し、カード配置API
 entrance-view.jsのvalidateEntranceTileset／loadEntranceTilesetsが版・32px矩形・実寸を検証してtheme別Mapを返す。入口検出の内部番号は部品名へ変換し、drawEntranceは定義内の矩形とバリアントを選択する。固定64×64画像・固定セル番号による切り出しを廃止。暗色アトラスも同じ定義を保持する。
 
 build-entrance-tileset.jsは任意フォルダのPNG検証と画像ハッシュ更新のみ。update-assets.jsは壁・入口の登録JSONと画像ハッシュを検証する。entrance-format.test.jsで拒否条件・異なるアトラス配置・バリアント・テーマ上書き・相対URL解決・読込失敗を検証する。
+
+## wall-autotile/v1（2026-10-28）
+
+wallNeighborMaskが描画用surfaceの4隣接からビットを生成し、drawWallPartsが定義のtiles[mask]を1回描画する。validateWallTilesetは新形式と旧wall-parts形式を分岐検証する。16番号・順序・寸法・範囲を検証し、旧定義の互換テストはparts-tileset-v1.jsonを使う。
+
+build-wall-autotiles.jsが専用32pxパーツから16チップを構成する。build-wall-tileset.jsはJSONに指定したPNGを検証し、固定のatlas-32.pngファイル名へ依存しない。wall-autotile.test.jsは全16番号・斜め非依存・画像選択・定義拒否条件・接続辺の最終PNG画素一致を検証する。

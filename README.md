@@ -199,3 +199,7 @@ Optionからミニマップを小／中／大へ変更可能（初期は中、�
 ### 通路入口素材の追加
 
 [入口素材フォーマット](art/terrain/entrances/FORMAT.md)と[複製用JSON](art/terrain/entrances/entrance-parts-v1.template.json)を追加。PNGとJSONの登録で新エリア・部品位置・バリアントを変更できる。現在の入口素材もこの形式で読み込む。
+
+### 壁オートタイル
+
+32px基準の壁を4方向16パターンで自動接続する形式へ更新。[フォーマット](art/terrain/walls/FORMAT.md)に接続番号表・制作・検証手順を記載。現在の壁も新形式を使用し、ゲーム進行とセーブ形式は維持する。

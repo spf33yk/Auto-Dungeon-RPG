@@ -96,3 +96,7 @@ art/terrain/entrances/atlas-32.pngを追加。32pxセル4種、アトラス64×6
 ## 入口素材のフォーマット化（2026-10-28）
 
 入口PNGは1907 bytesのまま変更なし。entrance-parts/v1のtileset.json、複製テンプレート、JSONスキーマ、FORMAT.md、build-entrance-tileset.jsを追加。部品名・32px矩形配列・テーマ・画像実寸を外部定義し、64×64固定配置から分離。新規画像生成なし。
+
+## 壁オートタイル16種（2026-10-28）
+
+crypt/autotile-32.png（128×224px、32×56セル16種、4693 bytes）を追加。既存の専用32px atlas-32.pngとparts-tileset-v1.jsonから構成し、床素材の流用・新しい画像生成・64px制作なし。現行tileset.jsonはwall-autotile/v1。新テンプレート・スキーマ・制作ガイドを追加し、旧パーツ形式の説明はWALL_PARTS_V1.mdへ保持する。

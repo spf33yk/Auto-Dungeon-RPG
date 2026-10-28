@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
 import {validateWallTileset,wallPartNames,wallVariant,drawWallParts,loadWallTilesets,wallDrawBox} from './wall-tileset.js';import {readPng} from './test-support/png.js';import {drawRaisedWall} from './terrain-view.js';
-const definition=JSON.parse(readFileSync(new URL('./art/terrain/walls/crypt/tileset.json',import.meta.url))),image={complete:true,naturalWidth:128,naturalHeight:definition.height};
+const definition=JSON.parse(readFileSync(new URL('./art/terrain/walls/crypt/parts-tileset-v1.json',import.meta.url))),image={complete:true,naturalWidth:128,naturalHeight:definition.height};
 test('south walls fit their own footprint along corridors, room edges and junctions',()=>{
  for(const grid of [[[0,0,0],[1,1,1],[0,0,0]],[[1,1,1],[1,1,1],[0,0,0]],[[0,1,0],[1,1,1],[0,0,1]]])for(const size of [24,32]){
   const before=JSON.stringify(grid),box=wallDrawBox(grid,1,2,.75,size);assert.equal(box.foreground,true);assert.equal(box.y,2*size);assert.equal(box.y+box.height,3*size);assert.equal(JSON.stringify(grid),before);
