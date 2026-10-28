@@ -440,3 +440,10 @@
 外壁を暗く描き、立体壁の明暗を専用アトラスへ適用。床座標に影を置くずれと壁の透明度による薄れを廃止。描画視界を補間位置の最寄りマスへ揃え、透明行を除く接地補正と敵HPバーの追従を追加。既知の階段・罠も視界外で暗くする。ローカル確認用配置で外壁・視界境界・接地を確認。PNG・保存形式・AI視界・MAP公開条件の変更なし。
 
 node --testと配信URL検証を実行。テスト結果と公開コミット・CI・実操作結果は確定後に追記する。実機スマホ／Safariは未確認。
+
+### 公開確認：外壁・視界・影 8ce96c1（2026-10-28）
+
+- コミット8ce96c15ada40f7759d6c283acec2c9145242535。Game tests #40658102130は139件成功、Pages #40658101528もsuccess。node scripts/update-assets.js --check成功。
+- 公開URL https://spf33yk.github.io/Auto-Dungeon-RPG/ をLoadGame→動画スキップ→探索再開で検証。B29 TURN120→129 Clear、準備画面経由でB28へ進みTURN154まで移動・戦闘・接地影・外壁の薄暗さ・視界の明暗・一時停止を確認。コンソール警告・エラーなし。
+- 公開indexのimportmap全URL・壁定義URLがローカルと一致。JSONと専用壁PNG3803 bytesも一致し、旧キャッシュ混在なし。360×700の検証フレームでもLoadGameと明暗描画を確認、警告・エラーなし。
+- 証跡はGit対象外のtest-results/lighting-showcase.png（ローカル確認用配置）、lighting-public-desktop.png、lighting-public-mobile.png。実機スマホ／Safari、全接続状態・全移動フレームの公開目視網羅は未確認。
