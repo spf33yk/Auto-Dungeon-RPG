@@ -1,0 +1,47 @@
+{
+  "format": "entrance-parts",
+  "version": 1,
+  "id": "crypt-entrance-v1",
+  "themes": [
+    "*",
+    "crypt"
+  ],
+  "image": "atlas-32.png?v=c4ac4ef4a9b1",
+  "tileSize": 32,
+  "width": 64,
+  "height": 64,
+  "parts": {
+    "leftJamb": [
+      [
+        0,
+        0,
+        32,
+        32
+      ]
+    ],
+    "rightJamb": [
+      [
+        32,
+        0,
+        32,
+        32
+      ]
+    ],
+    "lintel": [
+      [
+        0,
+        32,
+        32,
+        32
+      ]
+    ],
+    "threshold": [
+      [
+        32,
+        32,
+        32,
+        32
+      ]
+    ]
+  }
+}

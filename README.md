@@ -195,3 +195,7 @@ LoadGame後に保存階層・レベルを確認し、「旅を再開する」で
 準備画面はカード一覧・指示編集・探索予測の3列。予測は現在階を8／16／24回試行した参考Clear率・中央値ターン・終了時HPを表示し、本番の保存データは変えない。小画面では予測を下へ配置する。カードのドラッグ／タップ編集、装備、能力強化、状態、旅の記録を継続。専用フレームの差し替えは[CARD_FRAMES.md](CARD_FRAMES.md)を参照。
 
 Optionからミニマップを小／中／大へ変更可能（初期は中、端末に保持）。上下HUDを拡大し、通路入口の専用32px素材も追加。素材と生成プロンプトはart/terrain/entrances/README.md。今回もDESIGN・SPEC・SYSTEM_DESIGN・検証記録をソースと同じコミットで更新する。
+
+### 通路入口素材の追加
+
+[入口素材フォーマット](art/terrain/entrances/FORMAT.md)と[複製用JSON](art/terrain/entrances/entrance-parts-v1.template.json)を追加。PNGとJSONの登録で新エリア・部品位置・バリアントを変更できる。現在の入口素材もこの形式で読み込む。

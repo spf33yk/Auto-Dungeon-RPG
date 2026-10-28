@@ -484,3 +484,9 @@ node --testは150件成功（preparation-all-tests.log）。その後の表示�
 横持ち740×416でカード一覧＋指示の2列、下部の予測までの縦スクロール、固定された出発ボタンを確認。横方向のはみ出しを修正。検証iframe側で既知のMutationObserver.observeのNode未指定エラーを観測したが、ゲームソースに当該APIはなく描画・操作は継続した。実機Safariは未確認。
 
 最終の表示・制御調整後、preparation-ui.test.jsの5件と配信URL--checkを再確認し成功。予測のキャッシュキーはstate全体と試行数にし、同じ階へのセーブ読込で地形や乱数が変わった場合も再計算する。タイトルでは予測しない。証跡はGit対象外のpreparation-redesign.png、preparation-redesign-mobile.png、entrance-trims-preview.png。今回のソース・全資料・1907bytesの32px入口アトラスを同じコミットへ含める。公開版走行は省略する。
+
+## 入口素材フォーマット化（今回のコミット・2026-10-28）
+
+entrance-parts/v1を実装し、既存PNGをJSON定義から読み込む構成へ移行。任意配置・複数バリアント・theme上書き、テンプレート・スキーマ・検証ビルド・画像／JSONの配信ハッシュを追加。32px PNG・ゲーム進行・保存の変更なし。
+
+node --test entrance-format.test.js preparation-ui.test.js wall-tileset.test.js：15件成功。build-entrance-tileset.js実行、update-assets.js／--check成功。ローカルの確認用横通路で同じ入口の外観と読み込みを確認、警告・エラーなし。証跡はGit対象外のtest-results/entrance-format-preview.png。読み込み形式と描画定義のみの変更なので関連テストに限定し、全階走破と公開版走行は省略。実機Safariは未確認。資料も同じコミットへ更新する。

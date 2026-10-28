@@ -11,15 +11,15 @@ const map='<script type="importmap" id="asset-imports">'+JSON.stringify({imports
 const path=root+'index.html',html=readFileSync(path,'utf8');
 let updated=html.includes('id="asset-imports"')?html.replace(/<script type="importmap" id="asset-imports">[\s\S]*?<\/script>/,map):html.replace('</head>',map+'</head>');
 // Each registered definition carries its own image hash. New areas need no renderer edits.
-for(const match of html.matchAll(/\.\/art\/terrain\/walls\/[^"\s?]+\/tileset\.json(?:\?v=[^"\s]*)?/g)){
+for(const match of html.matchAll(/\.\/art\/terrain\/(?:walls|entrances)\/[^"\s?]*tileset\.json(?:\?v=[^"\s]*)?/g)){
  const file=match[0].split('?')[0].slice(2),definition=JSON.parse(readFileSync(root+file,'utf8'));
  const image=file.slice(0,file.lastIndexOf('/')+1)+definition.image.split('?')[0];
- if(definition.image.split('?v=')[1]!==version(image))throw Error('Wall image version is stale: run scripts/build-wall-tileset.js for '+file);
+ if(definition.image.split('?v=')[1]!==version(image))throw Error('Tileset image version is stale: run its build script for '+file);
  updated=updated.replaceAll(match[0],'./'+file+'?v='+version(file));
 }
 // The inline startup script imports app.js through this content-versioned map.
 for(const file of ['style.css','screens.css'])updated=updated.replace(new RegExp('href="\\./'+file.replace('.', '\\.')+'(?:\\?v=[^"]*)?"'),'href="./'+file+'?v='+version(file)+'"');
-for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','terrain/crypt/atlas-32.png','props/atlas-32.png','terrain/entrances/atlas-32.png']){
+for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','terrain/crypt/atlas-32.png','props/atlas-32.png']){
  const asset='./art/'+file;
  updated=updated.replace(new RegExp('\\./art/'+file.replaceAll('.','\\.')+'(?:\\?v=[^"\\s>]*)?','g'),asset+'?v='+version('art/'+file));
 }
