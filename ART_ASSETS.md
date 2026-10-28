@@ -99,7 +99,10 @@ art/terrain/entrances/atlas-32.pngを追加。32pxセル4種、アトラス64×6
 
 ## 壁オートタイル16種（2026-10-28）
 
-crypt/autotile-32.png（128×224px、32×56セル16種、4693 bytes）を追加。既存の専用32px atlas-32.pngとparts-tileset-v1.jsonから構成し、床素材の流用・新しい画像生成・64px制作なし。現行tileset.jsonはwall-autotile/v1。新テンプレート・スキーマ・制作ガイドを追加し、旧パーツ形式の説明はWALL_PARTS_V1.mdへ保持する。
+crypt/autotile-32.png（128×224px、32×56セル16種、3726 bytes）を追加。現行v2は新規生成アートのpainted-32.pngから構成する。旧32pxパーツは互換保管。現行tileset.jsonはwall-autotile/v1。新テンプレート・スキーマ・制作ガイドを追加し、旧パーツ形式の説明はWALL_PARTS_V1.mdへ保持する。
 
 ## 共通横画面への対応（2026-10-28）
 探索・準備のUIを1280×720の論理領域から端末へ等比表示。描画Canvas1920×1080、タイトル映像、32pxタイル原寸は変更せず、新規素材・配信容量の増加はない。
+
+## 岩壁アートv2（2026-10-29）
+組み込みimagegenで新規生成。生成原画はart/local-originals/wall-auto16-source-v2.pngにローカル保管し、Git対象外。32px原稿crypt/painted-32.png（27773 bytes）と配信用autotile-32.png（3726 bytes、128×224）を保持。16種は新しい岩面・正面から構成し、15番は全面岩。旧32pxパーツと64px保管原本は使用しない。生成指示と工程はart/terrain/walls/crypt/ARTWORK.md。

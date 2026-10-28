@@ -1,12 +1,12 @@
 {
   "format": "wall-autotile",
   "version": 1,
-  "id": "crypt-stone-auto16-v1",
+  "id": "crypt-rock-auto16-v2",
   "themes": [
     "*",
     "crypt"
   ],
-  "image": "autotile-32.png?v=5cbf9f891150",
+  "image": "autotile-32.png?v=71656e92708f",
   "tileSize": 32,
   "rise": 0.75,
   "width": 128,

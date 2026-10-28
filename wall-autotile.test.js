@@ -5,6 +5,11 @@ test('all 16 wall masks select their own graphic and ignore diagonals without co
  assert.equal(validateWallTileset(d),d);const seen=new Set();for(let mask=0;mask<16;mask++){const grid=gridFor(mask),before=JSON.stringify(grid);assert.equal(wallNeighborMask(grid,1,1),mask);for(const [x,y]of [[0,0],[2,0],[0,2],[2,2]])grid[y][x]=0;assert.equal(wallNeighborMask(grid,1,1),mask);const calls=[],ctx={drawImage(...a){calls.push(a);}};assert.equal(drawWallParts(ctx,{definition:d,image},grid,1,1,123),true);assert.equal(calls.length,1);assert.deepEqual(calls[0].slice(1,5),d.tiles[mask][0]);seen.add(calls[0][1]+','+calls[0][2]);assert.equal(JSON.stringify(gridFor(mask)),before);}assert.equal(seen.size,16);assert.equal(wallNeighborMask([[0]],0,0),15);
 });
 test('autotile definitions reject missing patterns, wrong bit order and out-of-range artwork',()=>{for(const change of [x=>delete x.tiles[7],x=>x.neighbors=8,x=>x.bitOrder.reverse(),x=>x.tiles[0]=[[128,0,32,56]],x=>x.tiles[0]=[],x=>x.tileSize=64]){const value=structuredClone(d);change(value);assert.throws(()=>validateWallTileset(value));}});
+
+test('solid rock chip15 fills the entire wall projection without transparent or black holes',()=>{
+ const p=readPng(new URL('./art/terrain/walls/crypt/autotile-32.png',import.meta.url)),f=d.tiles[15][0];
+ for(let y=0;y<56;y++)for(let x=0;x<32;x++){const c=p.pixel(f[0]+x,f[1]+y);assert.equal(c[3],255);assert.ok(c[0]+c[1]+c[2]>35,`rock hole ${x},${y}`);}
+});
 test('every compatible connected edge shares exact pixels in the final PNG',()=>{
  const p=readPng(new URL('./art/terrain/walls/crypt/autotile-32.png',import.meta.url));assert.equal(p.width,128);assert.equal(p.height,224);let pairs=0;
  for(let a=0;a<16;a++)for(let b=0;b<16;b++){

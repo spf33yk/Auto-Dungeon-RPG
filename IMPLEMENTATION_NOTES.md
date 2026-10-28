@@ -493,13 +493,13 @@ node --test entrance-format.test.js preparation-ui.test.js wall-tileset.test.js�
 
 ## 壁16パターンの自動接続（今回のコミット・2026-10-28）
 
-4方向ビット判定と16チップのJSON対応、専用32pxパーツからの構成、旧形式の互換読み込みを実装。元PNGとゲームロジックを変えず、新規auto16アトラス4693 bytesを配信。現行FORMAT.md、テンプレート、スキーマ、各資料を同期。8方向47パターンは未実装の別拡張と明記。
+4方向ビット判定と16チップのJSON対応、専用32pxパーツからの構成、旧形式の互換読み込みを実装。元PNGとゲームロジックを変えず、新規auto16アトラス3726 bytesを配信。現行FORMAT.md、テンプレート、スキーマ、各資料を同期。8方向47パターンは未実装の別拡張と明記。
 
 wall-autotile／wall-tilesetの関連10件が成功。全16番号の選択、斜め非依存、マップ外、定義の欠落と範囲、同じ露出条件の接続辺の最終PNG画素一致を検証。配信URL整合と最終描画確認は下記へ追記。保存v12・歩行・視界への変更がないため全階走破と公開版走行は省略する。
 
 ### 最終検証
 
-wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が成功（test-results/wall-autotile-tests.log）。build-wall-tileset.jsと配信URL--check成功。ローカル確認用横通路で新JSON・16チップの読込、接続辺、入口装飾、前景壁が床へ張り出さない表示を確認。警告・エラーなし。証跡はGit対象外のtest-results/wall-autotile-preview.png。元の32pxパーツ・保存v12・ゲーム進行は維持。新PNGは4693 bytes。実機Safariと公開版走行は未確認。
+wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が成功（test-results/wall-autotile-tests.log）。build-wall-tileset.jsと配信URL--check成功。ローカル確認用横通路で新JSON・16チップの読込、接続辺、入口装飾、前景壁が床へ張り出さない表示を確認。警告・エラーなし。証跡はGit対象外のtest-results/wall-autotile-preview.png。元の32pxパーツ・保存v12・ゲーム進行は維持。新PNGは3726 bytes。実機Safariと公開版走行は未確認。
 
 ## PC・スマホの共通横画面（2026-10-28）
 - 対象：探索／準備を1280×720から等比表示。スマホでも3列、縦向き回転案内、準備移行時の全画面維持。保存v12変更なし。
@@ -507,3 +507,8 @@ wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が
 - UI：740×416の横持ち相当と1280×720のPCで編集3列の論理幅が一致（309／567／334px）。全景が収まり、縮小後のドラッグで第3行を第1行へ移動できる。PCブラウザで全画面→探索→準備→探索の維持と手動終了を確認。
 - 未確認：実機スマホ／Safariのネイティブ全画面と横向き固定。縦向き判定は単体テストで確認。検証iframeではブラウザ操作補助のMutationObserverエラーが出るが、ゲーム側に同処理はない。
 - 公開確認：df141232476a54a1fd40746ecbb0125a3261dffd を確認。Game tests（40696049309）とPages（40696049413）はともにsuccess。公開URLでLoadGame→映像スキップ→探索、全画面要求→デバッグ階移動→準備の全画面維持→手動終了を実操作。公開app=e4d192e90c85／display-mode=1200a20c9763を確認し、旧キャッシュ混在なし。公開ページを740×416のiframeでも表示し、論理1280×720・表示739.56×416で全景が収まることを確認。記録追記のみの後続コミットはゲーム資産に変更なし。実機スマホ／Safariは引き続き未確認。
+
+## 岩壁16パターンの差し替え（2026-10-29）
+- 組み込みimagegenの新規岩壁原画から32px原稿・配信用16種を作成。15番の全域を不透明岩で埋める。保存v12・ゲーム数値の変更なし。
+- ローカル：壁・地形・陰影・入口・描画順の関連26テスト成功。配信ハッシュcheck成功。全16接続・斜め非依存・互換辺の画素一致・15番の透明／黒穴なし・前景壁の床への張り出し防止を自動検証。ローカル探索画面B28で部屋・通路・内部の岩面・暗色表示を確認。初回プレビューにあった生成余白由来の縦筋は除去・なじませ処理で解消。
+- 生成原画はGit対象外、追加32px原稿は約28KB、配信PNGは3726 bytes。公開確認はpush後に結果を追記。

@@ -330,8 +330,11 @@ build-entrance-tileset.jsは任意フォルダのPNG検証と画像ハッシュ�
 
 wallNeighborMaskが描画用surfaceの4隣接からビットを生成し、drawWallPartsが定義のtiles[mask]を1回描画する。validateWallTilesetは新形式と旧wall-parts形式を分岐検証する。16番号・順序・寸法・範囲を検証し、旧定義の互換テストはparts-tileset-v1.jsonを使う。
 
-build-wall-autotiles.jsが専用32pxパーツから16チップを構成する。build-wall-tileset.jsはJSONに指定したPNGを検証し、固定のatlas-32.pngファイル名へ依存しない。wall-autotile.test.jsは全16番号・斜め非依存・画像選択・定義拒否条件・接続辺の最終PNG画素一致を検証する。
+build-wall-autotiles.jsが新規岩壁アートの32px原稿から16チップを構成する。build-wall-tileset.jsはJSONに指定したPNGを検証し、固定のatlas-32.pngファイル名へ依存しない。wall-autotile.test.jsは全16番号・斜め非依存・画像選択・定義拒否条件・接続辺の最終PNG画素一致を検証する。
 
 ## 共通仮想画面と端末方向（2026-10-28）
 display-mode.jsのsceneLayoutが1280×720の論理寸法・等比倍率・タッチ縦向き判定を返す。app.jsはresize／visualViewport.resize／fullscreenchangeでCSS変数--game-scene-scaleを更新する。screens.cssはmainとworkspaceを固定論理寸法にし、中央基準のtransformで表示する。コンテナ幅はPCとスマホで共通となり、HUDと準備3列を同じ規則で描画する。
 縦向き案内はnative dialogで背景操作を止め、探索をpausedにする。横向きへ戻った際も自動で探索を再開しない。全画面要求はユーザー操作から実行し、準備遷移時の自動exitFullscreenを廃止。保存モデル・描画Canvas寸法・素材形式は変更しない。
+
+## 岩壁アートの構成（2026-10-29）
+ビルド入力を生成アートの32px原稿painted-32.pngへ変更。岩面と正面の画像を使い、4方向接続番号に従って16チップを出力。15番は岩面を全域に充填。生成余白除去・4pxの折り返しなじませ・接続辺の同値類による画素統一を制作時に実行し、実行時の負荷は変更なし。旧パーツ原稿は互換保管。PNG→JSON→indexの内容ハッシュを更新する。

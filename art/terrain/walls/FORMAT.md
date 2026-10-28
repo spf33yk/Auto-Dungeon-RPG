@@ -19,7 +19,7 @@
 
 ## ファイルと定義
 
-各エリアにtileset.jsonと32px基準のPNGを置く。現行はcrypt/autotile-32.png（128×224px、4693 bytes）。1セル32×56px（床幅32px＋壁高0.75マス）、4列×4行に接続番号0〜15を左上から並べる。透明背景・二値アルファ。64px原本は使わない。
+各エリアにtileset.jsonと32px基準のPNGを置く。現行はcrypt/autotile-32.png（128×224px、3726 bytes）。1セル32×56px（床幅32px＋壁高0.75マス）、4列×4行に接続番号0〜15を左上から並べる。アルファは0／255を許容し、現行の岩壁チップは全面不透明。64px原本は使わない。
 
 JSONはformat=wall-autotile、version=1、neighbors=4、bitOrder=[north,east,south,west]。tileSize=32、rise=0.75、width／heightはPNG実寸。tilesのキー0〜15が必須で、各値は[x,y,width,height]の配列を複数登録できる。配置は自由で4×4固定ではない。同じ番号のバリアントはseedと座標から選び、ゲーム乱数は消費しない。
 
@@ -29,7 +29,9 @@ idは固有名、themesはzone ID配列、*は共通既定。具体的なエリ�
 
 接続する辺に外周枠・露出面を描かず、露出した方向だけ側面・正面・上端の縁を描く。上面の端画素、正面の左右端、縦側面の接続端を共通にする。角の露出が違う接合点は形状の変化として描き、同じ露出条件で隣接するチップ同士は端画素を一致させる。
 
-現行PNGは既存の専用32pxパーツから16チップを構成した。crypt/parts-tileset-v1.jsonとatlas-32.pngが構成元。床素材の流用や画像生成の追加呼び出しはない。構成元を変えた場合はnode scripts/build-wall-autotiles.js art/terrain/walls/cryptを実行（制作時のみSharpが必要。第3引数でモジュールファイルを指定可）。直接描く場合はautotile-32.pngを編集してよい。
+現行PNGは新規生成した岩壁アートを32px基準へ整形したcrypt/painted-32.pngから構成する。従来のparts-tileset-v1.json／atlas-32.pngは互換資料として保持し、現行ビルドには使用しない。15番は縁・正面・透明穴のない岩の内部で、32×56全体を埋める。全16種の上面は共通の岩、南が露出する場合のみ暗い正面、未接続の北・東・西のみ縁を付ける。
+
+node scripts/build-wall-autotiles.js art/terrain/walls/cryptで再構成する（制作時のみSharpが必要。第3引数でモジュールファイル指定可）。第4引数に生成原画を指定した場合のみpainted-32.pngも更新する。岩素材の外周余白を除き、端4pxの折り返しをなじませた後、互換接続辺の画素を同一グループとして平均化する。画像とJSONのハッシュを同時更新。高解像度原画はart/local-originalsにローカル保管し、GitHubには小型32px原稿と配信用PNGだけを置く。
 
 ## 検証・登録
 
