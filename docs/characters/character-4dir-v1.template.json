@@ -1,0 +1,22 @@
+{
+  "format": "character-4dir",
+  "version": 1,
+  "id": "your-character-id",
+  "image": "sprites-32.png",
+  "tileSize": 32,
+  "columns": 3,
+  "rows": 4,
+  "width": 96,
+  "height": 128,
+  "directions": [
+    "south",
+    "west",
+    "east",
+    "north"
+  ],
+  "anchor": [
+    16,
+    29
+  ],
+  "displayScale": 1.25
+}

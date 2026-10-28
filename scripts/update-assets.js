@@ -18,6 +18,12 @@ for(const match of html.matchAll(/\.\/art\/terrain\/(?:walls|entrances)\/[^"\s?]
  updated=updated.replaceAll(match[0],'./'+file+'?v='+version(file));
 }
 // The inline startup script imports app.js through this content-versioned map.
+for(const match of html.matchAll(/\.\/art\/characters\/[^"\s?]*sprites\.json(?:\?v=[^"\s]*)?/g)){
+ const file=match[0].split('?')[0].slice(2),definition=JSON.parse(readFileSync(root+file,'utf8'));
+ const image=file.slice(0,file.lastIndexOf('/')+1)+definition.image.split('?')[0];
+ if(definition.image.split('?v=')[1]!==version(image))throw Error('Character image version is stale: run build-character-sheet.js for '+file);
+ updated=updated.replaceAll(match[0],'./'+file+'?v='+version(file));
+}
 for(const file of ['style.css','screens.css'])updated=updated.replace(new RegExp('href="\\./'+file.replace('.', '\\.')+'(?:\\?v=[^"]*)?"'),'href="./'+file+'?v='+version(file)+'"');
 for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','terrain/crypt/atlas-32.png','props/atlas-32.png']){
  const asset='./art/'+file;

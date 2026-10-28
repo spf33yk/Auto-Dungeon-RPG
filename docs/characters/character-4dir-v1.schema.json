@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "character-4dir/v1",
+  "type": "object",
+  "required": [
+    "format",
+    "version",
+    "id",
+    "image",
+    "tileSize",
+    "columns",
+    "rows",
+    "width",
+    "height",
+    "directions",
+    "anchor",
+    "displayScale"
+  ],
+  "properties": {
+    "format": {
+      "const": "character-4dir"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "image": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tileSize": {
+      "type": "integer",
+      "minimum": 8,
+      "maximum": 256
+    },
+    "columns": {
+      "const": 3
+    },
+    "rows": {
+      "const": 4
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 24
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 32
+    },
+    "directions": {
+      "const": [
+        "south",
+        "west",
+        "east",
+        "north"
+      ]
+    },
+    "anchor": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "displayScale": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 2
+    }
+  }
+}

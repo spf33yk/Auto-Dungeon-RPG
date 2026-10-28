@@ -342,3 +342,8 @@ display-mode.jsのsceneLayoutが1280×720の論理寸法・等比倍率・タッ
 ## wall-material/v1 → wall-autotile/v2（2026-10-29）
 制作入力material.jsonの原稿・色調倍率・zoneを検証し、壁上面／正面の共通32px原稿から16接続＋4入口を構成する。PNGパレットと光源・投影を共有し、入口の色調が壁から乖離しないようにする。実行時はloadWallTilesetsだけで画像を読み込み、drawWallPartsが接続チップに同じアトラスの入口を重ねる。drawRaisedWallへ入口番号を渡し、前景壁も同じwallDrawBoxで描く。
 app.jsからloadEntranceTilesets・drawEntrance・data-entrances依存を除外。entranceWallFramesの肩検出だけを継続する。暗色化キャッシュも同じ画像へ適用。v1壁互換は継続し、v2ではmaterialと4入口の32×56矩形・共通投影を必須検証。制作入力と配信用のテンプレート・スキーマを分離する。
+
+## CharacterAnimation / character-4dir/v1（2026-10-29）
+character-animation.jsに個体別の位置・方向・状態・サンプル時刻、方向判定、切り抜き矩形、足元バインド、Canvas描画、JSON/PNGローダーを分離。実時計をクラス内部で読まず、探索が動いている間だけ進むheroClockをapp.jsから渡す。moveToとattackToは描画状態のみ更新し、エンジンの行動を遅延しない。
+主人公のdamageEventsのhero=falseを攻撃トリガーとするため、敵の反撃でflashが上書きされても向きと攻撃コマを更新できる。表示座標は従来の移動補間から渡し、深度は共通の足元を使う。状態・画像はセーブ外。
+indexのdata-heroへsprites.jsonを登録。PNGハッシュはbuild-character-sheet.js、JSONとJSハッシュはupdate-assets.jsで管理し、不整合をcheckで拒否する。敵や倅は同じ定義をloadし、各個体に独立インスタンスを与える設計。今回は主人公のみ接続。
