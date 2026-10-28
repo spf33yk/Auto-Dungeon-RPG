@@ -1,0 +1,7 @@
+{
+  "format":"wall-material", "version":1, "id":"crypt-ashlar-v3", "themes":["*","crypt"],
+  "source":"surfaces-32.png", "tileSize":32, "rise":0.75,
+  "cap":[0,0,32,32], "front":[32,0,32,32],
+  "capGain":0.78, "frontGain":1.12, "bevelGain":1.45,
+  "light":"north-west", "entranceMode":"integrated"
+}

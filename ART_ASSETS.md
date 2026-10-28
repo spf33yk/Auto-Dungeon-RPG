@@ -106,3 +106,6 @@ crypt/autotile-32.png（128×224px、32×56セル16種、3726 bytes）を追加�
 
 ## 岩壁アートv2（2026-10-29）
 組み込みimagegenで新規生成。生成原画はart/local-originals/wall-auto16-source-v2.pngにローカル保管し、Git対象外。32px原稿crypt/painted-32.png（27773 bytes）と配信用autotile-32.png（3726 bytes、128×224）を保持。16種は新しい岩面・正面から構成し、15番は全面岩。旧32pxパーツと64px保管原本は使用しない。生成指示と工程はart/terrain/walls/crypt/ARTWORK.md。
+
+## 統合石積み壁v3（2026-10-29・現行）
+組み込みimagegenで壁上面／正面の2面原画を新規生成。高解像度原画はart/local-originals/wall-material-source-v3.pngへローカル保管しGit対象外。32px原稿surfaces-32.png（64×32、2931 bytes）と配信用autotile-32.png（128×280、4269 bytes）を使用する。16壁＋4入口を同一原稿・パレットで構成。旧独立入口とpainted-32.pngは現行描画・ビルドで使わない。制作入力はcrypt/material.json。制作記録・生成プロンプトはcrypt/ARTWORK-V3.md。

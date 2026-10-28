@@ -1,16 +1,16 @@
 {
   "format": "wall-autotile",
-  "version": 1,
-  "id": "crypt-rock-auto16-v2",
+  "version": 2,
+  "id": "crypt-ashlar-v3",
   "themes": [
     "*",
     "crypt"
   ],
-  "image": "autotile-32.png?v=71656e92708f",
+  "image": "autotile-32.png?v=bac5b9616dbc",
   "tileSize": 32,
   "rise": 0.75,
   "width": 128,
-  "height": 224,
+  "height": 280,
   "neighbors": 4,
   "bitOrder": [
     "north",
@@ -18,6 +18,15 @@
     "south",
     "west"
   ],
+  "material": {
+    "format": "wall-material",
+    "version": 1,
+    "id": "crypt-ashlar-v3",
+    "capPixels": 32,
+    "facePixels": 24,
+    "light": "north-west",
+    "entranceMode": "integrated"
+  },
   "tiles": {
     "0": [
       [
@@ -143,6 +152,40 @@
       [
         96,
         168,
+        32,
+        56
+      ]
+    ]
+  },
+  "entrances": {
+    "leftJamb": [
+      [
+        0,
+        224,
+        32,
+        56
+      ]
+    ],
+    "rightJamb": [
+      [
+        32,
+        224,
+        32,
+        56
+      ]
+    ],
+    "lintel": [
+      [
+        64,
+        224,
+        32,
+        56
+      ]
+    ],
+    "threshold": [
+      [
+        96,
+        224,
         32,
         56
       ]

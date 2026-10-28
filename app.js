@@ -1,5 +1,5 @@
-import {loadWallTilesets,wallDrawBox} from './wall-tileset.js';
-import {entranceWallFrames,drawEntrance,loadEntranceTilesets} from './entrance-view.js';
+import {loadWallTilesets} from './wall-tileset.js';
+import {entranceWallFrames} from './entrance-view.js';
 import {readUiSettings,saveUiSettings} from './ui-settings.js';
 import {forecastExploration} from './exploration-forecast.js';
 import {MEMORY_SHADE,dimmedWallTileset,floorLight,actorFootOffset,renderSightState} from './scene-lighting.js';
@@ -61,7 +61,7 @@ const palette={h:'#57695a',b:'#e2dfbd',d:'#27352f',a:'#899e85',s:'#b8b2a1',g:'#3
 function sprite(ctx,type,x,y,size=24,height=size){if(drawProp(ctx,propsAtlas,type,x,y,size,height))return;const rows=sprites[type]||(['tombstone','tombstone-cracked'].includes(type)?['............','....aaaa....','...abbbba...','..abbbbbba..','..abdbbbba..','..abbdbbba..','..abbbbbba..','..abbbbbba..','..abbbbbba..','.aabbbbbbaa.','.aaaaaaaaaa.','............']:sprites.reward);const scale=size/12,scaleY=height/12;for(let py=0;py<rows.length;py++)for(let px=0;px<rows[py].length;px++){const c=rows[py][px];if(c!=='.'&&palette[c]){ctx.fillStyle=palette[c];ctx.fillRect(x+px*scale,y+py*scaleY,Math.ceil(scale),Math.ceil(scaleY));}}}
 const ctx=$('map').getContext('2d');ctx.imageSmoothingEnabled=false;
 const cryptAtlas=new Image();cryptAtlas.src=$('map').dataset.terrain;
-let entranceSets=new Map(),entranceGrid=null,entranceFrames=new Map();const entranceAssetsReady=loadEntranceTilesets($('map').dataset.entrances.split(/\s+/)).then(sets=>{entranceSets=sets;}).catch(error=>console.error('Entrance tileset:',error));
+let entranceGrid=null,entranceFrames=new Map();
 let wallSets=new Map();const wallAssetsReady=loadWallTilesets($('map').dataset.walls.split(/\s+/)).then(sets=>{wallSets=sets;}).catch(error=>console.error('Wall tileset:',error));
 function draw(){
  const scene=state.seed+':'+state.floor;if(damageScene!==scene){damagePopups=[];damageScene=scene;}
@@ -82,7 +82,7 @@ function draw(){
    if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+5+n,py+8,2,2);}
   }
   if(floor&&light==='memory'){ctx.fillStyle=MEMORY_SHADE;ctx.fillRect(px,py,24,24);}
-  if(!floor)queue.push({footY:(y+1)*24,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,light==='visible'?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme);const entrances=entranceSets.get(theme.id)||entranceSets.get('*');if(entrances)drawEntrance(ctx,light==='visible'?entrances:dimmedWallTileset(entrances),entranceFrames.get(x+','+y),wallDrawBox(surface,x,y,walls?.definition.rise??.75),state.seed^Math.imul(x,73856093)^Math.imul(y,19349663));ctx.restore();}});
+  if(!floor)queue.push({footY:(y+1)*24,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,light==='visible'?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme,24,entranceFrames.get(x+','+y));ctx.restore();}});
  }
  const stair=state.stairs;if(state.seen[stair.y][stair.x]){ctx.save();ctx.globalAlpha=visible(stair.x,stair.y)?1:.4;sprite(ctx,'stairs',stair.x*24,stair.y*24);ctx.restore();}
  for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;ctx.fillStyle=t.spent?'#7e7769':'#d7b278';ctx.fillRect(t.x*24+6,t.y*24+14,12,3);ctx.fillStyle='#d1b88b';for(let i=0;i<3;i++)ctx.fillRect(t.x*24+7+i*4,t.y*24+10,2,4);ctx.restore();}
@@ -297,4 +297,4 @@ const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap'),gap=wrap.clie
 installCardDragging($('tab-content'),()=>state,()=>{delete $('tab-content').dataset.orderSignature;render();});
 sprite($('portrait').getContext('2d'),'skeleton',4,3,48);sprite($('camp-portrait').getContext('2d'),'skeleton',12,8,96);render();requestAnimationFrame(loop);
 
-await Promise.all([...['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})),cryptAtlas.decode().catch(()=>{}),propsAtlas.decode().catch(()=>{}),entranceAssetsReady,wallAssetsReady]);draw();
+await Promise.all([...['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})),cryptAtlas.decode().catch(()=>{}),propsAtlas.decode().catch(()=>{}),wallAssetsReady]);draw();

@@ -18,8 +18,8 @@ export function drawCryptTile(ctx,atlas,grid,x,y,seed,size=24,walkable=Boolean(g
 }
 
 // All textured surfaces come from dedicated wall-parts/v1 sprites.
-export function drawRaisedWall(ctx,tileset,grid,x,y,seed,theme,size=24){
- if(drawWallParts(ctx,tileset,grid,x,y,seed,size))return true;
+export function drawRaisedWall(ctx,tileset,grid,x,y,seed,theme,size=24,entrance){
+ if(drawWallParts(ctx,tileset,grid,x,y,seed,size,entrance))return true;
  // Missing/invalid assets remain readable; never sample floor or old wall art.
  const box=wallDrawBox(grid,x,y,tileset?.definition?.rise??.75,size);ctx.fillStyle=theme.wallColor;ctx.fillRect(box.x,box.y,box.width,box.height);return false;
 }

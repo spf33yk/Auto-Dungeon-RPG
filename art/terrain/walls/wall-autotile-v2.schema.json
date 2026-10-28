@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "wall-autotile/v2: integrated stage wall material",
+  "type": "object",
+  "required": [
+    "format",
+    "version",
+    "id",
+    "themes",
+    "image",
+    "tileSize",
+    "rise",
+    "width",
+    "height",
+    "neighbors",
+    "bitOrder",
+    "tiles",
+    "material",
+    "entrances"
+  ],
+  "properties": {
+    "format": {
+      "const": "wall-autotile"
+    },
+    "version": {
+      "const": 2
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "themes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "image": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tileSize": {
+      "const": 32
+    },
+    "rise": {
+      "const": 0.75
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 32
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 32
+    },
+    "neighbors": {
+      "const": 4
+    },
+    "bitOrder": {
+      "const": [
+        "north",
+        "east",
+        "south",
+        "west"
+      ]
+    },
+    "tiles": {
+      "type": "object",
+      "required": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
+      ],
+      "propertyNames": {
+        "pattern": "^(?:[0-9]|1[0-5])$"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "material": {
+      "type": "object",
+      "required": [
+        "format",
+        "version",
+        "id",
+        "capPixels",
+        "facePixels",
+        "light",
+        "entranceMode"
+      ],
+      "properties": {
+        "format": {
+          "const": "wall-material"
+        },
+        "version": {
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capPixels": {
+          "const": 32
+        },
+        "facePixels": {
+          "const": 24
+        },
+        "light": {
+          "const": "north-west"
+        },
+        "entranceMode": {
+          "const": "integrated"
+        }
+      }
+    },
+    "entrances": {
+      "type": "object",
+      "required": [
+        "leftJamb",
+        "rightJamb",
+        "lintel",
+        "threshold"
+      ],
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "const": 32
+            },
+            {
+              "const": 56
+            }
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        }
+      }
+    }
+  }
+}
