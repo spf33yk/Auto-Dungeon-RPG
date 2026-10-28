@@ -506,4 +506,4 @@ wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が
 - ローカル：node --test display-mode.test.js preparation-ui.test.js card-placement.test.js の13件成功。app.js構文、配信ハッシュ更新とcheckを確認。
 - UI：740×416の横持ち相当と1280×720のPCで編集3列の論理幅が一致（309／567／334px）。全景が収まり、縮小後のドラッグで第3行を第1行へ移動できる。PCブラウザで全画面→探索→準備→探索の維持と手動終了を確認。
 - 未確認：実機スマホ／Safariのネイティブ全画面と横向き固定。縦向き判定は単体テストで確認。検証iframeではブラウザ操作補助のMutationObserverエラーが出るが、ゲーム側に同処理はない。
-- 公開確認：本変更のpush後にActions・Pages・公開UIを確認して追記する。
+- 公開確認：df141232476a54a1fd40746ecbb0125a3261dffd を確認。Game tests（40696049309）とPages（40696049413）はともにsuccess。公開URLでLoadGame→映像スキップ→探索、全画面要求→デバッグ階移動→準備の全画面維持→手動終了を実操作。公開app=e4d192e90c85／display-mode=1200a20c9763を確認し、旧キャッシュ混在なし。公開ページを740×416のiframeでも表示し、論理1280×720・表示739.56×416で全景が収まることを確認。記録追記のみの後続コミットはゲーム資産に変更なし。実機スマホ／Safariは引き続き未確認。
