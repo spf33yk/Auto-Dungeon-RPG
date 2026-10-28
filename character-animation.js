@@ -18,21 +18,21 @@ export function characterDrawBox(x,y,d,size=24){const scale=size/d.tileSize*d.di
 export class CharacterAnimation{
  constructor({x=0,y=0,direction=0,idleMs=240,moveMs=180,attackMs=140}={}){
   if(![x,y,idleMs,moveMs,attackMs].every(Number.isFinite)||Math.min(idleMs,moveMs,attackMs)<=0||!Number.isInteger(direction)||direction<0||direction>3)throw Error('Invalid character animation state');
-  Object.assign(this,{x,y,direction,idleMs,moveMs,attackMs,state:'idle',since:0,until:0});
+  Object.assign(this,{x,y,direction,idleMs,moveMs,attackMs,state:'idle',since:0,until:0,idleFrame:0,stepStart:0,nextStep:0});
  }
  faceTo(x,y){this.direction=directionTo(x-this.x,y-this.y,this.direction);return this.direction;}
- teleport(x,y,time=0){if(![x,y,time].every(Number.isFinite))throw Error('Invalid character position');Object.assign(this,{x,y,state:'idle',since:time,until:time});}
+ teleport(x,y,time=0){if(![x,y,time].every(Number.isFinite))throw Error('Invalid character position');Object.assign(this,{x,y,state:'idle',since:time,until:time,idleFrame:0,stepStart:0,nextStep:0});}
  moveTo(x,y,time,duration=this.moveMs){
   if(![x,y,time,duration].every(Number.isFinite)||duration<=0)throw Error('Invalid character movement');
   if(x===this.x&&y===this.y)return;
-  this.faceTo(x,y);Object.assign(this,{x,y,state:'moving',since:time,until:time+duration});
+  this.faceTo(x,y);this.stepStart=this.nextStep;this.nextStep=1-this.nextStep;Object.assign(this,{x,y,state:'moving',since:time,until:time+duration});
  }
  attackTo(x,y,time,duration=this.attackMs){if(![x,y,time,duration].every(Number.isFinite)||duration<=0)throw Error('Invalid character attack');this.faceTo(x,y);Object.assign(this,{state:'attacking',since:time,until:time+duration});}
  sample(time,{reducedMotion=false}={}){
   if(!Number.isFinite(time))throw Error('Invalid animation time');
-  if(this.state!=='idle'&&time>=this.until){this.state='idle';this.since=this.until;}
+  if(this.state!=='idle'&&time>=this.until){this.idleFrame=this.state==='moving'?1-this.stepStart:0;this.state='idle';this.since=this.until;}
   const elapsed=Math.max(0,time-this.since),interval=this.state==='moving'?(this.until-this.since)/2:this.idleMs;
-  const frame=this.state==='attacking'?2:reducedMotion?0:Math.floor(elapsed/interval)%2;
+  const frame=this.state==='attacking'?2:reducedMotion?0:((this.state==='moving'?this.stepStart:this.idleFrame)+Math.floor(elapsed/interval))%2;
   return {x:this.x,y:this.y,direction:this.direction,state:this.state,frame};
  }
 }

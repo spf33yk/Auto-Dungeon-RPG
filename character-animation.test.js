@@ -7,10 +7,10 @@ test('four directions safely round vectors and preserve the previous direction f
 });
 test('movement, idle and one-shot attacks change frames without shared instance state',()=>{
  const hero=new CharacterAnimation({x:2,y:3}),enemy=new CharacterAnimation({direction:3});
- hero.moveTo(3,3,0,100);assert.equal(hero.direction,2);assert.equal(hero.sample(0).frame,0);assert.equal(hero.sample(51).frame,1);assert.equal(hero.sample(100).state,'idle');assert.equal(hero.sample(340).frame,1);
+ hero.moveTo(3,3,0,100);assert.equal(hero.direction,2);assert.equal(hero.sample(0).frame,0);assert.equal(hero.sample(51).frame,1);assert.equal(hero.sample(100).state,'idle');assert.equal(hero.sample(100).frame,1);assert.equal(hero.sample(340).frame,0);
  hero.attackTo(2,3,350,140);assert.equal(hero.sample(400).frame,2);assert.equal(hero.sample(400).direction,1);assert.deepEqual(hero.sample(400),hero.sample(400),'Caller-controlled time freezes animation while paused');
  assert.equal(hero.sample(490).state,'idle');assert.equal(hero.sample(490).frame,0);assert.equal(enemy.state,'idle');assert.equal(enemy.direction,3);
- for(const duration of [190,170,85]){hero.moveTo(hero.x,hero.y-1,1000,duration);assert.equal(hero.sample(1000+duration*.25).frame,0);assert.equal(hero.sample(1000+duration*.75).frame,1);assert.equal(hero.sample(1000+duration*.75,{reducedMotion:true}).frame,0);}
+ let previousStart,walkTime=1000;for(const duration of [190,170,85]){hero.moveTo(hero.x,hero.y-1,walkTime,duration);const first=hero.sample(walkTime+duration*.25).frame,last=hero.sample(walkTime+duration*.75).frame;assert.notEqual(first,last);if(previousStart!==undefined)assert.notEqual(first,previousStart,'Consecutive tiles must alternate the leading foot');previousStart=first;assert.equal(hero.sample(walkTime+duration).frame,last,'The movement contact pose remains during the following idle');assert.equal(hero.sample(walkTime+duration+1,{reducedMotion:true}).frame,0);walkTime+=duration+10;}
  hero.teleport(20,20,2000);assert.equal(hero.state,'idle');assert.throws(()=>hero.moveTo(NaN,0,1));assert.throws(()=>hero.attackTo(0,0,1,-1));
 });
 test('frame slicing and ground anchors bind all poses to stable foot-depth coordinates',()=>{
@@ -29,4 +29,16 @@ test('native32 artwork contains twelve distinct transparent frames with a shared
  const path=new URL('./art/characters/mukuro-v1/sprites-32.png',import.meta.url),p=readPng(path);assert.equal(p.width,96);assert.equal(p.height,128);const frames=new Set();
  for(let row=0;row<4;row++)for(let col=0;col<3;col++){let last=-1,red=0,visible=0;const pixels=[];for(let y=0;y<32;y++)for(let x=0;x<32;x++){const c=p.pixel(col*32+x,row*32+y);pixels.push(...c);assert.ok(c[3]===0||c[3]===255);if(x<2||x>29||y<2||y>28)assert.equal(c[3],0);if(c[3]){visible++;last=y;if(c[0]>c[1]*1.4&&c[0]>c[2]*1.4)red++;}}assert.equal(last,28);assert.ok(visible>60&&red>12);frames.add(JSON.stringify(pixels));}
  assert.equal(frames.size,12);assert.ok(readFileSync(path).length<16384);
+});
+
+test('walk B changes the support-foot silhouette in every direction, not just the cape',()=>{
+ const p=readPng(new URL('./art/characters/mukuro-v1/sprites-32.png',import.meta.url)),shifts=[];
+ for(let dir=0;dir<4;dir++){const feet=[];for(let frame=0;frame<2;frame++){let weight=0,weightedX=0;
+  for(let y=24;y<=28;y++)for(let x=7;x<25;x++){const [r,g,b,a]=p.pixel(frame*32+x,dir*32+y);if(a&&r>70&&g>60&&r>g*1.03&&g>b*1.08){const w=(r+g+b)**2;weight+=w;weightedX+=x*w;}}
+  assert.ok(weight>0);feet.push(weightedX/weight);
+ }shifts.push(feet[1]-feet[0]);}
+ assert.ok(shifts[0]>1.5,'South: the planted bone foot must switch to the other side');
+ assert.ok(shifts[1]>1,'West: the bright near leg must swing back to screen right');
+ assert.ok(shifts[2]<-2,'East: the bright near leg must swing back to screen left');
+ assert.ok(shifts[3]<-1.2,'North: the visible support foot must change side below the cape');
 });

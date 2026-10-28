@@ -111,4 +111,7 @@ crypt/autotile-32.png（128×224px、32×56セル16種、3726 bytes）を追加�
 組み込みimagegenで壁上面／正面の2面原画を新規生成。高解像度原画はart/local-originals/wall-material-source-v3.pngへローカル保管しGit対象外。32px原稿surfaces-32.png（64×32、2931 bytes）と配信用autotile-32.png（128×280、4269 bytes）を使用する。16壁＋4入口を同一原稿・パレットで構成。旧独立入口とpainted-32.pngは現行描画・ビルドで使わない。制作入力はcrypt/material.json。制作記録・生成プロンプトはcrypt/ARTWORK-V3.md。
 
 ## 骸の4方向スプライト（2026-10-29）
-art/characters/mukuro-v1/sprites-32.png（96×128、32pxセル3列4行、4468 bytes）とsprites.jsonを追加。組み込みimagegenで新規原画を作成し、既存キャラ素材・64px保管素材は参照しない。歩行差分・西向き・32pxの頭蓋骨の読みやすさを調整し、最近傍・共通倍率・足元アンカーで整形。原画／修正案はart/local-originals/mukuro-animation-*へローカル保管しGit対象外。生成プロンプトと工程は同フォルダARTWORK.md。
+art/characters/mukuro-v1/sprites-32.png（96×128、32pxセル3列4行、4286 bytes）とsprites.jsonを追加。組み込みimagegenで新規原画を作成し、既存キャラ素材・64px保管素材は参照しない。歩行差分・西向き・32pxの頭蓋骨の読みやすさを調整し、最近傍・共通倍率・足元アンカーで整形。原画／修正案はart/local-originals/mukuro-animation-*へローカル保管しGit対象外。生成プロンプトと工程は同フォルダARTWORK.md。
+
+## 骸の歩行B修正（2026-10-29）
+技術ポーズガイドを参照してimagegenでBの4方向だけを再作成し、sprites-32.pngへ反映（4286 bytes）。Aと攻撃の8コマは画素単位で維持。原画はart/local-originals/mukuro-walk-b-corrected.pngにローカル保管。ポーズガイドはdocs/characters/poses/walk-b-guide.svg、採用プロンプトと整形記録はキャラのARTWORK.md。

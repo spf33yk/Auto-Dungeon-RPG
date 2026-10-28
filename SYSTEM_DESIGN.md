@@ -347,3 +347,6 @@ app.jsからloadEntranceTilesets・drawEntrance・data-entrances依存を除外�
 character-animation.jsに個体別の位置・方向・状態・サンプル時刻、方向判定、切り抜き矩形、足元バインド、Canvas描画、JSON/PNGローダーを分離。実時計をクラス内部で読まず、探索が動いている間だけ進むheroClockをapp.jsから渡す。moveToとattackToは描画状態のみ更新し、エンジンの行動を遅延しない。
 主人公のdamageEventsのhero=falseを攻撃トリガーとするため、敵の反撃でflashが上書きされても向きと攻撃コマを更新できる。表示座標は従来の移動補間から渡し、深度は共通の足元を使う。状態・画像はセーブ外。
 indexのdata-heroへsprites.jsonを登録。PNGハッシュはbuild-character-sheet.js、JSONとJSハッシュはupdate-assets.jsで管理し、不整合をcheckで拒否する。敵や倅は同じ定義をloadし、各個体に独立インスタンスを与える設計。今回は主人公のみ接続。
+
+## 歩行位相の継続（2026-10-29）
+CharacterAnimationにidleFrame／stepStart／nextStepを追加。moveToで開始位相を交互に選び、sampleの移動終了で最後の接地コマを待機へ引き継ぐ。攻撃終了とteleportは待機0へ戻す。視覚状態のみでセーブへ追加しない。素材の受け入れでは全体フレーム差分だけでなく、足元の骨画素と支持脚の位置変化を検査する。
