@@ -32,3 +32,8 @@ test('production terrain PNG dimensions and combined storage budget remain bound
  }
  assert.ok(total<=32768,'The 64px master and 32px delivery atlas together must stay below 32 KiB');
 });
+
+test('tombstone cells can draw floor underneath while remaining blocked in the grid',()=>{
+ const calls=[],ctx={drawImage(...a){calls.push(a);},fillRect(){}},grid=[[0]],atlas={complete:true,naturalWidth:64,naturalHeight:64};
+ assert.equal(drawCryptTile(ctx,atlas,grid,0,0,1,24,true),true);assert.equal(calls[0][2],0);assert.deepEqual(grid,[[0]]);
+});

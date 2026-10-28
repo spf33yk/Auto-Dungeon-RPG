@@ -1,0 +1,10 @@
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {resolve} from 'node:path';
+const {default:sharp}=await import(process.argv[2]?pathToFileURL(resolve(process.argv[2])).href:'sharp');
+const folder=fileURLToPath(new URL('../art/props/',import.meta.url));
+const m=await sharp(folder+'master-64.png').metadata();
+if(m.width!==192||m.height!==128)throw new Error('Expected 3x2 64px prop cells');
+const {data,info}=await sharp(folder+'master-64.png').resize(96,64,{kernel:'nearest'}).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+for(let i=3;i<data.length;i+=4)data[i]=data[i]>=128?255:0;
+await sharp(data,{raw:info}).png({palette:true,colours:48,dither:0}).toFile(folder+'atlas-32.png');
+console.log('Built six transparent 32px props.');

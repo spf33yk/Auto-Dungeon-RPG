@@ -5,9 +5,9 @@ export function cryptTileFrame(walkable,x,y,seed){
  hash^=hash>>>13;hash=Math.imul(hash,0x5bd1e995);hash^=hash>>>15;
  return {x:(hash&1)*32,y:walkable?0:32,width:32,height:32};
 }
-export function drawCryptTile(ctx,atlas,grid,x,y,seed,size=24){
+export function drawCryptTile(ctx,atlas,grid,x,y,seed,size=24,walkable=Boolean(grid[y]?.[x])){
  if(!atlas.complete||atlas.naturalWidth!==64||atlas.naturalHeight!==64)return false;
- const floor=Boolean(grid[y]?.[x]),frame=cryptTileFrame(floor,x,y,seed),px=x*size,py=y*size;
+ const floor=walkable,frame=cryptTileFrame(floor,x,y,seed),px=x*size,py=y*size;
  ctx.imageSmoothingEnabled=false;
  ctx.drawImage(atlas,frame.x,frame.y,32,32,px,py,size,size);
  const north=Boolean(grid[y-1]?.[x]),south=Boolean(grid[y+1]?.[x]),west=Boolean(grid[y]?.[x-1]),east=Boolean(grid[y]?.[x+1]),edge=size/32;

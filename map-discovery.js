@@ -2,7 +2,8 @@
 // Derive them from the saved grid so older floors need no regeneration.
 export function roomMapTiles(s){
  const grid=s.grid,h=grid.length,w=grid[0].length,wide=new Set(),key=(x,y)=>y*w+x;
- for(let y=0;y<h-1;y++)for(let x=0;x<w-1;x++)if(grid[y][x]&&grid[y][x+1]&&grid[y+1][x]&&grid[y+1][x+1])
+ const obstacles=new Set((s.obstacles||[]).map(p=>key(p.x,p.y))),roomGrid=grid.map((r,y)=>r.map((v,x)=>v||obstacles.has(key(x,y))));
+ for(let y=0;y<h-1;y++)for(let x=0;x<w-1;x++)if(roomGrid[y][x]&&roomGrid[y][x+1]&&roomGrid[y+1][x]&&roomGrid[y+1][x+1])
   for(const [dx,dy]of [[0,0],[1,0],[0,1],[1,1]])wide.add(key(x+dx,y+dy));
  const sector=(x,y)=>s.bossFloor||w!==31||h!==23?0:Math.min(2,Math.floor(x/10))+(y>=12?3:0);
  const pending=new Set(wide),rooms=[],roomWalls=new Set(),shown=new Set();

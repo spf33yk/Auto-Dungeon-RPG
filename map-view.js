@@ -7,6 +7,7 @@ export function autoMapModel(s,visible){
  for(const i of s.items)if(known(i)&&s.seen[i.y][i.x])markers.push({x:i.x,y:i.y,type:'item'});
  for(const t of s.traps||[])if(t.revealed&&(s.gimmick?.id==='traps'||known(t)&&s.seen[t.y][t.x]))markers.push({x:t.x,y:t.y,type:t.spent?'spent':'trap'});
  for(const e of s.enemies)if(known(e)&&visible(e.x,e.y))markers.push({x:e.x,y:e.y,type:e.boss?'boss':'enemy'});
+ for(const o of s.obstacles||[])if(known(o)&&s.seen[o.y][o.x])markers.push({...o,type:'tombstone'});
  markers.push({...s.player,type:'player'});return {tiles,markers};
 }
 
@@ -29,5 +30,5 @@ export function drawMiniMap(ctx,model,geometry){
   ctx.fillStyle='#40574a';ctx.fillRect(tile.x*cell,tile.y*cell,cell+1,cell+1);
   ctx.fillStyle=tile.walkable?'#739d86':'#253c32';ctx.fillRect(tile.x*cell+1,tile.y*cell+1,cell-1,cell-1);
  }
- for(const m of model.markers){ctx.fillStyle=({player:'#fff3b0',enemy:'#ff8c83',boss:'#ffb44e',stairs:'#9ddff2',item:'#dec68c',trap:'#f3a66d',spent:'#827b73'})[m.type];ctx.fillRect(m.x*cell+1,m.y*cell+1,cell-1,cell-1);}
+ for(const m of model.markers){ctx.fillStyle=({player:'#fff3b0',enemy:'#ff8c83',boss:'#ffb44e',stairs:'#9ddff2',item:'#dec68c',trap:'#f3a66d',spent:'#827b73',tombstone:'#a3aa9b'})[m.type];ctx.fillRect(m.x*cell+1,m.y*cell+1,cell-1,cell-1);}
 }

@@ -275,3 +275,9 @@ teaser-sceneは黒いviewportオーバーレイ、teaser-frameはタイトルと
 ## 地下墓所テクスチャの読込・描画
 terrain-view.jsのdrawCryptTileが、32pxの2×2アトラスから床／壁と座標ハッシュによる2種類の差分を描く。Image.completeと64×64px寸法を確認し、失敗時はfalseで既存レンダラーへフォールバックする。隣接床に接する壁だけ境界を補う。描画先の既存24px論理座標・カメラを維持し、画像補間を無効化する。マップデータ・乱数・保存には書き込まない。
 index.htmlのmap[data-terrain]にハッシュ付きPNGを設定し、app.jsがdecode完了後に再描画する。update-assets.jsがPNGとモジュールの内容ハッシュを更新する。scripts/build-crypt-tiles.jsは64px原本から32pxアトラスを再生成する制作時ツールで、Sharpはゲームの実行時依存にしない。
+
+
+## 小物アトラスと墓石
+prop-view.jsは6種類の32pxセルを描画し、画像未読込・寸法不正・未対応種別はfalseを返して従来スプライトへ戻す。装備欄のCSSアイコンも同じハッシュ付きPNGを参照する。小物の配信URLはmap[data-props]をupdate-assets.jsで更新。
+crypt-obstacles.jsのplaceCryptObstaclesは新規地下墓所の敵・アイテム・罠を置いた後で候補を選び、BFSで歩行床の接続を検査してgridを0へ変更しobstaclesへ記録する。各部屋1基、全6部屋まで。validateSaveは任意配列を検証し、normalizeSaveは未設定のみ[]で補完する。
+roomMapTilesは墓石マスを部屋形状の判定時だけ床として扱い、表示上のwalkableはfalseを維持する。描画時は墓石マスだけ床テクスチャを下敷きにし、小物レイヤーで墓石を重ねる。衝突・視線・ドロップ地点は実gridを参照する。

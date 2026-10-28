@@ -62,3 +62,7 @@
 
 ## 地下墓所タイルの採用（2026-10-28）
 64px原本→32pxゲーム用の制作方式を採用。art/terrain/crypt/master-64.png（128×128、4コマ）とatlas-32.png（64×64、4コマ）を保持。元の生成サンプルから床を暗く整理し、外周色を合わせた。生成原案・比較画像はローカルのart/samples/へ保持。原本14,729 bytes＋配信4,436 bytes＝19,165 bytes。32KiB以下を自動検証。キャラクター案は本変更に含めない。
+
+
+## 小物アトラス採用（2026-10-28）
+art/props/master-64.pngは192×128、atlas-32.pngは96×64、3列×2行。宝箱・上り階段・武器・防具・墓石2種。原本12182 bytes、配信3879 bytes、合計16061 bytes。大きな生成原案はGit対象外のart/local-originals/crypt-props-source.pngへ保持。内蔵image_genで生成後、透過縁とセル余白を整理し、nearest-neighborで配信版を作成。生成条件と再生成手順はart/props/README.md。キャラクター素材は本変更に含めない。

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,W,H,canSee,reveal,radius,normalizeSave,upgrade,skills} from './engine.js';
 
-function room(){const s=newGame(29);s.grid=Array.from({length:H},()=>Array(W).fill(1));s.player={x:15,y:11};s.seen=s.grid.map(r=>r.map(()=>false));s.visited=s.grid.map(r=>r.map(()=>false));s.enemies=[];s.gimmick={id:'none'};return s;}
+function room(){const s=newGame(29);s.obstacles=[];s.grid=Array.from({length:H},()=>Array(W).fill(1));s.player={x:15,y:11};s.seen=s.grid.map(r=>r.map(()=>false));s.visited=s.grid.map(r=>r.map(()=>false));s.enemies=[];s.gimmick={id:'none'};return s;}
 
 test('sight is the full square at each memory rank, including diagonal corners',()=>{
  for(let rank=0;rank<=4;rank++){

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,normalizeSave,validateSave,tick,makeOrder,createCardRule,beginExploration,attackEnemy,dropFromEnemy,grantReward,rollEnemyDrop,random,nextRandom,enemyDropTables,rewardDefinitions,codexRows,addOrder,orderUnlocked,makeFloor,stats,monsters,W,H,reveal} from './engine.js';
 
-function arena(seed=1){const s=newGame(seed);s.grid=Array.from({length:H},(_,y)=>Array.from({length:W},(_,x)=>Number(x>0&&x<W-1&&y>0&&y<H-1)));s.seen=s.grid.map(r=>r.map(()=>true));s.visited=s.grid.map(r=>r.map(()=>false));s.player={x:5,y:5};s.stairs={x:25,y:18};s.enemies=[];s.items=[];s.traps=[];s.gimmick={id:'none'};s.phase='explore';s.orders=[makeOrder('stairs')];return s;}
+function arena(seed=1){const s=newGame(seed);s.obstacles=[];s.grid=Array.from({length:H},(_,y)=>Array.from({length:W},(_,x)=>Number(x>0&&x<W-1&&y>0&&y<H-1)));s.seen=s.grid.map(r=>r.map(()=>true));s.visited=s.grid.map(r=>r.map(()=>false));s.player={x:5,y:5};s.stairs={x:25,y:18};s.enemies=[];s.items=[];s.traps=[];s.gimmick={id:'none'};s.phase='explore';s.orders=[makeOrder('stairs')];return s;}
 function foe(s,{hp=1,defense=0}={}){const e={...monsters[0],baseId:monsters[0].id,x:6,y:5,hp,maxHp:hp,defense,attack:1,aggro:true};s.enemies.push(e);return e;}
 
 test('drop failure consumes only the first draw; success uses a second weighted draw',()=>{
