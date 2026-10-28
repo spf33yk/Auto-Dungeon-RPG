@@ -3,3 +3,8 @@ node_modules/
 Thumbs.db
 *.log
 test-results/
+
+# Large drafts and comparison screenshots stay local; production atlases are tracked.
+art/samples/
+art/local-originals/
+*.mov

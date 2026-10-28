@@ -1,3 +1,4 @@
+import {drawCryptTile} from './terrain-view.js';
 import {requestLandscapeDisplay} from './display-mode.js';
 import {openingVariant} from './opening.js';
 import {createLogVisibility} from './log-visibility.js';
@@ -41,6 +42,7 @@ const sprites={
 const palette={h:'#57695a',b:'#e2dfbd',d:'#27352f',a:'#899e85',s:'#b8b2a1',g:'#3e715f',l:'#9bbba6',r:'#66424a',p:'#ad7276',y:'#bfa266',o:'#634e32',Y:'#e3d49d'};
 function sprite(ctx,type,x,y,size=24){const rows=sprites[type]||sprites.reward;const scale=size/12;for(let py=0;py<rows.length;py++)for(let px=0;px<rows[py].length;px++){const c=rows[py][px];if(c!=='.'&&palette[c]){ctx.fillStyle=palette[c];ctx.fillRect(x+px*scale,y+py*scale,Math.ceil(scale),Math.ceil(scale));}}}
 const ctx=$('map').getContext('2d');ctx.imageSmoothingEnabled=false;
+const cryptAtlas=new Image();cryptAtlas.src=$('map').dataset.terrain;
 function draw(){
 const scene=state.seed+':'+state.floor;if(damageScene!==scene){damagePopups=[];damageScene=scene;}
 // Fixed Full HD drawing surface; CSS scales the 16:9 scene to the device.
@@ -54,7 +56,7 @@ const hop=moving?Math.sin(progress*Math.PI)*2:0;
 const camera=cameraFor(position,radius(state),ctx.canvas.width,ctx.canvas.height);
 ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);
 
-for(let y=0;y<H;y++)for(let x=0;x<W;x++){const seen=state.seen[y][x],floor=state.grid[y][x];if(!seen)continue;const px=x*24,py=y*24,n=(x*17+y*31+state.seed)%13;ctx.fillStyle=floor?theme.floorColor:theme.wallColor;ctx.fillRect(px,py,24,24);if(floor){ctx.fillStyle='#172722';ctx.fillRect(px,py,24,1);ctx.fillRect(px,py,1,24);if(n<4){ctx.fillStyle='#435044';ctx.fillRect(px+5+n,py+8,2,2);ctx.fillRect(px+15,py+16,3,1);}if(n===5){ctx.fillStyle='#354b39';ctx.fillRect(px+2,py+15,6,3);}}else{ctx.fillStyle=theme.wallColor;ctx.fillRect(px+1,py+1,22,3);ctx.fillStyle='#182925';ctx.fillRect(px,py+20,24,4);ctx.fillRect(px+11,py+4,2,16);}if(!visible(x,y)){ctx.fillStyle='#071111a8';ctx.fillRect(px,py,24,24);}}
+for(let y=0;y<H;y++)for(let x=0;x<W;x++){const seen=state.seen[y][x],floor=state.grid[y][x];if(!seen)continue;const px=x*24,py=y*24,n=(x*17+y*31+state.seed)%13;if(theme.id==='crypt'&&drawCryptTile(ctx,cryptAtlas,state.grid,x,y,state.seed)){if(!visible(x,y)){ctx.fillStyle='#071111a8';ctx.fillRect(px,py,24,24);}continue;}ctx.fillStyle=floor?theme.floorColor:theme.wallColor;ctx.fillRect(px,py,24,24);if(floor){ctx.fillStyle='#172722';ctx.fillRect(px,py,24,1);ctx.fillRect(px,py,1,24);if(n<4){ctx.fillStyle='#435044';ctx.fillRect(px+5+n,py+8,2,2);ctx.fillRect(px+15,py+16,3,1);}if(n===5){ctx.fillStyle='#354b39';ctx.fillRect(px+2,py+15,6,3);}}else{ctx.fillStyle=theme.wallColor;ctx.fillRect(px+1,py+1,22,3);ctx.fillStyle='#182925';ctx.fillRect(px,py+20,24,4);ctx.fillRect(px+11,py+4,2,16);}if(!visible(x,y)){ctx.fillStyle='#071111a8';ctx.fillRect(px,py,24,24);}}
 const stair=state.stairs;if(state.seen[stair.y][stair.x]){ctx.fillStyle='#88c2ac19';ctx.fillRect(stair.x*24-4,stair.y*24-4,32,32);sprite(ctx,'stairs',stair.x*24,stair.y*24);}
 for(const i of state.items)if(state.seen[i.y][i.x]){ctx.globalAlpha=visible(i.x,i.y)?1:.4;sprite(ctx,i.type==='letter'?'chest':i.type==='gear'&&gearById[i.gear.baseId].slot==='armor'?'armor':i.type,i.x*24,i.y*24);if(i.type==='chest'&&i.locked){ctx.fillStyle='#d8ca8a';ctx.fillRect(i.x*24+10,i.y*24+10,4,5);}if(i.type==='letter'){ctx.fillStyle='#d8ca8a';ctx.fillRect(i.x*24+10,i.y*24+5,4,4);}}ctx.globalAlpha=1;
 for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.fillStyle=t.spent?'#7e7769':'#d7b278';ctx.fillRect(t.x*24+6,t.y*24+14,12,3);ctx.fillStyle='#d1b88b';for(let i=0;i<3;i++)ctx.fillRect(t.x*24+7+i*4,t.y*24+10,2,4);}
@@ -245,4 +247,4 @@ const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap'),gap=wrap.clie
 installCardDragging($('tab-content'),()=>state,()=>{delete $('tab-content').dataset.orderSignature;render();});
 sprite($('portrait').getContext('2d'),'skeleton',4,3,48);sprite($('camp-portrait').getContext('2d'),'skeleton',12,8,96);render();requestAnimationFrame(loop);
 
-await Promise.all(['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})));
+await Promise.all([...['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})),cryptAtlas.decode().catch(()=>{})]);draw();

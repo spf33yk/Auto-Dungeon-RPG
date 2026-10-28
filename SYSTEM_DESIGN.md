@@ -270,3 +270,8 @@ playJourneyTeaserの入口でopeningVariantがmukuro以外なら映像UIを表�
 開始前映像の配信ファイルjourney-teaser.mp4はNewGame_12s_1080p.mp4の再格納版（1920×1080・24fps・12秒・音声なし）に更新。遷移と骸限定判定は変更しない。
 
 teaser-sceneは黒いviewportオーバーレイ、teaser-frameはタイトルと同じ16:9寸法の中央枠。videoとteaser-actionsを同じ枠の子要素とする。videoをabsolute inset:0、min-width/min-height:0で配置し、メディアの固有サイズとgridの最小サイズに依存させない。
+
+
+## 地下墓所テクスチャの読込・描画
+terrain-view.jsのdrawCryptTileが、32pxの2×2アトラスから床／壁と座標ハッシュによる2種類の差分を描く。Image.completeと64×64px寸法を確認し、失敗時はfalseで既存レンダラーへフォールバックする。隣接床に接する壁だけ境界を補う。描画先の既存24px論理座標・カメラを維持し、画像補間を無効化する。マップデータ・乱数・保存には書き込まない。
+index.htmlのmap[data-terrain]にハッシュ付きPNGを設定し、app.jsがdecode完了後に再描画する。update-assets.jsがPNGとモジュールの内容ハッシュを更新する。scripts/build-crypt-tiles.jsは64px原本から32pxアトラスを再生成する制作時ツールで、Sharpはゲームの実行時依存にしない。
