@@ -468,3 +468,19 @@ node --testと配信URL検証を実行。テスト結果と公開コミット・
 ローカルでnode --test wall-tileset.test.js scene-depth.test.js scene-lighting.test.js：15件成功。node scripts/update-assets.jsと--check成功。確認用の横通路・部屋下端をブラウザで目視し、下側の壁と足元が重ならないこと、警告・エラーなしを確認。証跡はGit対象外のtest-results/foreground-corridor-fixed.png、foreground-room-bottom-fixed.png。
 
 描画のみの変更でゲームロジック・保存は不変のため、関連テストと再現画面確認に限定し、全階層走破テストと公開版走行は省略。実機スマホ／Safariは未確認。
+
+## 準備画面・予測・ミニマップ・入口素材（今回のコミット・2026-10-28）
+
+3列準備、状態タブ、固定の出発操作、条件→対象→行動のカード表示、予測8／16／24試行、指示の復元、ミニマップ3サイズと別キー保存、HUD拡大、入口4種を実装。予測は複製上の本編tickを使用し、本番のHP・乱数・図鑑・保存を変えない。カード専用フレーム画像は未制作でCSSの差し替え契約のみ追加。
+
+資料更新履歴を確認：直近ecd0a5cはDESIGN・SPEC・SYSTEM_DESIGN・README・ART_ASSETS・IMPLEMENTATION_NOTESをソースと同じコミットへ含めている。今回も同様に全資料を同期する。
+
+node --testは150件成功（preparation-all-tests.log）。その後の表示調整でpreparation-ui／card-placement／card-ordersの関連22件、およびpreparation-uiの5件を再確認して成功。update-assets.jsと--check成功。ローカル1280×720で予測結果、HP31／60の非変更、カードのタップ付け替え、行のドラッグと上下移動、指示を元に戻す、装備・スキル・状態タブ、探索遷移を実操作。小217.6px・中294.4px・大384pxの表示切替、再読込後の大設定保持、標準の中への復帰を確認。入口の確認用横通路を目視し、ゲーム本体の警告・エラーなし。
+
+横持ち740×416の準備表示を検証中。最終結果と制約を追記する。今回も公開版走行は省略し、ローカル確認と配信URL整合で検証。実機スマホ／Safariは未確認。予測の精度校正・低性能端末の最大24試行の待ち時間は今後の確認対象。少数試行の参考値として提供する。
+
+### 最終ローカル確認
+
+横持ち740×416でカード一覧＋指示の2列、下部の予測までの縦スクロール、固定された出発ボタンを確認。横方向のはみ出しを修正。検証iframe側で既知のMutationObserver.observeのNode未指定エラーを観測したが、ゲームソースに当該APIはなく描画・操作は継続した。実機Safariは未確認。
+
+最終の表示・制御調整後、preparation-ui.test.jsの5件と配信URL--checkを再確認し成功。予測のキャッシュキーはstate全体と試行数にし、同じ階へのセーブ読込で地形や乱数が変わった場合も再計算する。タイトルでは予測しない。証跡はGit対象外のpreparation-redesign.png、preparation-redesign-mobile.png、entrance-trims-preview.png。今回のソース・全資料・1907bytesの32px入口アトラスを同じコミットへ含める。公開版走行は省略する。

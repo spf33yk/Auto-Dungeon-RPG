@@ -1,4 +1,7 @@
-import {loadWallTilesets} from './wall-tileset.js';
+import {loadWallTilesets,wallDrawBox} from './wall-tileset.js';
+import {entranceWallFrames,drawEntrance} from './entrance-view.js';
+import {readUiSettings,saveUiSettings} from './ui-settings.js';
+import {forecastExploration} from './exploration-forecast.js';
 import {MEMORY_SHADE,dimmedWallTileset,floorLight,actorFootOffset,renderSightState} from './scene-lighting.js';
 import {standingBox,sceneDrawOrder,drawFootShadow} from './scene-depth.js';
 import {drawProp} from './prop-view.js';
@@ -15,6 +18,16 @@ import {memoryGroups} from './skill-tree.js';
 import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment,debugTitleEnding} from './debug-tools.js';
 import {W,H,skills,newGame,abandonRun,stats,price,upgrade,equip,equipBest,tick,ascend,zoneFor,floorLabel,radius,canSee,gearById,gearStats,gearName,discard,locked,codexRows,sortedInventory,normalizeSave,orderDefinitions,orderById,orderCapacity,cardCapacity,orderUnlocked,addOrder,editOrder,beginExploration,equipment,LAST_FLOOR,LETTER_FLOOR,nextStageHint,rewardDefinitions,grantReward,experienceToNext,MAX_LEVEL,HP_PER_LEVEL,gainExperience} from './engine.js';
 const $=id=>document.getElementById(id), key='abyss-normal-v2';
+let uiStorage;try{uiStorage=localStorage;}catch{}let uiSettings=readUiSettings(uiStorage);document.documentElement.dataset.minimapSize=uiSettings.minimap;$('minimap-size').value=uiSettings.minimap;
+let forecastTicket=0,forecastKey='',forecastCache=null,forecastSamples=8,forecastContext='',initialOrders=[];
+function paintForecast(result){const host=$('forecast-result');if(!host)return;host.innerHTML=`<div class="forecast-metric"><span>${floorLabel(state)}のClear見込み</span><b>${result.clearRate}%</b><progress max="100" value="${result.clearRate}"></progress></div><div class="forecast-metric"><span>想定ターン数（中央値）</span><b>${result.turns===null?'到達なし':'約'+result.turns}</b></div><div class="forecast-metric"><span>回復余力・終了時HP平均</span><b>${result.remainingHp>=50?'余裕あり':result.remainingHp>=25?'やや不足':'危険'} · ${result.remainingHp}%</b><progress max="100" value="${result.remainingHp}"></progress></div><h4>試行中の行動例</h4>${result.examples.map((e,i)=>`<p class="forecast-example"><b>${i+1}</b><span>HP ${e.hp}<br>${esc(e.text)}</span></p>`).join('')}<small>${result.samples}試行／各1200ターン上限${result.incomplete?' · 未完了 '+result.incomplete+'回':''}</small>${result.warnings.map(t=>'<p class="forecast-warning">'+esc(t)+'</p>').join('')}`;host.removeAttribute('aria-busy');}
+function refreshForecast(force=false){
+ if(showingTitle||state.phase!=='prepare'||!$('forecast-result')){forecastTicket++;forecastKey='';return;}
+ const context=[state.seed,state.floor,state.profile.runs].join(':');if(context!==forecastContext){forecastContext=context;initialOrders=structuredClone(state.orders);}
+ $('forecast-samples').value=String(forecastSamples);const signature=JSON.stringify([state,forecastSamples]);
+ if(!force&&signature===forecastKey){if(forecastCache)paintForecast(forecastCache);return;}forecastKey=signature;forecastCache=null;const ticket=++forecastTicket,copy=structuredClone(state);$('forecast-result').textContent='試行を開始しています…';$('forecast-result').setAttribute('aria-busy','true');
+ void forecastExploration(copy,{samples:forecastSamples,cancelled:()=>ticket!==forecastTicket,onProgress:(done,total)=>{if(ticket===forecastTicket&&$('forecast-result'))$('forecast-result').textContent=`試行中 ${done} / ${total}…`;}}).then(result=>{if(result&&ticket===forecastTicket){forecastCache=result;paintForecast(result);}}).catch(error=>{if(ticket===forecastTicket&&$('forecast-result'))$('forecast-result').textContent='予測できませんでした。再予測してください。';console.error('Forecast:',error);});
+}
 const fieldLogVisibility=createLogVisibility({
  show:()=>{$('field-log-host').classList.remove('is-expired');$('field-log-host').removeAttribute('aria-hidden');},
  hide:()=>{$('field-log-host').classList.add('is-expired');$('field-log-host').setAttribute('aria-hidden','true');}
@@ -48,6 +61,7 @@ const palette={h:'#57695a',b:'#e2dfbd',d:'#27352f',a:'#899e85',s:'#b8b2a1',g:'#3
 function sprite(ctx,type,x,y,size=24,height=size){if(drawProp(ctx,propsAtlas,type,x,y,size,height))return;const rows=sprites[type]||(['tombstone','tombstone-cracked'].includes(type)?['............','....aaaa....','...abbbba...','..abbbbbba..','..abdbbbba..','..abbdbbba..','..abbbbbba..','..abbbbbba..','..abbbbbba..','.aabbbbbbaa.','.aaaaaaaaaa.','............']:sprites.reward);const scale=size/12,scaleY=height/12;for(let py=0;py<rows.length;py++)for(let px=0;px<rows[py].length;px++){const c=rows[py][px];if(c!=='.'&&palette[c]){ctx.fillStyle=palette[c];ctx.fillRect(x+px*scale,y+py*scaleY,Math.ceil(scale),Math.ceil(scaleY));}}}
 const ctx=$('map').getContext('2d');ctx.imageSmoothingEnabled=false;
 const cryptAtlas=new Image();cryptAtlas.src=$('map').dataset.terrain;
+const entranceAtlas=new Image();entranceAtlas.src=$('map').dataset.entrances;const entranceSet={definition:{},image:entranceAtlas};let entranceGrid=null,entranceFrames=new Map();
 let wallSets=new Map();const wallAssetsReady=loadWallTilesets($('map').dataset.walls.split(/\s+/)).then(sets=>{wallSets=sets;}).catch(error=>console.error('Wall tileset:',error));
 function draw(){
  const scene=state.seed+':'+state.floor;if(damageScene!==scene){damagePopups=[];damageScene=scene;}
@@ -59,6 +73,7 @@ function draw(){
  const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y),hop=moving?Math.sin(progress*Math.PI)*2:0;
  const camera=cameraFor(position,radius(state),map.width,map.height);ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);
  const graves=new Set((state.obstacles||[]).map(o=>o.x+','+o.y)),surface=state.grid.map((r,y)=>r.map((v,x)=>(v||graves.has(x+','+y))?1:0)),queue=[];
+ if(entranceGrid!==state.grid){entranceGrid=state.grid;entranceFrames=entranceWallFrames(surface);}
  for(let y=0;y<state.grid.length;y++)for(let x=0;x<state.grid[y].length;x++){
   if((x+1)*24<camera.left||x*24>camera.left+map.width/camera.scale||(y+1)*24<camera.top||(y-1)*24>camera.top+map.height/camera.scale)continue;
   const floor=Boolean(surface[y][x]),light=floorLight(state.seen[y][x],visible(x,y));if(floor&&light==='hidden')continue;const px=x*24,py=y*24,n=(x*17+y*31+state.seed)%13;
@@ -67,7 +82,7 @@ function draw(){
    if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+5+n,py+8,2,2);}
   }
   if(floor&&light==='memory'){ctx.fillStyle=MEMORY_SHADE;ctx.fillRect(px,py,24,24);}
-  if(!floor)queue.push({footY:(y+1)*24,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,light==='visible'?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme);ctx.restore();}});
+  if(!floor)queue.push({footY:(y+1)*24,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,light==='visible'?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme);if(entranceAtlas.complete&&entranceAtlas.naturalWidth===64){const source=light==='visible'?entranceAtlas:dimmedWallTileset(entranceSet).image;drawEntrance(ctx,source,entranceFrames.get(x+','+y),wallDrawBox(surface,x,y,walls?.definition.rise??.75));}ctx.restore();}});
  }
  const stair=state.stairs;if(state.seen[stair.y][stair.x]){ctx.save();ctx.globalAlpha=visible(stair.x,stair.y)?1:.4;sprite(ctx,'stairs',stair.x*24,stair.y*24);ctx.restore();}
  for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;ctx.fillStyle=t.spent?'#7e7769':'#d7b278';ctx.fillRect(t.x*24+6,t.y*24+14,12,3);ctx.fillStyle='#d1b88b';for(let i=0;i<3;i++)ctx.fillRect(t.x*24+7+i*4,t.y*24+10,2,4);ctx.restore();}
@@ -95,7 +110,7 @@ function draw(){
 }
 
 function drawAutoMap(){
- const canvas=$('auto-map'),geometry=miniMapGeometry(state.grid[0].length,state.grid.length,$('map').clientWidth<420?4:6);
+ const canvas=$('auto-map'),geometry=miniMapGeometry(state.grid[0].length,state.grid.length,6);
  if(canvas.width!==geometry.width||canvas.height!==geometry.height){canvas.width=geometry.width;canvas.height=geometry.height;}
  drawMiniMap(canvas.getContext('2d'),autoMapModel(state,(x,y)=>canSee(state,x,y)),geometry);
 }
@@ -183,8 +198,10 @@ function renderMemories(){
 }
 function renderTab(){
  if(tab==='skills')renderMemories();
+ if(tab==='status')$('tab-content').innerHTML=$('expedition-summary').innerHTML.replace(/\sid="[^"]*"/g,'');
  if(tab==='gear'){$('tab-content').innerHTML='<div class="equipment-toolbar"><button data-best-equipment class="primary">最強装備</button><small>武器は攻撃力、防具は防御力で選びます。</small></div>'+categoryTabs('gear',gearSlot)+sortButtons('gear',gearSorts[gearSlot])+'<p class="section-caption">本編の装備は鑑定済み・呪いなし。入手順は古い順、攻撃力順・防御力順は高い順です。</p>'+itemCard(state.gear[gearSlot],gearSlot,true)+`<h3>所持品</h3>`+(sortedInventory(state,gearSlot,gearSorts[gearSlot]).map(({g,index})=>itemCard(g,index)).join('')||'<p class="section-caption">この種類の装備はありません。</p>');}
  if(tab==='orders'){delete $('tab-content').dataset.orderSignature;renderOrderEditor($('tab-content'));}
+ refreshForecast();
 
 }
 function renderScreens(){
@@ -237,7 +254,10 @@ $('primary').onclick=()=>{if(state.phase==='explore')return;if(['awakening','pre
 $('abandon-run').onclick=()=>{if(state.phase==='prepare')openDialog('abandon-dialog');};
 $('confirm-abandon').onclick=()=>{const next=abandonRun(state);if(!next)return;$('abandon-dialog').close();reset(next);};
 $('pause-toggle').onclick=()=>{if(state.phase!=='explore')return;paused=!paused;last=performance.now();render();if(!paused)tryMobileDisplay();};
-$('sound').onclick=()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');$('sound').textContent='効果音：'+(sound?'ON':'OFF');tone(440);};
+$('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{minimap:$('minimap-size').value});document.documentElement.dataset.minimapSize=uiSettings.minimap;drawAutoMap();};
+ document.addEventListener('click',e=>{if(e.target.closest('[data-forecast-run]'))refreshForecast(true);if(e.target.closest('[data-orders-undo]')&&state.phase==='prepare'&&initialOrders.length){state.orders=structuredClone(initialOrders);render();}});
+ document.addEventListener('change',e=>{if(e.target.id==='forecast-samples'){forecastSamples=Number(e.target.value);refreshForecast(true);}});
+ $('sound').onclick=()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');$('sound').textContent='効果音：'+(sound?'ON':'OFF');tone(440);};
 $('skill-book').onclick=()=>showCodex('skills');$('monster-book').onclick=()=>showCodex('monsters');$('equipment-book').onclick=()=>showCodex('equipment');
 $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dialog').close();$('guide-start').onclick=()=>$('dialog').close();
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',finishDialog));
@@ -270,4 +290,4 @@ const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap'),gap=wrap.clie
 installCardDragging($('tab-content'),()=>state,()=>{delete $('tab-content').dataset.orderSignature;render();});
 sprite($('portrait').getContext('2d'),'skeleton',4,3,48);sprite($('camp-portrait').getContext('2d'),'skeleton',12,8,96);render();requestAnimationFrame(loop);
 
-await Promise.all([...['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})),cryptAtlas.decode().catch(()=>{}),propsAtlas.decode().catch(()=>{}),wallAssetsReady]);draw();
+await Promise.all([...['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})),cryptAtlas.decode().catch(()=>{}),propsAtlas.decode().catch(()=>{}),entranceAtlas.decode().catch(()=>{}),wallAssetsReady]);draw();

@@ -1,0 +1,18 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readUiSettings,saveUiSettings} from './ui-settings.js';import {forecastExploration,summarizeForecast,forecastWarnings} from './exploration-forecast.js';import {newGame} from './engine.js';import {entranceWallFrames,drawEntrance} from './entrance-view.js';import {wallDrawBox} from './wall-tileset.js';import {readPng} from './test-support/png.js';import {readFileSync} from 'node:fs';
+test('minimap defaults to medium, persists all sizes, and tolerates corrupt or blocked storage',()=>{
+ let value=null;const storage={getItem:()=>value,setItem:(key,v)=>{assert.equal(key,'abyss-ui-settings');value=v;}};assert.equal(readUiSettings(storage).minimap,'medium');for(const size of ['small','medium','large']){saveUiSettings(storage,{minimap:size});assert.equal(readUiSettings(storage).minimap,size);}value='{bad';assert.equal(readUiSettings(storage).minimap,'medium');assert.equal(readUiSettings(undefined).minimap,'medium');assert.equal(saveUiSettings(undefined,{minimap:'bad'}).minimap,'medium');
+});
+test('forecast statistics expose incomplete runs and use clear-run median turns',()=>{
+ const r=summarizeForecast([{phase:'cleared',turns:10,hpRatio:.8,examples:[]},{phase:'cleared',turns:20,hpRatio:.4},{phase:'dead',turns:3,hpRatio:0},{phase:'explore',turns:1200,hpRatio:.4}]);assert.equal(r.clearRate,50);assert.equal(r.turns,20);assert.equal(r.remainingHp,40);assert.equal(r.incomplete,1);
+});
+test('real forecast uses disposable copies and cancellation never changes the current run',async()=>{
+ const s=newGame(44);s.phase='prepare';s.items=[];s.enemies=[];s.stairs={...s.player};const before=JSON.stringify(s),progress=[];const r=await forecastExploration(s,{samples:2,maxTurns:10,yieldTask:async()=>{},onProgress:n=>progress.push(n)});assert.equal(r.clearRate,100);assert.equal(r.samples,2);assert.deepEqual(progress,[1,2]);assert.equal(JSON.stringify(s),before);assert.equal(await forecastExploration(s,{cancelled:()=>true}),null);assert.equal(JSON.stringify(s),before);assert.ok(forecastWarnings(s).length>0);
+});
+test('entrance trims mark only solid shoulders of horizontal and vertical corridor mouths',()=>{
+ const grid=Array.from({length:7},()=>Array(15).fill(0));for(const [a,b]of [[1,4],[10,13]])for(let y=1;y<6;y++)for(let x=a;x<=b;x++)grid[y][x]=1;for(let x=5;x<10;x++)grid[3][x]=1;const before=JSON.stringify(grid),frames=entranceWallFrames(grid);assert.equal(frames.get('5,2'),2);assert.equal(frames.get('5,4'),3);assert.equal(frames.get('9,2'),2);assert.equal(frames.get('9,4'),3);for(const key of frames.keys()){const [x,y]=key.split(',').map(Number);assert.equal(grid[y][x],0);}assert.equal(JSON.stringify(grid),before);
+ const rotated=grid[0].map((_,x)=>grid.map(r=>r[x]));const vertical=entranceWallFrames(rotated);assert.equal(vertical.get('2,5'),0);assert.equal(vertical.get('4,5'),1);
+ const calls=[],ctx={drawImage(...args){calls.push(args);}};const image={complete:true,naturalWidth:64,naturalHeight:64},box=wallDrawBox(grid,5,4,.75);assert.equal(drawEntrance(ctx,image,3,box),true);assert.deepEqual(calls[0].slice(5),[120,96,24,24]);assert.equal(drawEntrance(ctx,image,undefined,box),false);
+});
+test('native 32px entrance PNG remains compact with binary transparent cell borders',()=>{
+ const path=new URL('./art/terrain/entrances/atlas-32.png',import.meta.url),p=readPng(path);assert.equal(p.width,64);assert.equal(p.height,64);assert.ok(readFileSync(path).length<8192);for(let y=0;y<64;y++)for(let x=0;x<64;x++){const a=p.pixel(x,y)[3];assert.ok(a===0||a===255);if(x%32===0||x%32===31||y%32===0||y%32===31)assert.equal(a,0);}
+});

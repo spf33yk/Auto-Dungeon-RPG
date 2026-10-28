@@ -86,3 +86,9 @@ art/terrain/walls/crypt/master-64.png（256×288px、11065 bytes）、atlas-32.p
 ## 前景壁の修正（2026-10-28）
 
 32px PNG・JSON定義の変更、新素材の生成はなし。床の下側の壁だけ描画先を1マス内へ収める。奥側は同じ専用素材の通常の立体表示を継続する。
+
+## 通路入口とカードフレームの準備（2026-10-28）
+
+art/terrain/entrances/atlas-32.pngを追加。32pxセル4種、アトラス64×64px、1907 bytes。内蔵image_genで左右石柱・梁・低い縁を生成し、32色以下・二値アルファへ整理。大きい原案はGit対象外のart/local-originals/entrance-source.png。詳細と全文プロンプトは同フォルダREADME.md。64px素材制作は再開していない。
+
+専用カードフレーム画像は今回作成していない。data-card-kindとCSSの--card-frame-image／--card-frame-border-source／--card-frame-slice等により将来差し替える。実装手順はCARD_FRAMES.md。

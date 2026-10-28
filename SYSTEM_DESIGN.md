@@ -311,3 +311,11 @@ sceneDrawOrderは壁・小物を足元順に描いた後、視界内のキャラ
 ## 前景壁の描画矩形（2026-10-28）
 
 wall-tileset.jsのwallDrawBoxが真上の床に接する壁を前景壁として識別する。前景は自分のセル内、その他はrise分持ち上がった通常矩形を返す。drawWallPartsの全パーツとterrain-view.jsのフォールバックが共通の矩形を使う。シミュレーション・素材・描画順を変更しない。wall-tileset.test.jsで横通路・部屋下端・分岐の24px／32px表示、地形の非変更、奥側の高さ維持、フォールバックを検証する。
+
+## 準備UIと予測システム（2026-10-28）
+
+exploration-forecast.jsは本編tickを使う複製シミュレーション、集計、指示構成の注意判定を担当。24ターンごとにイベントループへ制御を戻し、試行間もyieldする。app.jsは指示・育成・装備・HP・所持品等のシグネチャとチケットで同一結果をキャッシュし、編集・タブ遷移・出発時に古い計算をキャンセル。予測に永続化やworker用の別ロジックを持たせず、本番の乱数を消費しない。
+
+ui-settings.jsはミニマップの選択値を別キーへ保存し、htmlのdata-minimap-sizeとCSS変数で描画幅を切り替える。storage拒否・破損は中へ戻す。ネイティブCanvasのセルは6pxとし、CSS拡大で3サイズを表示。準備パネルをinline-sizeコンテナにしてモバイルの2列＋下部予測を適用する。
+
+card-editor.jsは表示順とフレーム識別を分離し、カード配置APIは維持。状態タブへ既存サマリーを複製する際はid属性を除いて重複を防ぐ。entrance-view.jsは描画用surfaceから入口の壁セルを判定し、grid参照が変わった時だけキャッシュを作り直す。入口素材のURLはindexのdata-entrancesから取得し、update-assets.jsで内容ハッシュを更新する。preparation-ui.test.jsで設定保持／破損・予測集計／キャンセル／非変更・入口判定／床非配置・PNG寸法／透過／容量を検証。
