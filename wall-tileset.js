@@ -19,10 +19,13 @@ export function wallPartNames(grid,x,y){
  return names;
 }
 export function wallVariant(x,y,seed,count){let h=Math.imul(x+1,73856093)^Math.imul(y+1,19349663)^(seed|0);h^=h>>>13;return (h>>>0)%count;}
+// A wall directly below floor is a low foreground rim: never project it into the walkable cell.
+export function wallDrawBox(grid,x,y,rise,size=24){const foreground=Boolean(grid[y-1]?.[x]);return {x:x*size,y:(foreground?y:y-rise)*size,width:size,height:(foreground?1:1+rise)*size,foreground};}
 export function drawWallParts(ctx,tileset,grid,x,y,seed,size=24){
  const d=tileset?.definition,image=tileset?.image;if(!d||!image||image.complete===false||(image.naturalWidth??image.width)!==d.width||(image.naturalHeight??image.height)!==d.height)return false;
  ctx.imageSmoothingEnabled=false;
- for(const name of wallPartNames(grid,x,y)){const choices=d.parts[name],f=choices[wallVariant(x,y,seed,choices.length)];ctx.drawImage(image,...f,x*size,(y-d.rise)*size,size,size*(1+d.rise));}
+ const box=wallDrawBox(grid,x,y,d.rise,size);
+ for(const name of wallPartNames(grid,x,y)){const choices=d.parts[name],f=choices[wallVariant(x,y,seed,choices.length)];ctx.drawImage(image,...f,box.x,box.y,box.width,box.height);}
  return true;
 }
 export async function loadWallTilesets(sources,{baseURL=globalThis.document?.baseURI,fetcher=globalThis.fetch,imageFactory=()=>new Image()}={}){

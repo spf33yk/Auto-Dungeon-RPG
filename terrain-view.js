@@ -1,4 +1,4 @@
-import {drawWallParts} from './wall-tileset.js';
+import {drawWallParts,wallDrawBox} from './wall-tileset.js';
 export const TERRAIN_TILE_PIXELS=32;
 // Pure visual hash: never consume the game's random stream.
 export function cryptTileFrame(walkable,x,y,seed){
@@ -21,5 +21,5 @@ export function drawCryptTile(ctx,atlas,grid,x,y,seed,size=24,walkable=Boolean(g
 export function drawRaisedWall(ctx,tileset,grid,x,y,seed,theme,size=24){
  if(drawWallParts(ctx,tileset,grid,x,y,seed,size))return true;
  // Missing/invalid assets remain readable; never sample floor or old wall art.
- ctx.fillStyle=theme.wallColor;ctx.fillRect(x*size,(y-.5)*size,size,size*1.5);return false;
+ const box=wallDrawBox(grid,x,y,tileset?.definition?.rise??.75,size);ctx.fillStyle=theme.wallColor;ctx.fillRect(box.x,box.y,box.width,box.height);return false;
 }

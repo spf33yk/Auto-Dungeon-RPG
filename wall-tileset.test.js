@@ -1,6 +1,14 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
-import {validateWallTileset,wallPartNames,wallVariant,drawWallParts,loadWallTilesets} from './wall-tileset.js';import {readPng} from './test-support/png.js';import {drawRaisedWall} from './terrain-view.js';
+import {validateWallTileset,wallPartNames,wallVariant,drawWallParts,loadWallTilesets,wallDrawBox} from './wall-tileset.js';import {readPng} from './test-support/png.js';import {drawRaisedWall} from './terrain-view.js';
 const definition=JSON.parse(readFileSync(new URL('./art/terrain/walls/crypt/tileset.json',import.meta.url))),image={complete:true,naturalWidth:128,naturalHeight:definition.height};
+test('south walls fit their own footprint along corridors, room edges and junctions',()=>{
+ for(const grid of [[[0,0,0],[1,1,1],[0,0,0]],[[1,1,1],[1,1,1],[0,0,0]],[[0,1,0],[1,1,1],[0,0,1]]])for(const size of [24,32]){
+  const before=JSON.stringify(grid),box=wallDrawBox(grid,1,2,.75,size);assert.equal(box.foreground,true);assert.equal(box.y,2*size);assert.equal(box.y+box.height,3*size);assert.equal(JSON.stringify(grid),before);
+  const calls=[],ctx={drawImage(...a){calls.push(a);}};drawWallParts(ctx,{definition,image},grid,1,2,7,size);assert.ok(calls.length);for(const c of calls){assert.equal(c[6],2*size);assert.equal(c[8],size);}
+ }
+ const rear=wallDrawBox([[0,0,0],[0,0,0],[1,1,1]],1,1,.75);assert.equal(rear.foreground,false);assert.equal(rear.y,6);assert.equal(rear.height,42);
+});
+test('missing wall artwork uses the same non-overlapping foreground box',()=>{const calls=[],ctx={fillRect(...a){calls.push(a);}};drawRaisedWall(ctx,null,[[1],[0]],0,1,1,{wallColor:'#666'});assert.deepEqual(calls,[[0,24,24,24]]);});
 test('wall definitions reject incompatible versions, missing faces and out-of-bounds frames',()=>{
  assert.equal(validateWallTileset(definition),definition);
  for(const edit of [d=>d.version=2,d=>delete d.parts.leftMiddle,d=>d.parts.front=[[128,0,32,48]],d=>d.parts.cap=[[0,0,32,32]],d=>d.rise=0,d=>d.themes=[]]){const d=structuredClone(definition);edit(d);assert.throws(()=>validateWallTileset(d));}

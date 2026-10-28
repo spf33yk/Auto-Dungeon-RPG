@@ -460,3 +460,11 @@ node --testと配信URL検証を実行。テスト結果と公開コミット・
 - ローカル4323でNewGame→開始動画→思い出す→B30の探索・戦闘・TURN38・一時停止を実操作。ゲーム本体のコンソール警告・エラーなし。1280×720の確認用配置で引いた視点・厚い壁・薄暗い地形・接地を目視確認。360×700の検証フレームでも表示確認。証跡はGit対象外のtest-results/expanded-map-showcase.png、expanded-live-desktop.png、expanded-map-mobile.png。
 - スマホ幅検証用iframeのブラウザ側ではMutationObserver.observeのNode未指定エラーを観測。ゲームソース内にMutationObserverの使用箇所はなく、実際のゲーム描画・操作は継続した。検証フレーム由来の制約として記録し、実機スマホ／Safariは未確認。
 - 最新のユーザー指示に基づき公開版の走行テストは省略。配信方式は変更せず、内容ハッシュ整合をローカル検査したため。pushや自動デプロイをもって公開版の実操作確認済みとは扱わない。全体の難易度・所要時間の再調整は仮バランスのまま。
+
+## 前景壁の重なり修正（今回のコミット・2026-10-28）
+
+下側の壁をwallDrawBoxで1マス内へ収め、横通路・部屋下端で床への張り出しを防止。壁素材と当たり判定は変更せず、透過なし・キャラクター本体の後段描画を継続。画像未読込の単色表示も共通矩形へ修正。
+
+ローカルでnode --test wall-tileset.test.js scene-depth.test.js scene-lighting.test.js：15件成功。node scripts/update-assets.jsと--check成功。確認用の横通路・部屋下端をブラウザで目視し、下側の壁と足元が重ならないこと、警告・エラーなしを確認。証跡はGit対象外のtest-results/foreground-corridor-fixed.png、foreground-room-bottom-fixed.png。
+
+描画のみの変更でゲームロジック・保存は不変のため、関連テストと再現画面確認に限定し、全階層走破テストと公開版走行は省略。実機スマホ／Safariは未確認。
