@@ -557,3 +557,11 @@ wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が
 - ローカル全195テスト成功。追加検証は配置前の値の引継ぎ・無効入力時の原子性・事前強調の非破壊性・条件／行の削除。ブラウザで数値変更・タップ配置・カードドラッグ・行ドラッグ・条件削除・元に戻す・予測完了・再読み込みを確認。844×390のiframeで横持ち相当の配置と設定欄を確認。物理スマホのタッチ操作は未確認。
 - node --checkとupdate-assets.js --check成功。配信7画像の内容ハッシュも登録。ユーザーのローカルセーブを変更しないよう4329番の隔離環境で検証。確認画像はtest-results/preparation-desktop.pngとpreparation-mobile.png。
 - 詳細はdocs/ui/PREPARATION_UI.md。別テーマのゲーム内切替は未実装。GitHubの自動テスト・デプロイ・公開操作はpush後に追記する。
+
+## 2026-10-30 準備カードUIの公開確認
+
+- 実装コミット：6918f8674672634e684d852ce633380f22759cf3（mainへpush済み）。Game tests run 40969630396、pages build and deployment run 40969629869はいずれもsuccess。
+- 公開URL https://spf33yk.github.io/Auto-Dungeon-RPG/ を、allow-same-originを付けないsandbox iframeで操作し、既存の保存データに触れず検証。NewGame→デバッグでB29準備へ進み、カードリスト1列・標準素材・予測ボタンの位置を確認。条件HP35%の設定とタップ配置、予測8試行の完了（Clear見込み・ターン・HP・注意表示）を確認した。
+- 公開index内のapp.js 4ef61bef1c40、card-editor.js 488659c5cb0c、screens.css e6c68ab5fd4f、card-condition.png 6c27af31054f、tray-middle.png e8dbbc8dd60eはローカルの配信定義と一致。新旧キャッシュの混在を認めない。
+- 公開確認画像：test-results/preparation-public.png。ローカル全195テストとPC・844×390横持ち相当の表示確認に加え、公開版の実操作まで完了。物理スマホのタッチ操作、別テーマのゲーム内切替は未確認／未実装のまま。
+
