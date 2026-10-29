@@ -115,3 +115,8 @@ art/characters/mukuro-v1/sprites-32.png（96×128、32pxセル3列4行、4286 by
 
 ## 骸の歩行B修正（2026-10-29）
 技術ポーズガイドを参照してimagegenでBの4方向だけを再作成し、sprites-32.pngへ反映（4286 bytes）。Aと攻撃の8コマは画素単位で維持。原画はart/local-originals/mukuro-walk-b-corrected.pngにローカル保管。ポーズガイドはdocs/characters/poses/walk-b-guide.svg、採用プロンプトと整形記録はキャラのARTWORK.md。
+
+
+## マップ小物追加（2026-10-29）
+
+art/props/map-items-32.png：96×64、32pxセル×6。ハート、未作動トラップ、作動済みトラップ、記憶の欠片、スキル報酬石、左から右へ登る高さ28pxの石階段。泉と薬草は共通のハートを表示。既存宝箱・装備・墓石のアトラスは維持する。内蔵画像生成を使用し、プロンプトはart/props/MAP_ITEMS_PROMPT.md。高解像度原稿はローカルのみ、配信用PNGだけを追加する。鍵の描画は廃止。キャラクター素材・アニメーションは未変更。

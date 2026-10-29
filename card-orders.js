@@ -10,7 +10,6 @@ export const conditionCards=[
  {id:'one-hit',name:'一撃で倒せる'},
  {id:'injured',name:'敵のHPが半分以下'},
  {id:'loot-empty',name:'既知の回収品がない'},
- {id:'keys',name:'鍵を指定数以上所持',param:'value',value:1,min:1,max:10,step:1,unit:'個以上'},
 ];
 export const actionCards=[
  {id:'stairs',name:'階段を上る',detail:'階段へ向かい、実際に乗ると次の階へ。'},
@@ -92,7 +91,6 @@ function match(s,r,subject,destination,ctx){
    case'one-hit':return subject.hp<=Math.max(1,ctx.stats(s).attack-subject.defense);
    case'injured':return subject.hp<=subject.maxHp*.5;
    case'loot-empty':return !s.items.some(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i));
-   case'keys':return s.keys>=c.value;
    default:return false;
   }
  });
@@ -140,6 +138,6 @@ export function chooseCardOrder(s,ctx){
 
 export function describeCardRule(input){
  const r=legacyToCards(input),target=targetCards.find(t=>t.id===r.target)?.name||'？',effect=effectDefinition(r);
- const conditions=r.conditions.map(c=>{const d=conditionById[c.id];if(c.id==='visible')return (r.effect.id==='stairs'?'階段':r.effect.id==='chests'?'宝箱':r.effect.id==='avoid-traps'?'トラップ':r.target==='self'?'対象':'敵')+'が視界内';return d?.param?d.name.replace('指定%',String(c.value)+'%').replace('指定距離',String(c.value)+'マス').replace('指定ターン',String(c.value)+'ターン').replace('指定数',String(c.value)+(c.id==='keys'?'個':'')):d?.name||'？';});
+ const conditions=r.conditions.map(c=>{const d=conditionById[c.id];if(c.id==='visible')return (r.effect.id==='stairs'?'階段':r.effect.id==='chests'?'宝箱':r.effect.id==='avoid-traps'?'トラップ':r.target==='self'?'対象':'敵')+'が視界内';return d?.param?d.name.replace('指定%',String(c.value)+'%').replace('指定距離',String(c.value)+'マス').replace('指定ターン',String(c.value)+'ターン').replace('指定数',String(c.value)):d?.name||'？';});
  return `${target}は、${conditions.length?conditions.join('、かつ')+'のとき、':''}${effect?.name||'？'}${r.effect.kind==='skill'?'を発動する':''}。`;
 }

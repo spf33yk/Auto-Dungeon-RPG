@@ -1,2 +1,4 @@
 export const PROP_FRAMES={chest:[0,0],stairs:[1,0],gear:[2,0],armor:[0,1],tombstone:[1,1],'tombstone-cracked':[2,1]};
 export function drawProp(ctx,atlas,type,x,y,size=24,height=size){const cell=PROP_FRAMES[type];if(!cell||!atlas.complete||atlas.naturalWidth!==96||atlas.naturalHeight!==64)return false;ctx.imageSmoothingEnabled=false;ctx.drawImage(atlas,cell[0]*32,cell[1]*32,32,32,x,y,size,height);return true;}
+export const MAP_PROP_FRAMES={potion:[0,0],herb:[0,0],trap:[1,0],'trap-spent':[2,0],fragment:[0,1],reward:[1,1],stairs:[2,1]};
+export function drawMapProp(ctx,atlas,type,x,y,size=24,height=size){const cell=MAP_PROP_FRAMES[type];if(!cell||!atlas.complete||atlas.naturalWidth!==96||atlas.naturalHeight!==64)return false;ctx.imageSmoothingEnabled=false;ctx.drawImage(atlas,cell[0]*32,cell[1]*32,32,32,x,y,size,height);return true;}

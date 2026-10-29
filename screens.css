@@ -330,9 +330,9 @@ body.watching-teaser .title-scene{visibility:hidden}
 .equipment-icon{display:inline-block!important;width:32px;height:32px;vertical-align:middle;margin-right:6px;background-image:var(--prop-atlas);background-repeat:no-repeat;background-size:96px 64px;image-rendering:pixelated}.equipment-icon.weapon{background-position:-64px 0}.equipment-icon.armor{background-position:0 -32px}
 
 /* Current preparation layout and replaceable card-frame contract. */
-:root{--card-frame-image:none;--card-frame-radius:5px;--card-frame-line:#607369;--map-size-width:clamp(100px,23cqw,330px)}
+:root{--card-frame-image:none;--card-frame-radius:5px;--card-frame-line:#607369;--map-size-width:clamp(130px,30cqw,430px)}
 html[data-minimap-size=small]{--map-size-width:clamp(76px,17cqw,240px)}
-html[data-minimap-size=large]{--map-size-width:clamp(130px,30cqw,430px)}
+html[data-minimap-size=large]{--map-size-width:clamp(170px,39cqw,560px)}
 #map-wrap .automap-overlay{width:min(var(--map-size-width),var(--minimap-limit,42cqw))!important;max-width:42%;padding:0;border:0;background:transparent;top:var(--hud-top-space,70px);right:12px}
 #map-wrap .automap-overlay canvas{width:100%;height:auto}
 .minimap-setting{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0;font-size:14px}

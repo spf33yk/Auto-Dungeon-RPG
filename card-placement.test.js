@@ -7,7 +7,7 @@ const prep=()=>{const s=newGame(31);s.phase='prepare';s.floor=2;s.orders=[create
 const palette=(type,id)=>({origin:'palette',type,id}),slot=(row,slot,index)=>({origin:'slot',row,slot,index}),dest=(row,slot,index)=>({row,slot,index});
 
 test('palette cards replace target, effect or condition and preserve valid rules',()=>{
- const s=prep();assert.equal(placeCard(s,palette('condition','keys'),dest(0,'condition',1)),true);assert.deepEqual(s.orders[0].conditions[1],{id:'keys',value:1});
+ const s=prep();assert.equal(placeCard(s,palette('condition','turns'),dest(0,'condition',1)),true);assert.deepEqual(s.orders[0].conditions[1],{id:'turns',value:150});
  assert.equal(placeCard(s,palette('condition','range'),dest(0,'condition',0)),true);assert.equal(s.orders[0].conditions[0].value,6);
  assert.equal(placeCard(s,palette('target','enemy'),dest(0,'target')),true);assert.equal(s.orders[0].effect.id,'attack');
  assert.equal(placeCard(s,palette('target','self'),dest(0,'target')),true);assert.equal(s.orders[0].effect.id,'stairs');
@@ -27,11 +27,11 @@ test('locked rewards, mismatched categories, duplicate conditions and capacity c
  s.phase='explore';const saved=structuredClone(s.orders);assert.equal(placeCard(s,palette('action','stairs'),dest(0,'effect')),false);assert.equal(moveCardRow(s,0,1),false);assert.deepEqual(s.orders,saved);
 });
 test('row priority is reordered and persists with existing save format',()=>{
- const s=prep();assert.equal(moveCardRow(s,0,1),true);assert.equal(s.orders[0].effect.id,'chests');const saved=normalizeSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(saved.orders,s.orders);assert.equal(saved.version,12);
+ const s=prep();assert.equal(moveCardRow(s,0,1),true);assert.equal(s.orders[0].effect.id,'chests');const saved=normalizeSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(saved.orders,s.orders);assert.equal(saved.version,13);
 });
 test('expanded capacity supports eight rows and four conditions without exceeding limits',()=>{
  const s=prep();s.levels.commandSlots=6;s.levels.cardSlots=2;s.orders=Array.from({length:8},()=>createCardRule());
- for(const [index,id] of ['hp-below','visible','range','keys'].entries())assert.equal(placeCard(s,palette('condition',id),dest(7,'condition',index)),true);
+ for(const [index,id] of ['hp-below','visible','range','hp-above'].entries())assert.equal(placeCard(s,palette('condition',id),dest(7,'condition',index)),true);
  const before=structuredClone(s.orders);assert.equal(placeCard(s,palette('condition','turns'),dest(7,'condition',4)),false);assert.deepEqual(s.orders,before);
  assert.equal(moveCardRow(s,7,0),true);assert.equal(s.orders[0].conditions.length,4);assert.ok(s.orders.every(r=>validCardRule(s,r)));
 });

@@ -6,7 +6,7 @@ import {debugTitleEnding} from './debug-tools.js';
 
 test('legacy saves gain an unachieved title flag without losing progress',()=>{
  const old=newGame(91);delete old.profile.trueEnding;const before=JSON.stringify(old),loaded=normalizeSave(old);
- assert.ok(loaded);assert.equal(loaded.version,12);assert.equal(loaded.profile.trueEnding,false);assert.equal(openingVariant(loaded.profile),'mukuro');
+ assert.ok(loaded);assert.equal(loaded.version,13);assert.equal(loaded.profile.trueEnding,false);assert.equal(openingVariant(loaded.profile),'mukuro');
  assert.deepEqual(loaded.gear,old.gear);assert.equal(loaded.hp,old.hp);assert.equal(loaded.floor,old.floor);assert.equal(JSON.stringify(old),before);
  const bad=structuredClone(loaded);bad.profile.trueEnding='yes';assert.equal(normalizeSave(bad),null);
 });

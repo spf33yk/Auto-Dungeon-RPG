@@ -8,7 +8,7 @@ export const orderDefinitions=[
  {id:'stairs-low',name:'HP低下時は階段へ',detail:'指定HP以下なら探索を切り上げる。',param:'hp',value:35,min:10,max:90,step:5,unit:'%以下'},
  {id:'stairs-after',name:'指定ターン後は階段へ',detail:'この階で指定ターン経過後に帰路へ。',param:'turns',value:150,min:20,max:1000,step:10,unit:'ターン後'},
  {id:'stairs-after-loot',name:'見つけた品の回収後に階段へ',detail:'既知の取得可能な品がなくなったら向かう。',},
- {id:'collect-items',name:'発見した品をすべて回収',detail:'装備・鍵・スキル・薬草・欠片・泉・開封可能な箱を回収する。',},
+ {id:'collect-items',name:'発見した品をすべて回収',detail:'装備・スキル・薬草・欠片・泉・開封可能な箱を回収する。',},
  {id:'chests',name:'宝箱を優先して回収',detail:'通常宝箱だけを集める。中身は開封まで不明。',},
  {id:'chests-near',name:'近くの宝箱だけ回収',detail:'指定距離内の通常宝箱へ向かう。',param:'range',value:6,min:1,max:20,step:1,unit:'マス以内'},
  {id:'heal-critical',name:'瀕死時に泉へ向かう',detail:'指定HP以下で、発見済みの泉や薬草へ向かう。',param:'hp',value:35,min:10,max:90,step:5,unit:'%以下'},

@@ -33,7 +33,7 @@ export const incomingDamage=(attack,defense)=>Math.max(1,Math.ceil(attack*.2),at
 export function stats(s){const w=gearStats(s.gear.weapon),a=gearStats(s.gear.armor);return {maxHp:54+((s.level??1)-1)*HP_PER_LEVEL+s.levels.vitality*12,attack:7+s.levels.power*2+w.attack+a.attack,defense:1+s.levels.guard+w.defense+a.defense};}
 export function newGame(seed=Date.now()%10000000,profile=profileDefault()){
  const p=structuredClone(profile);p.skills??=[];p.trueEnding??=false;p.runs++;
- const s={version:12,level:1,experience:0,damageEvents:[],keys:0,abilities:[],unlockedOrders:[],rngState:seed>>>0,warped:false,nextAcquisition:0,b15HintShown:false,orders:[createCardRule()],seed,floor:1,phase:'awakening',hp:54,shards:12,levels:Object.fromEntries(skills.map(k=>[k.id,0])),gear:{weapon:createGear('weapon-0'),armor:createGear('armor-0')},inventory:[],mode:'stairs',turn:0,kills:0,logs:[],memories:[],profile:p,letter:false};
+ const s={version:13,level:1,experience:0,damageEvents:[],abilities:[],unlockedOrders:[],rngState:seed>>>0,warped:false,nextAcquisition:0,b15HintShown:false,orders:[createCardRule()],seed,floor:1,phase:'awakening',hp:54,shards:12,levels:Object.fromEntries(skills.map(k=>[k.id,0])),gear:{weapon:createGear('weapon-0'),armor:createGear('armor-0')},inventory:[],mode:'stairs',turn:0,kills:0,logs:[],memories:[],profile:p,letter:false};
  for(const g of Object.values(s.gear)){g.acquiredOrder=s.nextAcquisition++;register(p.equipment,g.baseId);register(p.knownEquipment,g.baseId);}
  makeFloor(s);log(s,'目が覚めると、そこには骨だけの手があった。','story');log(s,p.normalClears?'息子に会いたい。今度こそ、あの手紙を届けよう。':'なぜだろう。上へ行かなければならない気がする。','story');return s;
 }
@@ -98,7 +98,7 @@ export function makeFloor(s){
  for(let i=0;i<BALANCE.enemyCount(z.index);i++){const base=monsters[z.index*2+(i%3===2?1:0)];s.enemies.push({...base,baseId:base.id,...spot(),maxHp:base.hp,aggro:false});}
  for(let i=0;i<BALANCE.springCount;i++)s.items.push({...spot(),type:'potion'});
  for(let i=0;i<2;i++)s.items.push({...spot(),type:rng()<.25?'herb':'fragment'});
- for(let i=0;i<4;i++)if(rng()<CHEST_CHANCE)s.items.push({...spot(),type:'chest',locked:true,rewardId:rollChestReward(rng)});
+ for(let i=0;i<4;i++)if(rng()<CHEST_CHANCE)s.items.push({...spot(),type:'chest',rewardId:rollChestReward(rng)});
  if(s.floor===LETTER_FLOOR)s.items.push({...spot(),type:'letter'});
  if(['monsters','traps'].includes(s.gimmick.id)){
   const inside=(p,r)=>p.x>=r.x&&p.x<r.x+r.w&&p.y>=r.y&&p.y<r.y+r.h;
@@ -119,22 +119,21 @@ export function makeFloor(s){
 export function route(s,test,{start=s.player,known=true,blocked=new Set()}={}){const q=[start],prev=new Map([[key(start),null]]);for(let i=0;i<q.length;i++){const p=q[i];if(test(p)){if(i===0)return start;let end=p;while(prev.get(key(end))!==start)end=prev.get(key(end));return end;}for(const [dx,dy]of dirs){const n={x:p.x+dx,y:p.y+dy},k=key(n);if(s.grid[n.y]?.[n.x]&&(!known||s.seen[n.y][n.x])&&!prev.has(k)&&!blocked.has(k)){prev.set(k,p);q.push(n);}}}return null;}
 function modifierActive(s,id){return s.orders.some(o=>o.cards)?cardModifier(s,id,{canSee,stats,obtainable}):activeOrders(s).some(o=>o.id===id);}
 export function targetEnemy(s){const near=dirs.map(([dx,dy])=>s.enemies.find(e=>e.x===s.player.x+dx&&e.y===s.player.y+dy)).filter(Boolean);if(!modifierActive(s,'tactics'))return near[0];const atk=stats(s).attack;return near.sort((a,b)=>Number(b.hp<=Math.max(1,atk-b.defense))-Number(a.hp<=Math.max(1,atk-a.defense))||b.attack-a.attack)[0];}
-export function obtainable(s,i){return i.type==='letter'?Boolean(s.profile.normalClears&&!s.letter):i.type==='chest'&&i.locked?s.keys>0:true;}
+export function obtainable(s,i){return i.type==='letter'?Boolean(s.profile.normalClears&&!s.letter):true;}
 function receiveReward(s,id){const fresh=grantReward(s,id);log(s,fresh?'「'+rewardById[id].name+'」を手に入れた。'+(rewardById[id].kind==='order'?'次の準備で探索指示に設定できる。':'この旅で使用できる。'):'「'+rewardById[id].name+'」は取得済み。記憶の欠片 +5','good');}
-function pickup(s){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent=item.type==='letter'?'封じられた宝箱。まだ思い出せない':'鍵が足りない。今は開けられない';return;}s.items=s.items.filter(i=>i!==item);
+function pickup(s){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);
  if(item.type==='potion'||item.type==='herb'){const heal=Math.min(stats(s).maxHp-s.hp,item.type==='herb'?10:BALANCE.springHeal);s.hp+=heal;log(s,(item.type==='herb'?'薬草':'回復の泉')+'。HP +'+heal,'good');}
  else if(item.type==='fragment'){s.shards+=3;log(s,'床の記憶の欠片を拾った。+3','good');}
- else if(item.type==='key'){s.keys++;log(s,'古びた鍵を拾った。所持 '+s.keys+'個','good');}
  else if(item.type==='gear'){acquire(s,item.gear);log(s,gearName(item.gear)+'を拾った。','good');}
  else if(item.type==='reward')receiveReward(s,item.rewardId);
  else if(item.type==='letter'){s.letter=true;log(s,'古びた手紙を手に取った。今度こそ、届けよう。','story');}
- else if(item.type==='chest'){if(item.locked){s.keys--;log(s,'鍵を1個使い、宝箱を開けた。','good');}if(item.gear){acquire(s,item.gear);s.shards+=2;log(s,'旧宝箱から'+gearName(item.gear)+'を入手。記憶の欠片 +2','good');}else receiveReward(s,item.rewardId);}
+ else if(item.type==='chest'){log(s,'宝箱を開けた。','good');if(item.gear){acquire(s,item.gear);s.shards+=2;log(s,'旧宝箱から'+gearName(item.gear)+'を入手。記憶の欠片 +2','good');}else receiveReward(s,item.rewardId);}
 }
 export function dropFromEnemy(s,e){const rng=()=>nextRandom(s),drop=rollEnemyDrop(e.baseId,rng);if(!drop)return null;
  const q=[{x:e.x,y:e.y}],seen=new Set([key(e)]);let position=null;
  for(let i=0;i<q.length;i++){const p=q[i];if(key(p)!==key(s.stairs)&&!s.items.some(i=>key(i)===key(p))&&!s.enemies.some(o=>key(o)===key(p))){position=p;break;}for(const [dx,dy] of dirs){const n={x:p.x+dx,y:p.y+dy};if(s.grid[n.y]?.[n.x]&&!seen.has(key(n))){seen.add(key(n));q.push(n);}}}
  if(!position){log(s,'落とした品は瓦礫に埋もれた。');return null;}
- const item={...position,type:drop.type};if(drop.type==='gear'){const plus=rng()<.12?1+Math.floor(rng()*3):0;item.gear=createGear(drop.id,{plus});}else if(drop.type==='reward')item.rewardId=drop.id;s.items.push(item);log(s,e.name+'が'+(drop.type==='key'?'鍵':drop.type==='gear'?gearName(item.gear):rewardById[drop.id].name)+'を落とした。');return item;
+ const item={...position,type:drop.type};if(drop.type==='gear'){const plus=rng()<.12?1+Math.floor(rng()*3):0;item.gear=createGear(drop.id,{plus});}else if(drop.type==='reward')item.rewardId=drop.id;s.items.push(item);log(s,e.name+'が'+(drop.type==='gear'?gearName(item.gear):rewardById[drop.id].name)+'を落とした。');return item;
 }
 export function attackEnemy(s,enemy){
  if(!s.enemies.includes(enemy)||enemy.hp<=0)return;
@@ -178,10 +177,10 @@ export function tick(s){
 export function ascend(s){if(s.phase!=='cleared')return false;if(s.floor===LAST_FLOOR){s.phase='ending';s.profile.normalClears++;log(s,'地上で、若者が剣を抜いた。「魔物か」','story');log(s,'骸は言葉を伝えられないまま、若者の剣に倒れた。','story');return true;}s.floor++;s.phase='prepare';makeFloor(s);s.hp=Math.min(stats(s).maxHp,s.hp+Math.ceil(stats(s).maxHp*BALANCE.restRatio));log(s,`${floorLabel(s)}へ。休息して次の探索に備える。`,'good');return true;}
 export function codexRows(s,kind){if(kind==='skills')return rewardDefinitions.map(r=>s.profile.skills.includes(r.id)?{...r,known:true,owned:(r.kind==='skill'?s.abilities:s.unlockedOrders).includes(r.id)}:{known:false});if(kind==='monsters')return monsters.map(m=>s.profile.monsters.includes(m.id)?{name:m.name,attack:m.attack,defense:m.defense,zone:zones[m.zone].name,known:true}:{known:false});return equipment.map(g=>s.profile.knownEquipment.includes(g.id)&&s.profile.equipment.includes(g.id)?{name:g.name,attack:g.attack,defense:g.defense,slot:g.slot,acquiredOrder:s.profile.equipment.indexOf(g.id),known:true}:{known:false,slot:g.slot});}
 function validMapShape(s){const h=s.grid?.length,w=s.grid?.[0]?.length;return ((w===W&&h===H)||(w===31&&h===23))&&s.grid.every(r=>Array.isArray(r)&&r.length===w)&&[s.seen,s.visited].every(g=>Array.isArray(g)&&g.length===h&&g.every(r=>Array.isArray(r)&&r.length===w))&&(s.rooms===undefined||Array.isArray(s.rooms)&&s.rooms.every(r=>r&&['x','y','w','h'].every(k=>Number.isInteger(r[k]))&&r.x>=0&&r.y>=0&&r.w>0&&r.h>0&&r.x+r.w<=w&&r.y+r.h<=h));}
-export function validateSave(s){return Boolean(s?.version===12&&Number.isInteger(s.level)&&s.level>=1&&s.level<=MAX_LEVEL&&Number.isSafeInteger(s.experience)&&s.experience>=0&&(s.level===MAX_LEVEL?s.experience===0:s.experience<experienceToNext(s.level))&&Number.isInteger(s.keys)&&s.keys>=0&&Number.isInteger(s.rngState)&&s.rngState>=0&&s.rngState<=4294967295&&typeof s.warped==='boolean'&&Array.isArray(s.abilities)&&s.abilities.every(id=>rewardById[id]?.kind==='skill')&&new Set(s.abilities).size===s.abilities.length&&Array.isArray(s.unlockedOrders)&&s.unlockedOrders.every(id=>rewardById[id]?.kind==='order')&&new Set(s.unlockedOrders).size===s.unlockedOrders.length&&Number.isInteger(s.nextAcquisition)&&s.nextAcquisition>=0&&Array.isArray(s.logs)&&Array.isArray(s.enemies)&&Array.isArray(s.items)&&s.items.every(i=>i&&Number.isInteger(i.x)&&Number.isInteger(i.y)&&i.x>=0&&i.x<W&&i.y>=0&&i.y<H&&(['potion','herb','fragment','key','letter'].includes(i.type)||i.type==='gear'&&gearById[i.gear?.baseId]||i.type==='reward'&&rewardById[i.rewardId]||i.type==='chest'&&(i.gear?gearById[i.gear.baseId]:Boolean(rewardById[i.rewardId]&&i.locked===true))))&&Array.isArray(s.memories)&&Number.isInteger(s.floor)&&s.floor>=1&&s.floor<=LAST_FLOOR&&['awakening','prepare','explore','cleared','dead','ending'].includes(s.phase)&&validMapShape(s)&&s.levels&&skills.every(k=>Number.isInteger(s.levels[k.id])&&s.levels[k.id]>=0&&s.levels[k.id]<=k.max)&&Array.isArray(s.orders)&&s.orders.length<=orderCapacity(s)&&s.orders.every(o=>validCardRule(s,o))&&s.profile&&typeof s.profile.trueEnding==='boolean'&&['monsters','equipment','knownEquipment','skills'].every(k=>Array.isArray(s.profile[k]))&&s.profile.skills.every(id=>rewardById[id])&&s.gear&&Object.values(s.gear).every(g=>gearById[g.baseId])&&Array.isArray(s.inventory)&&s.inventory.every(g=>gearById[g.baseId])&&validCryptObstacles(s));}
+export function validateSave(s){return Boolean(s?.version===13&&Number.isInteger(s.level)&&s.level>=1&&s.level<=MAX_LEVEL&&Number.isSafeInteger(s.experience)&&s.experience>=0&&(s.level===MAX_LEVEL?s.experience===0:s.experience<experienceToNext(s.level))&&!Object.hasOwn(s,'keys')&&Number.isInteger(s.rngState)&&s.rngState>=0&&s.rngState<=4294967295&&typeof s.warped==='boolean'&&Array.isArray(s.abilities)&&s.abilities.every(id=>rewardById[id]?.kind==='skill')&&new Set(s.abilities).size===s.abilities.length&&Array.isArray(s.unlockedOrders)&&s.unlockedOrders.every(id=>rewardById[id]?.kind==='order')&&new Set(s.unlockedOrders).size===s.unlockedOrders.length&&Number.isInteger(s.nextAcquisition)&&s.nextAcquisition>=0&&Array.isArray(s.logs)&&Array.isArray(s.enemies)&&Array.isArray(s.items)&&s.items.every(i=>i&&Number.isInteger(i.x)&&Number.isInteger(i.y)&&i.x>=0&&i.x<W&&i.y>=0&&i.y<H&&(['potion','herb','fragment','letter'].includes(i.type)||i.type==='gear'&&gearById[i.gear?.baseId]||i.type==='reward'&&rewardById[i.rewardId]||i.type==='chest'&&(i.gear?gearById[i.gear.baseId]:Boolean(rewardById[i.rewardId]&&!Object.hasOwn(i,'locked')))))&&Array.isArray(s.memories)&&Number.isInteger(s.floor)&&s.floor>=1&&s.floor<=LAST_FLOOR&&['awakening','prepare','explore','cleared','dead','ending'].includes(s.phase)&&validMapShape(s)&&s.levels&&skills.every(k=>Number.isInteger(s.levels[k.id])&&s.levels[k.id]>=0&&s.levels[k.id]<=k.max)&&Array.isArray(s.orders)&&s.orders.length<=orderCapacity(s)&&s.orders.every(o=>validCardRule(s,o))&&s.profile&&typeof s.profile.trueEnding==='boolean'&&['monsters','equipment','knownEquipment','skills'].every(k=>Array.isArray(s.profile[k]))&&s.profile.skills.every(id=>rewardById[id])&&s.gear&&Object.values(s.gear).every(g=>gearById[g.baseId])&&Array.isArray(s.inventory)&&s.inventory.every(g=>gearById[g.baseId])&&validCryptObstacles(s));}
 
 export function normalizeSave(input){
- if(!input||![2,3,4,5,6,7,8,9,10,11,12].includes(input.version))return null;const s=structuredClone(input);if(s.obstacles===undefined)s.obstacles=[];if(s.profile&&s.profile.trueEnding===undefined)s.profile.trueEnding=false;
+ if(!input||![2,3,4,5,6,7,8,9,10,11,12,13].includes(input.version))return null;const s=structuredClone(input);if(s.obstacles===undefined)s.obstacles=[];if(s.profile&&s.profile.trueEnding===undefined)s.profile.trueEnding=false;
  if(s.version===2){for(const k of skills)s.levels[k.id]??=0;s.orders=(s.mode==='collect'?['collect-items','stairs']:s.mode==='explore'?['explore-all','stairs']:['stairs']).map(makeOrder);s.retreatTurns=0;s.retreatCooldown=0;s.activeOrder=null;}
  if(s.version<4){
   // Exact acquisition timestamps did not exist before v4. Keep a stable inferred order.
@@ -217,7 +216,7 @@ export function normalizeSave(input){
   let refund=0;if(s.levels.tactics){refund+=8;if(s.orders.length<orderCapacity(s)&&!s.orders.some(o=>o.id==='tactics'))s.orders.push(makeOrder('tactics'));}if(s.levels.mend){refund+=10;grantReward(s,'mend');}delete s.levels.tactics;delete s.levels.mend;s.shards+=refund;
   // Existing generated gear chests remain free legacy chests. New floors use locked reward chests.
   for(const i of s.items)if(i.type==='chest'&&i.gear)i.locked=false;
-  s.version=9;log(s,'ドロップ版へ移行。旧戦術・再生の費用 '+refund+'pt を返還。新しい階から鍵付き宝箱が出現。','story');
+  s.version=9;log(s,'ドロップ版へ移行。旧戦術・再生の費用 '+refund+'pt を返還。新しい階から特殊報酬宝箱が出現。','story');
  }
  if(s.version<10){
   s.levels.cardSlots=0;s.orders=s.orders.map(legacyToCards);
@@ -226,5 +225,11 @@ export function normalizeSave(input){
  }
  if(s.version<11){s.level=1;s.experience=0;s.version=11;}s.damageEvents=[];
  if(s.version<12)s.version=12;
+ if(s.version<13){
+  if(!Array.isArray(s.items)||!Array.isArray(s.orders)||s.orders.some(rule=>rule?.cards&&!Array.isArray(rule.conditions)))return null;
+  delete s.keys;s.items=s.items.filter(i=>i.type!=='key');for(const i of s.items)if(i.type==='chest')delete i.locked;
+  for(const rule of s.orders)if(rule.cards)rule.conditions=rule.conditions.filter(c=>c.id!=='keys');
+  s.version=13;log(s,'鍵を廃止。宝箱は鍵なしで開封できます。旧鍵と鍵条件は削除しました。','story');
+ }
  if(!validateSave(s))return null;reveal(s);return s;
 }

@@ -43,7 +43,7 @@ export const rewardDefinitions=[
 export const rewardById=Object.fromEntries(rewardDefinitions.map(r=>[r.id,r]));
 export const chestRewards=[{id:'critical',weight:30},{id:'leech',weight:25},{id:'double-strike',weight:20},{id:'warp',weight:15},{id:'avoid-traps',weight:10}];
 export const enemyDropTables=Object.fromEntries(monsters.map(m=>{
- const boss=m.id.startsWith('boss-'),gearWeight=boss?79:87;
+ const boss=m.id.startsWith('boss-'),gearWeight=99;
  const weights=equipment.map(g=>1/Math.pow(1+Math.abs(g.rank-m.zone),4)),total=weights.reduce((a,b)=>a+b,0);
- return [m.id,{rate:boss?1:m.type==='brute'?.30:.22,entries:[...equipment.map((g,i)=>({type:'gear',id:g.id,weight:gearWeight*weights[i]/total})),{type:'key',weight:boss?20:12},{type:'reward',id:'mend',weight:1}]}];
+ return [m.id,{rate:boss?1:m.type==='brute'?.30:.22,entries:[...equipment.map((g,i)=>({type:'gear',id:g.id,weight:gearWeight*weights[i]/total})),{type:'reward',id:'mend',weight:1}]}];
 }));

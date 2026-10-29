@@ -178,12 +178,12 @@ TRUEエンドの状態遷移は未実装。旧50階共闘構想は現行ルー�
 ## ドロップ・取得スキルの設計（2026-10-26）
 
 - data.jsのenemyDropTablesは敵IDごとのrate／entries。各entryはtype／id／weightを持つ。通常22%・重装30%・中ボス100%は仮採用。rank距離重みを装備20品のentriesへ展開する。rollEnemyDropは第1段階失敗なら第2段階を呼ばず、成功時にweightedPickで1品を返す。特殊報酬はrewardDefinitions、箱の重みはchestRewardsに分離する。
-- drop-system.jsのnextRandom(s)がs.rngStateを32bitで進め、戦闘と拾得の抽選を保存から再開する。フロアのレイアウト・箱報酬は既存seed＋floorの独立した生成乱数を使う。箱は生成時のrewardIdを保持し、AIのobtainableは鍵と物語条件のみ参照する。
+- drop-system.jsのnextRandom(s)がs.rngStateを32bitで進め、戦闘と拾得の抽選を保存から再開する。フロアのレイアウト・箱報酬は既存seed＋floorの独立した生成乱数を使う。箱は生成時のrewardIdを保持し、AIのobtainableは手紙の物語条件を参照し、通常箱は鍵不要。
 - attackEnemyで通常打撃→生存なら追撃抽選→追加打撃→死亡処理。各打撃に会心と実ダメージ吸収を適用。死亡処理は登録済みかつ生存中の敵だけ実行し、撃破報酬・ドロップは1回。品の床が埋まっていればBFSで近い空き床へ置く。
-- pickupはtypeで鍵・装備・戦闘報酬・薬草・欠片・箱・手紙・泉を処理。箱は鍵消費後にgrantRewardを呼ぶ。同名所持は+5ptへ変換し効果を重複させない。abilities／unlockedOrdersは周回リセット、profile.skillsは継続。
+- pickupはtypeで装備・戦闘報酬・薬草・欠片・箱・手紙・泉を処理。箱は鍵不要でgrantRewardを呼ぶ。同名所持は+5ptへ変換し効果を重複させない。abilities／unlockedOrdersは周回リセット、profile.skillsは継続。
 - tacticsはactiveOrdersの存在で隣接攻撃優先を切替。warpはchooseOrderから緊急アクションとして返し、エンジンで全合法床から抽選する。warpedは階生成時にfalseへ戻す。罠見切りは指示の経路blockedと最終罠処理の両方へ適用する。敵が回収対象を塞いで指示不成立となる時は基本接近し、2地点の往復を防ぐ。
 - v8→v9は旧tactics／mendを削除・8／10pt返還し、mendの能力と図鑑登録を引き継ぐ。tacticsは空き枠だけ自動設定。生成済み旧gear箱を鍵不要で保持。地形を再生成せず、次階から新規箱を配置。v2〜v7の従来の移行段階を通した後にv9へ上げる。
-- スキル図鑑は既存codex-dialogを共用する独立のskills表示分岐。名前・効果・種類・当該旅の所持状態を表示し、未取得は？。右ステータスに鍵と取得報酬一覧を追加。指示エディターの再描画signatureにはunlockedOrdersを含め、取得直後に選択肢を更新する。
+- スキル図鑑は既存codex-dialogを共用する独立のskills表示分岐。名前・効果・種類・当該旅の所持状態を表示し、未取得は？。右ステータスに取得報酬一覧を表示する。鍵表示は廃止。指示エディターの再描画signatureにはunlockedOrdersを含め、取得直後に選択肢を更新する。
 
 仮バランスの再検証はscripts/balance-audit.jsで固定10シード・瀕死時の回復＋宝箱回収・最強装備・守護／剣技／生命の購入方針を通し実行する。特定方針の比較であり、実プレイヤー全体の勝率としては扱わない。
 
@@ -350,3 +350,10 @@ indexのdata-heroへsprites.jsonを登録。PNGハッシュはbuild-character-sh
 
 ## 歩行位相の継続（2026-10-29）
 CharacterAnimationにidleFrame／stepStart／nextStepを追加。moveToで開始位相を交互に選び、sampleの移動終了で最後の接地コマを待機へ引き継ぐ。攻撃終了とteleportは待機0へ戻す。視覚状態のみでセーブへ追加しない。素材の受け入れでは全体フレーム差分だけでなく、足元の骨画素と支持脚の位置変化を検査する。
+
+
+## 映像設定・小物・鍵廃止の設計（2026-10-29）
+
+ui-settings.jsでminimapとskipOpeningを部分更新時にも保持。playJourneyTeaserの開始前に自動スキップを判定し、再生せず継続コールバックへ進む。propsの既存アトラスを保持し、map-items-32.pngを別途ロード、drawMapPropを既存drawPropより優先。回復2種は同一ハートセルへ対応し、罠はspentでセルを切り替える。階段は固定床描画から足元基準の描画キューへ移す。
+
+新規状態はv13でkeysを持たない。敵の抽選表は装備99・再生1、箱はrewardIdのみで開封。v12以前では鍵データとkeys条件を移行時に除去し、箱の報酬と現在階を保存する。旧v9移行内部の仮keysは最終v13移行で必ず削除する。鍵機能のクリア後再導入は未設計。JS/CSS/画像URLはupdate-assets.jsで内容ハッシュを更新する。

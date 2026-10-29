@@ -25,7 +25,7 @@ for(const match of html.matchAll(/\.\/art\/characters\/[^"\s?]*sprites\.json(?:\
  updated=updated.replaceAll(match[0],'./'+file+'?v='+version(file));
 }
 for(const file of ['style.css','screens.css'])updated=updated.replace(new RegExp('href="\\./'+file.replace('.', '\\.')+'(?:\\?v=[^"]*)?"'),'href="./'+file+'?v='+version(file)+'"');
-for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','terrain/crypt/atlas-32.png','props/atlas-32.png']){
+for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','terrain/crypt/atlas-32.png','props/atlas-32.png','props/map-items-32.png']){
  const asset='./art/'+file;
  updated=updated.replace(new RegExp('\\./art/'+file.replaceAll('.','\\.')+'(?:\\?v=[^"\\s>]*)?','g'),asset+'?v='+version('art/'+file));
 }
