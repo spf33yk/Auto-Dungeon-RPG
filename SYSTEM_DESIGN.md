@@ -365,3 +365,7 @@ card-editor.jsの準備用描画を連結素材と2列パネルへ変更。条�
 app.jsで予測の準備開始時スナップショットを記録し、forecast-dialogが開いている場合だけ試行を実行。閉じる際は世代番号で実行中の結果を破棄する。index.htmlに静的な予測ダイアログと下部ボタンを配置。準備以外は編集できない既存の状態判定とセーブv13を維持。
 
 scripts/build-preparation-assets.jsは追跡対象のcard-frame/v1部品と共通土台から7PNGを作成。update-assets.jsがPNGの内容ハッシュをpreparation-assetsスタイルへ登録する。ゲームの実行には制作原稿やSharpを必要としない。詳細はdocs/ui/PREPARATION_UI.md。
+
+## 等倍率による素材の組み立て・表示（2026-10-30）
+
+build-card-frames.jsのcardTransformは縦横の必要倍率の小さい方を1つだけ使用し、共通枠内へ中央配置する。SVG画像はpreserveAspectRatioをmeetにし、X/Y別のmatrix変換を廃止。配信カード4点を再生成。screens.cssは背景containと元画像のaspect-ratioを用い、土台の端と中央も75%の同倍率に揃える。引き伸ばして長い枠を作らず、中央を反復する。ゲームの指示・保存形式には触れない。

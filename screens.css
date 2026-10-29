@@ -368,7 +368,7 @@ body.preparing #prepare-scene .prep-foot{margin:0;font-size:10px;max-width:none;
 .card-library-tabs button{font-size:12px;min-height:34px}
 .card-rules{display:flex;flex-direction:column;overflow:auto}
 .card-rules-heading{font-size:14px}
-.palette-card,.board-slot{background-image:var(--card-frame-image);background-size:100% 100%;border-radius:var(--card-frame-radius);border:1px solid var(--card-frame-line);font-size:13px;min-height:64px;padding:9px;text-align:left}
+.palette-card,.board-slot{background-image:var(--card-frame-image);background-size:contain;border-radius:var(--card-frame-radius);border:1px solid var(--card-frame-line);font-size:13px;min-height:64px;padding:9px;text-align:left}
 .palette-card{height:76px;background-color:#17251f;align-self:start}
 .palette-card.target,.board-slot.target{--card-frame-line:#55836c}
 .palette-card.condition,.board-slot.condition{--card-frame-line:#ae9141}
@@ -391,7 +391,7 @@ body.preparing #prepare-scene .prep-foot{margin:0;font-size:10px;max-width:none;
 .board-rule .card-rule-preview{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);padding:0;margin:0}
 .board-rule .board-slots{padding:3px 0}.board-rule{padding-top:6px;padding-bottom:6px}
 .forecast-panel{overflow:hidden}#forecast-result{overflow:auto;min-height:0}.forecast-disclaimer,.forecast-actions{flex-shrink:0}
-.card-library .palette-card,.board-slots .board-slot{background-image:var(--card-frame-image);background-size:100% 100%;border-color:var(--card-frame-line);border-image-source:var(--card-frame-border-source,none);border-image-slice:var(--card-frame-slice,8);border-image-width:8px;border-image-repeat:stretch}
+.card-library .palette-card,.board-slots .board-slot{background-image:var(--card-frame-image);background-size:contain;border-color:var(--card-frame-line);border-image-source:var(--card-frame-border-source,none);border-image-slice:var(--card-frame-slice,8);border-image-width:8px;border-image-repeat:repeat}
 .board-slots [data-card-kind=skill]{--card-frame-line:#8f70a8}
 
 /* One desktop layout, proportionally fitted to every device. Canvas remains 1920x1080. */
@@ -428,7 +428,7 @@ body.preparing #prepare-scene .fitted-card-editor .card-library,body.preparing #
 .fitted-card-editor [data-card-kind=condition]{--prep-card:var(--prep-card-condition)}
 .fitted-card-editor [data-card-kind=skill]{--prep-card:var(--prep-card-skill)}
 .fitted-card-editor [data-card-kind=action]{--prep-card:var(--prep-card-action)}
-.fitted-card-editor .palette-card,.fitted-card-editor .board-slot{background:transparent var(--prep-card) center/100% 100% no-repeat!important;border:0!important;border-image:none!important;border-radius:0;box-shadow:none;color:#efeada;position:relative;touch-action:none;outline-offset:-5px;text-align:center;box-sizing:border-box}
+.fitted-card-editor .palette-card,.fitted-card-editor .board-slot{background:transparent var(--prep-card) center/contain no-repeat!important;border:0!important;border-image:none!important;border-radius:0;box-shadow:none;color:#efeada;position:relative;touch-action:none;outline-offset:-5px;text-align:center;box-sizing:border-box}
 .fitted-card-editor .palette-card{width:100%;height:76px;min-height:76px;padding:37px 16px 7px;font-size:14px;line-height:1.15}
 .fitted-card-editor .palette-card em{position:absolute;bottom:3px;right:17px;font-size:10px;font-style:normal;color:#d4a38b}
 .fitted-card-editor .palette-card:disabled{opacity:.42}
@@ -466,3 +466,14 @@ body.preparing #prepare-scene .fitted-card-editor .card-library,body.preparing #
 .forecast-dialog .forecast-panel{border:0;border-radius:0;min-height:260px;padding:16px;max-height:calc(86dvh - 42px);overflow:auto}
 .forecast-dialog #forecast-result{overflow:visible;flex:none}.forecast-dialog .forecast-heading h2{margin:0;font-size:20px}
 body.preparing #prepare-scene #prepare-forecast{order:0}body.preparing #prepare-scene #prepare-journal{order:1}body.preparing #prepare-scene #abandon-run{order:2}body.preparing #prepare-scene #primary{order:3;margin-left:auto}
+
+/* Artwork keeps its source aspect ratio; extra length uses repeated tray pieces. */
+.fitted-card-editor .palette-card,.fitted-card-editor .board-slot{background-size:contain!important}
+.fitted-card-editor .palette-card{height:auto;min-height:0;aspect-ratio:515/130;padding:24px 16px 3px;font-size:12px;line-height:1.05}
+.fitted-card-editor .palette-card em{bottom:1px;right:14px;font-size:9px}
+.fitted-card-editor .board-slot{height:calc(260px * 130 / 515);min-height:0;padding:32px 24px 4px 31px}
+.fitted-card-editor .board-slots{height:66px}
+.tray-surface{height:96px;padding:15px 36px 15px 94px;background-size:96px 96px,48px 96px}
+.tray-surface:before{inset:0 48px 0 96px;background-size:576px 96px}
+.tray-surface:after{inset:21px 35px 20px 88px}
+.fitted-card-editor .board-rule .row-handle{left:37px;top:30px;width:34px;height:34px;font-size:26px}

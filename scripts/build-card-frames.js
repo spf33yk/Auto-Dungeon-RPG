@@ -28,22 +28,26 @@ export function cornerPlacements(format) {
 
 function pngUri(file) { return `data:image/png;base64,${fs.readFileSync(file).toString('base64')}`; }
 
+export function cardTransform(format,card) {
+  const {left,right,top,bottom}=format.body;
+  const [sl,st,sr,sb]=card.sourceBody;
+  const scale=Math.min((right-left)/(sr-sl),(bottom-top)/(sb-st));
+  return {scale,tx:(left+right-(sl+sr)*scale)/2,ty:(top+bottom-(st+sb)*scale)/2};
+}
+
 export function renderCard(format, directory, cardId, patternId) {
   validateFormat(format);
   const card = format.cards[cardId], pattern = format.patterns[patternId];
   if (!card || !pattern) throw new Error('Unknown card or pattern');
   const { width, height } = format.canvas;
-  const { left, right, top, bottom } = format.body;
-  const [sl, st, sr, sb] = card.sourceBody;
-  // Map each raster's measured rail corners to one shared template rectangle.
-  const sx = (right - left) / (sr - sl), sy = (bottom - top) / (sb - st);
-  const tx = left - sl * sx, ty = top - st * sy;
+  // Fit into the shared bounds with ONE scale; never deform a frame to fill them.
+  const {scale,tx,ty}=cardTransform(format,card);
   const base = pngUri(path.resolve(directory, card.base));
   const gem = pattern.corners ? pngUri(path.resolve(directory, format.corner.asset)) : '';
   const placements = pattern.corners ? cornerPlacements(format) : [];
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-  <image xlink:href="${base}" width="${card.sourceSize[0]}" height="${card.sourceSize[1]}" preserveAspectRatio="none" transform="matrix(${sx} 0 0 ${sy} ${tx} ${ty})"/>
-  ${placements.length ? `<defs><image id="corner" xlink:href="${gem}" width="${format.corner.width}" height="${format.corner.height}" preserveAspectRatio="none"/></defs>` : ''}
+  <image xlink:href="${base}" width="${card.sourceSize[0]}" height="${card.sourceSize[1]}" preserveAspectRatio="xMidYMid meet" transform="translate(${tx} ${ty}) scale(${scale})"/>
+  ${placements.length ? `<defs><image id="corner" xlink:href="${gem}" width="${format.corner.width}" height="${format.corner.height}" preserveAspectRatio="xMidYMid meet"/></defs>` : ''}
   ${placements.map(p => `<use xlink:href="#corner" x="${p.x}" y="${p.y}"/>`).join('\n')}
 </svg>`;
 }

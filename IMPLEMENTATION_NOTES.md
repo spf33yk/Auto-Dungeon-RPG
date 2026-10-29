@@ -565,3 +565,10 @@ wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が
 - 公開index内のapp.js 4ef61bef1c40、card-editor.js 488659c5cb0c、screens.css e6c68ab5fd4f、card-condition.png 6c27af31054f、tray-middle.png e8dbbc8dd60eはローカルの配信定義と一致。新旧キャッシュの混在を認めない。
 - 公開確認画像：test-results/preparation-public.png。ローカル全195テストとPC・844×390横持ち相当の表示確認に加え、公開版の実操作まで完了。物理スマホのタッチ操作、別テーマのゲーム内切替は未確認／未実装のまま。
 
+## 2026-10-30 素材の縦横比保持
+
+- カードの背景100%×100%表示と、素材生成のX/Y別倍率による変形を修正。SVGはmeetと単一scale、CSSはcontainと元比率を使用する。リストも同様に保持。土台は左右と中央を一律75%で描き、行高を96pxへ縮小する。
+- 配信カード4PNGを再生成し、全7点で230,440bytes。新規原稿は追加しない。ソース・制作ルール・仕様書と各資料を同時更新。
+- 関連15テスト成功。新規テストで4種の単一倍率による内接と中央配置、SVGの比率保持、配信7画像の寸法・容量を確認。update-assets.js --check成功。
+- 隔離ローカルのブラウザで見た目を確認し、DOMの実測はリスト188×47.453px、指示カード260×65.625px、背景contain。元の515:130と一致（サブピクセルの丸め差のみ）。確認画像test-results/preparation-aspect-ratio.png。セーブv13、ゲーム数値と操作は変更なし。
+- 公開版の確認はpush後に実施して追記する。既存の制作途中ファイルは今回のコミットへ含めない。
