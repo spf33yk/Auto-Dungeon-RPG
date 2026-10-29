@@ -1,0 +1,45 @@
+{
+  "schema": "card-tray/v1",
+  "source": {
+    "width": 1024,
+    "height": 128
+  },
+  "slices": {
+    "left": 128,
+    "right": 128
+  },
+  "layout": {
+    "rowHeight": 128,
+    "rowGap": 12,
+    "columnWidth": 280,
+    "contentLeft": 136,
+    "contentRight": 136,
+    "number": {
+      "x": 72,
+      "y": 64,
+      "fontSize": 40
+    }
+  },
+  "skins": {
+    "classic": {
+      "name": "標準",
+      "image": "skins/classic.png",
+      "numberColor": "#eee2c2"
+    },
+    "black-iron": {
+      "name": "黒鉄",
+      "image": "skins/black-iron.png",
+      "numberColor": "#e0e6eb"
+    },
+    "bone-parchment": {
+      "name": "骨白と羊皮紙",
+      "image": "skins/bone-parchment.png",
+      "numberColor": "#39291d"
+    },
+    "obsidian-runes": {
+      "name": "黒曜石と魔法刻印",
+      "image": "skins/obsidian-runes.png",
+      "numberColor": "#ddd5fa"
+    }
+  }
+}

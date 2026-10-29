@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,createCardRule,validCardRule,normalizeSave} from './engine.js';
-import {placeCard,moveCardRow} from './card-placement.js';
+import {placeCard,moveCardRow,canPlaceCard,removePlacedCard} from './card-placement.js';
 import {targetCards,conditionCards,actionCards,skillCards} from './card-orders.js';
 const prep=()=>{const s=newGame(31);s.phase='prepare';s.floor=2;s.orders=[createCardRule('self',[{id:'hp-below',value:45}],'action','stairs'),createCardRule('self',[{id:'visible'}],'action','chests')];return s;};
 const palette=(type,id)=>({origin:'palette',type,id}),slot=(row,slot,index)=>({origin:'slot',row,slot,index}),dest=(row,slot,index)=>({row,slot,index});
@@ -39,4 +39,23 @@ test('every existing card can be placed on a compatible rule when acquired',()=>
  for(const c of targetCards){const s=prep();assert.equal(placeCard(s,palette('target',c.id),dest(0,'target')),true,c.id);}
  for(const c of conditionCards){const s=prep();s.orders[0]=['one-hit','injured'].includes(c.id)?createCardRule('enemy',[],'action','attack'):createCardRule();assert.equal(placeCard(s,palette('condition',c.id),dest(0,'condition',0)),true,c.id);}
  for(const [kind,cards] of [['action',actionCards],['skill',skillCards]])for(const c of cards){const s=prep();s.abilities.push('mend');s.unlockedOrders.push('warp','avoid-traps');s.orders[0]=c.enemy?createCardRule('enemy',[],'action','attack'):createCardRule();assert.equal(placeCard(s,palette(kind,c.id),dest(0,'effect')),true,c.id);}
+});
+
+test('configured palette values survive placement, while invalid values are atomic',()=>{
+ const s=prep(),before=JSON.stringify(s);
+ assert.equal(canPlaceCard(s,{...palette('condition','range'),value:9},dest(1,'condition',1)),true);
+ assert.equal(JSON.stringify(s),before);
+ assert.equal(placeCard(s,{...palette('condition','range'),value:9},dest(1,'condition',1)),true);
+ assert.equal(s.orders[1].conditions[1].value,9);
+ const saved=JSON.stringify(s);for(const value of [0,21,1.5,NaN])assert.equal(placeCard(s,{...palette('condition','range'),value},dest(1,'condition',1)),false);
+ assert.equal(JSON.stringify(s),saved);
+});
+
+test('trash removes only placed conditions or entire rows during preparation',()=>{
+ const s=prep(),before=JSON.stringify(s);
+ for(const source of [palette('condition','visible'),slot(0,'target',0),slot(0,'effect',0),slot(-1,'condition',0),slot(0,'condition',8)])assert.equal(removePlacedCard(s,source),false);
+ assert.equal(JSON.stringify(s),before);
+ assert.equal(removePlacedCard(s,slot(0,'condition',0)),true);assert.equal(s.orders[0].conditions.length,0);
+ assert.equal(removePlacedCard(s,{origin:'row',row:0}),true);assert.equal(s.orders.length,1);
+ s.phase='explore';const saved=JSON.stringify(s);assert.equal(removePlacedCard(s,{origin:'row',row:0}),false);assert.equal(JSON.stringify(s),saved);
 });

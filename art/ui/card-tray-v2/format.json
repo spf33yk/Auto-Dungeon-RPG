@@ -1,0 +1,72 @@
+{
+  "schema": "card-tray/v2",
+  "source": {
+    "width": 1024,
+    "height": 128
+  },
+  "frameImage": "../card-tray-v1/skins/classic.png",
+  "slices": {
+    "left": 128,
+    "right": 128
+  },
+  "layout": {
+    "rowHeight": 128,
+    "rowGap": 12,
+    "columnWidth": 280,
+    "contentLeft": 136,
+    "contentRight": 136,
+    "number": {
+      "x": 72,
+      "y": 64,
+      "fontSize": 40
+    }
+  },
+  "texture": {
+    "top": 28,
+    "height": 72,
+    "number": {
+      "x": 44,
+      "y": 34,
+      "width": 50,
+      "height": 60
+    },
+    "channelInset": 108
+  },
+  "skins": {
+    "classic": {
+      "name": "標準",
+      "image": "../card-tray-v1/skins/classic.png",
+      "numberColor": "#eee2c2"
+    },
+    "black-iron": {
+      "name": "黒鉄",
+      "image": "../card-tray-v1/skins/black-iron.png",
+      "numberColor": "#e0e6eb",
+      "metalRamp": [
+        "#10171b",
+        "#616e7b",
+        "#f3f7fc"
+      ]
+    },
+    "bone-parchment": {
+      "name": "骨白と羊皮紙",
+      "image": "../card-tray-v1/skins/bone-parchment.png",
+      "numberColor": "#39291d",
+      "metalRamp": [
+        "#433322",
+        "#ba9e6d",
+        "#fff5db"
+      ]
+    },
+    "obsidian-runes": {
+      "name": "黒曜石と魔法刻印",
+      "image": "../card-tray-v1/skins/obsidian-runes.png",
+      "numberColor": "#ddd5fa",
+      "metalRamp": [
+        "#090d19",
+        "#4c486d",
+        "#e0d7ff"
+      ]
+    }
+  }
+}

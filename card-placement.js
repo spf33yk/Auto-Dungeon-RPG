@@ -10,7 +10,7 @@ export function placeCard(s,source,destination){
   if(source.type==='target'&&slot==='target'&&targetCards.some(c=>c.id===source.id)){
    if(dest.target!==source.id){dest.target=source.id;dest.conditions=dest.conditions.filter(c=>dest.target!=='self'||!['one-hit','injured'].includes(c.id));dest.effect=dest.target==='self'?{kind:'action',id:'stairs'}:{kind:'action',id:'attack'};}
   }else if(source.type==='condition'&&slot==='condition'&&conditionById[source.id]){
-   const value=conditionDefault(source.id);if(ci===dest.conditions.length)dest.conditions.push(value);else dest.conditions[ci]=value;
+   const value=conditionDefault(source.id);if(source.value!==undefined&&conditionById[source.id].param)value.value=source.value;if(ci===dest.conditions.length)dest.conditions.push(value);else dest.conditions[ci]=value;
   }else if(['action','skill'].includes(source.type)&&slot==='effect'){
    const list=source.type==='action'?actionCards:skillCards,card=list.find(c=>c.id===source.id);
    if(!effectUnlocked(s,card))return false;dest.effect={kind:source.type,id:source.id};
@@ -34,4 +34,16 @@ export function placeCard(s,source,destination){
 export function moveCardRow(s,from,to){
  if(s.phase!=='prepare'||!Number.isInteger(from)||!Number.isInteger(to)||from<0||to<0||from>=s.orders.length||to>=s.orders.length)return false;
  if(from===to)return true;const [row]=s.orders.splice(from,1);s.orders.splice(to,0,row);s.mode='custom';return true;
+}
+
+// placeCard builds new rules before committing, so a shallow state copy is sufficient.
+export const canPlaceCard=(s,source,destination)=>placeCard({...s},source,destination);
+export function removePlacedCard(s,source){
+ if(s.phase!=='prepare'||!source)return false;
+ if(source.origin==='row'&&Number.isInteger(source.row)&&s.orders[source.row]){s.orders.splice(source.row,1);s.mode='custom';return true;}
+ if(source.origin==='slot'&&source.slot==='condition'&&Number.isInteger(source.row)&&Number.isInteger(source.index)&&s.orders[source.row]){
+  const rows=s.orders.map(legacyToCards);if(!rows[source.row].conditions[source.index])return false;
+  rows[source.row].conditions.splice(source.index,1);if(!rows.every(r=>validCardRule(s,r)))return false;s.orders=rows;s.mode='custom';return true;
+ }
+ return false;
 }

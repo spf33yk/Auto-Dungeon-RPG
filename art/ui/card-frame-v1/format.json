@@ -1,0 +1,92 @@
+{
+  "schema": "card-frame/v1",
+  "canvas": {
+    "width": 1085,
+    "height": 363
+  },
+  "body": {
+    "left": 140,
+    "right": 950,
+    "top": 104,
+    "bottom": 280
+  },
+  "corner": {
+    "asset": "parts/corner-diamond.png",
+    "width": 40,
+    "height": 40
+  },
+  "patterns": {
+    "ornate": {
+      "corners": true
+    },
+    "plain": {
+      "corners": false
+    }
+  },
+  "cards": {
+    "target": {
+      "name": "ターゲットカード",
+      "categoryColor": "#7cc8ed",
+      "role": "start",
+      "base": "parts/target-base.png",
+      "sourceSize": [
+        2169,
+        725
+      ],
+      "sourceBody": [
+        280,
+        200,
+        1905,
+        535
+      ]
+    },
+    "condition": {
+      "name": "条件カード",
+      "categoryColor": "#e4b34e",
+      "role": "middle",
+      "base": "parts/condition-base.png",
+      "sourceSize": [
+        2168,
+        725
+      ],
+      "sourceBody": [
+        175,
+        205,
+        1870,
+        555
+      ]
+    },
+    "skill": {
+      "name": "スキルカード",
+      "categoryColor": "#be8de2",
+      "role": "end",
+      "base": "parts/skill-base.png",
+      "sourceSize": [
+        2169,
+        725
+      ],
+      "sourceBody": [
+        245,
+        205,
+        1900,
+        535
+      ]
+    },
+    "action": {
+      "name": "アクションカード",
+      "categoryColor": "#e18c77",
+      "role": "end",
+      "base": "parts/action-base.png",
+      "sourceSize": [
+        2169,
+        725
+      ],
+      "sourceBody": [
+        185,
+        205,
+        1760,
+        535
+      ]
+    }
+  }
+}

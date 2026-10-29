@@ -357,3 +357,11 @@ CharacterAnimationにidleFrame／stepStart／nextStepを追加。moveToで開始
 ui-settings.jsでminimapとskipOpeningを部分更新時にも保持。playJourneyTeaserの開始前に自動スキップを判定し、再生せず継続コールバックへ進む。propsの既存アトラスを保持し、map-items-32.pngを別途ロード、drawMapPropを既存drawPropより優先。回復2種は同一ハートセルへ対応し、罠はspentでセルを切り替える。階段は固定床描画から足元基準の描画キューへ移す。
 
 新規状態はv13でkeysを持たない。敵の抽選表は装備99・再生1、箱はrewardIdのみで開封。v12以前では鍵データとkeys条件を移行時に除去し、箱の報酬と現在階を保存する。旧v9移行内部の仮keysは最終v13移行で必ず削除する。鍵機能のクリア後再導入は未設計。JS/CSS/画像URLはupdate-assets.jsで内容ハッシュを更新する。
+
+## 準備カードUIの実装（2026-10-29）
+
+card-editor.jsの準備用描画を連結素材と2列パネルへ変更。条件設定と配置先の強調は一時DOM状態として保持する。card-placement.jsのcanPlaceCardは状態の浅いコピーで既存の原子的検証を再利用し、事前強調によるセーブ変更を防ぐ。条件の配置前の値とremovePlacedCardを追加。Pointer Eventsによる既存配置を維持し、上下の行一覧と左右のカード列の端で自動スクロールする。ドラッグ開始時は設定欄を開閉しない。
+
+app.jsで予測の準備開始時スナップショットを記録し、forecast-dialogが開いている場合だけ試行を実行。閉じる際は世代番号で実行中の結果を破棄する。index.htmlに静的な予測ダイアログと下部ボタンを配置。準備以外は編集できない既存の状態判定とセーブv13を維持。
+
+scripts/build-preparation-assets.jsは追跡対象のcard-frame/v1部品と共通土台から7PNGを作成。update-assets.jsがPNGの内容ハッシュをpreparation-assetsスタイルへ登録する。ゲームの実行には制作原稿やSharpを必要としない。詳細はdocs/ui/PREPARATION_UI.md。

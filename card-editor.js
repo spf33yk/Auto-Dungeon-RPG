@@ -1,31 +1,52 @@
 import {targetCards,conditionCards,conditionById,actionCards,skillCards,cardCapacity,conditionDefault,legacyToCards,effectUnlocked,createCardRule,describeCardRule,replaceCardRule,addCardRule} from './card-orders.js';
-import {placeCard,moveCardRow} from './card-placement.js';
+import {placeCard,moveCardRow,canPlaceCard,removePlacedCard} from './card-placement.js';
 
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const option=(id,name,current,disabled=false)=>`<option value="${id}" ${id===current?'selected':''} ${disabled?'disabled':''}>${esc(name)}</option>`;
-const paletteGroups={target:['対象',targetCards],condition:['条件',conditionCards],action:['行動',actionCards],skill:['スキル',skillCards]};
+const paletteGroups={target:['ターゲット',targetCards],condition:['条件',conditionCards],action:['アクション',actionCards],skill:['スキル',skillCards]};
 const sourceFor=(type,id)=>`palette|${type}|${id}`;
-const parseSource=value=>{const p=value?.split('|')||[];if(p[0]==='palette')return {origin:'palette',type:p[1],id:p[2]};if(p[0]==='slot')return {origin:'slot',row:Number(p[1]),slot:p[2],index:Number(p[3])};return null;};
+const parseSource=(value,host)=>{const p=value?.split('|')||[];if(p[0]==='row')return {origin:'row',row:Number(p[1])};if(p[0]==='palette'){let values={};try{values=JSON.parse(host?.dataset.conditionValues||'{}');}catch{}return {origin:'palette',type:p[1],id:p[2],...(values[p[2]]===undefined?{}:{value:values[p[2]]})};}if(p[0]==='slot')return {origin:'slot',row:Number(p[1]),slot:p[2],index:Number(p[3])};return null;};
 const parseDestination=value=>{const p=value?.split('|')||[];return {row:Number(p[0]),slot:p[1],index:Number(p[2])};};
-function selectSource(host,value){host.dataset.cardSource=value||'';host.querySelectorAll('[data-drag-source]').forEach(el=>el.classList.toggle('selected-card',el.dataset.dragSource===value));const status=host.querySelector('[data-card-status]');if(status){const p=value?.split('|')||[],card=p[0]==='palette'?paletteGroups[p[1]]?.[1].find(c=>c.id===p[2]):null;status.textContent=value?(card?`${card.name}：${card.detail||'配置先を選んでください。'}`:'配置先のカードを選ぶか、ドラッグしてください。'):'カードを選び、配置先へドラッグまたはタップしてください。';}}
+function updateDropHints(host,s,value){
+ const source=parseSource(value,host);host.querySelectorAll('[data-drop-slot]').forEach(el=>{const active=Boolean(source),valid=active&&source.origin!=='row'&&canPlaceCard(s,source,parseDestination(el.dataset.dropSlot));el.classList.toggle('valid-drop',valid);el.classList.toggle('invalid-drop',active&&source.origin!=='row'&&!valid);});
+ host.querySelectorAll('[data-drop-row]').forEach(el=>el.classList.toggle('row-drop-ready',source?.origin==='row'));
+ const trash=host.querySelector('[data-drop-trash]');if(trash){const removable=source&&(source.origin==='row'||source.origin==='slot'&&source.slot==='condition');trash.disabled=!removable;trash.classList.toggle('valid-drop',Boolean(removable));}
+}
+function conditionSettings(host,s,value){
+ const panel=host.querySelector('[data-condition-settings]');if(!panel)return;
+ const source=parseSource(value,host),placed=source?.origin==='slot'&&source.slot==='condition',condition=placed?legacyToCards(s.orders[source.row]).conditions[source.index]:null;
+ const d=conditionById[condition?.id||(source?.type==='condition'?source.id:'')];
+ panel.hidden=!d;if(!d){panel.innerHTML='';return;}
+ const field=placed?'value':'palette-value',amount=condition?.value??source.value??d.value;
+ panel.innerHTML=`<div ${placed?`data-card-row="${source.row}"`:''}><strong>${esc(d.name)}</strong>${d.param?`<label>値 <input type="number" data-card-field="${field}" data-condition="${source.index??0}" data-condition-id="${d.id}" min="${d.min}" max="${d.max}" step="${d.step}" value="${amount}" aria-label="${esc(d.name)}の値"> ${esc(d.unit)}</label><small>${d.min}〜${d.max} · ${d.step}刻み${placed?'':'／次に置くカードへ適用'}</small>`:'<p>この条件には数値の設定はありません。</p>'}<button type="button" data-close-condition aria-label="条件の設定を閉じる">×</button></div>`;
+}
+function selectSource(host,value,s,showSettings=true){
+ host.dataset.cardSource=value||'';host.querySelectorAll('[data-drag-source]').forEach(el=>el.classList.toggle('selected-card',el.dataset.dragSource===value));
+ const status=host.querySelector('[data-card-status]');if(status){const p=value?.split('|')||[],card=p[0]==='palette'?paletteGroups[p[1]]?.[1].find(c=>c.id===p[2]):null;status.textContent=value?(card?`${card.name}：${card.detail||'光っている溝へ配置できます。'}`:'光っている溝へ配置するか、「外す」へ移動してください。'):'カードを選び、光る配置先へドラッグまたはタップしてください。';}
+ if(s){updateDropHints(host,s,value);if(showSettings)conditionSettings(host,s,value);}
+}
 function applySource(host,s,source,target){
  const row=target.closest('[data-drop-row]'),spot=target.closest('[data-drop-slot]');let ok=false;
- if(source?.startsWith('row|')&&row)ok=moveCardRow(s,Number(source.split('|')[1]),Number(row.dataset.dropRow));
- else if(spot)ok=placeCard(s,parseSource(source),parseDestination(spot.dataset.dropSlot));
- host.dataset.cardMessage=ok?'カードを配置しました。':'その組み合わせには配置できません。対象・取得状況・条件の重複・枠数を確認してください。';selectSource(host,'');return ok;
+ if(target.closest('[data-drop-trash]'))ok=removePlacedCard(s,parseSource(source,host));
+ else if(source?.startsWith('row|')&&row)ok=moveCardRow(s,Number(source.split('|')[1]),Number(row.dataset.dropRow));
+ else if(spot)ok=placeCard(s,parseSource(source,host),parseDestination(spot.dataset.dropSlot));
+ host.dataset.cardMessage=ok?'指示を更新しました。':'その組み合わせには配置できません。対象・取得状況・条件の重複・枠数を確認してください。';selectSource(host,'',s);return ok;
 }
+function conditionName(c){const d=conditionById[c.id];return d.name.replace('指定%',c.value+'%').replace('指定数',String(c.value)).replace('指定距離',c.value+'マス').replace('指定ターン',c.value+'ターン');}
 function renderCardBoard(host,s,capacity){
  const group=paletteGroups[host.dataset.cardGroup]?host.dataset.cardGroup:'target',entries=paletteGroups[group][1];
- const message=host.dataset.cardMessage||'カードを選び、配置先へドラッグまたはタップしてください。';
- const card=(src,label,detail,disabled=false)=>`<button type="button" class="palette-card ${group}" data-card-kind="${group}" data-drag-source="${src}" title="${esc(detail||label)}" ${disabled?'disabled':''}>${esc(label)}${disabled?' <small>未取得</small>':''}</button>`;
- host.innerHTML=`<div class="card-board"><div class="card-board-info">指示 ${s.orders.length} / ${capacity}行 · 1行 ${cardCapacity(s)}枚まで。上の行から順に判定し、条件はすべて満たす必要があります。</div><div class="card-workspace"><section class="card-library" aria-label="カードリスト"><div class="card-library-heading"><strong>カードリスト</strong></div><div class="card-library-tabs" role="group" aria-label="カードの種類">${Object.entries(paletteGroups).map(([id,[name]])=>`<button type="button" data-palette-tab="${id}" class="${id===group?'active':''}" aria-pressed="${id===group}">${name}</button>`).join('')}</div><div class="card-library-list">${entries.map(c=>card(sourceFor(group,c.id),c.name,c.detail||c.name,['action','skill'].includes(group)&&!effectUnlocked(s,c))).join('')}</div></section><section class="card-rules" aria-label="探索指示"><div class="card-rules-heading"><strong>探索指示 ${s.orders.length} / ${capacity}行</strong><button type="button" data-card-op="add-row" ${s.orders.length>=capacity?'disabled':''}>＋指示の行</button></div><p class="card-help" data-card-status role="status">${esc(message)}</p>${s.orders.map((input,index)=>{
+ const message=host.dataset.cardMessage||'カードを選び、光る配置先へドラッグまたはタップしてください。';
+ const card=(c)=>{const disabled=['action','skill'].includes(group)&&!effectUnlocked(s,c);return `<button type="button" class="palette-card ${group}" data-card-kind="${group}" data-drag-source="${sourceFor(group,c.id)}" title="${esc(c.detail||c.name)}" ${disabled?'disabled':''}><span>${esc(c.name)}</span>${disabled?'<em>未取得</em>':''}</button>`;};
+ host.innerHTML=`<div class="card-board fitted-card-editor"><div class="card-board-info">指示 ${s.orders.length} / ${capacity}行 · 1行 ${cardCapacity(s)}枚まで · 上の行から判定／条件はすべて成立</div><div class="card-workspace"><section class="card-library" aria-label="カードリスト"><strong>カードリスト</strong><div class="card-library-tabs" role="group" aria-label="カードの種類">${Object.entries(paletteGroups).map(([id,[name]])=>`<button type="button" data-palette-tab="${id}" class="${id===group?'active':''}" aria-pressed="${id===group}">${name}</button>`).join('')}</div><div class="card-library-list">${entries.map(card).join('')}</div></section><section class="card-rules" aria-label="探索指示"><div class="card-rules-heading"><strong>探索指示 ${s.orders.length} / ${capacity}行</strong><div><button type="button" data-orders-undo>元に戻す</button><button type="button" data-drop-trash disabled>ここへ移動して外す</button><button type="button" data-card-op="add-row" ${s.orders.length>=capacity?'disabled':''}>＋指示の行</button></div></div><p class="card-help" data-card-status role="status">${esc(message)}</p><section class="condition-settings" data-condition-settings aria-label="条件の設定" hidden></section><div class="instruction-trays">${s.orders.map((input,index)=>{
   const r=legacyToCards(input),target=targetCards.find(t=>t.id===r.target),effect=(r.effect.kind==='skill'?skillCards:actionCards).find(c=>c.id===r.effect.id);
-  const cardSlot=(kind,i,label,cardName)=>`<button type="button" class="board-slot ${kind}" data-card-kind="${kind==='effect'?r.effect.kind:kind}" data-drop-slot="${index}|${kind}|${i}" data-drag-source="slot|${index}|${kind}|${i}" aria-label="指示${index+1} ${label} ${esc(cardName)}"><small>${label}</small><span>${esc(cardName)}</span></button>`;
-  const conditions=r.conditions.map((c,ci)=>{const d=conditionById[c.id];return `<div class="condition-wrap">${cardSlot('condition',ci,`条件${ci+1}`,d.name.replace('指定%',c.value+'%').replace('指定数',String(c.value)).replace('指定距離',c.value+'マス').replace('指定ターン',c.value+'ターン'))}${d.param?`<label class="card-value"><input type="number" data-card-field="value" data-condition="${ci}" min="${d.min}" max="${d.max}" step="${d.step}" value="${c.value}" aria-label="指示${index+1}の条件${ci+1}の値"> ${d.unit}</label>`:''}<button type="button" class="condition-remove" data-card-op="remove-condition" data-condition="${ci}" aria-label="指示${index+1}の条件${ci+1}を外す">×</button></div>`;}).join('');
-  const empty=r.conditions.length+2<cardCapacity(s)?`<button type="button" class="board-slot empty condition ${r.conditions.length?'compact':''}" data-drop-slot="${index}|condition|${r.conditions.length}" aria-label="指示${index+1}に条件を追加">${r.conditions.length?'＋':'＋ 条件（なしで常に）'}</button>`:'';
-  return `<article class="board-rule" data-card-row="${index}" data-drop-row="${index}"><div class="card-rule-heading"><button type="button" class="row-handle" data-drag-source="row|${index}" data-drop-row="${index}" aria-label="指示${index+1}を移動">${index+1}</button><span>${r.conditions.length+2} / ${cardCapacity(s)}枚</span><button type="button" data-rule-op="up" data-index="${index}" aria-label="指示${index+1}を上へ" ${index===0?'disabled':''}>↑</button><button type="button" data-rule-op="down" data-index="${index}" aria-label="指示${index+1}を下へ" ${index===s.orders.length-1?'disabled':''}>↓</button><button type="button" data-rule-op="remove" data-index="${index}">外す</button></div><div class="board-slots">${conditions}${empty}<span class="card-connector">なら</span>${cardSlot('target',0,'対象',target.name)}<span class="card-connector">は</span>${cardSlot('effect',0,r.effect.kind==='skill'?'スキル':'行動',effect.name)}</div><p class="card-rule-preview">${esc(describeCardRule(r))}</p></article>`;
- }).join('')}</section><aside class="forecast-panel" aria-label="探索の予測"><div class="forecast-heading"><h3>探索の予測</h3><select id="forecast-samples" aria-label="予測の試行回数"><option value="8">8回</option><option value="16">16回</option><option value="24">24回</option></select></div><div id="forecast-result" role="status" aria-live="polite">予測を準備しています…</div><p class="forecast-disclaimer">現在の階を試行した参考値です。未発見の敵や品物の位置は表示しません。</p><div class="forecast-actions"><button type="button" data-orders-undo>指示を元に戻す</button><button type="button" data-forecast-run>再予測</button></div></aside></div><p class="card-help">視界条件は行動対象を判定。通常は隣接戦闘を優先し、戦術・罠回避は条件付きの補助行動です。探索中は編集できません。</p></div>`;
+  const cardSlot=(kind,i,label,name)=>`<button type="button" class="board-slot ${kind}" data-card-kind="${kind==='effect'?r.effect.kind:kind}" data-drop-slot="${index}|${kind}|${i}" data-drag-source="slot|${index}|${kind}|${i}" aria-label="指示${index+1} ${label} ${esc(name)}"><small class="visually-hidden">${label}</small><span>${esc(name)}</span></button>`;
+  const conditions=r.conditions.map((c,ci)=>cardSlot('condition',ci,`条件${ci+1}`,conditionName(c))).join('');
+  const empty=r.conditions.length+2<cardCapacity(s)?`<button type="button" class="board-slot empty condition" data-drop-slot="${index}|condition|${r.conditions.length}" aria-label="指示${index+1}に条件を追加">＋条件</button>`:'';
+  return `<article class="board-rule" data-card-row="${index}" data-drop-row="${index}"><div class="tray-scroll" tabindex="0" aria-label="指示${index+1}のカード列・横スクロール"><div class="tray-surface"><button type="button" class="row-handle" data-drag-source="row|${index}" data-drop-row="${index}" aria-label="指示${index+1}を移動">${index+1}</button><div class="board-slots">${cardSlot('target',0,'ターゲット',target.name)}${conditions}${empty}${cardSlot('effect',0,r.effect.kind==='skill'?'スキル':'アクション',effect.name)}</div></div></div><div class="tray-caption"><span>${r.conditions.length+2} / ${cardCapacity(s)}枚 · ${esc(describeCardRule(r))}</span></div></article>`;
+ }).join('')}</div></section></div><p class="card-help">番号をドラッグして行を並べ替え。条件・行は選択後に「外す」へ移動できます。探索中は編集できません。</p></div>`;
+ selectSource(host,'',s);
 }
+
 export function renderCardEditor(host,s,capacity){
  const editable=s.phase==='prepare',disabled=editable?'':'disabled';
  const signature=JSON.stringify([s.orders,s.levels,s.abilities,s.unlockedOrders,s.phase]);
@@ -39,13 +60,15 @@ export function renderCardEditor(host,s,capacity){
 
 export function handleCardClick(e,s){
  const host=e.currentTarget,tab=e.target.closest('[data-palette-tab]');
- if(tab&&s.phase==='prepare'){host.dataset.cardGroup=tab.dataset.paletteTab;host.dataset.cardMessage='';selectSource(host,'');return true;}
+ if(tab&&s.phase==='prepare'){host.dataset.cardGroup=tab.dataset.paletteTab;host.dataset.cardMessage='';selectSource(host,'',s);return true;}
+ if(e.target.closest('[data-close-condition]')){selectSource(host,'',s);return 'selected';}
+ if(e.target.closest('[data-drop-trash]')&&s.phase==='prepare'){applySource(host,s,host.dataset.cardSource,e.target);return true;}
  const source=e.target.closest('[data-drag-source]'),spot=e.target.closest('[data-drop-slot]'),row=e.target.closest('[data-drop-row]');
  if(s.phase==='prepare'&&(source||spot)){
   if(host.dataset.ignoreCardClick==='1')return 'selected';
   const selected=host.dataset.cardSource;
   if(selected&&((selected.startsWith('row|')&&row)||(spot&&!selected.startsWith('row|')))){applySource(host,s,selected,e.target);return true;}
-  if(source){selectSource(host,selected===source.dataset.dragSource?'':source.dataset.dragSource);return 'selected';}
+  if(source){selectSource(host,selected===source.dataset.dragSource?'':source.dataset.dragSource,s);return 'selected';}
   host.dataset.cardMessage='先にカードリストからカードを選んでください。';return true;
  }
  const b=e.target.closest('[data-card-op]');if(!b)return null;
@@ -68,9 +91,11 @@ export function installCardDragging(host,getState,onCommit){
  });
  document.addEventListener('pointermove',e=>{
   if(!pending||pending.id!==e.pointerId)return;
-  if(!pending.dragging&&Math.hypot(e.clientX-pending.x,e.clientY-pending.y)>7){pending.dragging=true;ghost=document.createElement('div');ghost.className='card-drag-ghost';ghost.textContent=host.querySelector('[data-drag-source="'+pending.source+'"]')?.textContent?.trim()||'カード';document.body.appendChild(ghost);}
+  if(!pending.dragging&&Math.hypot(e.clientX-pending.x,e.clientY-pending.y)>7){pending.dragging=true;selectSource(host,pending.source,getState(),false);ghost=document.createElement('div');ghost.className='card-drag-ghost';ghost.textContent=host.querySelector('[data-drag-source="'+pending.source+'"]')?.textContent?.trim()||'カード';document.body.appendChild(ghost);}
   if(!pending.dragging)return;e.preventDefault();ghost.style.transform=`translate(${e.clientX+12}px,${e.clientY+12}px)`;
-  const under=document.elementFromPoint(e.clientX,e.clientY),scroll=under?.closest('.card-library-list,.card-rules');if(scroll){const r=scroll.getBoundingClientRect();if(e.clientY<r.top+24)scroll.scrollTop-=12;else if(e.clientY>r.bottom-24)scroll.scrollTop+=12;}
+  const under=document.elementFromPoint(e.clientX,e.clientY),scroll=under?.closest('.card-library-list,.instruction-trays,.card-rules');if(scroll){const r=scroll.getBoundingClientRect();if(e.clientY<r.top+24)scroll.scrollTop-=12;else if(e.clientY>r.bottom-24)scroll.scrollTop+=12;}
+  host.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));under?.closest('.valid-drop,[data-drop-row].row-drop-ready')?.classList.add('drop-hover');
+  const horizontal=under?.closest('.tray-scroll');if(horizontal){const r=horizontal.getBoundingClientRect();if(e.clientX<r.left+32)horizontal.scrollLeft-=16;else if(e.clientX>r.right-32)horizontal.scrollLeft+=16;}
  },{passive:false});
  document.addEventListener('pointerup',e=>{
   if(!pending||pending.id!==e.pointerId)return;const drag=pending;pending=null;if(!drag.dragging)return;
@@ -78,11 +103,16 @@ export function installCardDragging(host,getState,onCommit){
   host.dataset.ignoreCardClick='1';setTimeout(()=>{delete host.dataset.ignoreCardClick;},0);
   if(target&&host.contains(target)){applySource(host,getState(),drag.source,target);onCommit();}
  });
- document.addEventListener('pointercancel',()=>{pending=null;ghost?.remove();ghost=null;});
+ document.addEventListener('pointercancel',()=>{pending=null;ghost?.remove();ghost=null;selectSource(host,'',getState());});
 }
 export function handleCardChange(e,s){
  const input=e.target;if(!input.dataset.cardField)return null;
  if(s.phase!=='prepare')return false;
+ if(!input.checkValidity()){input.reportValidity();return 'selected';}
+ if(input.dataset.cardField==='palette-value'){
+  const d=conditionById[input.dataset.conditionId],n=Number(input.value);if(!d?.param||!Number.isFinite(n)||n<d.min||n>d.max||(n-d.min)%d.step!==0)return false;
+  let values={};try{values=JSON.parse(e.currentTarget.dataset.conditionValues||'{}');}catch{}values[d.id]=n;e.currentTarget.dataset.conditionValues=JSON.stringify(values);return 'selected';
+ }
  const index=Number(input.closest('[data-card-row]').dataset.cardRow),r=legacyToCards(s.orders[index]),ci=Number(input.dataset.condition);
  switch(input.dataset.cardField){
   case'target':r.target=input.value;r.conditions=r.conditions.filter(c=>r.target!=='self'||!['one-hit','injured'].includes(c.id));r.effect=r.target==='self'?{kind:'action',id:'stairs'}:{kind:'action',id:'attack'};break;

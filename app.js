@@ -23,8 +23,8 @@ let uiStorage;try{uiStorage=localStorage;}catch{}let uiSettings=readUiSettings(u
 let forecastTicket=0,forecastKey='',forecastCache=null,forecastSamples=8,forecastContext='',initialOrders=[];
 function paintForecast(result){const host=$('forecast-result');if(!host)return;host.innerHTML=`<div class="forecast-metric"><span>${floorLabel(state)}のClear見込み</span><b>${result.clearRate}%</b><progress max="100" value="${result.clearRate}"></progress></div><div class="forecast-metric"><span>想定ターン数（中央値）</span><b>${result.turns===null?'到達なし':'約'+result.turns}</b></div><div class="forecast-metric"><span>回復余力・終了時HP平均</span><b>${result.remainingHp>=50?'余裕あり':result.remainingHp>=25?'やや不足':'危険'} · ${result.remainingHp}%</b><progress max="100" value="${result.remainingHp}"></progress></div><h4>試行中の行動例</h4>${result.examples.map((e,i)=>`<p class="forecast-example"><b>${i+1}</b><span>HP ${e.hp}<br>${esc(e.text)}</span></p>`).join('')}<small>${result.samples}試行／各1200ターン上限${result.incomplete?' · 未完了 '+result.incomplete+'回':''}</small>${result.warnings.map(t=>'<p class="forecast-warning">'+esc(t)+'</p>').join('')}`;host.removeAttribute('aria-busy');}
 function refreshForecast(force=false){
- if(showingTitle||state.phase!=='prepare'||!$('forecast-result')){forecastTicket++;forecastKey='';return;}
- const context=[state.seed,state.floor,state.profile.runs].join(':');if(context!==forecastContext){forecastContext=context;initialOrders=structuredClone(state.orders);}
+ const context=[state.seed,state.floor,state.profile.runs].join(':');if(state.phase==='prepare'&&context!==forecastContext){forecastContext=context;initialOrders=structuredClone(state.orders);}
+ if(showingTitle||state.phase!=='prepare'||!$('forecast-dialog').open){forecastTicket++;forecastKey='';return;}
  $('forecast-samples').value=String(forecastSamples);const signature=JSON.stringify([state,forecastSamples]);
  if(!force&&signature===forecastKey){if(forecastCache)paintForecast(forecastCache);return;}forecastKey=signature;forecastCache=null;const ticket=++forecastTicket,copy=structuredClone(state);$('forecast-result').textContent='試行を開始しています…';$('forecast-result').setAttribute('aria-busy','true');
  void forecastExploration(copy,{samples:forecastSamples,cancelled:()=>ticket!==forecastTicket,onProgress:(done,total)=>{if(ticket===forecastTicket&&$('forecast-result'))$('forecast-result').textContent=`試行中 ${done} / ${total}…`;}}).then(result=>{if(result&&ticket===forecastTicket){forecastCache=result;paintForecast(result);}}).catch(error=>{if(ticket===forecastTicket&&$('forecast-result'))$('forecast-result').textContent='予測できませんでした。再予測してください。';console.error('Forecast:',error);});
@@ -130,7 +130,7 @@ function categoryTabs(type,selected,common=false){return `<div class="subtabs" r
 function sortButtons(type,selected){return `<div class="sort-controls" role="group" aria-label="装備の並べ替え">${[['acquired','入手順'],['attack','攻撃力順'],['defense','防御力順']].map(([id,label])=>`<button data-sort="${type}" data-value="${id}" class="${selected===id?'active':''}" aria-pressed="${selected===id}">${label} ${id==='acquired'?'↑':'↓'}</button>`).join('')}</div>`;}
 function renderOrderEditor(host){renderCardEditor(host,state,orderCapacity(state));}
 function handleOrderClick(e,host){const result=handleCardClick(e,state);if(result!==null){if(result!=='selected'){delete host.dataset.orderSignature;render();}return true;}const b=e.target.closest('button');if(!b||b.disabled)return false;if(b.hasAttribute('data-rule-add')){const choice=host.querySelector('[data-order-choice]');if(choice&&addOrder(state,choice.value)){delete host.dataset.orderSignature;render();}return true;}if(b.dataset.ruleOp){editOrder(state,Number(b.dataset.index),b.dataset.ruleOp);delete host.dataset.orderSignature;render();return true;}return false;}
-function handleOrderChange(e){const result=handleCardChange(e,state);if(result!==null){delete $('live-orders').dataset.orderSignature;delete $('tab-content').dataset.orderSignature;render();return;}if(e.target.dataset.ruleValue!==undefined){editOrder(state,Number(e.target.dataset.ruleValue),e.target.value);delete $('live-orders').dataset.orderSignature;delete $('tab-content').dataset.orderSignature;render();}}
+function handleOrderChange(e){const result=handleCardChange(e,state);if(result!==null){if(result==='selected')return;delete $('live-orders').dataset.orderSignature;delete $('tab-content').dataset.orderSignature;render();return;}if(e.target.dataset.ruleValue!==undefined){editOrder(state,Number(e.target.dataset.ruleValue),e.target.value);delete $('live-orders').dataset.orderSignature;delete $('tab-content').dataset.orderSignature;render();}}
 const displayAttack=()=>state.gear.weapon.identified?stats(state).attack:'？';
 const displayDefense=()=>state.gear.armor.identified?stats(state).defense:'？';
 function render(){
@@ -264,7 +264,7 @@ $('confirm-abandon').onclick=()=>{const next=abandonRun(state);if(!next)return;$
 $('pause-toggle').onclick=()=>{if(state.phase!=='explore')return;paused=!paused;last=performance.now();render();if(!paused)tryMobileDisplay();};
 $('skip-opening').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,skipOpening:$('skip-opening').checked});};
 $('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,minimap:$('minimap-size').value});document.documentElement.dataset.minimapSize=uiSettings.minimap;drawAutoMap();};
- document.addEventListener('click',e=>{if(e.target.closest('[data-forecast-run]'))refreshForecast(true);if(e.target.closest('[data-orders-undo]')&&state.phase==='prepare'&&initialOrders.length){state.orders=structuredClone(initialOrders);render();}});
+ document.addEventListener('click',e=>{if(e.target.closest('[data-forecast-run]'))refreshForecast(true);if(e.target.closest('[data-orders-undo]')&&state.phase==='prepare'&&forecastContext){state.orders=structuredClone(initialOrders);render();}});
  document.addEventListener('change',e=>{if(e.target.id==='forecast-samples'){forecastSamples=Number(e.target.value);refreshForecast(true);}});
  $('sound').onclick=()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');$('sound').textContent='効果音：'+(sound?'ON':'OFF');tone(440);};
 $('skill-book').onclick=()=>showCodex('skills');$('monster-book').onclick=()=>showCodex('monsters');$('equipment-book').onclick=()=>showCodex('equipment');
@@ -291,6 +291,7 @@ addEventListener('resize',syncSceneViewport);window.visualViewport?.addEventList
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){if(lockedOrientation)screen.orientation?.unlock?.();lockedOrientation=false;ownsFullscreen=false;$('fullscreen-open').textContent='横向きで全画面表示';displayMessage('横向きで全画面表示');}});
 $('status-open').onclick=()=>openDialog('status-dialog');
 $('prepare-status').onclick=()=>openDialog('status-dialog');
+$('prepare-forecast').onclick=()=>{if(state.phase==='prepare'){openDialog('forecast-dialog');refreshForecast();}};
 $('prepare-journal').onclick=()=>openDialog('prep-journal-dialog');
 $('sound-volume').oninput=e=>{volume=Number(e.target.value);$('volume-value').textContent=volume+'%';};
 $('sound-volume').onchange=()=>tone(440);
