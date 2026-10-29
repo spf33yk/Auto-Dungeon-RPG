@@ -539,3 +539,13 @@ wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が
 スキップ文言、開始映像の自動スキップ設定、MAPサイズ変更、32px新素材、高さのある階段、鍵廃止とv13移行を実装。ローカル自動テスト186件成功、追加した移行・設定・素材テスト4件成功。後続の移行ガード・不要文言整理後も関連37件成功。配信URLを更新しチェック実施。
 
 独立したlocalhost:4327の検証データで実操作。自動スキップOFFで映像と「スキップ」を確認、ONでNewGame／LoadGameの映像省略と設定保持を確認。PC1280×720で中384px／大約499pxを測定。ハート2種、罠の未使用／使用済み、欠片、報酬、階段の表示をゲーム画面で確認。ブラウザエラーなし。スクリーンショットはtest-results/map-items-in-game.pngとmap-options.png。スマホ実機は未確認。公開版はpush後に確認予定で、この時点では公開反映済みと扱わない。
+
+
+### 公開確認完了（2026-10-29）
+
+- 確認対象の実装コミット：43de1d0f27e25ec73c49504c4c1c54a6e543f2d1。
+- GitHub Actions Game tests：40843590264 success。Pages build and deployment：40843589519 success。
+- 公開URL https://spf33yk.github.io/Auto-Dungeon-RPG/ でOptionの自動スキップ追加と「スキップ」文言を確認し、ONでLoadGameから映像を省略して再開した。状態画面・条件カード・デバッグから鍵が削除されていることを確認。通常セーブの進行をリセットせず、再開後はひとやすみを維持した。
+- 公開版1280×720でMAP中384px／大499.1875pxを実測。確認後は元の中／自動スキップOFFへ戻した。ブラウザエラーなし。
+- app.js配信ハッシュbdc7bcaf14d2、新アトラス766e01dafbf6。公開PNGとローカルPNGのSHA256が一致し、旧素材キャッシュとの混在がないことを確認。公開オプションの証跡はtest-results/map-options-public.png。新素材全種のゲーム内表示は独立したローカル検証データで確認済み（map-items-in-game.png）。
+- 最終ローカル全186件成功、配信URLチェック成功。スマホ実機の確認は未実施。アニメーション制作は保留のまま。
