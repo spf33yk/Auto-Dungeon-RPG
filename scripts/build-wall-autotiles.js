@@ -12,14 +12,15 @@ const width=128,height=280,out=Buffer.alloc(width*height*4),tiles={},entrances={
 const raw=(name,x,y)=>{const [sx,sy]=m[name],i=((sy+y)*64+sx+x)*4;return [...data.subarray(i,i+3),255];};
 const surface=(name,x,y)=>{const coord=v=>Math.round(2+v*27/31),weight=v=>v<4?(4-v)/8:v>27?(v-27)/8:0,wx=weight(x),wy=weight(y),a=raw(name,coord(x),coord(y)),b=raw(name,coord(31-x),coord(y)),c=raw(name,coord(x),coord(31-y)),d=raw(name,coord(31-x),coord(31-y));return a.map((v,k)=>k===3?255:Math.round(v*(1-wx)*(1-wy)+b[k]*wx*(1-wy)+c[k]*(1-wx)*wy+d[k]*wx*wy));};
 const tone=(c,g)=>c.map((v,k)=>k===3?255:Math.min(255,Math.round(v*g))),put=(x,y,c)=>out.set(c,(y*width+x)*4);
+const rim=(side,x,y)=>tone(surface('front',x,y%32),side==='left'?(x===0?.5:x===1?m.bevelGain:m.frontGain):side==='right'?(x===31?.5:x===30?m.frontGain*.9:m.frontGain):(y===0?.5:m.frontGain));
 for(let mask=0;mask<16;mask++){
  const dx=mask%4*32,dy=Math.floor(mask/4)*56,n=mask&1,e=mask&2,s=mask&4,w=mask&8;tiles[mask]=[[dx,dy,32,56]];
  for(let y=0;y<56;y++)for(let x=0;x<32;x++){
   let c=y>=32&&!s?tone(surface('front',x,Math.round((y-32)*31/23)),m.frontGain):tone(surface('cap',x,y%32),m.capGain).map((v,k)=>k===3?255:Math.max(14,v));
   // Raised bevel and shadow are present only where the wall meets floor.
-  if(!n&&y<2)c=tone(c,y===0?.55:1.25);
-  if(!w&&x<3)c=tone(c,x===0?.45:x===1?m.bevelGain:1.1);
-  if(!e&&x>28)c=tone(c,x===31?.38:.68);
+  if(!n&&y<2)c=rim('north',x,y);
+  if(!w&&x<3)c=rim('left',x,y);
+  if(!e&&x>28)c=rim('right',x,y);
   if(!s&&y===30)c=tone(surface('front',x,0),m.bevelGain);
   if(!s&&y===31)c=tone(surface('front',x,1),.46);
   put(dx+x,dy+y,c);
@@ -37,8 +38,8 @@ for(let i=0;i<count;i++){const g=groups.get(find(i));for(let c=0;c<3;c++)out[i*4
 for(let part=0;part<4;part++){
  const dx=part*32,dy=224;entrances[WALL_ENTRANCES[part]]=[[dx,dy,32,56]];
  for(let y=0;y<56;y++)for(let x=0;x<32;x++){
-  const active=part===0?x>=29:part===1?x<=2:part===2?y>=32&&y<35:y<2;
-  if(active)put(dx+x,dy+y,tone(surface('front',x,Math.round(y%32)),part===0||part===1?1.04:1.12));
+  const active=part===0?x>=29&&y!==30&&y!==31:part===1?x<=2&&y!==30&&y!==31:part===2?y>=32&&y<35&&x>=3&&x<=28:y<2&&x>=3&&x<=28;
+  if(active)put(dx+x,dy+y,part===0?rim('right',x,y):part===1?rim('left',x,y):part===2?tone(surface('front',x,Math.round((y-32)*31/23)),m.frontGain):rim('north',x,y));
  }
 }
 const target=resolve(folder,'autotile-32.png');await sharp(out,{raw:{width,height,channels:4}}).png({palette:true,colours:48,dither:0}).toFile(target);

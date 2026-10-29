@@ -19,6 +19,18 @@ test('vertical masonry is distinctly lighter than the dark buried-wall cap',()=>
  for(let y=4;y<28;y++)for(let x=4;x<28;x++){const a=p.pixel(f[0]+x,f[1]+y),b=p.pixel(f[0]+x,f[1]+32+Math.floor((y-4)*20/24));cap+=a[0]+a[1]+a[2];front+=b[0]+b[1]+b[2];}
  assert.ok(front>cap*1.35,'The front face must remain readable as a separate vertical surface');
 });
+
+test('corridor borders remain visible along vertical and horizontal walls and match entrance trims',()=>{
+ const p=readPng(new URL('./art/terrain/walls/crypt/autotile-32.png',import.meta.url));
+ const brightness=(mask,points)=>{const f=d.tiles[mask][0];return points.reduce((sum,[x,y])=>{const c=p.pixel(f[0]+x,f[1]+y);return sum+c[0]+c[1]+c[2];},0)/points.length;};
+ const vertical=x=>Array.from({length:24},(_,i)=>[x,i+4]),horizontal=y=>Array.from({length:24},(_,i)=>[i+4,y]);
+ assert.ok(brightness(5,vertical(1))>brightness(5,vertical(6))*1.2,'Left border must use visible masonry');
+ assert.ok(brightness(5,vertical(30))>brightness(5,vertical(25))*1.2,'Right border must continue beyond the entrance');
+ assert.ok(brightness(10,horizontal(1))>brightness(10,horizontal(6))*1.2,'North border must continue along horizontal corridors');
+ for(const [name,mask,active]of [['leftJamb',5,(x,y)=>x>=29&&y!==30&&y!==31],['rightJamb',5,(x,y)=>x<=2&&y!==30&&y!==31],['lintel',10,(x,y)=>x>=3&&x<=28&&y>=32&&y<35],['threshold',10,(x,y)=>x>=3&&x<=28&&y<2]]){
+  const trim=d.entrances[name][0],base=d.tiles[mask][0];for(let y=0;y<56;y++)for(let x=0;x<32;x++)if(active(x,y))assert.deepEqual(p.pixel(trim[0]+x,trim[1]+y),p.pixel(base[0]+x,base[1]+y),name+' must share the wall frame pixels');
+ }
+});
 test('all 16 wall masks select their own graphic and ignore diagonals without consuming state',()=>{
  assert.equal(validateWallTileset(d),d);const seen=new Set();for(let mask=0;mask<16;mask++){const grid=gridFor(mask),before=JSON.stringify(grid);assert.equal(wallNeighborMask(grid,1,1),mask);for(const [x,y]of [[0,0],[2,0],[0,2],[2,2]])grid[y][x]=0;assert.equal(wallNeighborMask(grid,1,1),mask);const calls=[],ctx={drawImage(...a){calls.push(a);}};assert.equal(drawWallParts(ctx,{definition:d,image},grid,1,1,123),true);assert.equal(calls.length,1);assert.deepEqual(calls[0].slice(1,5),d.tiles[mask][0]);seen.add(calls[0][1]+','+calls[0][2]);assert.equal(JSON.stringify(gridFor(mask)),before);}assert.equal(seen.size,16);assert.equal(wallNeighborMask([[0]],0,0),15);
 });
