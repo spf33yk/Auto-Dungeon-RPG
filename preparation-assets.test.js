@@ -34,3 +34,17 @@ test('text anchors sit inside the blank body panel rather than over the heading 
   for(const dx of [-20,0,20]){const c=p.pixel(r.x+r.width/2+dx,r.y+r.height/2);assert.ok(c[3]>240,id+' text center must be on opaque panel');assert.ok(c[0]+c[1]+c[2]<240,id+' text center must not cross a heading or ornament');}
  }
 });
+
+test('joined cards seat the outgoing tip in the next notch without hiding its diamond',()=>{
+ const layout=JSON.parse(fs.readFileSync(new URL('./art/ui/preparation/layout.json',import.meta.url),'utf8'));
+ const {left,right,displayWidth}=layout.connection,advance=right-left;
+ assert.equal(advance,437);
+ assert.ok(Math.abs(advance/layout.cardSize.width*displayWidth-220.6213592233)<1e-8);
+ for(const previous of ['target','condition'])for(const next of ['condition','skill','action']){
+  const a=readPng(new URL(`./art/ui/preparation/card-${previous}.png`,import.meta.url));
+  const b=readPng(new URL(`./art/ui/preparation/card-${next}.png`,import.meta.url));
+  assert.ok(a.pixel(483,65)[3]>200,previous+' connector diamond exists');
+  assert.ok(b.pixel(483-advance,65)[3]<20,next+' notch exposes the previous diamond');
+  for(let x=470;x<=530;x++)assert.ok(Math.max(x<515?a.pixel(x,65)[3]:0,b.pixel(x-advance,65)[3])>20,previous+'→'+next+' has no open seam at '+x);
+ }
+});
