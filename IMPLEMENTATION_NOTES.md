@@ -585,3 +585,9 @@ wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が
 - layout.jsonを追加し、update-assets.jsがCSS変数へ反映。本文の内外レイヤーを分け、長いラベルは省略してtitle/aria-labelに全文を維持。文字がボタン操作を奪わないようpointer-events:noneを使用。
 - 関連16テスト成功。新規テストで本文領域の範囲と空欄の暗色パネル上に収まることを4種類のPNGで確認。update-assets.js --check成功。
 - 隔離ローカルのブラウザでリスト・指示本文・行番号と条件選択を確認。DOM実測の本文欄中心の誤差は0.02px未満（サブピクセル丸め）。確認画像test-results/preparation-text-align.png。公開確認はpush後に追記。
+
+## 2026-10-30 本文位置調整の公開確認
+
+- 修正コミットab2fe26f5e5fe3d88ff3bbb50e94b34f03bc86c1をmainへpush。Game tests 40992510677、Pages 40992510303はいずれもsuccess。
+- 公開URLを保存分離用sandbox iframeでB29準備まで操作し、リスト・指示カードの本文と番号の配置を目視確認。条件カード選択とHP50%以下のタップ配置も成功。既存セーブへは触れない。
+- 公開のscreens.css 186d7fdec488、card-editor.js ce307e597d51と本文配置用CSS変数がローカルの配信定義と一致。確認画像はtest-results/preparation-text-public.png。関連16テストとローカルDOM実測に加え、公開版の確認まで完了。
