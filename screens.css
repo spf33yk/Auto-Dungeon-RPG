@@ -477,3 +477,9 @@ body.preparing #prepare-scene #prepare-forecast{order:0}body.preparing #prepare-
 .tray-surface:before{inset:0 48px 0 96px;background-size:576px 96px}
 .tray-surface:after{inset:21px 35px 20px 88px}
 .fitted-card-editor .board-rule .row-handle{left:37px;top:30px;width:34px;height:34px;font-size:26px}
+
+/* Text follows the artwork content rectangle, independent of button padding. */
+.fitted-card-editor .palette-card,.fitted-card-editor .board-slot:not(.empty){padding:0}
+.fitted-card-editor .palette-card>.card-content,.fitted-card-editor .board-slot>.card-content{position:absolute;left:var(--prep-text-left);top:var(--prep-text-top);width:var(--prep-text-width);height:var(--prep-text-height);display:flex;align-items:center;justify-content:center;max-height:none;overflow:hidden;z-index:1;text-align:center;pointer-events:none}
+.fitted-card-editor .card-content>.card-content-text{position:static;display:block;min-width:0;max-width:100%;max-height:none;margin:0;padding:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.15;pointer-events:none}
+.fitted-card-editor .board-rule .row-handle{left:var(--prep-number-left);top:var(--prep-number-top);width:var(--prep-number-width);height:var(--prep-number-height);display:grid;place-items:center;line-height:1;text-align:center}

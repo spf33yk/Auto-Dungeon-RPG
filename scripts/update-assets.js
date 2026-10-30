@@ -13,6 +13,15 @@ let updated=html.includes('id="asset-imports"')?html.replace(/<script type="impo
 const preparationAssets=['card-target','card-condition','card-skill','card-action','tray-left','tray-middle','tray-right'];
 const preparationStyle='<style id="preparation-assets">:root{'+preparationAssets.map(name=>'--prep-'+name+':url("./art/ui/preparation/'+name+'.png?v='+version('art/ui/preparation/'+name+'.png')+'")').join(';')+'}</style>';
 updated=updated.includes('id="preparation-assets"')?updated.replace(/<style id="preparation-assets">[\s\S]*?<\/style>/,preparationStyle):updated.replace('</head>',preparationStyle+'</head>');
+const textLayout=JSON.parse(readFileSync(root+'art/ui/preparation/layout.json','utf8'));
+const textRect=textLayout.contentRect,cardSize=textLayout.cardSize,number=textLayout.rowNumber;
+const textStyle='<style id="preparation-text-layout">:root{'+[
+ ['text-left',textRect.x/cardSize.width*100+'%'],['text-top',textRect.y/cardSize.height*100+'%'],
+ ['text-width',textRect.width/cardSize.width*100+'%'],['text-height',textRect.height/cardSize.height*100+'%'],
+ ['number-left',number.centerX-number.width/2+'px'],['number-top',number.centerY-number.height/2+'px'],
+ ['number-width',number.width+'px'],['number-height',number.height+'px']
+].map(([name,value])=>'--prep-'+name+':'+value).join(';')+'}</style>';
+updated=updated.includes('id="preparation-text-layout"')?updated.replace(/<style id="preparation-text-layout">[\s\S]*?<\/style>/,textStyle):updated.replace('</head>',textStyle+'</head>');
 // Each registered definition carries its own image hash. New areas need no renderer edits.
 for(const match of html.matchAll(/\.\/art\/terrain\/(?:walls|entrances)\/[^"\s?]*tileset\.json(?:\?v=[^"\s]*)?/g)){
  const file=match[0].split('?')[0].slice(2),definition=JSON.parse(readFileSync(root+file,'utf8'));

@@ -578,3 +578,10 @@ wall-autotile／wall-tileset／entrance-format／preparation-uiの関連18件が
 - 修正コミット4c6576b018ad6ed9274cc36749812d1af18ee727をmainへpush。Game tests 40974335745、Pages 40974335893はいずれもsuccess。
 - 公開版を保存データから分離したsandbox iframeでB29準備まで操作し、比率を保持したカード・土台、カテゴリ切替、条件設定欄と配置可能表示を確認。画像はtest-results/preparation-aspect-public.png。元のセーブへは触れていない。
 - 公開のscreens.css 920122cc63a7、card-target.png 294a95499d91、card-condition.png 1995a518f47bは配信定義と一致し、古い素材との混在なし。関連15テストとローカルでの表示寸法確認に加え、公開版の実操作まで完了。
+
+## 2026-10-30 カード本文の位置ずれを修正
+
+- 原因は、異なるサイズのボタンをpaddingで位置決めしていたこと。素材内の本文矩形を共通定義し、リストと配置カードの本文を縦横中央へ配置。番号も枠の中心へ揃えた。画像の再生成・引き伸ばしやセーブ変更はない。
+- layout.jsonを追加し、update-assets.jsがCSS変数へ反映。本文の内外レイヤーを分け、長いラベルは省略してtitle/aria-labelに全文を維持。文字がボタン操作を奪わないようpointer-events:noneを使用。
+- 関連16テスト成功。新規テストで本文領域の範囲と空欄の暗色パネル上に収まることを4種類のPNGで確認。update-assets.js --check成功。
+- 隔離ローカルのブラウザでリスト・指示本文・行番号と条件選択を確認。DOM実測の本文欄中心の誤差は0.02px未満（サブピクセル丸め）。確認画像test-results/preparation-text-align.png。公開確認はpush後に追記。

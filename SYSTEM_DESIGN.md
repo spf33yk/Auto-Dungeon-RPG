@@ -369,3 +369,7 @@ scripts/build-preparation-assets.jsは追跡対象のcard-frame/v1部品と共�
 ## 等倍率による素材の組み立て・表示（2026-10-30）
 
 build-card-frames.jsのcardTransformは縦横の必要倍率の小さい方を1つだけ使用し、共通枠内へ中央配置する。SVG画像はpreserveAspectRatioをmeetにし、X/Y別のmatrix変換を廃止。配信カード4点を再生成。screens.cssは背景containと元画像のaspect-ratioを用い、土台の端と中央も75%の同倍率に揃える。引き伸ばして長い枠を作らず、中央を反復する。ゲームの指示・保存形式には触れない。
+
+## 素材に追従する本文レイアウト（2026-10-30）
+
+art/ui/preparation/layout.jsonへ本文矩形と番号の基準を集約。update-assets.jsが相対比率をpreparation-text-layoutのCSS変数へ展開する。card-editor.jsの動的本文をcard-content/card-content-textの二重spanへ分離し、外側で素材の本文欄に追従、内側で中央配置と省略を行う。文字レイヤーのpointer-eventsをnoneとし、既存のボタン・ドロップ操作を妨げない。番号はgridの中央配置を使う。
