@@ -2,5 +2,6 @@
   "schema": "preparation-text/v1",
   "cardSize": {"width": 515, "height": 130},
   "contentRect": {"x": 52, "y": 64, "width": 404, "height": 40},
-  "rowNumber": {"centerX": 54, "centerY": 48, "width": 34, "height": 34}
+  "rowNumber": {"centerX": 54, "centerY": 48, "width": 34, "height": 34},
+  "connection": {"left": 52.5, "right": 457.5, "displayWidth": 260, "insertionWidth": 64}
 }

@@ -19,7 +19,10 @@ const textStyle='<style id="preparation-text-layout">:root{'+[
  ['text-left',textRect.x/cardSize.width*100+'%'],['text-top',textRect.y/cardSize.height*100+'%'],
  ['text-width',textRect.width/cardSize.width*100+'%'],['text-height',textRect.height/cardSize.height*100+'%'],
  ['number-left',number.centerX-number.width/2+'px'],['number-top',number.centerY-number.height/2+'px'],
- ['number-width',number.width+'px'],['number-height',number.height+'px']
+ ['number-width',number.width+'px'],['number-height',number.height+'px'],
+ ['card-overlap',(1-(textLayout.connection.right-textLayout.connection.left)/cardSize.width)*textLayout.connection.displayWidth+'px'],
+ ['join-tail',(1-textLayout.connection.right/cardSize.width)*textLayout.connection.displayWidth+'px'],
+ ['insertion-width',textLayout.connection.insertionWidth+'px']
 ].map(([name,value])=>'--prep-'+name+':'+value).join(';')+'}</style>';
 updated=updated.includes('id="preparation-text-layout"')?updated.replace(/<style id="preparation-text-layout">[\s\S]*?<\/style>/,textStyle):updated.replace('</head>',textStyle+'</head>');
 // Each registered definition carries its own image hash. New areas need no renderer edits.

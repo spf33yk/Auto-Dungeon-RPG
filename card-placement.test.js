@@ -5,6 +5,19 @@ import {placeCard,moveCardRow,canPlaceCard,removePlacedCard} from './card-placem
 import {targetCards,conditionCards,actionCards,skillCards} from './card-orders.js';
 const prep=()=>{const s=newGame(31);s.phase='prepare';s.floor=2;s.orders=[createCardRule('self',[{id:'hp-below',value:45}],'action','stairs'),createCardRule('self',[{id:'visible'}],'action','chests')];return s;};
 const palette=(type,id)=>({origin:'palette',type,id}),slot=(row,slot,index)=>({origin:'slot',row,slot,index}),dest=(row,slot,index)=>({row,slot,index});
+test('insertion seams add and move conditions without replacing adjacent cards',()=>{
+ const s=prep();s.levels.cardSlots=2;
+ const gap=(row,index)=>({...dest(row,'condition',index),insert:true});
+ assert.equal(placeCard(s,palette('condition','range'),gap(0,0)),true);
+ assert.deepEqual(s.orders[0].conditions.map(c=>c.id),['range','hp-below']);
+ assert.equal(placeCard(s,slot(0,'condition',0),gap(0,2)),true);
+ assert.deepEqual(s.orders[0].conditions.map(c=>c.id),['hp-below','range']);
+ assert.equal(placeCard(s,slot(0,'condition',1),gap(1,0)),true);
+ assert.deepEqual(s.orders[1].conditions.map(c=>c.id),['range','visible']);
+ const before=structuredClone(s.orders);
+ assert.equal(placeCard(s,palette('condition','visible'),gap(1,0)),false);
+ assert.deepEqual(s.orders,before);
+});
 
 test('palette cards replace target, effect or condition and preserve valid rules',()=>{
  const s=prep();assert.equal(placeCard(s,palette('condition','turns'),dest(0,'condition',1)),true);assert.deepEqual(s.orders[0].conditions[1],{id:'turns',value:150});

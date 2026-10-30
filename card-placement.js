@@ -10,7 +10,7 @@ export function placeCard(s,source,destination){
   if(source.type==='target'&&slot==='target'&&targetCards.some(c=>c.id===source.id)){
    if(dest.target!==source.id){dest.target=source.id;dest.conditions=dest.conditions.filter(c=>dest.target!=='self'||!['one-hit','injured'].includes(c.id));dest.effect=dest.target==='self'?{kind:'action',id:'stairs'}:{kind:'action',id:'attack'};}
   }else if(source.type==='condition'&&slot==='condition'&&conditionById[source.id]){
-   const value=conditionDefault(source.id);if(source.value!==undefined&&conditionById[source.id].param)value.value=source.value;if(ci===dest.conditions.length)dest.conditions.push(value);else dest.conditions[ci]=value;
+   const value=conditionDefault(source.id);if(source.value!==undefined&&conditionById[source.id].param)value.value=source.value;if(destination.insert)dest.conditions.splice(ci,0,value);else if(ci===dest.conditions.length)dest.conditions.push(value);else dest.conditions[ci]=value;
   }else if(['action','skill'].includes(source.type)&&slot==='effect'){
    const list=source.type==='action'?actionCards:skillCards,card=list.find(c=>c.id===source.id);
    if(!effectUnlocked(s,card))return false;dest.effect={kind:source.type,id:source.id};
@@ -20,7 +20,8 @@ export function placeCard(s,source,destination){
   const from=rows[sr];
   if(slot==='condition'){
    if(!Number.isInteger(si)||si<0||si>=from.conditions.length)return false;
-   if(sr===destination.row){const [item]=from.conditions.splice(si,1);from.conditions.splice(Math.min(ci,from.conditions.length),0,item);}
+   if(sr===destination.row){const [item]=from.conditions.splice(si,1);const targetIndex=destination.insert&&si<ci?ci-1:ci;from.conditions.splice(Math.min(targetIndex,from.conditions.length),0,item);}
+   else if(destination.insert){dest.conditions.splice(ci,0,from.conditions.splice(si,1)[0]);}
    else if(ci===dest.conditions.length){dest.conditions.push(from.conditions.splice(si,1)[0]);}
    else [from.conditions[si],dest.conditions[ci]]=[dest.conditions[ci],from.conditions[si]];
   }else if(slot==='target'){

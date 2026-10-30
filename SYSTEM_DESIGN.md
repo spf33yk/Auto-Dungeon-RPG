@@ -362,7 +362,7 @@ ui-settings.jsでminimapとskipOpeningを部分更新時にも保持。playJourn
 
 card-editor.jsの準備用描画を連結素材と2列パネルへ変更。条件設定と配置先の強調は一時DOM状態として保持する。card-placement.jsのcanPlaceCardは状態の浅いコピーで既存の原子的検証を再利用し、事前強調によるセーブ変更を防ぐ。条件の配置前の値とremovePlacedCardを追加。Pointer Eventsによる既存配置を維持し、上下の行一覧と左右のカード列の端で自動スクロールする。ドラッグ開始時は設定欄を開閉しない。
 
-app.jsで予測の準備開始時スナップショットを記録し、forecast-dialogが開いている場合だけ試行を実行。閉じる際は世代番号で実行中の結果を破棄する。index.htmlに静的な予測ダイアログと下部ボタンを配置。準備以外は編集できない既存の状態判定とセーブv13を維持。
+app.jsで予測の準備開始時スナップショットを記録し、準備中に試行を実行して下部へ3指標を表示。指示・装備等の変更時と準備終了時は世代番号で古い結果を破棄する。index.htmlに静的な予測ダイアログと下部ボタンを配置。準備以外は編集できない既存の状態判定とセーブv13を維持。
 
 scripts/build-preparation-assets.jsは追跡対象のcard-frame/v1部品と共通土台から7PNGを作成。update-assets.jsがPNGの内容ハッシュをpreparation-assetsスタイルへ登録する。ゲームの実行には制作原稿やSharpを必要としない。詳細はdocs/ui/PREPARATION_UI.md。
 
@@ -373,3 +373,7 @@ build-card-frames.jsのcardTransformは縦横の必要倍率の小さい方を1�
 ## 素材に追従する本文レイアウト（2026-10-30）
 
 art/ui/preparation/layout.jsonへ本文矩形と番号の基準を集約。update-assets.jsが相対比率をpreparation-text-layoutのCSS変数へ展開する。card-editor.jsの動的本文をcard-content/card-content-textの二重spanへ分離し、外側で素材の本文欄に追従、内側で中央配置と省略を行う。文字レイヤーのpointer-eventsをnoneとし、既存のボタン・ドロップ操作を妨げない。番号はgridの中央配置を使う。
+
+## 2026-10-30 準備カードの接続と予測表示
+
+配置カードの接続基準を揃え、素材の縦横比を維持。条件追加は継ぎ目のホバー／フォーカス時に64pxの追加口を開く。スマホでは条件選択中も開き、ドラッグとタップで任意位置へ挿入できる。一覧は圧縮しない縦スクロールへ変更。ドラッグはカード画像・本文を掴んだ位置で追従表示する。探索の予測ボタン右にClear見込み、想定ターン数中央値、回復余力・終了時HP平均を常時表示。準備中に自動計算（初期8試行、1試行1200ターン上限）し、編集時は旧結果を消して再計算。詳細はdocs/ui/PREPARATION_UI.md。セーブv13・取得条件・容量・コストは変更なし。
