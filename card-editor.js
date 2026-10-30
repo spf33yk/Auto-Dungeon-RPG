@@ -10,7 +10,7 @@ const parseDestination=value=>{const p=value?.split('|')||[];return {row:Number(
 function updateDropHints(host,s,value){
  const source=parseSource(value,host);host.classList.toggle('placing-condition',Boolean(source&&(source.type==='condition'||source.slot==='condition')));host.querySelectorAll('[data-drop-slot]').forEach(el=>{const active=Boolean(source),valid=active&&source.origin!=='row'&&canPlaceCard(s,source,parseDestination(el.dataset.dropSlot));el.classList.toggle('valid-drop',valid);el.classList.toggle('invalid-drop',active&&source.origin!=='row'&&!valid);});
  host.querySelectorAll('[data-drop-row]').forEach(el=>el.classList.toggle('row-drop-ready',source?.origin==='row'));
- const trash=host.querySelector('[data-drop-trash]');if(trash){const removable=source&&(source.origin==='row'||source.origin==='slot'&&source.slot==='condition');trash.disabled=!removable;trash.classList.toggle('valid-drop',Boolean(removable));}
+ const trash=host.querySelector('[data-drop-trash]');if(trash){const removable=source&&(source.origin==='row'||source.origin==='slot');trash.disabled=!removable;trash.classList.toggle('valid-drop',Boolean(removable));}
 }
 function conditionSettings(host,s,value){
  const panel=host.querySelector('[data-condition-settings]');if(!panel)return;
@@ -22,12 +22,12 @@ function conditionSettings(host,s,value){
 }
 function selectSource(host,value,s,showSettings=true){
  host.dataset.cardSource=value||'';host.querySelectorAll('[data-drag-source]').forEach(el=>el.classList.toggle('selected-card',el.dataset.dragSource===value));
- const status=host.querySelector('[data-card-status]');if(status){const p=value?.split('|')||[],card=p[0]==='palette'?paletteGroups[p[1]]?.[1].find(c=>c.id===p[2]):null;status.textContent=value?(card?`${card.name}：${card.detail||'光っている溝へ配置できます。'}`:'光っている溝へ配置するか、「外す」へ移動してください。'):'カードを選び、光る配置先へドラッグまたはタップしてください。';}
+ const status=host.querySelector('[data-card-status]');if(status){const p=value?.split('|')||[],card=p[0]==='palette'?paletteGroups[p[1]]?.[1].find(c=>c.id===p[2]):null;status.textContent=value?(card?`${card.name}：${card.detail||'光っている溝へ配置できます。'}`:'カードリストへ戻すと外せます。対象・実行カードを外すと行ごと削除します。'):'カードを選び、光る配置先へドラッグまたはタップしてください。';}
  if(s){updateDropHints(host,s,value);if(showSettings)conditionSettings(host,s,value);}
 }
 function applySource(host,s,source,target){
  const row=target.closest('[data-drop-row]'),spot=target.closest('[data-drop-slot]');let ok=false;
- if(target.closest('[data-drop-trash]'))ok=removePlacedCard(s,parseSource(source,host));
+ if(target.closest('[data-drop-trash],[data-drop-return]'))ok=removePlacedCard(s,parseSource(source,host));
  else if(source?.startsWith('row|')&&row)ok=moveCardRow(s,Number(source.split('|')[1]),Number(row.dataset.dropRow));
  else if(spot)ok=placeCard(s,parseSource(source,host),parseDestination(spot.dataset.dropSlot));
  host.dataset.cardMessage=ok?'指示を更新しました。':'その組み合わせには配置できません。対象・取得状況・条件の重複・枠数を確認してください。';selectSource(host,'',s);return ok;
@@ -37,14 +37,14 @@ function renderCardBoard(host,s,capacity){
  const group=paletteGroups[host.dataset.cardGroup]?host.dataset.cardGroup:'target',entries=paletteGroups[group][1];
  const message=host.dataset.cardMessage||'カードを選び、光る配置先へドラッグまたはタップしてください。';
  const card=(c)=>{const disabled=['action','skill'].includes(group)&&!effectUnlocked(s,c);return `<button type="button" class="palette-card ${group}" data-card-kind="${group}" data-drag-source="${sourceFor(group,c.id)}" title="${esc(c.detail||c.name)}" ${disabled?'disabled':''}><span class="card-content"><span class="card-content-text">${esc(c.name)}</span></span>${disabled?'<em>未取得</em>':''}</button>`;};
- host.innerHTML=`<div class="card-board fitted-card-editor"><div class="card-board-info">指示 ${s.orders.length} / ${capacity}行 · 1行 ${cardCapacity(s)}枚まで · 上の行から判定／条件はすべて成立</div><div class="card-workspace"><section class="card-library" aria-label="カードリスト"><strong>カードリスト</strong><div class="card-library-tabs" role="group" aria-label="カードの種類">${Object.entries(paletteGroups).map(([id,[name]])=>`<button type="button" data-palette-tab="${id}" class="${id===group?'active':''}" aria-pressed="${id===group}">${name}</button>`).join('')}</div><div class="card-library-list">${entries.map(card).join('')}</div></section><section class="card-rules" aria-label="探索指示"><div class="card-rules-heading"><strong>探索指示 ${s.orders.length} / ${capacity}行</strong><div><button type="button" data-orders-undo>元に戻す</button><button type="button" data-drop-trash disabled>ここへ移動して外す</button><button type="button" data-card-op="add-row" ${s.orders.length>=capacity?'disabled':''}>＋指示の行</button></div></div><p class="card-help" data-card-status role="status">${esc(message)}</p><section class="condition-settings" data-condition-settings aria-label="条件の設定" hidden></section><div class="instruction-trays">${s.orders.map((input,index)=>{
+ host.innerHTML=`<div class="card-board fitted-card-editor"><div class="card-board-info">指示 ${s.orders.length} / ${capacity}行 · 1行 ${cardCapacity(s)}枚まで · 上の行から判定／条件はすべて成立</div><div class="card-workspace"><section class="card-library" data-drop-return aria-label="カードリスト・カードを戻して外す"><strong>カードリスト</strong><div class="card-library-tabs" role="group" aria-label="カードの種類">${Object.entries(paletteGroups).map(([id,[name]])=>`<button type="button" data-palette-tab="${id}" class="${id===group?'active':''}" aria-pressed="${id===group}">${name}</button>`).join('')}</div><p class="card-return-hint">配置済みカードをここへ戻すと外せます</p><div class="card-library-list">${entries.map(card).join('')}</div></section><section class="card-rules" aria-label="探索指示"><div class="card-rules-heading"><strong>探索指示 ${s.orders.length} / ${capacity}行</strong><div><button type="button" data-orders-undo>元に戻す</button><button type="button" data-drop-trash disabled>ここへ移動して外す</button><button type="button" data-card-op="add-row" ${s.orders.length>=capacity?'disabled':''}>＋指示の行</button></div></div><p class="card-help" data-card-status role="status">${esc(message)}</p><section class="condition-settings" data-condition-settings aria-label="条件の設定" hidden></section><div class="instruction-trays">${s.orders.map((input,index)=>{
   const r=legacyToCards(input),target=targetCards.find(t=>t.id===r.target),effect=(r.effect.kind==='skill'?skillCards:actionCards).find(c=>c.id===r.effect.id);
   const cardSlot=(kind,i,label,name)=>`<button type="button" class="board-slot ${kind}" data-card-kind="${kind==='effect'?r.effect.kind:kind}" data-drop-slot="${index}|${kind}|${i}" data-drag-source="slot|${index}|${kind}|${i}" title="${esc(name)}" aria-label="指示${index+1} ${label} ${esc(name)}"><small class="visually-hidden">${label}</small><span class="card-content"><span class="card-content-text">${esc(name)}</span></span></button>`;
   const insertion=i=>r.conditions.length+2<cardCapacity(s)?`<span class="condition-insertion"><button type="button" class="insert-condition" data-insert-condition data-drop-slot="${index}|condition|${i}|insert" aria-label="指示${index+1}の条件${i+1}の位置に追加">＋条件</button></span>`:'';
   const conditions=r.conditions.map((c,ci)=>insertion(ci)+cardSlot('condition',ci,`条件${ci+1}`,conditionName(c))).join('');
   const empty=insertion(r.conditions.length);
   return `<article class="board-rule" data-card-row="${index}" data-drop-row="${index}"><div class="tray-scroll" tabindex="0" aria-label="指示${index+1}のカード列・横スクロール"><div class="tray-surface"><button type="button" class="row-handle" data-drag-source="row|${index}" data-drop-row="${index}" aria-label="指示${index+1}を移動">${index+1}</button><div class="board-slots">${cardSlot('target',0,'ターゲット',target.name)}${conditions}${empty}${cardSlot('effect',0,r.effect.kind==='skill'?'スキル':'アクション',effect.name)}</div></div></div><div class="tray-caption"><span>${r.conditions.length+2} / ${cardCapacity(s)}枚 · ${esc(describeCardRule(r))}</span></div></article>`;
- }).join('')}</div></section></div><p class="card-help">番号をドラッグして行を並べ替え。条件・行は選択後に「外す」へ移動できます。探索中は編集できません。</p></div>`;
+ }).join('')}</div></section></div><p class="card-help">番号で行を並べ替え。カードを一覧へ戻して外す（対象・実行は行ごと削除）。探索中は編集できません。</p></div>`;
  selectSource(host,'',s);
 }
 
@@ -87,7 +87,7 @@ export function handleCardClick(e,s){
 // Pointer Events support mouse, pen and touch. The same buttons remain clickable for keyboard/tap.
 export function installCardDragging(host,getState,onCommit){
  let pending=null,ghost=null;
- const clearDrag=drag=>{drag?.element?.classList.remove('is-drag-source');ghost?.remove();ghost=null;host.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));};
+ const clearDrag=drag=>{host.querySelector('[data-drop-return]')?.classList.remove('return-ready');drag?.element?.classList.remove('is-drag-source');ghost?.remove();ghost=null;host.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));};
  host.addEventListener('pointerdown',e=>{
   const source=e.target.closest('[data-drag-source]');if(!source||source.disabled||getState().phase!=='prepare'||e.button!==0)return;
   const rect=source.getBoundingClientRect(),style=getComputedStyle(source),width=parseFloat(style.width),height=parseFloat(style.height);
@@ -104,7 +104,7 @@ export function installCardDragging(host,getState,onCommit){
   }
   if(!pending.dragging)return;e.preventDefault();ghost.style.transform=`translate(${e.clientX-pending.grabX}px,${e.clientY-pending.grabY}px) scale(${pending.scale})`;
   const under=document.elementFromPoint(e.clientX,e.clientY),scroll=under?.closest('.card-library-list,.instruction-trays,.card-rules');if(scroll){const r=scroll.getBoundingClientRect();if(e.clientY<r.top+24)scroll.scrollTop-=12;else if(e.clientY>r.bottom-24)scroll.scrollTop+=12;}
-  host.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));under?.closest('.valid-drop,[data-drop-row].row-drop-ready')?.classList.add('drop-hover');
+  host.querySelector('[data-drop-return]')?.classList.toggle('return-ready',pending.source.startsWith('slot|')||pending.source.startsWith('row|'));host.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));under?.closest('.valid-drop,[data-drop-row].row-drop-ready')?.classList.add('drop-hover');
   const horizontal=under?.closest('.tray-scroll');if(horizontal){const r=horizontal.getBoundingClientRect();if(e.clientX<r.left+32)horizontal.scrollLeft-=16;else if(e.clientX>r.right-32)horizontal.scrollLeft+=16;}
  },{passive:false});
  document.addEventListener('pointerup',e=>{

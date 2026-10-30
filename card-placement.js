@@ -42,6 +42,7 @@ export const canPlaceCard=(s,source,destination)=>placeCard({...s},source,destin
 export function removePlacedCard(s,source){
  if(s.phase!=='prepare'||!source)return false;
  if(source.origin==='row'&&Number.isInteger(source.row)&&s.orders[source.row]){s.orders.splice(source.row,1);s.mode='custom';return true;}
+ if(source.origin==='slot'&&Number.isInteger(source.row)&&s.orders[source.row]&&['target','effect'].includes(source.slot)){s.orders.splice(source.row,1);s.mode='custom';return true;}
  if(source.origin==='slot'&&source.slot==='condition'&&Number.isInteger(source.row)&&Number.isInteger(source.index)&&s.orders[source.row]){
   const rows=s.orders.map(legacyToCards);if(!rows[source.row].conditions[source.index])return false;
   rows[source.row].conditions.splice(source.index,1);if(!rows.every(r=>validCardRule(s,r)))return false;s.orders=rows;s.mode='custom';return true;

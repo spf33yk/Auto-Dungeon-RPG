@@ -66,9 +66,12 @@ test('configured palette values survive placement, while invalid values are atom
 
 test('trash removes only placed conditions or entire rows during preparation',()=>{
  const s=prep(),before=JSON.stringify(s);
- for(const source of [palette('condition','visible'),slot(0,'target',0),slot(0,'effect',0),slot(-1,'condition',0),slot(0,'condition',8)])assert.equal(removePlacedCard(s,source),false);
+ for(const source of [palette('condition','visible'),slot(-1,'condition',0),slot(0,'condition',8)])assert.equal(removePlacedCard(s,source),false);
  assert.equal(JSON.stringify(s),before);
  assert.equal(removePlacedCard(s,slot(0,'condition',0)),true);assert.equal(s.orders[0].conditions.length,0);
  assert.equal(removePlacedCard(s,{origin:'row',row:0}),true);assert.equal(s.orders.length,1);
  s.phase='explore';const saved=JSON.stringify(s);assert.equal(removePlacedCard(s,{origin:'row',row:0}),false);assert.equal(JSON.stringify(s),saved);
+});
+test('removing essential cards removes their row and never edits during exploration',()=>{
+ for(const type of ['target','effect']){const s=prep();assert.equal(removePlacedCard(s,slot(0,type,0)),true);assert.equal(s.orders.length,1);assert.ok(validCardRule(s,s.orders[0]));s.phase='explore';const before=JSON.stringify(s);assert.equal(removePlacedCard(s,slot(0,type,0)),false);assert.equal(JSON.stringify(s),before);}
 });

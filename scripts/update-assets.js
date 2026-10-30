@@ -1,3 +1,4 @@
+import {PREPARATION_SKINS} from '../preparation-skins.js';
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
@@ -11,7 +12,7 @@ const map='<script type="importmap" id="asset-imports">'+JSON.stringify({imports
 const path=root+'index.html',html=readFileSync(path,'utf8');
 let updated=html.includes('id="asset-imports"')?html.replace(/<script type="importmap" id="asset-imports">[\s\S]*?<\/script>/,map):html.replace('</head>',map+'</head>');
 const preparationAssets=['card-target','card-condition','card-skill','card-action','tray-left','tray-middle','tray-right'];
-const preparationStyle='<style id="preparation-assets">:root{'+preparationAssets.map(name=>'--prep-'+name+':url("./art/ui/preparation/'+name+'.png?v='+version('art/ui/preparation/'+name+'.png')+'")').join(';')+'}</style>';
+const preparationStyle='<style id="preparation-assets">:root{'+preparationAssets.map(name=>'--prep-'+name+':url("./art/ui/preparation/'+name+'.png?v='+version('art/ui/preparation/'+name+'.png')+'")').join(';')+'}'+PREPARATION_SKINS.slice(1).map(s=>'html[data-preparation-skin="'+s.id+'"]{'+preparationAssets.map(name=>'--prep-'+name+':url("./art/ui/preparation/'+s.id+'/'+name+'.png?v='+version('art/ui/preparation/'+s.id+'/'+name+'.png')+'")').join(';')+'}').join('')+'</style>';
 updated=updated.includes('id="preparation-assets"')?updated.replace(/<style id="preparation-assets">[\s\S]*?<\/style>/,preparationStyle):updated.replace('</head>',preparationStyle+'</head>');
 const textLayout=JSON.parse(readFileSync(root+'art/ui/preparation/layout.json','utf8'));
 const textRect=textLayout.contentRect,cardSize=textLayout.cardSize,number=textLayout.rowNumber;
