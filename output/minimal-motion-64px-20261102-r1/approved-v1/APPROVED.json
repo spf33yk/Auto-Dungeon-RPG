@@ -1,0 +1,108 @@
+{
+  "status": "accepted_as_complete_for_now",
+  "accepted_date_jst": "2026-11-02",
+  "user_decision": "一旦これで完成にしよう",
+  "body_px": 64,
+  "cell": [
+    128,
+    128
+  ],
+  "anchor": [
+    64,
+    96
+  ],
+  "directions": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "game_integration_status": "not_applied",
+  "approval_snapshot": "approved-v1",
+  "files": [
+    {
+      "file": "poses-64px.png",
+      "sha256": "d7944b448ba0418940b46fc98032709225cd340f1c174391f8d1c51501f71592"
+    },
+    {
+      "file": "right-base-64px.png",
+      "sha256": "07595e06843b5e7c1a2d2dbe6d55c6e694950c96b56bc6e10695e3a357c9177f"
+    },
+    {
+      "file": "right-equipment-layer.png",
+      "sha256": "d2cdc6208849340da38d1607583d6c87e3f30a213a1bd866e1b8c131c014bf8f"
+    },
+    {
+      "file": "palette-reference.png",
+      "sha256": "fe7de12fbcd24c54421439ef07170121f9e015a3cb1437f54228d882665f09dc"
+    },
+    {
+      "file": "grip-only-native-patch.png",
+      "sha256": "6a3e27c320b28fb9da7d295e8942347279ca4a6f1c49fc85de9bd2c608c4a1e9"
+    },
+    {
+      "file": "slash-source.png",
+      "sha256": "029e7e7d20392c4fb73e8fa6599fc12ef3cd1b52d0bac1749dc9b3dc2f7419bd"
+    },
+    {
+      "file": "four-directions-64px.gif",
+      "sha256": "32b77ec69ef666550c104a28055e4f7f85131cdab72d6d00b7f3c9f282611e60"
+    },
+    {
+      "file": "up-down-left-right-comparison.gif",
+      "sha256": "2b5de8d644f1beb047b55db95d5efed2b53022c455972ce468b3d9f35e4d774f"
+    },
+    {
+      "file": "sample-64px-assets.zip",
+      "sha256": "86394b76654509e4bb626f27652260644204242966f97c79c8fe517e4343f539"
+    },
+    {
+      "file": "down-stand.png",
+      "sha256": "776c4bf342b350ee0e185e2168e14cc486e2bec6dbd6c3541e2466018f56cede"
+    },
+    {
+      "file": "down-bob1.png",
+      "sha256": "f0e2c46b5805e0fd71480d7cf0d6a12eee340f7233936342c32ce101b4541720"
+    },
+    {
+      "file": "down-bob2.png",
+      "sha256": "62426428388fc9d0f0429fae87a8ebaac062fad149d485b62abf59857b0afd80"
+    },
+    {
+      "file": "left-stand.png",
+      "sha256": "469fe13835a2ed552e6a8b65df5bb11318b6d4ba3f3f38466206ca8db9b71e91"
+    },
+    {
+      "file": "left-bob1.png",
+      "sha256": "63efc9a9d9c438a756162642037db97fcf5813039d859c853fe59bf02692a11f"
+    },
+    {
+      "file": "left-bob2.png",
+      "sha256": "d89202501e11b5b6cbad866c9776079afec661062226888236036d759398a38d"
+    },
+    {
+      "file": "right-stand.png",
+      "sha256": "5afad293d06e6e5066294b730a92f8ba8c17dd4b91addd160428772bf2dd8b14"
+    },
+    {
+      "file": "right-bob1.png",
+      "sha256": "ce787c84280f98b14636cf105f1620eedff119a7c5b8a7023b03db7af592d2b0"
+    },
+    {
+      "file": "right-bob2.png",
+      "sha256": "e7b30345a5e6a0812176f1837b537034636bcb4e10cb1d28292b6bf9acffc9c8"
+    },
+    {
+      "file": "up-stand.png",
+      "sha256": "6ff7ae0f969e11e03883bb0ea2b02c0f7423c5bbd6922d56ff6b8bb085171404"
+    },
+    {
+      "file": "up-bob1.png",
+      "sha256": "be48ecf5488af36311d77e4d73340a9b8a397bf79435ea04a12e77365585980e"
+    },
+    {
+      "file": "up-bob2.png",
+      "sha256": "026e7180abde46f18d97834484630b493fab1f899bed4062540bf1f56dc7b0b8"
+    }
+  ]
+}

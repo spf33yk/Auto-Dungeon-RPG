@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
-import {CharacterAnimation,directionTo,characterFrame,characterDrawBox,validateCharacterSheet,drawCharacter,loadCharacterSheet} from './character-animation.js';import {readPng} from './test-support/png.js';
+import {CharacterAnimation,directionTo,characterFrame,characterActionFrame,characterDrawBox,validateCharacterSheet,drawCharacter,loadCharacterSheet} from './character-animation.js';import {readPng} from './test-support/png.js';
 const d=JSON.parse(readFileSync(new URL('./art/characters/mukuro-v1/sprites.json',import.meta.url))),image={complete:true,naturalWidth:96,naturalHeight:128};
+const front=JSON.parse(readFileSync(new URL('./art/characters/mukuro-front-v2/sprites.json',import.meta.url)));
 test('four directions safely round vectors and preserve the previous direction for ties and zero movement',()=>{
  for(const [x,y,want] of [[0,1,0],[-1,0,1],[1,0,2],[0,-1,3],[2,1,2],[-1,-2,3]])assert.equal(directionTo(x,y),want);
  for(const [x,y]of [[0,0],[1,1],[-1,1],[NaN,1]])assert.equal(directionTo(x,y,1),1);
@@ -41,4 +42,20 @@ test('walk B changes the support-foot silhouette in every direction, not just th
  assert.ok(shifts[1]>1,'West: the bright near leg must swing back to screen right');
  assert.ok(shifts[2]<-2,'East: the bright near leg must swing back to screen left');
  assert.ok(shifts[3]<-1.2,'North: the visible support foot must change side below the cape');
+});
+test('front action sheet maps every supplied pose and preserves a shared ground anchor',()=>{
+ assert.equal(validateCharacterSheet(front),front);
+ const p=readPng(new URL('./art/characters/mukuro-front-v2/sprites-64.png',import.meta.url));assert.equal(p.width,320);assert.equal(p.height,256);
+ for(const [name,count,row] of [['idle',4,0],['move',4,0],['attackA',4,1],['attackB',4,2],['death',5,3]]){
+  const clip=front.clips[name];assert.equal(clip.cells.length,count);for(const [col,y] of clip.cells){assert.equal(y,row);let visible=0;for(let py=0;py<64;py++)for(let px=0;px<64;px++)if(p.pixel(col*64+px,y*64+py)[3])visible++;assert.ok(visible>100);}
+ }
+ for(let col=0;col<4;col++)for(let row=0;row<3;row++){let bottom=-1;for(let y=0;y<64;y++)for(let x=0;x<64;x++)if(p.pixel(col*64+x,row*64+y)[3])bottom=y;assert.equal(bottom,59);}
+ const hero=new CharacterAnimation();assert.deepEqual(characterActionFrame(front,hero.sample(0)),{x:0,y:0,width:64,height:64});assert.equal(characterActionFrame(front,hero.sample(190)).x,64);
+ hero.moveTo(1,0,200,180);assert.equal(characterActionFrame(front,hero.sample(300)).x,128);
+ hero.attackTo(1,1,400,300);assert.equal(characterActionFrame(front,hero.sample(550)).y,64);
+ hero.attackTo(1,1,800,300);assert.equal(characterActionFrame(front,hero.sample(950)).y,128);
+ hero.die(1200);assert.equal(characterActionFrame(front,hero.sample(2000)).x,256);assert.equal(characterActionFrame(front,hero.sample(2000)).y,192);
+ const directions=readPng(new URL('./art/characters/mukuro-front-v2/directions-64.png',import.meta.url));assert.equal(directions.width,256);assert.equal(directions.height,64);
+ for(let col=0;col<4;col++){let bottom=-1;for(let y=0;y<64;y++)for(let x=0;x<64;x++)if(directions.pixel(col*64+x,y)[3])bottom=y;assert.equal(bottom,59);}
+ const calls=[],ctx={drawImage(...args){calls.push(args);}};assert.equal(drawCharacter(ctx,{definition:front,image:{naturalWidth:320,naturalHeight:256},directionImage:{naturalWidth:256,naturalHeight:64}}, {x:0,y:0,direction:1,state:'moving',frame:0,elapsed:0,progress:0}),true);assert.deepEqual(calls[0].slice(1,5),[64,0,64,64]);
 });

@@ -1,0 +1,21 @@
+{
+  "approved_source": "output/minimal-motion-64px-20261102-r1/approved-v1",
+  "sprites_sha256": "d7944b448ba0418940b46fc98032709225cd340f1c174391f8d1c51501f71592",
+  "approved_sprites_sha256": "d7944b448ba0418940b46fc98032709225cd340f1c174391f8d1c51501f71592",
+  "pose_rgba_sha256": {
+    "down-stand": "c1ac572bd6d614e36bd93bab40688926f73a0aedaa68631b8229914f77b5f084",
+    "down-bob1": "79685883ee2528745937ae3539ac7264b449c1bc46df590e82c49bc1a5a6a778",
+    "down-bob2": "2e88692d7ebfb8b25456d47bbdbe692e529fc45db01989d68dae6aaf0e893d85",
+    "left-stand": "528b0933c2823b3380b64c3d94be19ea15eef21c3fb901141aedf5934c6ef99d",
+    "left-bob1": "9e0ed7e414bd7d4bb2b99cf739fefb9264c043c66b13095db448028f7a43f9db",
+    "left-bob2": "b8c8f3c98f1b685933581e5c3f050c059e4e03e071a58a01a15a9edb9828e315",
+    "right-stand": "ee9a6ffe4b64bb780a8d85ba99a5fcff9f1474ac3280a1ccc23969179e28de58",
+    "right-bob1": "9f595f3f9f286802d0debcf936255715a2aed4f1da550e04b83011579e49859d",
+    "right-bob2": "f20b15f15a0d0a1b839d0e1d4e404f61eca4e6f4cf91c899bc19ec682810e768",
+    "up-stand": "c3ffedce737e094627daf1729ca7678cdfbb096d1a78adddd417a3f23323aa13",
+    "up-bob1": "f991ae4031abaef031dde5fb1654834ccc7489eade69bc9b80684ac9f9ae212a",
+    "up-bob2": "6011cf959ef0612aac295e54cfd7e8f0a562e4286d4f5410b29f7e922fb54934"
+  },
+  "character_pixels_modified": false,
+  "effect_source": "approved-v1/slash-source.png"
+}

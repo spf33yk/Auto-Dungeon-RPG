@@ -1,5 +1,5 @@
 import {skinById,nextPreparationSkin} from './preparation-skins.js';
-import {CharacterAnimation,loadCharacterSheet,drawCharacter,characterFrame} from './character-animation.js';
+import {CharacterAnimation,loadCharacterSheet,drawCharacter,characterFrame,characterPresentation,characterAttackDuration} from './character-animation.js';
 import {loadWallTilesets} from './wall-tileset.js';
 import {entranceWallFrames} from './entrance-view.js';
 import {readUiSettings,saveUiSettings} from './ui-settings.js';
@@ -63,15 +63,17 @@ const sprites={
  stairs:['............','.........ll.','.......llbl.','.....llbbbl.','...llbbbbbl.','.llbbbbbbbl.','.lbbbbbbbbl.','.llllllllll.','............','............','............','............']};
 const mapItemsAtlas=new Image();mapItemsAtlas.src=$('map').dataset.mapItems;
 const propsAtlas=new Image();propsAtlas.src=$('map').dataset.props;document.documentElement.style.setProperty('--prop-atlas','url("'+propsAtlas.src+'")');
+const enemyAtlas=new Image();enemyAtlas.src=$('map').dataset.enemies;
+const CELL=64;
 const palette={h:'#57695a',b:'#e2dfbd',d:'#27352f',a:'#899e85',s:'#b8b2a1',g:'#3e715f',l:'#9bbba6',r:'#66424a',p:'#ad7276',y:'#bfa266',o:'#634e32',Y:'#e3d49d'};
-function sprite(ctx,type,x,y,size=24,height=size){if(drawMapProp(ctx,mapItemsAtlas,type,x,y,size,height)||drawProp(ctx,propsAtlas,type,x,y,size,height))return;const rows=sprites[type]||(['tombstone','tombstone-cracked'].includes(type)?['............','....aaaa....','...abbbba...','..abbbbbba..','..abdbbbba..','..abbdbbba..','..abbbbbba..','..abbbbbba..','..abbbbbba..','.aabbbbbbaa.','.aaaaaaaaaa.','............']:sprites.reward);const scale=size/12,scaleY=height/12;for(let py=0;py<rows.length;py++)for(let px=0;px<rows[py].length;px++){const c=rows[py][px];if(c!=='.'&&palette[c]){ctx.fillStyle=palette[c];ctx.fillRect(x+px*scale,y+py*scaleY,Math.ceil(scale),Math.ceil(scaleY));}}}
+function sprite(ctx,type,x,y,size=CELL,height=size){if(drawMapProp(ctx,mapItemsAtlas,type,x,y,size,height)||drawProp(ctx,propsAtlas,type,x,y,size,height))return;if((type==='slime'||type==='brute')&&enemyAtlas.complete&&enemyAtlas.naturalWidth===128&&enemyAtlas.naturalHeight===64){ctx.imageSmoothingEnabled=false;ctx.drawImage(enemyAtlas,type==='slime'?0:64,0,64,64,x,y,size,height);return;}const rows=sprites[type]||(['tombstone','tombstone-cracked'].includes(type)?['............','....aaaa....','...abbbba...','..abbbbbba..','..abdbbbba..','..abbdbbba..','..abbbbbba..','..abbbbbba..','..abbbbbba..','.aabbbbbbaa.','.aaaaaaaaaa.','............']:sprites.reward);const scale=size/12,scaleY=height/12;for(let py=0;py<rows.length;py++)for(let px=0;px<rows[py].length;px++){const c=rows[py][px];if(c!=='.'&&palette[c]){ctx.fillStyle=palette[c];ctx.fillRect(x+px*scale,y+py*scaleY,Math.ceil(scale),Math.ceil(scaleY));}}}
 const ctx=$('map').getContext('2d');ctx.imageSmoothingEnabled=false;
 const cryptAtlas=new Image();cryptAtlas.src=$('map').dataset.terrain;
 let entranceGrid=null,entranceFrames=new Map();
 let heroSheet=null,heroVisual=new CharacterAnimation(),heroClock=0,heroScene='',lastVisualTime=null;
 const heroAssetsReady=loadCharacterSheet($('map').dataset.hero).then(sheet=>{heroSheet=sheet;drawHeroPortraits();}).catch(error=>console.error('Character sheet:',error));
 function resetHeroVisual(){heroVisual=new CharacterAnimation({x:state.player.x,y:state.player.y});heroClock=0;heroScene='';lastVisualTime=null;}
-function drawHeroPortraits(){if(!heroSheet)return;const d=heroSheet.definition,f=characterFrame(d,0,0);for(const id of ['portrait','camp-portrait']){const canvas=$(id),c=canvas.getContext('2d');c.clearRect(0,0,canvas.width,canvas.height);c.imageSmoothingEnabled=false;c.drawImage(heroSheet.image,f.x,f.y,f.width,f.height,0,0,canvas.width,canvas.height);}}
+function drawHeroPortraits(){if(!heroSheet)return;const d=heroSheet.definition,f=characterFrame(d,0,0),[px,py,pw,ph]=d.portrait||[0,0,f.width,f.height];for(const id of ['portrait','camp-portrait']){const canvas=$(id),c=canvas.getContext('2d'),scale=Math.min(canvas.width/pw,canvas.height/ph);c.clearRect(0,0,canvas.width,canvas.height);c.imageSmoothingEnabled=false;c.drawImage(heroSheet.image,f.x+px,f.y+py,pw,ph,(canvas.width-pw*scale)/2,(canvas.height-ph*scale)/2,pw*scale,ph*scale);}}
 let wallSets=new Map();const wallAssetsReady=loadWallTilesets($('map').dataset.walls.split(/\s+/)).then(sets=>{wallSets=sets;}).catch(error=>console.error('Wall tileset:',error));
 function draw(){
  const scene=state.seed+':'+state.floor;if(damageScene!==scene){damagePopups=[];damageScene=scene;}
@@ -82,32 +84,32 @@ function draw(){
  const progress=motion&&state.phase==='explore'?Math.min(1,(performance.now()-motion.time)/motion.duration):1,eased=1-Math.pow(1-progress,3);
  const position=motion?{x:motion.from.x+(state.player.x-motion.from.x)*eased,y:motion.from.y+(state.player.y-motion.from.y)*eased}:state.player;
  const sightState=renderSightState(state,position),visible=(x,y)=>canSee(sightState,x,y);
- const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y),hop=moving?Math.sin(progress*Math.PI)*2:0;
+ const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y),hop=moving?Math.sin(progress*Math.PI)*CELL/12:0;
  const camera=cameraFor(position,radius(state),map.width,map.height);ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);
  const graves=new Set((state.obstacles||[]).map(o=>o.x+','+o.y)),surface=state.grid.map((r,y)=>r.map((v,x)=>(v||graves.has(x+','+y))?1:0)),queue=[];
  if(entranceGrid!==state.grid){entranceGrid=state.grid;entranceFrames=entranceWallFrames(surface);}
  for(let y=0;y<state.grid.length;y++)for(let x=0;x<state.grid[y].length;x++){
-  if((x+1)*24<camera.left||x*24>camera.left+map.width/camera.scale||(y+1)*24<camera.top||(y-1)*24>camera.top+map.height/camera.scale)continue;
-  const floor=Boolean(surface[y][x]),light=floorLight(state.seen[y][x],visible(x,y));if(floor&&light==='hidden')continue;const px=x*24,py=y*24,n=(x*17+y*31+state.seed)%13;
-  if(!(floor&&theme.id==='crypt'&&drawCryptTile(ctx,cryptAtlas,surface,x,y,state.seed,24,true))){
-   ctx.fillStyle=floor?theme.floorColor:'#0c1416';ctx.fillRect(px,py,24,24);
-   if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+5+n,py+8,2,2);}
+  if((x+1)*CELL<camera.left||x*CELL>camera.left+map.width/camera.scale||(y+1)*CELL<camera.top||(y-1)*CELL>camera.top+map.height/camera.scale)continue;
+  const floor=Boolean(surface[y][x]),light=floorLight(state.seen[y][x],visible(x,y));if(floor&&light==='hidden')continue;const px=x*CELL,py=y*CELL,n=(x*17+y*31+state.seed)%13;
+  if(!(floor&&drawCryptTile(ctx,cryptAtlas,surface,x,y,state.seed,CELL,true,theme.index))){
+   ctx.fillStyle=floor?theme.floorColor:'#0c1416';ctx.fillRect(px,py,CELL,CELL);
+   if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+13+n*2,py+21,5,5);}
   }
-  if(floor&&light==='memory'){ctx.fillStyle=MEMORY_SHADE;ctx.fillRect(px,py,24,24);}
-  if(!floor)queue.push({footY:(y+1)*24,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,light==='visible'?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme,24,entranceFrames.get(x+','+y));ctx.restore();}});
+  if(floor&&light==='memory'){ctx.fillStyle=MEMORY_SHADE;ctx.fillRect(px,py,CELL,CELL);}
+  if(!floor)queue.push({footY:(y+1)*CELL,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,light==='visible'?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme,CELL,entranceFrames.get(x+','+y));ctx.restore();}});
  }
  const stair=state.stairs;
- for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;sprite(ctx,t.spent?'trap-spent':'trap',t.x*24,t.y*24);ctx.restore();}
+ for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;sprite(ctx,t.spent?'trap-spent':'trap',t.x*CELL,t.y*CELL);ctx.restore();}
  function entity(o,type,{standing=false,layer=1,hero=false,enemy=false}={}){
-  const at=hero?position:o,box=standing?standingBox(at.x,at.y):{x:at.x*24,y:at.y*24,width:24,height:24,footY:(at.y+1)*24};
-  if(standing||type==='chest'){ctx.save();ctx.globalAlpha=hero||visible(o.x,o.y)?1:.4;drawFootShadow(ctx,at.x,at.y);ctx.restore();}
+  const at=hero?position:o,presentation=hero&&heroSheet?characterPresentation(heroSheet.definition,heroFrame,CELL):{offsetX:0,offsetY:0,opacity:1},visualAt={x:at.x+presentation.offsetX/CELL,y:at.y+presentation.offsetY/CELL},box=standing?standingBox(visualAt.x,visualAt.y,CELL,1):{x:at.x*CELL,y:at.y*CELL,width:CELL,height:CELL,footY:(at.y+1)*CELL};
+  if(standing||type==='chest'){ctx.save();ctx.globalAlpha=(hero||visible(o.x,o.y)?1:.4)*presentation.opacity;drawFootShadow(ctx,visualAt.x,visualAt.y,CELL);ctx.restore();}
   queue.push({footY:box.footY,layer,x:at.x,draw(){ctx.save();ctx.globalAlpha=hero||visible(o.x,o.y)?1:.4;
    const oldPalette={g:palette.g,l:palette.l,r:palette.r,p:palette.p};if(enemy){if(type==='slime'){palette.g=theme.wallColor;palette.l='#c0c7b1';}else{palette.r=theme.floorColor;palette.p=theme.wallColor;}}
-   const footOffset=(hero||enemy)?actorFootOffset(sprites[type],box.height):0;
-   if(hero&&heroSheet)drawCharacter(ctx,heroSheet,heroFrame,at.x,at.y);else sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
+   const footOffset=enemy?0:(hero?actorFootOffset(sprites[type],box.height):0);
+   if(hero&&heroSheet)drawCharacter(ctx,heroSheet,heroFrame,at.x,at.y,CELL);else sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
    // The chest artwork supplies its own latch: no oversized yellow lock rectangle.
-   if(o.type==='letter'){ctx.fillStyle='#292a26';ctx.fillRect(box.x+15,box.y+3,8,6);ctx.fillStyle='#e4dfc3';ctx.fillRect(box.x+16,box.y+4,6,4);}
-   if(enemy){if(o.boss){ctx.strokeStyle='#dfba6b';ctx.lineWidth=1;ctx.strokeRect(box.x-1,box.y+footOffset-1,box.width+2,box.height+2);}ctx.fillStyle='#a06c70';ctx.fillRect(box.x+6,box.y+footOffset-3,12,2);}
+   if(o.type==='letter'){ctx.fillStyle='#292a26';ctx.fillRect(box.x+40,box.y+8,21,16);ctx.fillStyle='#e4dfc3';ctx.fillRect(box.x+43,box.y+11,16,11);}
+   if(enemy){if(o.boss){ctx.strokeStyle='#dfba6b';ctx.lineWidth=3;ctx.strokeRect(box.x-3,box.y+footOffset-3,box.width+6,box.height+6);}ctx.fillStyle='#a06c70';ctx.fillRect(box.x+16,box.y+footOffset-8,32,5);}
    ctx.restore();}});
  }
  if(state.seen[stair.y][stair.x])entity(stair,'stairs',{standing:true});
@@ -116,9 +118,9 @@ function draw(){
  for(const e of state.enemies)if(visible(e.x,e.y))entity(e,e.type,{standing:true,layer:2,enemy:true});
  entity(state.player,'skeleton',{standing:true,layer:3,hero:true});
  for(const object of sceneDrawOrder(queue))object.draw();
- if(state.flash){ctx.fillStyle=state.flash.kind==='hurt'?'#e49a8c55':'#fff3b755';ctx.fillRect(state.flash.x*24,state.flash.y*24,24,24);}
+ if(state.flash){ctx.fillStyle=state.flash.kind==='hurt'?'#e49a8c55':'#fff3b755';ctx.fillRect(state.flash.x*CELL,state.flash.y*CELL,CELL,CELL);}
  const now=performance.now();damagePopups=damagePopups.filter(p=>damageFrame(p,now).alive);
- for(const p of damagePopups){if(!p.hero&&!visible(p.x,p.y))continue;const frame=damageFrame(p,now),at=p.hero?position:p;ctx.save();ctx.globalAlpha=frame.alpha;ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=2.5;ctx.strokeStyle='#200909';ctx.fillStyle='#ff5656';const x=at.x*24+12,y=at.y*24-7-frame.rise;ctx.strokeText(String(p.damage),x,y);ctx.fillText(String(p.damage),x,y);ctx.restore();}
+ for(const p of damagePopups){if(!p.hero&&!visible(p.x,p.y))continue;const frame=damageFrame(p,now),at=p.hero?position:p;ctx.save();ctx.globalAlpha=frame.alpha;ctx.font='bold 29px monospace';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=6;ctx.strokeStyle='#200909';ctx.fillStyle='#ff5656';const x=at.x*CELL+CELL/2,y=at.y*CELL-19-frame.rise*CELL/24;ctx.strokeText(String(p.damage),x,y);ctx.fillText(String(p.damage),x,y);ctx.restore();}
  ctx.restore();if(state.gimmick?.id==='fog'){ctx.fillStyle='#a6bdc620';ctx.fillRect(0,0,map.width,map.height);}drawAutoMap();
 }
 
@@ -306,7 +308,7 @@ $('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-d
  motion=null;save();render();debugStatus(message);});
 $('debug-import').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const loaded=normalizeSave(JSON.parse(await file.text()));if(!loaded)throw Error('このゲームの有効なセーブではありません');if(confirm('選択したセーブで現在の進行と図鑑・達成記録を置き換えますか？')){try{localStorage.setItem(key+'-before-import',JSON.stringify(state));}catch{}state=loaded;resetHeroVisual();motion=null;paused=true;dialogWasPaused=true;save();render();debugStatus('セーブを読み込みました');}}catch(err){debugStatus('読み込み失敗：'+err.message);}e.target.value='';};
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
-function loop(t){const visualActive=!showingTitle&&state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]');if(visualActive&&lastVisualTime!==null)heroClock+=Math.max(0,Math.min(100,t-lastVisualTime));lastVisualTime=t;if(!showingTitle&&state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]')&&t-last>420/speed){last=t;const old=state.phase;motion={from:{...state.player},time:t,duration:reducedMotion.matches?1:Math.min(190,340/speed)};tick(state);if(Math.abs(state.player.x-heroVisual.x)+Math.abs(state.player.y-heroVisual.y)>1)heroVisual.teleport(state.player.x,state.player.y,heroClock);else heroVisual.moveTo(state.player.x,state.player.y,heroClock,motion.duration);const heroHit=(state.damageEvents||[]).find(e=>!e.hero);if(heroHit)heroVisual.attackTo(heroHit.x,heroHit.y,heroClock,Math.max(40,Math.min(140,200/speed)));damagePopups=queueDamage(damagePopups,state.damageEvents||[],t);if(Math.abs(state.player.x-motion.from.x)+Math.abs(state.player.y-motion.from.y)>1)motion=null;if(state.flash?.kind==='hit')tone(180);if(state.phase!==old){motion=null;heroVisual.teleport(state.player.x,state.player.y,heroClock);tone(state.phase==='dead'?110:660);}render();}if(state.phase==='explore'&&(!paused||motion&&t-motion.time<motion.duration+50)||damagePopups.length)draw();requestAnimationFrame(loop);}
+function loop(t){const visualActive=!showingTitle&&(state.phase==='dead'||state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]'));if(visualActive&&lastVisualTime!==null)heroClock+=Math.max(0,Math.min(100,t-lastVisualTime));lastVisualTime=t;if(!showingTitle&&state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]')&&t-last>420/speed){last=t;const old=state.phase;motion={from:{...state.player},time:t,duration:reducedMotion.matches?1:Math.min(190,340/speed)};tick(state);if(Math.abs(state.player.x-heroVisual.x)+Math.abs(state.player.y-heroVisual.y)>1)heroVisual.teleport(state.player.x,state.player.y,heroClock);else heroVisual.moveTo(state.player.x,state.player.y,heroClock,motion.duration);const heroHit=(state.damageEvents||[]).find(e=>!e.hero);if(heroHit)heroVisual.attackTo(heroHit.x,heroHit.y,heroClock,characterAttackDuration(heroSheet?.definition,speed));damagePopups=queueDamage(damagePopups,state.damageEvents||[],t);if(Math.abs(state.player.x-motion.from.x)+Math.abs(state.player.y-motion.from.y)>1)motion=null;if(state.flash?.kind==='hit')tone(180);if(state.phase!==old){motion=null;if(state.phase==='dead')heroVisual.die(heroClock);else heroVisual.teleport(state.player.x,state.player.y,heroClock);tone(state.phase==='dead'?110:660);}render();}if(state.phase==='explore'&&(!paused||motion&&t-motion.time<motion.duration+50)||damagePopups.length||state.phase==='dead'&&heroClock-heroVisual.since<800)draw();requestAnimationFrame(loop);}
 new ResizeObserver(()=>draw()).observe($('map'));
 const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap'),gap=wrap.clientWidth<=480?8:20;$('workspace').style.setProperty('--shared-hud-space',($('hud-top').offsetTop+$('hud-top').offsetHeight+gap)+'px');wrap.style.setProperty('--hud-top-space',($('hud-top').offsetHeight+gap)+'px');wrap.style.setProperty('--hud-bottom-space',($('hud-bottom').offsetHeight+gap)+'px');const available=wrap.clientHeight-$('hud-top').offsetHeight-$('hud-bottom').offsetHeight-$('field-log-host').offsetHeight-52;wrap.style.setProperty('--minimap-limit',Math.max(64,(available-22)*31/23)+'px');});hudObserver.observe($('hud-top'));hudObserver.observe($('hud-bottom'));hudObserver.observe($('field-log-host'));
 installCardDragging($('tab-content'),()=>state,()=>{delete $('tab-content').dataset.orderSignature;render();});

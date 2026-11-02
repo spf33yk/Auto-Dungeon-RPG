@@ -38,10 +38,12 @@ for(const match of html.matchAll(/\.\/art\/characters\/[^"\s?]*sprites\.json(?:\
  const file=match[0].split('?')[0].slice(2),definition=JSON.parse(readFileSync(root+file,'utf8'));
  const image=file.slice(0,file.lastIndexOf('/')+1)+definition.image.split('?')[0];
  if(definition.image.split('?v=')[1]!==version(image))throw Error('Character image version is stale: run build-character-sheet.js for '+file);
+ if(definition.directionsImage){const directionImage=file.slice(0,file.lastIndexOf('/')+1)+definition.directionsImage.split('?')[0];if(definition.directionsImage.split('?v=')[1]!==version(directionImage))throw Error('Character direction image version is stale: '+file);}
+ if(definition.effect){const effectImage=file.slice(0,file.lastIndexOf('/')+1)+definition.effect.image.split('?')[0];if(definition.effect.image.split('?v=')[1]!==version(effectImage))throw Error('Character effect image version is stale: '+file);}
  updated=updated.replaceAll(match[0],'./'+file+'?v='+version(file));
 }
 for(const file of ['style.css','screens.css'])updated=updated.replace(new RegExp('href="\\./'+file.replace('.', '\\.')+'(?:\\?v=[^"]*)?"'),'href="./'+file+'?v='+version(file)+'"');
-for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','terrain/crypt/atlas-32.png','props/atlas-32.png','props/map-items-32.png']){
+for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','terrain/crypt/atlas-zones-64.png','props/atlas-64.png','props/map-items-64.png','enemies/atlas-64.png']){
  const asset='./art/'+file;
  updated=updated.replace(new RegExp('\\./art/'+file.replaceAll('.','\\.')+'(?:\\?v=[^"\\s>]*)?','g'),asset+'?v='+version('art/'+file));
 }
