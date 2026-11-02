@@ -1,0 +1,16 @@
+{
+  "art_source": "host_image",
+  "route": "image_gen",
+  "date": "2026-11-03",
+  "model": "not exposed by host tool",
+  "estimateUsd": null,
+  "sourceHashes": {
+    "floors-source.png": "002062915b17799a0b2506fcffb0fe3bb0dcee010b58632e3408c67d82b6379b",
+    "enemies-source.png": "6e04be87d3f4edf9cf451d5f2e83a90c6c18d23ef5dd76c433890ab1af17e431"
+  },
+  "runtimeHashes": {
+    "art/terrain/floors-v2/atlas-64.png": "702425fb5b6e3a4b62a604fb198fc064250b66661e3f2ad41b55c9387edf58c2",
+    "art/enemies/v2/atlas-64.png": "3149ffdfa138baaf82a7d245ff1e32cb7139e4e9ef171aa77dc503182bbe8aca"
+  },
+  "processor": "scripts/build-environment-refresh.py"
+}

@@ -7,7 +7,7 @@ test('portrait and landscape cameras fit the full sight range without stretching
    const x=(center.x+dx*64-c.left)*c.scale,y=(center.y+dy*64-c.top)*c.scale;
    assert.ok(x>=0&&x<=width&&y>=0&&y<=height);
   }
-  assert.ok(Math.abs(c.scale*64-Math.min(width,height)/(2*Math.ceil(sight)+7))<1e-8);
+  assert.ok(Math.abs(c.scale*64-Math.min(width,height)/(2*Math.ceil(sight)+5))<1e-8);
  }
 });
 import {cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';

@@ -13,7 +13,7 @@ export function autoMapModel(s,visible){
 
 // The camera follows the interpolated hero; padding keeps the full sight square on screen.
 export function cameraFor(position,sight,width=744,height=552){
- const cell=64,rows=2*Math.ceil(sight)+7,scale=Math.min(width,height)/(rows*cell);
+ const cell=64,rows=2*Math.ceil(sight)+5,scale=Math.min(width,height)/(rows*cell);
  return {scale,left:(position.x+.5)*cell-width/scale/2,top:(position.y+.5)*cell-height/scale/2,rows:height/(cell*scale),columns:width/(cell*scale)};
 }
 

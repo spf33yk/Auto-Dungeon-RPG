@@ -1,3 +1,4 @@
+import {drawEnemySprite,drawEnemyLabel,layoutEnemyLabels} from './enemy-view.js';
 import {skinById,nextPreparationSkin} from './preparation-skins.js';
 import {CharacterAnimation,loadCharacterSheet,drawCharacter,characterFrame,characterPresentation,characterAttackDuration} from './character-animation.js';
 import {loadWallTilesets} from './wall-tileset.js';
@@ -8,7 +9,7 @@ import {forecastSummary} from './forecast-view.js';
 import {MEMORY_SHADE,dimmedWallTileset,floorLight,actorFootOffset,renderSightState} from './scene-lighting.js';
 import {standingBox,sceneDrawOrder,drawFootShadow} from './scene-depth.js';
 import {drawProp,drawMapProp} from './prop-view.js';
-import {drawCryptTile,drawRaisedWall} from './terrain-view.js';
+import {drawFloorTexture,drawRaisedWall} from './terrain-view.js';
 import {requestLandscapeDisplay,sceneLayout} from './display-mode.js';
 import {openingVariant} from './opening.js';
 import {createLogVisibility} from './log-visibility.js';
@@ -91,7 +92,7 @@ function draw(){
  for(let y=0;y<state.grid.length;y++)for(let x=0;x<state.grid[y].length;x++){
   if((x+1)*CELL<camera.left||x*CELL>camera.left+map.width/camera.scale||(y+1)*CELL<camera.top||(y-1)*CELL>camera.top+map.height/camera.scale)continue;
   const floor=Boolean(surface[y][x]),light=floorLight(state.seen[y][x],visible(x,y));if(floor&&light==='hidden')continue;const px=x*CELL,py=y*CELL,n=(x*17+y*31+state.seed)%13;
-  if(!(floor&&drawCryptTile(ctx,cryptAtlas,surface,x,y,state.seed,CELL,true,theme.index))){
+  if(!(floor&&drawFloorTexture(ctx,cryptAtlas,x,y,theme.index,CELL))){
    ctx.fillStyle=floor?theme.floorColor:'#0c1416';ctx.fillRect(px,py,CELL,CELL);
    if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+13+n*2,py+21,5,5);}
   }
@@ -106,10 +107,10 @@ function draw(){
   queue.push({footY:box.footY,layer,x:at.x,draw(){ctx.save();ctx.globalAlpha=hero||visible(o.x,o.y)?1:.4;
    const oldPalette={g:palette.g,l:palette.l,r:palette.r,p:palette.p};if(enemy){if(type==='slime'){palette.g=theme.wallColor;palette.l='#c0c7b1';}else{palette.r=theme.floorColor;palette.p=theme.wallColor;}}
    const footOffset=enemy?0:(hero?actorFootOffset(sprites[type],box.height):0);
-   if(hero&&heroSheet)drawCharacter(ctx,heroSheet,heroFrame,at.x,at.y,CELL);else sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
+   if(hero&&heroSheet)drawCharacter(ctx,heroSheet,heroFrame,at.x,at.y,CELL);else if(!enemy||!drawEnemySprite(ctx,enemyAtlas,o,box))sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
    // The chest artwork supplies its own latch: no oversized yellow lock rectangle.
    if(o.type==='letter'){ctx.fillStyle='#292a26';ctx.fillRect(box.x+40,box.y+8,21,16);ctx.fillStyle='#e4dfc3';ctx.fillRect(box.x+43,box.y+11,16,11);}
-   if(enemy){if(o.boss){ctx.strokeStyle='#dfba6b';ctx.lineWidth=3;ctx.strokeRect(box.x-3,box.y+footOffset-3,box.width+6,box.height+6);}ctx.fillStyle='#a06c70';ctx.fillRect(box.x+16,box.y+footOffset-8,32,5);}
+
    ctx.restore();}});
  }
  if(state.seen[stair.y][stair.x])entity(stair,'stairs',{standing:true});
@@ -118,6 +119,7 @@ function draw(){
  for(const e of state.enemies)if(visible(e.x,e.y))entity(e,e.type,{standing:true,layer:2,enemy:true});
  entity(state.player,'skeleton',{standing:true,layer:3,hero:true});
  for(const object of sceneDrawOrder(queue))object.draw();
+ for(const label of layoutEnemyLabels(state.enemies.filter(enemy=>visible(enemy.x,enemy.y)),CELL))drawEnemyLabel(ctx,label.enemy,CELL,label.offset);
  if(state.flash){ctx.fillStyle=state.flash.kind==='hurt'?'#e49a8c55':'#fff3b755';ctx.fillRect(state.flash.x*CELL,state.flash.y*CELL,CELL,CELL);}
  const now=performance.now();damagePopups=damagePopups.filter(p=>damageFrame(p,now).alive);
  for(const p of damagePopups){if(!p.hero&&!visible(p.x,p.y))continue;const frame=damageFrame(p,now),at=p.hero?position:p;ctx.save();ctx.globalAlpha=frame.alpha;ctx.font='bold 29px monospace';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=6;ctx.strokeStyle='#200909';ctx.fillStyle='#ff5656';const x=at.x*CELL+CELL/2,y=at.y*CELL-19-frame.rise*CELL/24;ctx.strokeText(String(p.damage),x,y);ctx.fillText(String(p.damage),x,y);ctx.restore();}

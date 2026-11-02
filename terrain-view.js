@@ -1,5 +1,7 @@
 import {drawWallParts,wallDrawBox} from './wall-tileset.js';
 export const TERRAIN_TILE_PIXELS=64;
+export function floorTextureFrame(zoneIndex=0){const index=Math.max(0,Math.min(9,Math.floor(Number.isFinite(zoneIndex)?zoneIndex:0)));return {x:index%4*64,y:Math.floor(index/4)*64,width:64,height:64};}
+export function drawFloorTexture(ctx,atlas,x,y,zoneIndex=0,size=64){if(!atlas.complete||atlas.naturalWidth!==256||atlas.naturalHeight!==256)return false;const f=floorTextureFrame(zoneIndex);ctx.imageSmoothingEnabled=false;ctx.drawImage(atlas,f.x,f.y,64,64,x*size,y*size,size,size);return true;}
 // Pure visual hash: never consume the game's random stream.
 export function cryptTileFrame(walkable,x,y,seed){
  let hash=Math.imul(x+1,73856093)^Math.imul(y+1,19349663)^(seed|0);
