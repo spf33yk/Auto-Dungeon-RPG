@@ -102,5 +102,7 @@
       "id": "swift-ascent",
       "index": 18
     }
-  ]
+  ],
+  "imageExtension": "webp",
+  "background": "transparent"
 }

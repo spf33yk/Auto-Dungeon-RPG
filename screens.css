@@ -583,3 +583,6 @@ button.illustrated-augment{cursor:pointer;transition:transform .15s,filter .15s}
 @media(max-height:500px){#augment-dialog{padding:10px 14px}#augment-dialog h2{font-size:19px}#augment-dialog>p{font-size:11px;margin-bottom:5px}.illustrated-augment{height:clamp(220px,65dvh,300px)}.augment-card-content{gap:4px}.augment-card-content>strong{font-size:16px}.augment-effect{font-size:11px;line-height:1.5}.augment-theme{font-size:9px}.augment-card-content>.augment-illustration{height:34%}}
 .augment-illustration{mix-blend-mode:screen}.illustrated-augment.NORMAL .augment-frame{filter:grayscale(.72) brightness(.95)}
 @media(max-width:620px) and (orientation:portrait){.augment-choices{justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:12px}.augment-choices .illustrated-augment{height:360px;scroll-snap-align:center}}
+
+/* Transparent ornament panels: only artwork and text remain visible. */
+.illustrated-augment,button.illustrated-augment:hover{background:transparent}.augment-chip.illustrated-chip{background:transparent;box-shadow:none}.augment-illustration{mix-blend-mode:normal}

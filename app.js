@@ -201,7 +201,6 @@ function render(){
  $('notice-hint').innerHTML=hint?'<div class="clear-hint"><h3>'+esc(displayStoryText(hint.title.replace(/^次は/,''),state.profile.normalClears))+'</h3><p>'+esc(displayStoryText(hint.text,state.profile.normalClears))+'</p></div>':'';
  $('primary').innerHTML=({awakening:'思い出す',prepare:'探索を始める',cleared:state.floor===LAST_FLOOR?'地上1Fへ':'準備画面へ',dead:'B30で再び目覚める',ending:'次の旅をはじめる'})[state.phase]||'';
  $('primary').hidden=state.phase==='explore';$('pause-toggle').hidden=state.phase!=='explore';$('explore-abandon').hidden=state.phase!=='explore';$('pause-toggle').textContent=paused?'探索を再開':'ひとやすみ';
- $('prep-note').textContent='能力強化・指示枠の拡張・装備変更は準備中のみ。再生・転移はカード配置、オーグメントは自動適用。';
  renderJourneyLog();
  $('memory-count').textContent=`記憶の断片 ${state.memories.length} / 4 · 通常エンド ${state.profile.normalClears}回`;
  $('memory-quote').textContent=displayStoryText(state.memories.at(-1)||openingThought(runClears),runClears);

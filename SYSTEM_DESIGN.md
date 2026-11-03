@@ -676,3 +676,8 @@ reinforcements.jsのspawnReinforcementをtick終端（Clear判定後、探索継
 増援は300ターンから60ターン固定間隔へ変更。「駆け上がる記憶」（焦燥・NORMAL、300ターン未満のClearで最大HP15%切上げ回復）を追加し全19種。新規制作したイラスト19点と透過装飾枠を選択・図鑑・準備に共用。指示行は土台とカードをまとめて掴む表示へ変更し、優先度番号のフォントと中央位置を調整。保存v16を維持し、詳細はSPECの最新節。素材規格は[augment-art/v1](art/ui/augments-v1/README.md)。
 
 augment-art.jsはformatと完成画像からupdate-assets.jsが生成するキャッシュ付きURLマップ。augment-view.jsが選択／図鑑／準備の共通描画を担当。clearAugmentHealingはClear判定時の回復量を計算する。installCardDraggingはrowの場合だけboard-rule全体をクローンし、座標・等倍率・スクロール位置を維持。番号中心は既存layout.jsonを使用する。
+
+
+## 2026-11-03：透過素材と説明の整理
+
+オーグメントの枠内外・アイコン周囲を透過し、選択／準備／図鑑へ共通適用。アイコン19点はalpha付きWebPへ移行（画像一式約727KiB）。準備の指定説明3箇所と✦、全図鑑のCODEXを削除。保存・進行・バランスは変更なし。詳細はSPECの最新節、素材はart/ui/augments-v1/README.md。
