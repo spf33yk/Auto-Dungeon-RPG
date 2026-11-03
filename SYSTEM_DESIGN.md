@@ -669,3 +669,10 @@ augments.jsが定義・候補抽選・選択・加算効果・致命傷耐久を
 敵は300ターン以降に繰り返し出現し、長期滞在で強化。増援は経験値・欠片・ドロップなし。「装備を取得」「回復品を取得」を削除し、武器・防具・薬草・泉で個別指定する。保存v16、カード29種。旧セーブは対応する個別カードを補填し、旧行を武器／薬草へ変換する。数値は仮採用で、詳細はSPEC末尾のv16節。追加案は[未決定の提案](docs/cards/EXPANSION_PROPOSALS.md)へ分けて記録。
 
 reinforcements.jsのspawnReinforcementをtick終端（Clear判定後、探索継続時のみ）に呼ぶ。既存の保存rngStateとstepsで周期・地点・種類を決める。敵のreinforcement/reinforcementTier属性で報酬と能力を区別し、ボス生成系には接続しない。retired-cards.jsが旧カード所持・図鑑・配置行・未開封箱を変換する。デバッグ停止はdebugUsedかつdebugNoReinforcementsの場合のみ有効。
+
+
+## 2026-11-03：イラスト付きオーグメントと行ドラッグ
+
+増援は300ターンから60ターン固定間隔へ変更。「駆け上がる記憶」（焦燥・NORMAL、300ターン未満のClearで最大HP15%切上げ回復）を追加し全19種。新規制作したイラスト19点と透過装飾枠を選択・図鑑・準備に共用。指示行は土台とカードをまとめて掴む表示へ変更し、優先度番号のフォントと中央位置を調整。保存v16を維持し、詳細はSPECの最新節。素材規格は[augment-art/v1](art/ui/augments-v1/README.md)。
+
+augment-art.jsはformatと完成画像からupdate-assets.jsが生成するキャッシュ付きURLマップ。augment-view.jsが選択／図鑑／準備の共通描画を担当。clearAugmentHealingはClear判定時の回復量を計算する。installCardDraggingはrowの場合だけboard-rule全体をクローンし、座標・等倍率・スクロール位置を維持。番号中心は既存layout.jsonを使用する。

@@ -44,7 +44,7 @@ function renderCardBoard(host,s,capacity){
   const insertion=i=>r.conditions.length+2<cardCapacity(s)?`<span class="condition-insertion"><button type="button" class="insert-condition" data-insert-condition data-drop-slot="${index}|condition|${i}|insert" aria-label="指示${index+1}の条件${i+1}の位置に追加">＋条件</button></span>`:'';
   const conditions=r.conditions.map((c,ci)=>insertion(ci)+cardSlot('condition',ci,`条件${ci+1}`,conditionName(c))).join('');
   const empty=insertion(r.conditions.length);
-  return `<article class="board-rule" data-card-row="${index}" data-drop-row="${index}"><div class="tray-scroll" tabindex="0" aria-label="指示${index+1}のカード列・横スクロール"><div class="tray-surface"><button type="button" class="row-handle" data-drag-source="row|${index}" data-drop-row="${index}" aria-label="指示${index+1}を移動">${index+1}</button><div class="board-slots">${cardSlot('target',0,'ターゲット',target.name)}${conditions}${empty}${cardSlot('effect',0,r.effect.kind==='skill'?'スキル':'アクション',effect.name)}</div></div></div><div class="tray-caption"><span>${r.conditions.length+2} / ${cardCapacity(s)}枚 · ${esc(describeCardRule(r))}</span></div></article>`;
+  return `<article class="board-rule" data-card-row="${index}" data-drop-row="${index}"><div class="tray-scroll" tabindex="0" aria-label="指示${index+1}のカード列・横スクロール"><div class="tray-surface"><button type="button" class="row-handle" data-drag-source="row|${index}" data-drop-row="${index}" aria-label="指示${index+1}を移動"><span class="priority-number">${index+1}</span></button><div class="board-slots">${cardSlot('target',0,'ターゲット',target.name)}${conditions}${empty}${cardSlot('effect',0,r.effect.kind==='skill'?'スキル':'アクション',effect.name)}</div></div></div><div class="tray-caption"><span>${r.conditions.length+2} / ${cardCapacity(s)}枚 · ${esc(describeCardRule(r))}</span></div></article>`;
  }).join('')}</div></section></div><p class="card-help">番号で行を並べ替え。カードを一覧へ戻して外す（対象・実行は行ごと削除）。探索中は編集できません。</p></div>`;
  selectSource(host,'',s);
 }
@@ -91,17 +91,18 @@ export function installCardDragging(host,getState,onCommit){
  const clearDrag=drag=>{host.querySelector('[data-drop-return]')?.classList.remove('return-ready');drag?.element?.classList.remove('is-drag-source');ghost?.remove();ghost=null;host.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));};
  host.addEventListener('pointerdown',e=>{
   const source=e.target.closest('[data-drag-source]');if(!source||source.disabled||getState().phase!=='prepare'||e.button!==0)return;
-  const rect=source.getBoundingClientRect(),style=getComputedStyle(source),width=parseFloat(style.width),height=parseFloat(style.height);
-  pending={id:e.pointerId,source:source.dataset.dragSource,element:source,style,width,height,scale:rect.width/width,grabX:e.clientX-rect.left,grabY:e.clientY-rect.top,x:e.clientX,y:e.clientY,dragging:false};
+  const rowDrag=source.dataset.dragSource.startsWith('row|'),dragElement=rowDrag?source.closest('[data-card-row]'):source;
+  const rect=dragElement.getBoundingClientRect(),style=getComputedStyle(dragElement),width=parseFloat(style.width),height=parseFloat(style.height);
+  pending={id:e.pointerId,source:source.dataset.dragSource,element:dragElement,rowDrag,scrollLeft:dragElement.querySelector('.tray-scroll')?.scrollLeft||0,style,width,height,scale:rect.width/width,grabX:e.clientX-rect.left,grabY:e.clientY-rect.top,x:e.clientX,y:e.clientY,dragging:false};
  });
  document.addEventListener('pointermove',e=>{
   if(!pending||pending.id!==e.pointerId)return;
   if(!pending.dragging&&Math.hypot(e.clientX-pending.x,e.clientY-pending.y)>7){
    pending.dragging=true;selectSource(host,pending.source,getState(),false);
-   ghost=document.createElement('div');ghost.className='card-drag-ghost fitted-card-editor';ghost.setAttribute('aria-hidden','true');
-   const clone=pending.element.cloneNode(true),cs=pending.style;clone.classList.remove('selected-card','valid-drop','invalid-drop','drop-hover');clone.removeAttribute('id');clone.tabIndex=-1;
+   ghost=document.createElement('div');ghost.className='card-drag-ghost fitted-card-editor'+(pending.rowDrag?' dragging-row':'');ghost.setAttribute('aria-hidden','true');
+   const clone=pending.element.cloneNode(true),cs=pending.style;clone.classList.remove('selected-card','valid-drop','invalid-drop','drop-hover');clone.classList.remove('row-drop-ready','is-drag-source');clone.querySelectorAll('.selected-card,.valid-drop,.invalid-drop,.drop-hover').forEach(el=>el.classList.remove('selected-card','valid-drop','invalid-drop','drop-hover'));clone.removeAttribute('id');clone.tabIndex=-1;
    Object.assign(clone.style,{width:pending.width+'px',height:pending.height+'px',minWidth:'0',minHeight:'0',margin:'0',flex:'none',opacity:'1',position:'relative',font:cs.font,color:cs.color,padding:cs.padding,border:cs.border,backgroundImage:cs.backgroundImage,backgroundSize:cs.backgroundSize,backgroundPosition:cs.backgroundPosition,pointerEvents:'none'});
-   ghost.style.width=pending.width+'px';ghost.style.height=pending.height+'px';ghost.appendChild(clone);document.body.appendChild(ghost);pending.element.classList.add('is-drag-source');
+   ghost.style.width=pending.width+'px';ghost.style.height=pending.height+'px';ghost.appendChild(clone);document.body.appendChild(ghost);if(pending.rowDrag){const viewport=clone.querySelector('.tray-scroll');if(viewport)viewport.scrollLeft=pending.scrollLeft;}pending.element.classList.add('is-drag-source');
   }
   if(!pending.dragging)return;e.preventDefault();ghost.style.transform=`translate(${e.clientX-pending.grabX}px,${e.clientY-pending.grabY}px) scale(${pending.scale})`;
   const under=document.elementFromPoint(e.clientX,e.clientY),scroll=under?.closest('.card-library-list,.instruction-trays,.card-rules');if(scroll){const r=scroll.getBoundingClientRect();if(e.clientY<r.top+24)scroll.scrollTop-=12;else if(e.clientY>r.bottom-24)scroll.scrollTop+=12;}

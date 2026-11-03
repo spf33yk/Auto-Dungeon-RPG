@@ -18,6 +18,7 @@ export const augments=[
  ['shell','満月の守り','満月','NORMAL','HP80%以上の間、防御力+3。'],
  ['patience','熟成の鎧','熟成','EPIC','この階の50ターンごとに防御力+1、最大+6。'],
  ['rush','焦燥の鋭刃','焦燥','EPIC','この階の最初の60ターン、会心率+25%。'],
+ ['swift-ascent','駆け上がる記憶','焦燥','NORMAL','300ターン未満でClearすると最大HPの15%回復（切上げ）。'],
 ].map(([id,name,theme,rarity,detail])=>({id,name,theme,rarity,detail}));
 export const augmentById=Object.fromEntries(augments.map(a=>[a.id,a]));
 export const hasAugment=(s,id)=>(s.augments||[]).includes(id);
@@ -29,3 +30,5 @@ export function augmentBonus(s,maxHp,visibleEnemies=0){const has=id=>hasAugment(
  critical:(has('critical')?.10:0)+(has('hunter')?Math.min(.40,(s.floorKills||0)*.04):0)+(has('rush')&&steps<=60?.25:0),
  leech:(has('leech')?.05:0)+(has('blood')?missing*.20:0),charged:has('charge')&&(s.unharmedTurns||0)>=10};}
 export function takeHeroDamage(s,damage){s.unharmedTurns=0;if(damage>=s.hp&&hasAugment(s,'undying')&&!s.undyingUsed){s.hp=1;s.undyingUsed=true;return true;}s.hp=Math.max(0,s.hp-damage);return false;}
+
+export function clearAugmentHealing(s,maxHp){return hasAugment(s,'swift-ascent')&&s.steps<300?Math.max(0,Math.min(maxHp-s.hp,Math.ceil(maxHp*.15))):0;}

@@ -1,0 +1,106 @@
+{
+  "schema": "augment-art/v1",
+  "sourceWidth": 1003,
+  "sourceHeight": 1568,
+  "columns": [
+    0,
+    250,
+    500,
+    751,
+    1003
+  ],
+  "rows": [
+    0,
+    311,
+    623,
+    901,
+    1195,
+    1516
+  ],
+  "iconCanvas": {
+    "width": 192,
+    "height": 240
+  },
+  "frameCanvas": {
+    "width": 384,
+    "height": 576
+  },
+  "icons": [
+    {
+      "id": "ripen",
+      "index": 0
+    },
+    {
+      "id": "haste",
+      "index": 1
+    },
+    {
+      "id": "pilgrim",
+      "index": 2
+    },
+    {
+      "id": "desperate",
+      "index": 3
+    },
+    {
+      "id": "undying",
+      "index": 4
+    },
+    {
+      "id": "blood",
+      "index": 5
+    },
+    {
+      "id": "thorns",
+      "index": 6
+    },
+    {
+      "id": "charge",
+      "index": 7
+    },
+    {
+      "id": "hunter",
+      "index": 8
+    },
+    {
+      "id": "moon",
+      "index": 9
+    },
+    {
+      "id": "surrounded",
+      "index": 10
+    },
+    {
+      "id": "nova",
+      "index": 11
+    },
+    {
+      "id": "critical",
+      "index": 12
+    },
+    {
+      "id": "leech",
+      "index": 13
+    },
+    {
+      "id": "double-strike",
+      "index": 14
+    },
+    {
+      "id": "shell",
+      "index": 15
+    },
+    {
+      "id": "patience",
+      "index": 16
+    },
+    {
+      "id": "rush",
+      "index": 17
+    },
+    {
+      "id": "swift-ascent",
+      "index": 18
+    }
+  ]
+}

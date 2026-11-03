@@ -1,6 +1,6 @@
 import{spawnReinforcement}from'./reinforcements.js';
 import{retiredCollectionCards,migrateRetiredCards}from'./retired-cards.js';
-import{augments,augmentById,hasAugment,offerAugments,chooseAugment,augmentBonus,takeHeroDamage}from'./augments.js';
+import{augments,augmentById,hasAugment,offerAugments,chooseAugment,augmentBonus,takeHeroDamage,clearAugmentHealing}from'./augments.js';
 export{augments,augmentById,offerAugments,chooseAugment};
 import {bossArena} from './boss-arena.js';
 import {generateDungeonLayout} from './dungeon-layout.js';
@@ -174,7 +174,7 @@ export function tick(s){
  const bossAlive=s.enemies.some(e=>e.boss);
  if(bossAlive&&(sealedStart||key(s.player)===key(s.stairs)))s.intent='階段は封印中。中ボスを倒す必要がある';
  const done=Boolean(action?.exit)&&!bossAlive;
- if(done&&key(s.player)===key(s.stairs)){const reward=8+Math.floor(s.floor/3);s.shards+=reward;s.phase='cleared';s.nextHint=nextStageHint(s);log(s,`${floorLabel(s)} Clear。記憶の欠片 +${reward}`,'good');const memory=storyFragment(s.floor,s.profile.normalClears);if(memory){s.memories.push(memory);log(s,memory,'story');}}
+ if(done&&key(s.player)===key(s.stairs)){const reward=8+Math.floor(s.floor/3);s.shards+=reward;s.phase='cleared';const heal=clearAugmentHealing(s,stats(s).maxHp);if(heal){s.hp+=heal;log(s,'駆け上がる記憶。HP +'+heal,'good');}s.nextHint=nextStageHint(s);log(s,`${floorLabel(s)} Clear。記憶の欠片 +${reward}`,'good');const memory=storyFragment(s.floor,s.profile.normalClears);if(memory){s.memories.push(memory);log(s,memory,'story');}}
  if(s.phase==='explore'){const z=zoneFor(s),e=spawnReinforcement(s,{canSee,rng:()=>nextRandom(s),pool:monsters.filter(m=>m.id.startsWith('enemy-')&&m.zone===z.index)});if(e)log(s,'遠くで、新たな足音が響いた。長居は危険だ。','bad');}
 }
 export function ascend(s){if(s.phase!=='cleared')return false;if(s.floor===LAST_FLOOR){s.phase='ending';s.profile.normalClears++;if(!s.ownedCards.includes('action:letter'))grantCard(s,'action:letter');log(s,'地上で、若者が剣を抜いた。「魔物か」','story');log(s,'骸は言葉を伝えられないまま、若者の剣に倒れた。','story');return true;}s.floor++;s.phase='prepare';makeFloor(s);s.hp=Math.min(stats(s).maxHp,s.hp+Math.ceil(stats(s).maxHp*BALANCE.restRatio));log(s,`${floorLabel(s)}へ。休息して次の探索に備える。`,'good');return true;}
