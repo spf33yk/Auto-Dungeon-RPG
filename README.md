@@ -499,3 +499,6 @@ B20・B10・B1の固定部屋を上下左右対称へ変更。中央にボス、
 
 ### TRUE ENDまでの到達可否の検証
 2026-11-03時点でTRUE本編の分岐は未実装です。通常エンドと手紙所持の地上到達は可能ですが、TRUE達成にはなりません。302回の本番ロジック検証と時間換算は[検証報告](docs/verification/CLEARABILITY_2026-11-03.md)を参照。再現：node scripts/verify-clearability.js 100 test-results/clearability-audit-100.json。
+
+### 通知背景の調整
+ひとやすみ・フロアClearの背景を少し薄くし、背後のダンジョンが見えやすくなりました。

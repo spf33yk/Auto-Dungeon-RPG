@@ -638,3 +638,6 @@ boss-arena.jsのbossArenaが、マップ中心と共通部屋寸法から地形�
 
 ## 2026-11-03 到達性の検証手段
 scripts/verify-clearability.jsは検証専用の自動準備方針で、ゲームのAIやユーザー保存データを変更しない。本番newGame/tick/ascendとメニュー機能を使用し、全指示を所持・組合せ・枠数で検査する。初回成功のprofileからのみ2周目を開始し、階当たり2500ターンで診断打切り。TRUE分岐の合成検査は通常プレイ試行と区別する。報告とCSVはdocs/verificationに保持。
+
+## 2026-11-03 通知背景の描画
+map-noticeへ表示用data-kindを付与し、rest／clearedだけをCSSで背景alpha0.70へ変更する。通知の本文・操作ボタンは不透明度1を維持。data属性は保存データには含めない。
