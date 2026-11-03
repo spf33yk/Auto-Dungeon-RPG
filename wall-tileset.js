@@ -2,9 +2,8 @@
 export const WALL_PARTS=['cap','front','leftStart','leftMiddle','leftEnd','leftSingle','rightStart','rightMiddle','rightEnd','rightSingle'];
 export const WALL_ENTRANCES=['leftJamb','rightJamb','lintel','threshold'];
 export function wallNeighborMask(grid,x,y){return (!grid[y-1]?.[x]?1:0)|(!grid[y]?.[x+1]?2:0)|(!grid[y+1]?.[x]?4:0)|(!grid[y]?.[x-1]?8:0);}
-// A lower diagonal room corner continues the north-facing foreground rim.
-// Keep the logical 4-neighbour mask unchanged; only its displayed surface differs.
-export function wallRenderMask(grid,x,y){const mask=wallNeighborMask(grid,x,y),roomCorner=[-1,1].some(dx=>grid[y-1]?.[x+dx]&&grid[y-2]?.[x+dx]&&grid[y-1]?.[x+2*dx]);return mask===15&&roomCorner?14:mask;}
+// Diagonal floor never exposes a face on an otherwise buried wall.
+export function wallRenderMask(grid,x,y){return wallNeighborMask(grid,x,y);}
 export function validateWallAutotile(d){
  if(d?.format!=='wall-autotile'||![1,2].includes(d.version)||d.neighbors!==4||JSON.stringify(d.bitOrder)!==JSON.stringify(['north','east','south','west'])||![32,64].includes(d.tileSize))throw Error('Unsupported wall-autotile definition');
  const tile=d.tileSize;

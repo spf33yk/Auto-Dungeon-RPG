@@ -611,3 +611,6 @@ renderSightStateは確定済みstateを参照する。drawSightWallはwallDrawBo
 
 ## 2026-11-03 スキルと目覚めの描画
 skillCardsを全5種の単一リストとし、カード図鑑と編集一覧を共有。補助3種はmodifier:trueで通常の実行行選択から除外し、attackEnemyがcardModifierで条件を確認する。awake状態は保存フェイズを追加せず、awakening.jsの字幕列と経過時間をappの描画ループで管理。終了時のみbeginExploration。黒画面は固定全面表示しヘッダー・フッター・図鑑を隠す。埋め壁は天面64×64だけをマスへ描画し、入口パーツは表示マスク15では禁止。
+
+## 2026-11-03 埋め壁の角枠修正
+wallRenderMaskはwallNeighborMaskをそのまま返す。斜めの部屋から15を14へ変換する補正を廃止。表示15は既存の正方形天面描画と入口パーツ禁止を通り、周囲8マスの斜め4方向16組合せでも枠を生成しない。下側角の照明・形状の過去記述より本項を優先する。

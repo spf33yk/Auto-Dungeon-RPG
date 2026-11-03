@@ -1,6 +1,15 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {wallNeighborMask,validateWallTileset,drawWallParts} from './wall-tileset.js';import {readPng} from './test-support/png.js';
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {wallNeighborMask,wallRenderMask,wallDrawBox,validateWallTileset,drawWallParts} from './wall-tileset.js';import {readPng} from './test-support/png.js';
 const d=JSON.parse(readFileSync(new URL('./art/terrain/walls/crypt/tileset.json',import.meta.url))),image={complete:true,naturalWidth:d.width,naturalHeight:d.height};
 const gridFor=mask=>{const g=[[1,1,1],[1,0,1],[1,1,1]];for(const [bit,x,y]of [[1,1,0],[2,2,1],[4,1,2],[8,0,1]])if(mask&bit)g[y][x]=0;return g;};
+test('all diagonal room arrangements leave a four-sided buried wall frameless',()=>{
+ for(let diagonals=0;diagonals<16;diagonals++){
+  const grid=Array.from({length:7},()=>Array(7).fill(0));let bit=1;
+  for(const dy of [-1,1])for(const dx of [-1,1]){if(diagonals&bit)for(const yy of [dy,dy*2])for(const xx of [dx,dx*2])grid[3+yy][3+xx]=1;bit<<=1;}
+  assert.equal(wallNeighborMask(grid,3,3),15);assert.equal(wallRenderMask(grid,3,3),15);
+  const calls=[],ctx={drawImage(...args){calls.push(args);}};drawWallParts(ctx,{definition:d,image},grid,3,3,12,64,2);
+  assert.equal(calls.length,1,'buried tiles never receive entrance trims');assert.deepEqual(calls[0].slice(1),[...d.tiles[15][0].slice(0,3),64,192,192,64,64]);assert.equal(wallDrawBox(grid,3,3,.75,64).buried,true);
+ }
+});
 test('unified entrances share the wall image, geometry and shading instead of stretching legacy 32px trims',()=>{
  assert.equal(d.version,2);const p=readPng(new URL('./art/terrain/walls/crypt/autotile-64.png',import.meta.url));
  for(let part=0;part<4;part++){
