@@ -618,3 +618,7 @@ wallRenderMaskはwallNeighborMaskをそのまま返す。斜めの部屋から15
 ## 2026-11-03 BGM・通常エンド
 scene-music.jsのmusicSceneで画面分類し、単一のHTMLAudioElementをSceneMusicが管理。初回入力でunlock、ループ・音量・ミュート・非表示停止・再生拒否を扱う。同一分類でsrcを更新せず二重再生を防ぐ。indexのaudio data属性を曲対応表とし、update-assets.jsがMP3とWebPをバイナリでハッシュ化する。server.jsへaudio/mpeg・image/webpを追加。
 normal-ending.jsは時刻と通常エンド回数から字幕・黒転・完了を返す純粋関数。appのrenderNormalEndingと描画ループは一時的な演出経過だけを保持し、ゲームのendingフェイズを利用する。通常達成記録は従来のascend以外で更新しない。プレビュー中は探索tickも停止。画像は固定16:9の枠へobject-fit:containで表示、通常UIを隠す。
+
+## 2026-11-03 字幕コントローラーと異変曲
+subtitle-player.jsのSubtitlePlayerを目覚め／END／プレビューで共有。index、elapsed、全文表示フラグを保持し、Intl.Segmenterの書記素で45msごとに描画する。updateは次行へ進めずadvanceのみが全文化または次行へ遷移する。旧awakeningFrame／normalEndingFrameの自動時間送りを削除。content modulesは文章列だけを返す。文字送りクリック領域は字幕・画像とは別の全面透明button、設定・スキップ・結果を上位レイヤーに置く。
+musicSceneはbossFloorを優先し、その後gimmick.idからtraps／monsters／fogを選ぶ。デバッグ試聴の一時上書きmusicAuditionはゲームstateへ保存しない。字幕プレビューの種別とplayerも表示専用で、探索を停止する。
