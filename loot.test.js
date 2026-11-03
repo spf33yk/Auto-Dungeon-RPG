@@ -1,3 +1,4 @@
+import{grantCard}from'./card-inventory.js';
 import{withCardInventory}from'./test-support/card-fixture.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -52,17 +53,17 @@ test('regeneration is acquired from drops and fires once before enemy attacks',(
 });
 
 test('critical and extra strikes are probabilistic, bounded and never duplicate a kill',()=>{
- let critical=0,double=0;for(let seed=0;seed<1000;seed++){const s=arena(seed);s.abilities=['critical','double-strike'];const e=foe(s,{hp:1000});attackEnemy(s,e);if(s.logs.some(l=>l.text.startsWith('会心')))critical++;if(s.logs.some(l=>l.text.startsWith('追撃')))double++;assert.ok(e.hp>=1000-stats(s).attack*4);}
+ let critical=0,double=0;for(let seed=0;seed<1000;seed++){const s=arena(seed);for(const id of ['critical','double-strike'])grantCard(s,'skill:'+id);s.orders=['critical','double-strike'].map(id=>createCardRule('self',[],'skill',id));const e=foe(s,{hp:1000});attackEnemy(s,e);if(s.logs.some(l=>l.text.startsWith('会心')))critical++;if(s.logs.some(l=>l.text.startsWith('追撃')))double++;assert.ok(e.hp>=1000-stats(s).attack*4);}
  assert.ok(critical>65&&critical<160);assert.ok(double>25&&double<85);
- const s=arena(123);s.abilities=['double-strike'];const e=foe(s);attackEnemy(s,e);const snapshot=JSON.stringify(s);attackEnemy(s,e);assert.equal(s.kills,1);assert.equal(JSON.stringify(s),snapshot);
+ const s=arena(123);grantCard(s,'skill:double-strike');s.orders=[createCardRule('self',[],'skill','double-strike')];const e=foe(s);attackEnemy(s,e);const snapshot=JSON.stringify(s);attackEnemy(s,e);assert.equal(s.kills,1);assert.equal(JSON.stringify(s),snapshot);
 });
 
 test('leech heals from actual damage, never overkill and never beyond maximum HP',()=>{
- const s=arena();s.abilities=['leech'];s.hp=10;attackEnemy(s,foe(s,{hp:1}));assert.equal(s.hp,10);s.levels.power=5;s.gear.weapon={baseId:'weapon-9',plus:3,identified:true,cursed:false};s.hp=53;attackEnemy(s,foe(s,{hp:100}));assert.equal(s.hp,54);
+ const s=arena();grantCard(s,'skill:leech');s.orders=[createCardRule('self',[],'skill','leech')];s.hp=10;attackEnemy(s,foe(s,{hp:1}));assert.equal(s.hp,10);s.levels.power=5;s.gear.weapon={baseId:'weapon-9',plus:3,identified:true,cursed:false};s.hp=53;attackEnemy(s,foe(s,{hp:100}));assert.equal(s.hp,54);
 });
 
 test('saved RNG state produces identical future loot and combat after reload',()=>{
- const s=arena(77);s.abilities=['critical','double-strike','leech'];s.hp=20;nextRandom(s);reveal(s);const restored=normalizeSave(JSON.parse(JSON.stringify(s)));for(let i=0;i<20;i++){attackEnemy(s,foe(s,{hp:20}));attackEnemy(restored,foe(restored,{hp:20}));}assert.deepEqual(restored,s);
+ const s=arena(77);s.levels.commandSlots=1;for(const id of ['critical','double-strike','leech'])grantCard(s,'skill:'+id);s.orders=['critical','double-strike','leech'].map(id=>createCardRule('self',[],'skill',id));s.hp=20;nextRandom(s);reveal(s);const restored=normalizeSave(JSON.parse(JSON.stringify(s)));for(let i=0;i<20;i++){attackEnemy(s,foe(s,{hp:20}));attackEnemy(restored,foe(restored,{hp:20}));}assert.deepEqual(restored,s);
 });
 
 test('v8 migration refunds retired purchases once and keeps legacy boxes and records',()=>{

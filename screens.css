@@ -535,3 +535,10 @@ body.preparing #prepare-scene :is(.subtabs,.sort-controls) button.active{border-
 .card-codex-item{margin:0;align-items:stretch;border-left:3px solid #a7b5bf}.card-codex-item.EPIC{border-left-color:#bc8ee8}.card-codex-item.LEGENDARY{border-left-color:#e9c371}
 .card-codex-item>div{width:100%}.card-codex-item strong{display:block;margin:5px 0}.card-codex-item p{font-size:12px;line-height:1.6;white-space:normal}.rarity-badge{font:bold 10px sans-serif;letter-spacing:.06em;color:#cbd2d7}
 @media(max-width:600px){.card-codex-grid{grid-template-columns:1fr}}
+
+/* The awakening is a black stage, with no surrounding game chrome. */
+body.awakening{background:#000;overflow:hidden}body.awakening>header,body.awakening footer{display:none!important}
+body.awakening #awakening-scene{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;min-height:0;margin:0;padding:24px;border:0;border-radius:0;background:#000;color:#ece9e1;box-sizing:border-box}
+#awakening-scene[hidden],#awakening-start[hidden],#awakening-copy[hidden]{display:none!important}
+body.awakening #awakening-start{margin:0;width:auto}body.awakening #awakening-start .primary{width:auto;min-width:180px;background:transparent;border:1px solid #888;color:#ece9e1;font:22px serif;padding:18px 34px}
+body.awakening #awakening-copy{margin:0;max-width:90%;font:clamp(18px,2.2vw,32px)/2 serif;letter-spacing:.12em;text-align:center;color:#ece9e1}

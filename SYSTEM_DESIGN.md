@@ -602,9 +602,12 @@ character-animation.jsにcharacter-minimal-4dirの定義検査、屈伸の選択
 
 カードの区分・レアリティ・初期所持はcard-access.js、一覧と図鑑はcard-catalog.js、取得・抽選・移行はcard-inventory.js。card-orders.js／card-placement.jsで対象・条件・実行の所持を検査する。game-engine.jsは新規箱にcardIdを保存し、取得時に能力と図鑑を更新する。cardIdからchest-view.jsが赤箱・金エフェクトを決めるため、外観と実際の報酬が一致する。乱数は表示で消費しない。
 
-保存v14にownedCardsとprofile.cardsを追加。旧保存は設定中の指示とスキルを失わず移行。常時効果は従来のabilities経由で適用し、図鑑だけをカード形式へ統合する。wallSurfaceVisibleは壁用の表示照明を8近傍の見える床から算出。wallDrawBoxは北対角に床がある下側角も手前縁に分類する。AIのcanSee／lineOfSightとは分離。詳細はdocs/cards/CARD_SYSTEM.md。
+保存v14にownedCardsとprofile.cardsを追加。旧保存は設定中の指示とスキルを失わず移行。全5種をskillCardsへ統合。abilitiesは取得状態を保持し、補助3種の発動にはcardModifierによる配置・条件成立も必要。wallSurfaceVisibleは壁用の表示照明を8近傍の見える床から算出。wallDrawBoxは北対角に床がある下側角も手前縁に分類する。AIのcanSee／lineOfSightとは分離。詳細はdocs/cards/CARD_SYSTEM.md。
 
 補足：wallRenderMaskは北対角に床を持つ下側の埋没マスク15だけを、見た目用の北向き手前縁14へ置き換える。論理的な4近傍マスク・衝突は変更せず、完全に埋まった壁は15のまま。wallDrawBoxと照明も同じ角の扱いに揃える。
 
 ## 2026-11-03 視界描画の統一
 renderSightStateは確定済みstateを参照する。drawSightWallはwallDrawBoxの投影領域をワールド座標のCELL単位に分割し、canSeeが真の矩形だけをclipして明るい壁を重ねる。隣接床8方向で壁全体を点灯するwallSurfaceVisibleは廃止。床・壁・敵・ミニマップは同じ確定座標の視界を参照し、カメラの平滑移動から独立させる。低い手前縁と下側角の表示マスク処理は維持。
+
+## 2026-11-03 スキルと目覚めの描画
+skillCardsを全5種の単一リストとし、カード図鑑と編集一覧を共有。補助3種はmodifier:trueで通常の実行行選択から除外し、attackEnemyがcardModifierで条件を確認する。awake状態は保存フェイズを追加せず、awakening.jsの字幕列と経過時間をappの描画ループで管理。終了時のみbeginExploration。黒画面は固定全面表示しヘッダー・フッター・図鑑を隠す。埋め壁は天面64×64だけをマスへ描画し、入口パーツは表示マスク15では禁止。

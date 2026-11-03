@@ -34,9 +34,9 @@ export const skills = [
 // Provisional loot balance. Each enemy owns a rate and an explicit weighted item pool.
 export const rewardDefinitions=[
  {id:'mend',kind:'skill',name:'再生の祈り',detail:'条件カードに従い最大HP40%回復。各階1回、1ターン使用。宝箱のカードで取得し、準備でスキルカードを設定。'},
- {id:'critical',kind:'skill',name:'会心の記憶',detail:'各打撃で10%の確率で与ダメージ1.5倍（切上げ）。'},
- {id:'leech',kind:'skill',name:'吸命の記憶',detail:'実際に与えたダメージの5%を回復（切捨て、最大HPまで）。'},
- {id:'double-strike',kind:'skill',name:'追撃の記憶',detail:'通常打撃の後に5%の確率で追加の1打。同ターン1回まで。'},
+ {id:'critical',kind:'skill',name:'会心の記憶',detail:'配置した条件が成立中、各打撃で10%の確率で与ダメージ1.5倍（切上げ）。'},
+ {id:'leech',kind:'skill',name:'吸命の記憶',detail:'配置した条件が成立中、実際に与えたダメージの5%を回復（切捨て、最大HPまで）。'},
+ {id:'double-strike',kind:'skill',name:'追撃の記憶',detail:'配置した条件が成立中、通常打撃の後に5%の確率で追加の1打。同ターン1回まで。'},
  {id:'warp',kind:'order',name:'窮地の転移',detail:'敵が見え、設定したカード条件が成立するとランダムな床へ転移。各階1回。スキルカードとして設定が必要。'},
  {id:'avoid-traps',kind:'order',name:'罠を見切る',detail:'既知の未作動罠を避けて進む。通過時も罠を作動させない。指示枠への設定が必要。'},
 ];

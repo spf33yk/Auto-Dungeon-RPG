@@ -28,6 +28,9 @@ export const actionCards=[
 export const skillCards=[
  {id:'mend',name:'再生の祈り',detail:'条件成立時に最大HP40%回復。各階1回。',ability:'mend'},
  {id:'warp',name:'窮地の転移',detail:'条件成立時にランダムな床へ転移。各階1回。',reward:'warp'},
+ {id:'critical',name:'会心の記憶',detail:'配置した条件が成立中、各打撃で10%の確率でダメージ1.5倍（切上げ）。',ability:'critical',modifier:true},
+ {id:'leech',name:'吸命の記憶',detail:'配置した条件が成立中、実ダメージの5%を回復（切捨て）。',ability:'leech',modifier:true},
+ {id:'double-strike',name:'追撃の記憶',detail:'配置した条件が成立中、通常打撃後5%の確率で追加攻撃。同ターン1回まで。',ability:'double-strike',modifier:true},
 ];
 for(const[kind,list]of Object.entries({target:targetCards,condition:conditionCards,action:actionCards,skill:skillCards}))for(const c of list){c.cardKind=kind;c.rarity=cardRarity(kind,c.id);if(!c.detail)c.detail=kind==='target'?'指示が判断する対象を選びます。':c.param?`${c.name}を${c.min}〜${c.max}の範囲で指定します。`:'この条件が成立した場合だけ指示を実行します。';}
 const cardDetails={self:'自分のHPや周囲の状況を条件の判断対象にする。',enemy:'視界内の敵を近い順に対象にする。','weak-enemy':'視界内の敵を残りHPの低い順に対象にする。','danger-enemy':'視界内の敵を攻撃力の高い順に対象にする。','one-hit':'対象の残りHPと推定通常ダメージを比べ、一撃で倒せる場合だけ実行。',injured:'対象の敵の残りHPが最大HPの半分以下の場合に実行。','loot-empty':'発見済みで入手可能な品物が残っていない場合に実行。',visible:'目的地・対象が現在の視界に入っている場合に実行。'};

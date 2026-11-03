@@ -53,7 +53,7 @@ test('expanded capacity supports eight rows and four conditions without exceedin
 test('every existing card can be placed on a compatible rule when acquired',()=>{
  for(const c of targetCards){const s=prep();assert.equal(placeCard(s,palette('target',c.id),dest(0,'target')),true,c.id);}
  for(const c of conditionCards){const s=prep();s.orders[0]=['one-hit','injured'].includes(c.id)?createCardRule('enemy',[],'action','attack'):createCardRule();assert.equal(placeCard(s,palette('condition',c.id),dest(0,'condition',0)),true,c.id);}
- for(const [kind,cards] of [['action',actionCards],['skill',skillCards]])for(const c of cards){const s=prep();s.abilities.push('mend');s.unlockedOrders.push('warp','avoid-traps');s.orders[0]=c.enemy?createCardRule('enemy',[],'action','attack'):createCardRule();assert.equal(placeCard(s,palette(kind,c.id),dest(0,'effect')),true,c.id);}
+ for(const [kind,cards] of [['action',actionCards],['skill',skillCards]])for(const c of cards){const s=prep();s.abilities.push('mend','critical','leech','double-strike');s.unlockedOrders.push('warp','avoid-traps');s.orders[0]=c.enemy?createCardRule('enemy',[],'action','attack'):createCardRule();assert.equal(placeCard(s,palette(kind,c.id),dest(0,'effect')),true,c.id);}
 });
 
 test('configured palette values survive placement, while invalid values are atomic',()=>{

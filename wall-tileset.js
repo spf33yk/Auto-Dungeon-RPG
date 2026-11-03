@@ -4,7 +4,7 @@ export const WALL_ENTRANCES=['leftJamb','rightJamb','lintel','threshold'];
 export function wallNeighborMask(grid,x,y){return (!grid[y-1]?.[x]?1:0)|(!grid[y]?.[x+1]?2:0)|(!grid[y+1]?.[x]?4:0)|(!grid[y]?.[x-1]?8:0);}
 // A lower diagonal room corner continues the north-facing foreground rim.
 // Keep the logical 4-neighbour mask unchanged; only its displayed surface differs.
-export function wallRenderMask(grid,x,y){const mask=wallNeighborMask(grid,x,y);return mask===15&&(grid[y-1]?.[x-1]||grid[y-1]?.[x+1])?14:mask;}
+export function wallRenderMask(grid,x,y){const mask=wallNeighborMask(grid,x,y),roomCorner=[-1,1].some(dx=>grid[y-1]?.[x+dx]&&grid[y-2]?.[x+dx]&&grid[y-1]?.[x+2*dx]);return mask===15&&roomCorner?14:mask;}
 export function validateWallAutotile(d){
  if(d?.format!=='wall-autotile'||![1,2].includes(d.version)||d.neighbors!==4||JSON.stringify(d.bitOrder)!==JSON.stringify(['north','east','south','west'])||![32,64].includes(d.tileSize))throw Error('Unsupported wall-autotile definition');
  const tile=d.tileSize;
@@ -39,12 +39,12 @@ export function wallPartNames(grid,x,y){
 }
 export function wallVariant(x,y,seed,count){let h=Math.imul(x+1,73856093)^Math.imul(y+1,19349663)^(seed|0);h^=h>>>13;return (h>>>0)%count;}
 // A wall directly below floor is a low foreground rim: never project it into the walkable cell.
-export function wallDrawBox(grid,x,y,rise,size=24){const foreground=Boolean(grid[y-1]?.[x]||(!grid[y]?.[x-1]&&!grid[y]?.[x+1]&&(grid[y-1]?.[x-1]||grid[y-1]?.[x+1])));return {x:x*size,y:(foreground?y:y-rise)*size,width:size,height:(foreground?1:1+rise)*size,foreground};}
+export function wallDrawBox(grid,x,y,rise,size=24){const buried=wallRenderMask(grid,x,y)===15,foreground=Boolean(grid[y-1]?.[x]||(!grid[y]?.[x-1]&&!grid[y]?.[x+1]&&(grid[y-1]?.[x-1]||grid[y-1]?.[x+1])));return {x:x*size,y:(foreground||buried?y:y-rise)*size,width:size,height:(foreground||buried?1:1+rise)*size,foreground,buried};}
 export function drawWallParts(ctx,tileset,grid,x,y,seed,size=24,entrance){
  const d=tileset?.definition,image=tileset?.image;if(!d||!image||image.complete===false||(image.naturalWidth??image.width)!==d.width||(image.naturalHeight??image.height)!==d.height)return false;
  ctx.imageSmoothingEnabled=false;
  const box=wallDrawBox(grid,x,y,d.rise,size);
- if(d.format==='wall-autotile'){const choices=d.tiles[wallRenderMask(grid,x,y)],f=choices[wallVariant(x,y,seed,choices.length)];ctx.drawImage(image,...f,box.x,box.y,box.width,box.height);const frames=d.version===2&&d.entrances[typeof entrance==='number'?WALL_ENTRANCES[entrance]:entrance];if(frames){const trim=frames[wallVariant(x,y,seed,frames.length)];ctx.drawImage(image,...trim,box.x,box.y,box.width,box.height);}return true;}
+ if(d.format==='wall-autotile'){const mask=wallRenderMask(grid,x,y),choices=d.tiles[mask],f=choices[wallVariant(x,y,seed,choices.length)];ctx.drawImage(image,f[0],f[1],f[2],box.buried?d.tileSize:f[3],box.x,box.y,box.width,box.height);const frames=mask!==15&&d.version===2&&d.entrances[typeof entrance==='number'?WALL_ENTRANCES[entrance]:entrance];if(frames){const trim=frames[wallVariant(x,y,seed,frames.length)];ctx.drawImage(image,...trim,box.x,box.y,box.width,box.height);}return true;}
  for(const name of wallPartNames(grid,x,y)){const choices=d.parts[name],f=choices[wallVariant(x,y,seed,choices.length)];ctx.drawImage(image,...f,box.x,box.y,box.width,box.height);}
  return true;
 }

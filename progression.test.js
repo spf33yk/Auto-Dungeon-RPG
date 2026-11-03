@@ -27,7 +27,7 @@ test('each defeated enemy grants experience once and each strike emits its own d
  const e={...monsters[0],baseId:monsters[0].id,x:3,y:3,hp:1};s.enemies.push(e);
  attackEnemy(s,e);assert.equal(s.level,2);assert.equal(s.experience,2);assert.equal(s.damageEvents.length,1);assert.equal(s.damageEvents[0].hero,false);assert.equal(s.damageEvents[0].damage,stats(s).attack);
  attackEnemy(s,e);assert.equal(s.experience,2);assert.equal(s.damageEvents.length,1);
- s.abilities=['double-strike'];s.rngState=7;const target={...e,hp:1000};s.enemies=[target];s.damageEvents=[];
+ grantCard(s,'skill:double-strike');s.orders=[createCardRule('self',[],'skill','double-strike')];s.rngState=7;const target={...e,hp:1000};s.enemies=[target];s.damageEvents=[];
  let attempts=0;while(s.damageEvents.length<2&&attempts++<100){s.damageEvents=[];attackEnemy(s,target);}
  assert.equal(s.damageEvents.length,2);
 });
