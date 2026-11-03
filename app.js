@@ -1,3 +1,4 @@
+import {screenTutorials} from './screen-tutorial.js';
 import{augmentCard,augmentChip}from'./augment-view.js';
 import{augments,augmentById,chooseAugment}from'./augments.js';
 import {SubtitlePlayer} from './subtitle-player.js';
@@ -206,7 +207,7 @@ function render(){
  $('memory-count').textContent=`記憶の断片 ${state.memories.length} / 4 · 通常エンド ${state.profile.normalClears}回`;
  $('memory-quote').textContent=displayStoryText(state.memories.at(-1)||openingThought(runClears),runClears);
 
- renderTab();renderThoughtSubtitle();draw();renderTitle();renderNormalEnding();renderAugments();syncSceneMusic();if(!showingTitle)save();
+ renderTab();renderThoughtSubtitle();draw();renderTitle();renderNormalEnding();renderAugments();syncSceneMusic();if(!showingTitle)save();maybeTutorial();
 }
 function syncTitleEffect(){
  const video=$('title-fx'),variant=openingVariant(state.profile);
@@ -279,6 +280,16 @@ function renderScreens(){
  $('status-open').hidden=showingTitle||awake;$('fullscreen-open').hidden=false;$('mobile-display').hidden=true;$('return-title').hidden=showingTitle;
 }
 function openDialog(id){if(!document.querySelector('dialog[open]'))dialogWasPaused=paused;paused=true;$(id).showModal();if(state.phase==='explore')render();}
+let tutorialKind=null,tutorialStep=0;
+function paintTutorial(){const steps=screenTutorials[tutorialKind],step=steps[tutorialStep];$('tutorial-progress').textContent=(tutorialKind==='explore'?'探索':'準備')+' · '+(tutorialStep+1)+' / '+steps.length;$('tutorial-title').textContent=step.title;$('tutorial-copy').textContent=step.text;$('tutorial-back').disabled=tutorialStep===0;$('tutorial-next').textContent=tutorialStep===steps.length-1?'わかった':'次へ';}
+function startTutorial(kind){tutorialKind=kind;tutorialStep=0;paintTutorial();openDialog('tutorial-dialog');}
+function maybeTutorial(){if(!showingTitle&&!pendingJourney&&!endingPreview&&!document.querySelector('dialog[open]')&&screenTutorials[state.phase]&&!uiSettings.tutorials[state.phase])startTutorial(state.phase);}
+function finishTutorial(){if(tutorialKind)uiSettings=saveUiSettings(uiStorage,{...uiSettings,tutorials:{...uiSettings.tutorials,[tutorialKind]:true}});tutorialKind=null;$('tutorial-dialog').close();}
+$('tutorial-next').onclick=()=>{if(tutorialStep===screenTutorials[tutorialKind].length-1)finishTutorial();else{tutorialStep++;paintTutorial();}};
+$('tutorial-back').onclick=()=>{if(tutorialStep>0){tutorialStep--;paintTutorial();}};
+$('tutorial-skip').onclick=finishTutorial;
+$('tutorial-dialog').addEventListener('cancel',e=>{e.preventDefault();finishTutorial();});
+for(const kind of ['explore','prepare'])$('tutorial-'+kind).onclick=()=>startTutorial(kind);
 function finishDialog(){if(!document.querySelector('dialog[open]')){paused=dialogWasPaused;last=performance.now();render();}}
 let cardBookKind='all';
 function renderCardBook(){const names={all:'すべて',target:'ターゲット',condition:'条件',action:'アクション',skill:'スキル'};const all=cardCodexRows(state),rows=all.filter(c=>cardBookKind==='all'||c.kind===cardBookKind);$('codex-title').textContent='カード図鑑';$('codex-note').textContent='未所持カードもすべて公開。取得記録は周回後も保持し、所持と効果はその旅だけ。全スキルは取得後、探索指示への配置が必要です。';$('codex-body').innerHTML='<div class="subtabs">'+Object.entries(names).map(([id,name])=>'<button data-card-book-kind="'+id+'" aria-pressed="'+(cardBookKind===id)+'">'+name+'</button>').join('')+'</div><p class="section-caption">この旅の所持 '+all.filter(c=>c.owned).length+' / '+all.length+' · 取得記録 '+all.filter(c=>c.discovered).length+'</p><div class="card-codex-grid">'+rows.map(c=>'<article class="item-card card-codex-item '+c.rarity+'"><div><span class="rarity-badge '+c.rarity+'">'+c.rarity+'</span><strong>'+esc(c.name)+'</strong><small>'+esc(c.group)+' · '+(c.owned?'所持中':c.discovered?'過去に取得／現在未所持':'未取得')+'</small><p>'+esc(c.detail)+'</p><small>入手：'+(c.id==='letter'?'通常エンド初回クリア後':c.initial?'旅の開始時':'宝箱')+(c.modifier&&c.kind==='skill'?' · 配置した条件の成立中に有効':'')+'</small></div></article>').join('')+'</div>';}

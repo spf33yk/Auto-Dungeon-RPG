@@ -695,3 +695,8 @@ TRUE END本編と達成後のコンテンツは引き続き未実装。profile.t
 新規の石造り背景と古金・骨・黒鉄の透過枠を準備画面へ採用。カード一覧・指示編集・外枠を統一し、既存4スキンに追従する。2素材合計約163KiB、比率保持・角固定・辺の繰返しで描画する。既存機能と保存v16は維持。詳細はSPECの最新節と[素材規格](art/ui/preparation-decor-v1/README.md)。
 
 format.jsonをupdate-assets.jsが読み、背景／枠のハッシュ付きURLとslice・表示幅のCSS変数をpreparation-decor-assetsへ生成する。screens.cssは装飾を疑似要素に分離し、元のエディタDOMとイベント処理を変更しない。Pillowは配信用素材の書出し時のみ使用。
+
+
+## 2026-11-04：準備画面と操作案内
+
+外枠はpreparing時の#workspace:beforeへ移し、内部パネルの装飾は既存9分割repeatを維持。editor-scroll.jsが再描画前にスクロールを採取し、再構築後に復元する。WeakMapに保持した前回の指示オブジェクトと行の対応から、並べ替え後の横位置を復元（ゲーム保存にDOM情報は含めない）。screen-tutorial.jsに画面別の案内データを分離し、app.jsが初回表示・ページ送り・既存ダイアログの停止制御に接続。ui-settings.jsは画面別閲覧フラグを検証し保存する。詳細はSPECの2026-11-04節。

@@ -16,3 +16,5 @@
 原本はGit対象外art/local-originals/preparation-decor-v1/background-source.png、frame-source.pngへ保存。PillowのあるPythonでscripts/build-preparation-decor.pyを実行し、node scripts/update-assets.jsでindex.htmlの画像URLハッシュとCSS変数を更新する。--checkで旧キャッシュ混在の原因になる差分を検知する。原本がない環境でも完成素材だけで本編は動く。制作プロンプトはPROMPTS.md。
 
 背景の差替えは同じ静かな中央・周辺装飾の構図を推奨。枠は四角形・透明な中央・直線の辺を守り、formatのsliceと表示幅を調整する。新しいスキンで別画像を使う場合も比率保持とrepeatを維持する。本背景はUIの装飾であり、物語上の新しい場所・イベントを追加するものではない。
+
+2026-11-04：主枠は上部HUDを含むゲーム画面全体（#workspace）の外周へ配置。パネル内部に20pxの内容余白を設ける。素材・9分割規格は変更しない。
