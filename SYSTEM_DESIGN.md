@@ -635,3 +635,6 @@ boss-arena.jsのbossArenaが、マップ中心と共通部屋寸法から地形�
 
 ## 2026-11-03 速度と探索中断
 既存data-speedと420/speedのターン制御へ0.5を追加。0.5時のみ歩行補間・characterAttackDurationを2倍とし、1/2/4の表示時間を維持する。表示速度は永続化せずゲームstateから独立。abandonRunの許可フェイズをprepareからprepare/exploreへ拡張。準備・探索の2ボタンをaskAbandonへ束ね、共通ダイアログでopenDialog/finishDialogの停止状態復帰を使用する。確定時は既存newGameのプロフィール複製処理で記録を保持する。
+
+## 2026-11-03 到達性の検証手段
+scripts/verify-clearability.jsは検証専用の自動準備方針で、ゲームのAIやユーザー保存データを変更しない。本番newGame/tick/ascendとメニュー機能を使用し、全指示を所持・組合せ・枠数で検査する。初回成功のprofileからのみ2周目を開始し、階当たり2500ターンで診断打切り。TRUE分岐の合成検査は通常プレイ試行と区別する。報告とCSVはdocs/verificationに保持。
