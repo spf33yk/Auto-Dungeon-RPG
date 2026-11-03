@@ -629,3 +629,6 @@ dungeon-layout.jsへ通常階レイアウトを分離。roomCountForFloorは5+fl
 
 ## 2026-11-03 B1ボスの統合
 minibossesへbasement:1のboss-b1を追加し、bossForFloor／fieldPlan／階段封印・報酬・図鑑の共通処理を再利用。makeBossFloorでB1専用の柱配置を選ぶ。enemyFrameはspriteIdを優先し、boss-b1の表示をenemy-9-1の既存フレームへ明示的に参照する。新しい空きアトラス領域を誤って描かない。次階ヒントはボス階ならそのボスだけを表示。
+
+## 2026-11-03 対称ボス部屋の生成
+boss-arena.jsのbossArenaが、マップ中心と共通部屋寸法から地形・柱・開始・階段・ボス・回復品を返す。柱の左上(x,y)、幅w、高さhに対して(2*cx-x-w+1,2*cy-y-h+1)を使い、占有マス全体を反転する。中心軸をまたぐ柱はSetで重複を除く。makeBossFloorは生成結果と既存ボス定義を組み合わせる。中央通路を塞がず、全床到達をテストする。

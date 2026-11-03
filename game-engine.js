@@ -1,3 +1,4 @@
+import {bossArena} from './boss-arena.js';
 import {generateDungeonLayout} from './dungeon-layout.js';
 import{INITIAL_CARDS}from'./card-access.js';
 import{cardCatalog,cardByKey,cardCodexRows}from'./card-catalog.js';
@@ -78,11 +79,8 @@ export function rollGear(floor,rng){const z=Math.min(9,zoneIndexForFloor(floor))
  // Preserve the previous random sequence without spawning cursed or unidentified gear.
  rng();rng();return createGear(base.id,{plus});}
 export function makeBossFloor(s,boss){
- const grid=Array.from({length:H},()=>Array(W).fill(0));
- for(let y=3;y<=19;y++)for(let x=5;x<=25;x++)grid[y][x]=1;
- const pillars=boss.basement===20?[[10,7],[20,7],[10,15],[20,15]]:boss.basement===1?[[9,6],[21,6],[9,14],[21,14],[12,10],[18,10]]:[[9,7],[21,7],[9,15],[21,15],[12,11],[18,11]];
- for(const [px,py] of pillars)for(let y=py;y<py+2;y++)for(let x=px;x<px+2;x++)grid[y][x]=0;
- Object.assign(s,{rooms:[{x:5,y:3,w:21,h:17}],grid,player:{x:15,y:19},stairs:{x:15,y:3},seen:grid.map(r=>r.map(()=>false)),visited:grid.map(r=>r.map(()=>false)),enemies:[{...boss,baseId:boss.id,x:15,y:10,maxHp:boss.hp,aggro:true,boss:true}],items:[{x:8,y:17,type:'potion'},{x:22,y:17,type:'potion'}],traps:[],obstacles:[],bossFloor:true,gimmick:{...fieldPlan(s.seed,s.floor),triggered:false,room:null},nextHint:null,warped:false,mended:false,floorKills:0,steps:0,flash:null,intent:'階段を封じる門番の気配',retreatTurns:0,retreatCooldown:0,activeOrder:null});reveal(s);
+ const arena=bossArena(boss.basement,W,H),{grid}=arena;
+ Object.assign(s,{rooms:arena.rooms,grid,player:arena.player,stairs:arena.stairs,seen:grid.map(r=>r.map(()=>false)),visited:grid.map(r=>r.map(()=>false)),enemies:[{...boss,baseId:boss.id,...arena.boss,maxHp:boss.hp,aggro:true,boss:true}],items:arena.items,traps:[],obstacles:[],bossFloor:true,gimmick:{...fieldPlan(s.seed,s.floor),triggered:false,room:null},nextHint:null,warped:false,mended:false,floorKills:0,steps:0,flash:null,intent:'階段を封じる門番の気配',retreatTurns:0,retreatCooldown:0,activeOrder:null});reveal(s);
 }
 export function makeFloor(s){
  const boss=bossForFloor(s.floor);if(boss){makeBossFloor(s,boss);return;}s.bossFloor=false;
