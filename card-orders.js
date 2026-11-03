@@ -1,3 +1,4 @@
+import{gearById}from'./data.js';
 // Card data and evaluation are shared by the editor, AI and save migration.
 import{cardOwned,cardRarity}from'./card-access.js';
 export const targetCards=[{id:'self',name:'自分'},{id:'enemy',name:'近くの敵'},{id:'weak-enemy',name:'HPの低い敵'},{id:'danger-enemy',name:'攻撃力の高い敵'}];
@@ -15,7 +16,12 @@ export const conditionCards=[
 export const actionCards=[
  {id:'stairs',name:'階段を上る',detail:'階段へ向かい、実際に乗ると次の階へ。'},
  {id:'chests',name:'宝箱を取得',detail:'開封可能な通常宝箱へ向かう。'},
- {id:'collect-items',name:'品物を取得',detail:'入手可能な品物へ向かう。'},
+ {id:'collect-items',name:'装備を取得',detail:'発見済みの武器・防具へ向かう。'},
+ {id:'collect-weapons',name:'武器を取得',detail:'発見済みの武器へ向かう。'},
+ {id:'collect-armor',name:'防具を取得',detail:'発見済みの防具へ向かう。'},
+ {id:'collect-fragments',name:'記憶の欠片を取得',detail:'床の記憶の欠片へ向かう。'},
+ {id:'collect-herbs',name:'薬草を取得',detail:'床の薬草へ向かう。'},
+ {id:'collect-springs',name:'回復の泉へ向かう',detail:'発見済みの回復の泉へ向かう。'},
  {id:'heal-item',name:'回復品を取得',detail:'泉や薬草へ向かう。'},
  {id:'letter',name:'手紙の箱を開ける',detail:'物語条件を満たす手紙の箱へ向かう。'},
  {id:'frontier',name:'視界の先を調べる',detail:'未発見の地形に接する未踏の床を調べる。'},
@@ -23,14 +29,11 @@ export const actionCards=[
  {id:'retreat',name:'敵から離れる',detail:'敵が見えるとき、危険の少ない隣の床へ退避。'},
  {id:'attack',name:'敵を攻撃',detail:'選んだ敵へ接近し、隣接したら攻撃。',enemy:true},
  {id:'tactics',name:'戦術で敵を選ぶ',detail:'条件成立中、隣接敵の一撃撃破・攻撃力を優先。',modifier:true},
- {id:'avoid-traps',name:'トラップを避ける',detail:'条件成立中は罠を経路で避け、踏んでも作動させない。',modifier:true,reward:'avoid-traps'},
+ {id:'avoid-traps',name:'トラップを避ける',detail:'安全な経路を優先。迂回できないときは罠を踏んで進む（ダメージあり）。',modifier:true,reward:'avoid-traps'},
 ];
 export const skillCards=[
  {id:'mend',name:'再生の祈り',detail:'条件成立時に最大HP40%回復。各階1回。',ability:'mend'},
  {id:'warp',name:'窮地の転移',detail:'条件成立時にランダムな床へ転移。各階1回。',reward:'warp'},
- {id:'critical',name:'会心の記憶',detail:'配置した条件が成立中、各打撃で10%の確率でダメージ1.5倍（切上げ）。',ability:'critical',modifier:true},
- {id:'leech',name:'吸命の記憶',detail:'配置した条件が成立中、実ダメージの5%を回復（切捨て）。',ability:'leech',modifier:true},
- {id:'double-strike',name:'追撃の記憶',detail:'配置した条件が成立中、通常打撃後5%の確率で追加攻撃。同ターン1回まで。',ability:'double-strike',modifier:true},
 ];
 for(const[kind,list]of Object.entries({target:targetCards,condition:conditionCards,action:actionCards,skill:skillCards}))for(const c of list){c.cardKind=kind;c.rarity=cardRarity(kind,c.id);if(!c.detail)c.detail=kind==='target'?'指示が判断する対象を選びます。':c.param?`${c.name}を${c.min}〜${c.max}の範囲で指定します。`:'この条件が成立した場合だけ指示を実行します。';}
 const cardDetails={self:'自分のHPや周囲の状況を条件の判断対象にする。',enemy:'視界内の敵を近い順に対象にする。','weak-enemy':'視界内の敵を残りHPの低い順に対象にする。','danger-enemy':'視界内の敵を攻撃力の高い順に対象にする。','one-hit':'対象の残りHPと推定通常ダメージを比べ、一撃で倒せる場合だけ実行。',injured:'対象の敵の残りHPが最大HPの半分以下の場合に実行。','loot-empty':'発見済みで入手可能な品物が残っていない場合に実行。',visible:'目的地・対象が現在の視界に入っている場合に実行。'};
@@ -81,7 +84,8 @@ function subjects(s,r,ctx){
 function destinations(s,r,ctx){
  const id=r.effect.id;
  if(id==='stairs')return [s.stairs].filter(p=>s.seen[p.y][p.x]&&!s.enemies.some(e=>e.boss));
- if(['chests','collect-items','heal-item','letter'].includes(id))return s.items.filter(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i)&&(id!=='chests'||i.type==='chest')&&(id!=='heal-item'||['potion','herb'].includes(i.type))&&(id!=='letter'||i.type==='letter'));
+ const types={chests:['chest'],'collect-items':['gear'],'collect-weapons':['gear'],'collect-armor':['gear'],'collect-fragments':['fragment'],'collect-herbs':['herb'],'collect-springs':['potion'],'heal-item':['potion','herb'],letter:['letter']};
+ if(types[id])return s.items.filter(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i)&&types[id].includes(i.type)&&(id!=='collect-weapons'||gearById[i.gear?.baseId]?.slot==='weapon')&&(id!=='collect-armor'||gearById[i.gear?.baseId]?.slot==='armor'));
  if(id==='avoid-traps')return (s.traps||[]).filter(t=>t.revealed&&!t.spent&&(s.gimmick?.id==='traps'||s.seen[t.y][t.x]));
  if(['retreat','tactics','warp'].includes(id))return s.enemies.filter(e=>ctx.canSee(s,e.x,e.y));
  return [s.player];
@@ -113,7 +117,7 @@ export function cardModifier(s,id,ctx){return s.orders.some(input=>{const r=lega
 export function chooseCardOrder(s,ctx){
  const visible=s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)),blocked=new Set(visible.map(key));
  if(cardModifier(s,'avoid-traps',ctx))for(const t of s.traps||[])if(t.revealed&&!t.spent&&(s.gimmick?.id==='traps'||s.seen[t.y][t.x]))blocked.add(key(t));
- const seek=test=>ctx.route(s,test,{blocked});
+ const seek=test=>ctx.route(s,test,{blocked})||ctx.route(s,test,{blocked:new Set(visible.map(key))});
  for(let index=0;index<s.orders.length;index++){
   const r=legacyToCards(s.orders[index]),effect=effectDefinition(r),targets=matchingCardTargets(s,r,ctx);
   if(!targets.length||effect?.modifier)continue;

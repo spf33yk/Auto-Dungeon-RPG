@@ -8,7 +8,7 @@ export function summarizeForecast(runs){const cleared=runs.filter(r=>r.phase==='
 export async function forecastExploration(input,{samples=8,maxTurns=1200,cancelled=()=>false,yieldTask=()=>new Promise(r=>setTimeout(r,0)),onProgress=()=>{}}={}){
  const runs=[];onProgress(0,samples);for(let sample=0;sample<samples;sample++){
   if(cancelled())return null;const s=structuredClone(input);s.phase='explore';s.rngState=(input.rngState+Math.imul(sample+1,2654435761))>>>0;s.damageEvents=[];const start=s.turn,examples=[];let previous='';
-  let sliceStart=performance.now();for(let turn=0;turn<maxTurns&&s.phase==='explore';turn++){tick(s);if(examples.length<3&&s.intent!==previous){examples.push({hp:s.hp,text:thoughtText(s.intent)});previous=s.intent;}if(performance.now()-sliceStart>=8||turn%24===23){await yieldTask();if(cancelled())return null;sliceStart=performance.now();}}
+  let sliceStart=performance.now();for(let turn=0;turn<maxTurns&&s.phase==='explore';turn++){tick(s);s.augmentOffer=null;if(examples.length<3&&s.intent!==previous){examples.push({hp:s.hp,text:thoughtText(s.intent)});previous=s.intent;}if(performance.now()-sliceStart>=8||turn%24===23){await yieldTask();if(cancelled())return null;sliceStart=performance.now();}}
   runs.push({phase:s.phase,turns:s.turn-start,hpRatio:Math.max(0,s.hp)/stats(s).maxHp,examples});onProgress(sample+1,samples);await yieldTask();
  }return {...summarizeForecast(runs),warnings:forecastWarnings(input),orders:input.orders.map(describeCardRule)};
 }

@@ -1,5 +1,8 @@
 # 骸の旅路 ― システム設計書
 
+> 現行のカード・オーグメントは保存v15です。旧版の取得条件・常時効果・カード数に関する履歴は、末尾の「オーグメント・カード取得 v15」と[詳細仕様](docs/cards/CARD_SYSTEM.md)で更新しています。
+
+
 > **2026-11-01：骸のドット絵試作は削除・制作中止。** 本編使用中の `art/characters/mukuro-v1/` のみ保持。旧試作の画像・原稿・GIF・ZIP・専用生成器と試作専用テストは削除済み。以降の旧試作に関する記述は履歴であり、新規制作の参考に流用しない。最新の決定は [試作リセット](docs/characters/PROTOTYPE_RESET.md) を参照。
 
 ## 主人公素材の独立制作データ（2026-10-28）
@@ -645,3 +648,12 @@ map-noticeへ表示用data-kindを付与し、rest／clearedだけをCSSで背�
 ## 2026-11-03 ログ閲覧の制御
 createLogVisibilityへsetHeldを追加。hover/focus/touchの保持理由をappのSetで集約し、保持中はタイマーを取消、解除時は5秒を再設定。古いタイマーはgenerationで無効化。透明化はjournalのopacityへ適用し、field-log-hostの当たり領域を残して非表示後のpointerenterを検知する。スクリーンリーダー向けにjournalのaria-hiddenとlogsのtabIndexを切り替える。
 本番log関数は切り捨てずstate.logsへ追加。renderJourneyLogはコピーを古い順に描画し、既存の追従判定・scrollTop保持を再利用。history-dialogは共有journalとは別の一覧を作り、全記録の時刻・内容を表示する。スクロール本文とtoolbarを分け、closeを固定。保存データの形は変えない。
+
+
+## 2026-11-03：オーグメント・カード取得 v15（現行）
+
+初期カード5種。手紙カードは初回通常エンド後に確定入手し、以後の旅にも付与。視界条件はLEGENDARY宝箱ドロップ。品物取得は装備取得に変更し、武器・防具・欠片・薬草・泉を専用カードへ細分化。罠回避は迂回不可なら通過しダメージを受ける。
+
+開始時とB20・B10・B1撃破時にオーグメント3択から1種選択。18種、3レアリティ、6テーマを実装。会心・吸命・追撃はオーグメントへ移動。能動スキルは再生・転移の2種で配置が必要。準備画面に階のヒントと所持効果を上部表示、オーグメント図鑑を追加。効果の数値・候補重み・操作・既存セーブへの影響は[カード・オーグメント仕様](docs/cards/CARD_SYSTEM.md)に記載し、本節と同資料を以前のカード記述より優先する。数値は仮採用。
+
+augments.jsが定義・候補抽選・選択・加算効果・致命傷耐久を担当。game-engine.jsはstats／attackEnemy／被弾／罠／床生成／ボス撃破へ結合する。状態にaugments、augmentOffer、augmentStarted、trapTriggers、unharmedTurns、undyingUsed、firstAttackUsedを追加し、profile.augmentsは周回保持。予測は破棄する複製で同じengineを実行し、ボス後の未選択offerだけ解除する。UIはrenderAugmentsと固定3択モーダルで選択し、更新時に保存する。

@@ -1,3 +1,4 @@
+import{grantReward}from'./engine.js';
 import{grantCard}from'./card-inventory.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,7 +17,7 @@ test('character levels use remaining experience and grow only HP, including mult
 });
 test('old save gains Lv1 without retroactive growth and v11 round-trips or rejects corrupt progression',()=>{
  const old=newGame(991);old.version=10;delete old.level;delete old.experience;old.kills=200;old.hp=21;
- const s=normalizeSave(old);assert.equal(s.level,1);assert.equal(s.experience,0);assert.equal(s.hp,21);assert.equal(s.version,14);
+ const s=normalizeSave(old);assert.equal(s.level,1);assert.equal(s.experience,0);assert.equal(s.hp,21);assert.equal(s.version,15);
  for(const key of ['grid','gear','profile','shards','rngState','kills'])assert.deepEqual(s[key],old[key]);
  gainExperience(s,12);assert.ok(validateSave(s));assert.deepEqual(normalizeSave(s),s);
  for(const [level,experience]of [[0,0],[31,0],[1,-1],[1,10],[30,1],[1,Infinity]])assert.equal(normalizeSave({...s,level,experience}),null);
@@ -27,7 +28,7 @@ test('each defeated enemy grants experience once and each strike emits its own d
  const e={...monsters[0],baseId:monsters[0].id,x:3,y:3,hp:1};s.enemies.push(e);
  attackEnemy(s,e);assert.equal(s.level,2);assert.equal(s.experience,2);assert.equal(s.damageEvents.length,1);assert.equal(s.damageEvents[0].hero,false);assert.equal(s.damageEvents[0].damage,stats(s).attack);
  attackEnemy(s,e);assert.equal(s.experience,2);assert.equal(s.damageEvents.length,1);
- grantCard(s,'skill:double-strike');s.orders=[createCardRule('self',[],'skill','double-strike')];s.rngState=7;const target={...e,hp:1000};s.enemies=[target];s.damageEvents=[];
+ grantReward(s,'double-strike');s.orders=[];s.rngState=7;const target={...e,hp:1000};s.enemies=[target];s.damageEvents=[];
  let attempts=0;while(s.damageEvents.length<2&&attempts++<100){s.damageEvents=[];attackEnemy(s,target);}
  assert.equal(s.damageEvents.length,2);
 });

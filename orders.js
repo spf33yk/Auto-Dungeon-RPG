@@ -8,7 +8,7 @@ export const orderDefinitions=[
  {id:'stairs-low',name:'HP低下時は階段へ',detail:'指定HP以下なら探索を切り上げる。',param:'hp',value:35,min:10,max:90,step:5,unit:'%以下'},
  {id:'stairs-after',name:'指定ターン後は階段へ',detail:'この階で指定ターン経過後に帰路へ。',param:'turns',value:150,min:20,max:1000,step:10,unit:'ターン後'},
  {id:'stairs-after-loot',name:'見つけた品の回収後に階段へ',detail:'既知の取得可能な品がなくなったら向かう。',},
- {id:'collect-items',name:'発見した品をすべて回収',detail:'装備・スキル・薬草・欠片・泉・開封可能な箱を回収する。',},
+ {id:'collect-items',name:'装備を取得',detail:'発見した武器・防具のみ回収する。',},
  {id:'chests',name:'宝箱を優先して回収',detail:'通常宝箱だけを集める。中身は開封まで不明。',},
  {id:'chests-near',name:'近くの宝箱だけ回収',detail:'指定距離内の通常宝箱へ向かう。',param:'range',value:6,min:1,max:20,step:1,unit:'マス以内'},
  {id:'heal-critical',name:'瀕死時に泉へ向かう',detail:'指定HP以下で、発見済みの泉や薬草へ向かう。',param:'hp',value:35,min:10,max:90,step:5,unit:'%以下'},
@@ -58,7 +58,7 @@ export function chooseOrder(s,ctx,emergencyOnly=false){
    next=seek(p=>key(p)===key(s.stairs));exit=true;
   }else if(['collect-items','chests','chests-near','heal-critical','heal-wounded','letter'].includes(o.id)){
    const healing=o.id.startsWith('heal');if(healing&&percent>o.hp)continue;
-   next=seek(p=>s.items.some(i=>key(i)===key(p)&&s.seen[i.y][i.x]&&obtainable(s,i)&&(!healing||['potion','herb'].includes(i.type))&&(o.id!=='letter'||i.type==='letter')&&(!o.id.startsWith('chests')||i.type==='chest')&&(o.id!=='chests-near'||dist(s.player,i)<=o.range)));
+   next=seek(p=>s.items.some(i=>key(i)===key(p)&&s.seen[i.y][i.x]&&obtainable(s,i)&&(o.id!=='collect-items'||i.type==='gear')&&(!healing||['potion','herb'].includes(i.type))&&(o.id!=='letter'||i.type==='letter')&&(!o.id.startsWith('chests')||i.type==='chest')&&(o.id!=='chests-near'||dist(s.player,i)<=o.range)));
   }else if(o.id==='frontier')next=seek(p=>!s.visited[p.y][p.x]&&dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false));
   else if(o.id==='explore-all'||o.id==='explore-near')next=seek(p=>!s.visited[p.y][p.x]&&(o.id!=='explore-near'||dist(s.player,p)<=o.range));
   else if(o.id.startsWith('hunt')){

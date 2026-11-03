@@ -21,10 +21,10 @@ test('each enemy has a valid configurable table and rare distant gear remains po
 });
 
 test('ordinary chests open without keys and acquired combat skills work immediately',()=>{
- const s=arena();s.stairs={...s.player};s.items=[{...s.player,type:'chest',rewardId:'critical'}];tick(s);assert.equal(Object.hasOwn(s,'keys'),false);assert.equal(s.items.length,0);assert.deepEqual(s.abilities,['critical']);assert.ok(s.profile.skills.includes('critical'));const shards=s.shards;tick(s);assert.equal(s.shards,shards);
+ const s=arena();s.stairs={...s.player};s.items=[{...s.player,type:'chest',rewardId:'critical'}];tick(s);assert.equal(Object.hasOwn(s,'keys'),false);assert.equal(s.items.length,0);assert.deepEqual(s.augments,['critical']);assert.ok(s.profile.augments.includes('critical'));const shards=s.shards;tick(s);assert.equal(s.shards,shards);
 });
 test('collection rules approach and open ordinary chests without keys',()=>{
- const s=arena();s.orders=['collect-items','stairs'].map(makeOrder);s.items=[{x:5,y:4,type:'chest',rewardId:'leech'}];tick(s);assert.deepEqual(s.player,{x:5,y:4});assert.ok(s.abilities.includes('leech'));assert.equal(Object.hasOwn(s,'keys'),false);
+ const s=arena();s.orders=['chests','stairs'].map(makeOrder);s.items=[{x:5,y:4,type:'chest',rewardId:'leech'}];tick(s);assert.deepEqual(s.player,{x:5,y:4});assert.ok(s.augments.includes('leech'));assert.equal(Object.hasOwn(s,'keys'),false);
 });
 
 test('ground gear is acquired and registered, herbs heal and fragments are common pickups',()=>{
@@ -33,7 +33,7 @@ test('ground gear is acquired and registered, herbs heal and fragments are commo
 });
 
 test('duplicates give five fragments without stacking; new journeys keep only codex records',()=>{
- const s=arena();for(const r of rewardDefinitions){assert.equal(grantReward(s,r.id),true);const shards=s.shards;assert.equal(grantReward(s,r.id),false);assert.equal(s.shards,shards+5);}assert.equal(codexRows(s,'skills').filter(r=>r.known).length,6);const fresh=newGame(2,s.profile);assert.deepEqual(fresh.abilities,[]);assert.deepEqual(fresh.unlockedOrders,[]);assert.equal(Object.hasOwn(fresh,'keys'),false);assert.equal(codexRows(fresh,'skills').filter(r=>r.known).length,6);assert.ok(codexRows(fresh,'skills').every(r=>!r.owned));
+ const s=arena();for(const r of rewardDefinitions){assert.equal(grantReward(s,r.id),true);const shards=s.shards;assert.equal(grantReward(s,r.id),false);assert.equal(s.shards,shards+5);}assert.equal(codexRows(s,'skills').filter(r=>r.known).length,3);const fresh=newGame(2,s.profile);assert.deepEqual(fresh.abilities,[]);assert.deepEqual(fresh.unlockedOrders,[]);assert.equal(Object.hasOwn(fresh,'keys'),false);assert.equal(codexRows(fresh,'skills').filter(r=>r.known).length,3);assert.ok(codexRows(fresh,'skills').every(r=>!r.owned));
 });
 
 test('special orders must be obtained and configured in an available slot',()=>{
@@ -44,8 +44,8 @@ test('warp is once per floor, preserves saved usage, and resets on the next floo
  const s=arena(42);grantReward(s,'warp');s.orders=[makeOrder('warp')];s.hp=10;foe(s,{hp:999});const before={...s.player};tick(s);assert.equal(s.warped,true);assert.notDeepEqual(s.player,before);assert.ok(s.grid[s.player.y][s.player.x]);assert.ok(!s.enemies.some(e=>e.x===s.player.x&&e.y===s.player.y));assert.equal(normalizeSave(s).warped,true);s.floor=2;makeFloor(s);assert.equal(s.warped,false);
 });
 
-test('trap avoidance protects only when the acquired order is equipped',()=>{
- const s=arena();grantReward(s,'avoid-traps');s.stairs={...s.player};s.traps=[{...s.player,revealed:true,spent:false}];s.orders=[makeOrder('avoid-traps'),makeOrder('stairs')];tick(s);assert.equal(s.hp,54);assert.equal(s.traps[0].spent,false);s.phase='explore';s.orders=[makeOrder('stairs')];tick(s);assert.equal(s.hp,49);assert.equal(s.traps[0].spent,true);
+test('unavoidable traps still trigger despite avoidance',()=>{
+ const s=arena();grantReward(s,'avoid-traps');s.stairs={...s.player};s.traps=[{...s.player,revealed:true,spent:false}];s.orders=[makeOrder('avoid-traps'),makeOrder('stairs')];tick(s);assert.equal(s.hp,49);assert.equal(s.traps[0].spent,true);s.phase='explore';s.orders=[makeOrder('stairs')];tick(s);assert.equal(s.hp,49);assert.equal(s.traps[0].spent,true);
 });
 
 test('regeneration is acquired from drops and fires once before enemy attacks',()=>{
@@ -53,21 +53,21 @@ test('regeneration is acquired from drops and fires once before enemy attacks',(
 });
 
 test('critical and extra strikes are probabilistic, bounded and never duplicate a kill',()=>{
- let critical=0,double=0;for(let seed=0;seed<1000;seed++){const s=arena(seed);for(const id of ['critical','double-strike'])grantCard(s,'skill:'+id);s.orders=['critical','double-strike'].map(id=>createCardRule('self',[],'skill',id));const e=foe(s,{hp:1000});attackEnemy(s,e);if(s.logs.some(l=>l.text.startsWith('会心')))critical++;if(s.logs.some(l=>l.text.startsWith('追撃')))double++;assert.ok(e.hp>=1000-stats(s).attack*4);}
+ let critical=0,double=0;for(let seed=0;seed<1000;seed++){const s=arena(seed);for(const id of ['critical','double-strike'])grantReward(s,id);s.orders=[];const e=foe(s,{hp:1000});attackEnemy(s,e);if(s.logs.some(l=>l.text.startsWith('会心')))critical++;if(s.logs.some(l=>l.text.startsWith('追撃')))double++;assert.ok(e.hp>=1000-stats(s).attack*4);}
  assert.ok(critical>65&&critical<160);assert.ok(double>25&&double<85);
- const s=arena(123);grantCard(s,'skill:double-strike');s.orders=[createCardRule('self',[],'skill','double-strike')];const e=foe(s);attackEnemy(s,e);const snapshot=JSON.stringify(s);attackEnemy(s,e);assert.equal(s.kills,1);assert.equal(JSON.stringify(s),snapshot);
+ const s=arena(123);grantReward(s,'double-strike');s.orders=[];const e=foe(s);attackEnemy(s,e);const snapshot=JSON.stringify(s);attackEnemy(s,e);assert.equal(s.kills,1);assert.equal(JSON.stringify(s),snapshot);
 });
 
 test('leech heals from actual damage, never overkill and never beyond maximum HP',()=>{
- const s=arena();grantCard(s,'skill:leech');s.orders=[createCardRule('self',[],'skill','leech')];s.hp=10;attackEnemy(s,foe(s,{hp:1}));assert.equal(s.hp,10);s.levels.power=5;s.gear.weapon={baseId:'weapon-9',plus:3,identified:true,cursed:false};s.hp=53;attackEnemy(s,foe(s,{hp:100}));assert.equal(s.hp,54);
+ const s=arena();grantReward(s,'leech');s.orders=[];s.hp=10;attackEnemy(s,foe(s,{hp:1}));assert.equal(s.hp,10);s.levels.power=5;s.gear.weapon={baseId:'weapon-9',plus:3,identified:true,cursed:false};s.hp=53;attackEnemy(s,foe(s,{hp:100}));assert.equal(s.hp,54);
 });
 
 test('saved RNG state produces identical future loot and combat after reload',()=>{
- const s=arena(77);s.levels.commandSlots=1;for(const id of ['critical','double-strike','leech'])grantCard(s,'skill:'+id);s.orders=['critical','double-strike','leech'].map(id=>createCardRule('self',[],'skill',id));s.hp=20;nextRandom(s);reveal(s);const restored=normalizeSave(JSON.parse(JSON.stringify(s)));for(let i=0;i<20;i++){attackEnemy(s,foe(s,{hp:20}));attackEnemy(restored,foe(restored,{hp:20}));}assert.deepEqual(restored,s);
+ const s=arena(77);s.levels.commandSlots=1;for(const id of ['critical','double-strike','leech'])grantCard(s,'skill:'+id);s.orders=[];s.hp=20;nextRandom(s);reveal(s);const restored=normalizeSave(JSON.parse(JSON.stringify(s)));for(let i=0;i<20;i++){attackEnemy(s,foe(s,{hp:20}));attackEnemy(restored,foe(restored,{hp:20}));}assert.deepEqual(restored,s);
 });
 
 test('v8 migration refunds retired purchases once and keeps legacy boxes and records',()=>{
- const old=arena();old.version=8;old.levels.tactics=1;old.levels.mend=1;old.items=[{x:7,y:5,type:'chest',gear:{baseId:'weapon-3',plus:0,identified:true,cursed:false}}];for(const k of ['abilities','unlockedOrders','keys','rngState','warped'])delete old[k];delete old.profile.skills;const before=JSON.stringify(old),s=normalizeSave(old);assert.equal(JSON.stringify(old),before);assert.equal(s.version,14);assert.equal(s.shards,old.shards+18);assert.ok(s.abilities.includes('mend'));assert.ok(s.orders.some(o=>o.effect.id==='tactics'));assert.equal(s.items[0].locked,undefined);assert.equal(s.levels.tactics,undefined);assert.equal(s.levels.mend,undefined);assert.deepEqual(normalizeSave(s),s);
+ const old=arena();old.version=8;old.levels.tactics=1;old.levels.mend=1;old.items=[{x:7,y:5,type:'chest',gear:{baseId:'weapon-3',plus:0,identified:true,cursed:false}}];for(const k of ['abilities','unlockedOrders','keys','rngState','warped'])delete old[k];delete old.profile.skills;const before=JSON.stringify(old),s=normalizeSave(old);assert.equal(JSON.stringify(old),before);assert.equal(s.version,15);assert.equal(s.shards,old.shards+18);assert.ok(s.abilities.includes('mend'));assert.ok(s.orders.some(o=>o.effect.id==='tactics'));assert.equal(s.items[0].locked,undefined);assert.equal(s.levels.tactics,undefined);assert.equal(s.levels.mend,undefined);assert.deepEqual(normalizeSave(s),s);
  const full=structuredClone(old);full.orders=['stairs','collect-items'].map(makeOrder);assert.equal(normalizeSave(full).orders.length,2);
 });
 
