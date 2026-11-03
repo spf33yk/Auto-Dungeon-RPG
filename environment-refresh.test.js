@@ -9,10 +9,10 @@ test('all areas have independent floor cells and uniform draw scaling',()=>{
  const calls=[],ctx={drawImage(...args){calls.push(args);}};assert.equal(drawFloorTexture(ctx,{complete:false},1,2),false);
  assert.equal(drawFloorTexture(ctx,{complete:true,naturalWidth:256,naturalHeight:256},1,2,6,64),true);assert.deepEqual(calls[0].slice(1),[128,64,64,64,64,128,64,64]);assert.equal(ctx.imageSmoothingEnabled,false);
 });
-test('every monster including bosses gets its own binary-alpha native64 art',()=>{
+test('all monsters have visible native64 art, with explicit aliases for reused boss art',()=>{
  const p=readPng('art/enemies/v2/atlas-64.png');assert.equal(p.width,320);assert.equal(p.height,320);const frames=new Set();
  for(const m of monsters){const f=enemyFrame(m);assert.ok(f,m.id);frames.add(JSON.stringify(f));let opaque=0;for(let y=0;y<64;y++)for(let x=0;x<64;x++){const a=p.pixel(f.x+x,f.y+y)[3];assert.ok(a===0||a===255);if(a)opaque++;if(y>=60)assert.equal(a,0,'Foot margin');}assert.ok(opaque>80,m.id);}
- assert.equal(frames.size,monsters.length);assert.equal(enemyFrame({id:'missing'}),null);
+ assert.equal(frames.size,monsters.filter(m=>!m.spriteId).length);for(const m of monsters.filter(m=>m.spriteId))assert.deepEqual(enemyFrame(m),enemyFrame({id:m.spriteId}));assert.equal(enemyFrame({id:'missing'}),null);
  assert.ok(fs.statSync('art/enemies/v2/atlas-64.png').size+fs.statSync('art/terrain/floors-v2/atlas-64.png').size<350000);
 });
 test('HP bars represent actual remaining health, with stable boss labels',()=>{

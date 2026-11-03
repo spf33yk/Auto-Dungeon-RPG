@@ -15,6 +15,7 @@ const species = [['墓地スライム','骨の番兵'],['水路ヒル','水門�
 export const minibosses=[
  {id:'boss-b20',name:'封門の骸騎士',basement:20,zone:3,type:'brute',experience:25,hp:88,attack:15,defense:4,period:2,color:['#89634b','#dfbc79']},
  {id:'boss-b10',name:'霧冠の番人',basement:10,zone:6,type:'brute',experience:45,hp:136,attack:23,defense:7,period:2,color:['#654b7c','#c9b6e5']},
+ {id:'boss-b1',name:'暁門の守護者',basement:1,zone:9,type:'brute',spriteId:'enemy-9-1',experience:70,hp:190,attack:29,defense:10,period:2,color:['#8d8665','#e5d69c']},
 ];
 export const monsters = species.flatMap((names,z)=>names.map((name,k)=>({id:`enemy-${z}-${k}`,name,zone:z,type:k?'brute':'slime',experience:3+z*2+(k?2:0),hp:(k?19:11)+z*4,attack:(k?8:5)+Math.floor(z*2.75),defense:Math.floor(z*.8)+(k?1:0),period:k?2:1,color:k?['#966e68','#c7aba0']:['#507f69','#a2c6a5']}))).concat(minibosses);
 const weapons=['錆びた剣','銅の剣','鉄の剣','炉鍛の剣','氷晶の剣','魔導の剣','茨の剣','騎士の剣','月影の剣','黎明の剣'];

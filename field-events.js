@@ -4,7 +4,7 @@ export const NORMAL_FLOORS=30,LETTER_FLOOR=16;
 export const zoneIndexForFloor=floor=>[0,1,3,4,6,9][Math.floor((floor-1)/5)]??9;
 export const bossForFloor=floor=>minibosses.find(b=>b.basement===NORMAL_FLOORS+1-floor);
 export const fieldEvents={
- boss:{id:'boss',name:'封印された闘技場',hint:'門番の気配がする。固定の闘技場で中ボスを倒すまで階段は封印される。'},
+ boss:{id:'boss',name:'封印された闘技場',hint:'門番の気配がする。固定の闘技場で門番を倒すまで階段は封印される。'},
  none:{id:'none',name:'静かな階',hint:'強い異変は感じない。油断せず、階段への道を探そう。'},
  monsters:{id:'monsters',name:'モンスターハウス',hint:'一室に幾つもの敵意が重なる。包囲への備えと、引き返す判断を。'},
  traps:{id:'traps',name:'トラップハウス',hint:'棘の紋様が密集する。罠は最初から見える。HPに余裕を残そう。'},
@@ -23,5 +23,5 @@ export function nextStageHint(s){
  if(s.phase==='dead')return {title:'再出発 · B30',text:'骨は砕けても、旅の記録は残る。再びB30から歩き始めよう。',event:'none'};
  if(s.floor>=NORMAL_FLOORS)return {title:'地上の気配',text:'階段の先から、かすかな風が吹いてくる。',event:'surface'};
  const floor=s.floor+1,z=zones[zoneIndexForFloor(floor)],plan=fieldPlan(s.seed,floor);
- return {floor,event:plan.id,title:`次はB${NORMAL_FLOORS+1-floor} · ${z.name}`,text:`${plan.hint} 主な魔物：${bossForFloor(floor)?.name||monsters[z.index*2].name}、${monsters[z.index*2+1].name}。${floor===LETTER_FLOOR?'胸の奥に、届けられなかった言葉の気配がある。':''}`};
+ return {floor,event:plan.id,title:`次はB${NORMAL_FLOORS+1-floor} · ${z.name}`,text:`${plan.hint} 主な魔物：${bossForFloor(floor)?.name||monsters[z.index*2].name+'、'+monsters[z.index*2+1].name}。${floor===LETTER_FLOOR?'胸の奥に、届けられなかった言葉の気配がある。':''}`};
 }

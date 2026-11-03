@@ -1,6 +1,6 @@
 import {monsters} from './data.js';
 const indices=new Map(monsters.map((m,index)=>[m.id,index]));
-export function enemyFrame(enemy){const index=indices.get(enemy.baseId||enemy.id);return index===undefined?null:{x:index%5*64,y:Math.floor(index/5)*64,width:64,height:64};}
+export function enemyFrame(enemy){const id=enemy.spriteId||monsters.find(m=>m.id===(enemy.baseId||enemy.id))?.spriteId||enemy.baseId||enemy.id,index=indices.get(id);return index===undefined?null:{x:index%5*64,y:Math.floor(index/5)*64,width:64,height:64};}
 export function drawEnemySprite(ctx,atlas,enemy,box){const frame=enemyFrame(enemy);if(!frame||!atlas.complete||atlas.naturalWidth!==320||atlas.naturalHeight!==320)return false;ctx.imageSmoothingEnabled=false;ctx.drawImage(atlas,frame.x,frame.y,64,64,box.x,box.y,box.width,box.height);return true;}
 export function enemyHealth(enemy){const max=Number.isFinite(enemy.maxHp)&&enemy.maxHp>0?enemy.maxHp:Math.max(1,Number.isFinite(enemy.hp)?enemy.hp:1),hp=Math.max(0,Math.min(max,Number.isFinite(enemy.hp)?enemy.hp:0));return {hp,max,ratio:hp/max};}
 // Labels are an overlay after world depth sorting, so walls and actors cannot cover them.

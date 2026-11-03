@@ -1,3 +1,4 @@
+import {generateDungeonLayout} from './dungeon-layout.js';
 import{INITIAL_CARDS}from'./card-access.js';
 import{cardCatalog,cardByKey,cardCodexRows}from'./card-catalog.js';
 import{grantCard,migrateCardInventory,rollCardChest}from'./card-inventory.js';
@@ -79,22 +80,13 @@ export function rollGear(floor,rng){const z=Math.min(9,zoneIndexForFloor(floor))
 export function makeBossFloor(s,boss){
  const grid=Array.from({length:H},()=>Array(W).fill(0));
  for(let y=3;y<=19;y++)for(let x=5;x<=25;x++)grid[y][x]=1;
- const pillars=boss.basement===20?[[10,7],[20,7],[10,15],[20,15]]:[[9,7],[21,7],[9,15],[21,15],[12,11],[18,11]];
+ const pillars=boss.basement===20?[[10,7],[20,7],[10,15],[20,15]]:boss.basement===1?[[9,6],[21,6],[9,14],[21,14],[12,10],[18,10]]:[[9,7],[21,7],[9,15],[21,15],[12,11],[18,11]];
  for(const [px,py] of pillars)for(let y=py;y<py+2;y++)for(let x=px;x<px+2;x++)grid[y][x]=0;
  Object.assign(s,{rooms:[{x:5,y:3,w:21,h:17}],grid,player:{x:15,y:19},stairs:{x:15,y:3},seen:grid.map(r=>r.map(()=>false)),visited:grid.map(r=>r.map(()=>false)),enemies:[{...boss,baseId:boss.id,x:15,y:10,maxHp:boss.hp,aggro:true,boss:true}],items:[{x:8,y:17,type:'potion'},{x:22,y:17,type:'potion'}],traps:[],obstacles:[],bossFloor:true,gimmick:{...fieldPlan(s.seed,s.floor),triggered:false,room:null},nextHint:null,warped:false,mended:false,floorKills:0,steps:0,flash:null,intent:'階段を封じる門番の気配',retreatTurns:0,retreatCooldown:0,activeOrder:null});reveal(s);
 }
 export function makeFloor(s){
  const boss=bossForFloor(s.floor);if(boss){makeBossFloor(s,boss);return;}s.bossFloor=false;
- const z=zoneFor(s),rng=random(s.seed+s.floor*997),grid=Array.from({length:H},()=>Array(W).fill(0));
- const rooms=Array.from({length:9},(_,i)=>{const w=z.layout==='hall'?10:z.layout==='channels'?6:6+Math.floor(rng()*5),h=z.layout==='hall'?8:z.layout==='channels'?6:5+Math.floor(rng()*4);return {x:2+(i%3)*15+Math.floor(rng()*2),y:2+Math.floor(i/3)*11+Math.floor(rng()*2),w,h};});
- const centers=rooms.map(r=>({x:r.x+Math.floor(r.w/2),y:r.y+Math.floor(r.h/2)}));
- for(const r of rooms)for(let y=r.y;y<r.y+r.h;y++)for(let x=r.x;x<r.x+r.w;x++){if(z.layout!=='caves'||Math.hypot((x-r.x-r.w/2)/(r.w/2),(y-r.y-r.h/2)/(r.h/2))<1.15)grid[y][x]=1;}
- function carve(a,b){let {x,y}=a;const stamp=()=>{for(let dy=0;dy<1;dy++)for(let dx=0;dx<1;dx++)if(x+dx>0&&x+dx<W-1&&y+dy>0&&y+dy<H-1)grid[y+dy][x+dx]=1;};for(const axis of rng()<.5?['x','y']:['y','x'])while((axis==='x'?x:y)!==b[axis]){stamp();if(axis==='x')x+=Math.sign(b.x-x);else y+=Math.sign(b.y-y);}stamp();}
- const startIndex=Math.floor(rng()*rooms.length),connected=[startIndex],remaining=centers.map((_,i)=>i).filter(i=>i!==startIndex);
- while(remaining.length){const from=connected[Math.floor(rng()*connected.length)],to=remaining.reduce((a,b)=>distance(centers[a],centers[from])<distance(centers[b],centers[from])?a:b);carve(centers[from],centers[to]);connected.push(to);remaining.splice(remaining.indexOf(to),1);}
- if(z.layout==='cross'){const hub={x:23,y:17};for(const c of centers)carve(c,hub);}else if(z.layout==='channels'||rng()<.5)carve(centers[0],centers[8]);
- carve(centers[2],centers[6]);
- const start=centers[startIndex],end=centers.reduce((a,b)=>distance(a,start)>distance(b,start)?a:b);
+ const z=zoneFor(s),rng=random(s.seed+s.floor*997),{grid,rooms,start,end}=generateDungeonLayout(s.floor,rng,{width:W,height:H,layout:z.layout});
  s.gimmick={...fieldPlan(s.seed,s.floor),triggered:false,room:null};s.traps=[];s.obstacles=[];s.nextHint=null;
  s.rooms=rooms;s.grid=grid;s.player={...start};s.stairs={...end};s.seen=grid.map(row=>row.map(()=>false));s.visited=grid.map(row=>row.map(()=>false));s.enemies=[];s.items=[];s.mended=false;s.warped=false;s.floorKills=0;s.steps=0;s.flash=null;s.damageEvents=[];s.intent='視界の先を調べる';s.retreatTurns=0;s.retreatCooldown=0;s.activeOrder=null;
  const occupied=new Set([key(start),key(end)]);const free=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(grid[y][x]&&!occupied.has(`${x},${y}`)&&distance({x,y},start)>4)free.push({x,y});

@@ -620,5 +620,12 @@ scene-music.jsのmusicSceneで画面分類し、単一のHTMLAudioElementをScen
 normal-ending.jsは時刻と通常エンド回数から字幕・黒転・完了を返す純粋関数。appのrenderNormalEndingと描画ループは一時的な演出経過だけを保持し、ゲームのendingフェイズを利用する。通常達成記録は従来のascend以外で更新しない。プレビュー中は探索tickも停止。画像は固定16:9の枠へobject-fit:containで表示、通常UIを隠す。
 
 ## 2026-11-03 字幕コントローラーと異変曲
-subtitle-player.jsのSubtitlePlayerを目覚め／END／プレビューで共有。index、elapsed、全文表示フラグを保持し、Intl.Segmenterの書記素で45msごとに描画する。updateは次行へ進めずadvanceのみが全文化または次行へ遷移する。旧awakeningFrame／normalEndingFrameの自動時間送りを削除。content modulesは文章列だけを返す。文字送りクリック領域は字幕・画像とは別の全面透明button、設定・スキップ・結果を上位レイヤーに置く。
+subtitle-player.jsのSubtitlePlayerを目覚め／END／プレビューで共有。indexとelapsedを保持し、Intl.Segmenterの書記素で45msごとに描画する。updateは次行へ進めずadvanceは文字表示完了時だけ次行へ遷移し、表示途中では何もしない。旧awakeningFrame／normalEndingFrameの自動時間送りを削除。content modulesは文章列だけを返す。文字送りクリック領域は字幕・画像とは別の全面透明button、設定・スキップ・結果を上位レイヤーに置く。
 musicSceneはbossFloorを優先し、その後gimmick.idからtraps／monsters／fogを選ぶ。デバッグ試聴の一時上書きmusicAuditionはゲームstateへ保存しない。字幕プレビューの種別とplayerも表示専用で、探索を停止する。
+
+## 2026-11-03 部屋数進行・地形生成
+dungeon-layout.jsへ通常階レイアウトを分離。roomCountForFloorは5+floor((floor-1)/5)を最大10で返す。4×3候補を隣接成長で選び、接続木＋稀な追加辺を作る。壁の隙間を経由する折れ線と幅抽選を使い、全床到達を保証する。始点からBFSで部屋中心までの実経路距離を測り階段を選択。makeFloorは配置済み地形とroomsを受け取り、従来の敵・品物・異変配置へ渡す。ボス生成はこのモジュールを通さない。
+字幕テキストをspanへ分離し、隣にaria-hiddenの▼spanを配置。出そろった時だけ表示しCSSで上下動。表示途中のadvanceは無効とし、全文表示フラグを削除。
+
+## 2026-11-03 B1ボスの統合
+minibossesへbasement:1のboss-b1を追加し、bossForFloor／fieldPlan／階段封印・報酬・図鑑の共通処理を再利用。makeBossFloorでB1専用の柱配置を選ぶ。enemyFrameはspriteIdを優先し、boss-b1の表示をenemy-9-1の既存フレームへ明示的に参照する。新しい空きアトラス領域を誤って描かない。次階ヒントはボス階ならそのボスだけを表示。
