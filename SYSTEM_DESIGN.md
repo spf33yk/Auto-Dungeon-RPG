@@ -657,3 +657,8 @@ createLogVisibilityへsetHeldを追加。hover/focus/touchの保持理由をapp�
 開始時とB20・B10・B1撃破時にオーグメント3択から1種選択。18種、3レアリティ、6テーマを実装。会心・吸命・追撃はオーグメントへ移動。能動スキルは再生・転移の2種で配置が必要。準備画面に階のヒントと所持効果を上部表示、オーグメント図鑑を追加。効果の数値・候補重み・操作・既存セーブへの影響は[カード・オーグメント仕様](docs/cards/CARD_SYSTEM.md)に記載し、本節と同資料を以前のカード記述より優先する。数値は仮採用。
 
 augments.jsが定義・候補抽選・選択・加算効果・致命傷耐久を担当。game-engine.jsはstats／attackEnemy／被弾／罠／床生成／ボス撃破へ結合する。状態にaugments、augmentOffer、augmentStarted、trapTriggers、unharmedTurns、undyingUsed、firstAttackUsedを追加し、profile.augmentsは周回保持。予測は破棄する複製で同じengineを実行し、ボス後の未選択offerだけ解除する。UIはrenderAugmentsと固定3択モーダルで選択し、更新時に保存する。
+
+
+## 2026-11-03：カードの役割監査
+
+[全31種の監査結果](docs/cards/CARD_AUDIT_2026-11-03.md)へ、視界条件の常時成立する組合せ、戦術と攻撃の競合、基本探索への罠回避の適用漏れ、取得カードの役割重複を記録。改善案は未決定。今回は実装・保存・取得条件・バランスを変更していない。
