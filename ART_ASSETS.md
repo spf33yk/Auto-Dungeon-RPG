@@ -321,3 +321,6 @@ output/march-in-place-20261102-r1/とoutput/march-fullbody-20261102-r2/はユー
 ## 2026-11-03 赤いスキル宝箱
 
 art/props/chest-skill-64.pngはimage_gen（host_image）で現行宝箱を参照し、新しく赤い閉箱を生成。透明背景を維持して32色・二値alpha・64pxセルへ書き出し、既存箱と同じ足元と可視サイズへ等倍率で合わせる。生成原画はart/local-originals/card-loot-20261103/にローカル保管。金色の光と粒子はCanvasの表示エフェクトで、画像の変形やカード内容の再抽選をしない。新規主人公・足踏み素材は制作しない。
+
+## 2026-11-03 BGMと通常エンドの採用
+ユーザー配置のart/BGMから4曲だけを配信に登録。星々の眠る地.mp3、洞窟A.mp3、絡繰仕掛けの罠を抜けて.mp3、光差し込む廃墟.mp3。原音を再圧縮せず使用し合計10,081,906bytes。その他の音源は今回のコミットへ含めない。通常エンドはart/concepts/normal-end-son-strike-v6/scene-1920x1080.pngを採用し、同じ1920×1080画素のロスレスWebPをart/endingへ配信（2,345,992bytes）。原稿・ラフ・旧版は追加配信しない。素材来歴と圧縮の検証はart/ending/README.md。

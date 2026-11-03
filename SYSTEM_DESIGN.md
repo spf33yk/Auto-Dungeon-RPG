@@ -614,3 +614,7 @@ skillCardsを全5種の単一リストとし、カード図鑑と編集一覧を
 
 ## 2026-11-03 埋め壁の角枠修正
 wallRenderMaskはwallNeighborMaskをそのまま返す。斜めの部屋から15を14へ変換する補正を廃止。表示15は既存の正方形天面描画と入口パーツ禁止を通り、周囲8マスの斜め4方向16組合せでも枠を生成しない。下側角の照明・形状の過去記述より本項を優先する。
+
+## 2026-11-03 BGM・通常エンド
+scene-music.jsのmusicSceneで画面分類し、単一のHTMLAudioElementをSceneMusicが管理。初回入力でunlock、ループ・音量・ミュート・非表示停止・再生拒否を扱う。同一分類でsrcを更新せず二重再生を防ぐ。indexのaudio data属性を曲対応表とし、update-assets.jsがMP3とWebPをバイナリでハッシュ化する。server.jsへaudio/mpeg・image/webpを追加。
+normal-ending.jsは時刻と通常エンド回数から字幕・黒転・完了を返す純粋関数。appのrenderNormalEndingと描画ループは一時的な演出経過だけを保持し、ゲームのendingフェイズを利用する。通常達成記録は従来のascend以外で更新しない。プレビュー中は探索tickも停止。画像は固定16:9の枠へobject-fit:containで表示、通常UIを隠す。

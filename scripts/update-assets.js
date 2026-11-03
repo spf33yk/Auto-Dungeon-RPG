@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 // Normalize line endings so Windows and Linux generate the same release URLs.
-const version=file=>createHash('sha256').update(/\.(png|webm|mp4)$/.test(file)?readFileSync(root+file):readFileSync(root+file,'utf8').replace(/\r\n/g,'\n')).digest('hex').slice(0,12);
+const version=file=>createHash('sha256').update(/\.(png|webm|mp4|webp|mp3)$/.test(file)?readFileSync(root+file):readFileSync(root+file,'utf8').replace(/\r\n/g,'\n')).digest('hex').slice(0,12);
 const modules=readdirSync(root).filter(f=>f.endsWith('.js')&&!f.endsWith('.test.js')&&f!=='server.js').sort();
 const imports=Object.fromEntries(modules.map(f=>['./'+f,'./'+f+'?v='+version(f)]));
 const map='<script type="importmap" id="asset-imports">'+JSON.stringify({imports})+'</script>';
@@ -43,7 +43,7 @@ for(const match of html.matchAll(/\.\/art\/characters\/[^"\s?]*sprites\.json(?:\
  updated=updated.replaceAll(match[0],'./'+file+'?v='+version(file));
 }
 for(const file of ['style.css','screens.css'])updated=updated.replace(new RegExp('href="\\./'+file.replace('.', '\\.')+'(?:\\?v=[^"]*)?"'),'href="./'+file+'?v='+version(file)+'"');
-for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','terrain/floors-v2/atlas-64.png','props/chest-skill-64.png','props/atlas-64.png','props/map-items-64.png','enemies/v2/atlas-64.png']){
+for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','ending/normal-end-son-strike-v6.webp','BGM/星々の眠る地.mp3','BGM/洞窟A.mp3','BGM/絡繰仕掛けの罠を抜けて.mp3','BGM/光差し込む廃墟.mp3','terrain/floors-v2/atlas-64.png','props/chest-skill-64.png','props/atlas-64.png','props/map-items-64.png','enemies/v2/atlas-64.png']){
  const asset='./art/'+file;
  updated=updated.replace(new RegExp('\\./art/'+file.replaceAll('.','\\.')+'(?:\\?v=[^"\\s>]*)?','g'),asset+'?v='+version('art/'+file));
 }
