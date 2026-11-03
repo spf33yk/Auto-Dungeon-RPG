@@ -263,7 +263,7 @@ function renderTab(){
  if(tab==='skills')renderMemories();
  if(tab==='status')$('tab-content').innerHTML=$('expedition-summary').innerHTML.replace(/\sid="[^"]*"/g,'');
  if(tab==='gear'){$('tab-content').innerHTML='<div class="equipment-toolbar"><button data-best-equipment class="primary">最強装備</button><small>武器は攻撃力、防具は防御力で選びます。</small></div>'+categoryTabs('gear',gearSlot)+sortButtons('gear',gearSorts[gearSlot])+'<p class="section-caption">本編の装備は鑑定済み・呪いなし。入手順は古い順、攻撃力順・防御力順は高い順です。</p>'+itemCard(state.gear[gearSlot],gearSlot,true)+`<h3>所持品</h3>`+(sortedInventory(state,gearSlot,gearSorts[gearSlot]).map(({g,index})=>itemCard(g,index)).join('')||'<p class="section-caption">この種類の装備はありません。</p>');}
- if(tab==='orders'){delete $('tab-content').dataset.orderSignature;renderOrderEditor($('tab-content'));}
+ if(tab==='orders'){if(!$('tab-content').querySelector('.card-board'))delete $('tab-content').dataset.orderSignature;renderOrderEditor($('tab-content'));}
  refreshForecast();
 
 }

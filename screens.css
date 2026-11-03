@@ -440,7 +440,7 @@ body.preparing #prepare-scene .fitted-card-editor .card-library,body.preparing #
 .fitted-card-editor .card-help{margin:2px 0;font-size:11px}
 .instruction-trays{overflow-y:auto;min-height:0;flex:1;scrollbar-width:thin;padding-bottom:8px}
 .fitted-card-editor .board-rule{border:0;padding:0;margin:4px 0 10px;background:transparent;overflow:hidden}
-.tray-scroll{overflow-x:auto;overflow-y:hidden;max-width:100%;padding-bottom:5px;scrollbar-width:thin;overscroll-behavior:contain;touch-action:pan-x}
+.tray-scroll{overflow-x:auto;overflow-y:hidden;max-width:100%;padding-bottom:5px;scrollbar-width:thin;overscroll-behavior-x:contain;overscroll-behavior-y:auto;touch-action:pan-x pan-y}
 .tray-surface{position:relative;isolation:isolate;display:flex;width:max-content;height:108px;box-sizing:border-box;padding:16px 40px 16px 105px;background-image:var(--prep-tray-left),var(--prep-tray-right);background-position:left top,right top;background-size:108px 108px,54px 108px;background-repeat:no-repeat}
 .tray-surface:before{content:'';position:absolute;z-index:-1;inset:0 54px 0 108px;background:var(--prep-tray-middle) left top/648px 108px repeat-x;pointer-events:none}
 .tray-surface:after{content:'';position:absolute;inset:23px 39px 22px 99px;box-shadow:inset 0 3px 3px #000b,inset 0 -2px 1px #000b;border-bottom:1px solid #b3a17c55;pointer-events:none;z-index:3}
@@ -605,10 +605,9 @@ html[data-preparation-skin="obsidian-runes"] body.preparing #workspace:before,ht
 
 body.preparing #prepare-scene #prep-hint{padding-left:26px;padding-right:26px}body.preparing #prepare-scene>.preparation-launch{padding-left:22px;padding-right:22px}
 
-/* Outer ornament follows the entire 16:9 viewport, including its HUD. */
-body.preparing #workspace:before{z-index:30}
-body.preparing #prepare-scene{left:10px;right:10px;bottom:10px}
-body.preparing #hud-top{padding-left:22px;padding-right:22px;padding-top:12px}
+/* Outer ornament starts below the shared HUD and reaches the scene edges. */
+body.preparing #workspace:before{z-index:30;top:var(--shared-hud-space,82px)}
+body.preparing #prepare-scene{padding-top:12px;padding-bottom:10px}
 body.preparing #prepare-scene .card-library,body.preparing #prepare-scene .card-rules{padding:20px}
 body.preparing #prepare-scene #prep-hint{padding-top:8px;padding-bottom:8px}
 #tutorial-dialog{width:min(540px,90vw);box-sizing:border-box;padding:24px;color:#eee4cb;background:#11191bf5;border:1px solid #b89e67;max-height:88dvh;overflow:auto}

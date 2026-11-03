@@ -1277,3 +1277,11 @@ B1追加後も全233テスト成功（test-results/b1-map-subtitle-release-tests
 - ローカル4371の合成セーブでPC画面および844×390のiframeによる横向きスマホ相当画面を確認。実利用の4317や公開セーブは変更していない。画像：test-results/prep-frame-final.png、prep-frame-scroll-fixed.png、prep-frame-mobile-final.png（検証用・非配信）。
 - 公開版走行確認は未実施。配信方式は変更せず、内容ハッシュ更新とローカル検証で確認できるUI変更のため省略。公開版で動作確認済みとは扱わない。
 - 未確認：実機スマホのタッチドラッグ、OSの回転・全画面制御。既存の操作方式を維持。保存v16・ゲームバランス・物語・素材規格は変更なし。
+
+
+## 2026-11-04追補：枠上辺の復元・スクロール停止・公開不具合調査
+
+- 確認対象：e818c75を基準に今回の作業ツリー。枠上辺は--shared-hud-space（HUD下端＋余白）へ戻し、左右・下辺はゲーム画面外周に維持。枠とヒント・下部操作が重ならないよう準備内容に上12px／下10pxの余白。
+- 原因：.tray-scrollのoverscroll-behavior:containが縦方向のスクロール連鎖も止めていた。横方向のみcontain、縦方向autoへ変更。行番号・カード以外の余白はpan-x pan-yを許可。無関係なrenderTabでも指示DOMを再生成していたため、既存シグネチャを活用し内容が同じ場合は維持。
+- ローカル4372の8行合成セーブでカード列上のホイール操作を確認（指示一覧scrollTop 0→720）。下段で行移動後も720を維持し、上スクロールで0へ戻ることを確認。修正画面test-results/frame-scroll-r2.png。実利用のセーブは未変更。実機スマホのタッチは未確認。
+- GitHub調査：mainはe818c75と一致し、Game tests #115成功。Pages run 41670755131はbuild成功後、deployでupdating_pagesのまま約10分経過しTimeout reachedで失敗。コミット失敗とは異なる公開処理側の失敗。公開確認が必要と判断し今回のpush後も確認する。
