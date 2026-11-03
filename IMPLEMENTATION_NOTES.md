@@ -1285,3 +1285,8 @@ B1追加後も全233テスト成功（test-results/b1-map-subtitle-release-tests
 - 原因：.tray-scrollのoverscroll-behavior:containが縦方向のスクロール連鎖も止めていた。横方向のみcontain、縦方向autoへ変更。行番号・カード以外の余白はpan-x pan-yを許可。無関係なrenderTabでも指示DOMを再生成していたため、既存シグネチャを活用し内容が同じ場合は維持。
 - ローカル4372の8行合成セーブでカード列上のホイール操作を確認（指示一覧scrollTop 0→720）。下段で行移動後も720を維持し、上スクロールで0へ戻ることを確認。修正画面test-results/frame-scroll-r2.png。実利用のセーブは未変更。実機スマホのタッチは未確認。
 - GitHub調査：mainはe818c75と一致し、Game tests #115成功。Pages run 41670755131はbuild成功後、deployでupdating_pagesのまま約10分経過しTimeout reachedで失敗。コミット失敗とは異なる公開処理側の失敗。公開確認が必要と判断し今回のpush後も確認する。
+
+
+### 0a9b864検証・公開確認結果
+
+ローカル自動テスト261件成功、配信URLチェック・差分空白チェック成功。GitHub mainへ0a9b864をpushし、Pages run 41676029893はbuild／deployとも成功。公開ページを再読込してapp.js?v=21df0a073d67、screens.css?v=b2e4de90c6bbがローカルと一致することを確認（旧URLから更新）。今回は公開障害の報告があるため配信確認を実施。公開版の旅を開始・ロードして走行する検証は未実施で、ゲーム内操作はローカルで確認した。前回のPagesタイムアウトは今回の再公開で解消。
