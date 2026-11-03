@@ -8,7 +8,7 @@ test('every instruction mutation is rejected outside preparation without changin
   s.orders=['retreat-low','stairs'].map(makeOrder);grantReward(s,'warp');
   const before=JSON.stringify(s);
   assert.equal(addOrder(s,'warp'),false,phase);
-  assert.equal(addOrder(s,'collect-items'),false,phase);
+  assert.equal(addOrder(s,'collect-weapons'),false,phase);
   for(const [index,change] of [[0,'remove'],[0,'down'],[1,'up'],[0,50]])assert.equal(editOrder(s,index,change),false,phase);
   assert.equal(setMode(s,'collect'),false,phase);
   assert.equal(JSON.stringify(s),before,phase);
@@ -24,5 +24,5 @@ test('preparation still supports adding, reordering, changing thresholds and rem
  assert.equal(editOrder(s,0,'down'),true);
  assert.equal(editOrder(s,1,'remove'),true);
  assert.equal(setMode(s,'collect'),true);
- assert.deepEqual(s.orders.map(o=>o.id),['collect-items','stairs']);
+ assert.deepEqual(s.orders.map(o=>o.id),['collect-weapons','stairs']);
 });

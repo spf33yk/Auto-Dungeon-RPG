@@ -42,7 +42,7 @@ test('locked rewards, mismatched categories, duplicate conditions and capacity c
  s.phase='explore';const saved=structuredClone(s.orders);assert.equal(placeCard(s,palette('action','stairs'),dest(0,'effect')),false);assert.equal(moveCardRow(s,0,1),false);assert.deepEqual(s.orders,saved);
 });
 test('row priority is reordered and persists with existing save format',()=>{
- const s=prep();assert.equal(moveCardRow(s,0,1),true);assert.equal(s.orders[0].effect.id,'chests');const saved=normalizeSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(saved.orders,s.orders);assert.equal(saved.version,15);
+ const s=prep();assert.equal(moveCardRow(s,0,1),true);assert.equal(s.orders[0].effect.id,'chests');const saved=normalizeSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(saved.orders,s.orders);assert.equal(saved.version,16);
 });
 test('expanded capacity supports eight rows and four conditions without exceeding limits',()=>{
  const s=prep();s.levels.commandSlots=6;s.levels.cardSlots=2;s.orders=Array.from({length:8},()=>createCardRule());

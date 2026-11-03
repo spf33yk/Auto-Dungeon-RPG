@@ -16,13 +16,11 @@ export const conditionCards=[
 export const actionCards=[
  {id:'stairs',name:'階段を上る',detail:'階段へ向かい、実際に乗ると次の階へ。'},
  {id:'chests',name:'宝箱を取得',detail:'開封可能な通常宝箱へ向かう。'},
- {id:'collect-items',name:'装備を取得',detail:'発見済みの武器・防具へ向かう。'},
  {id:'collect-weapons',name:'武器を取得',detail:'発見済みの武器へ向かう。'},
  {id:'collect-armor',name:'防具を取得',detail:'発見済みの防具へ向かう。'},
  {id:'collect-fragments',name:'記憶の欠片を取得',detail:'床の記憶の欠片へ向かう。'},
  {id:'collect-herbs',name:'薬草を取得',detail:'床の薬草へ向かう。'},
  {id:'collect-springs',name:'回復の泉へ向かう',detail:'発見済みの回復の泉へ向かう。'},
- {id:'heal-item',name:'回復品を取得',detail:'泉や薬草へ向かう。'},
  {id:'letter',name:'手紙の箱を開ける',detail:'物語条件を満たす手紙の箱へ向かう。'},
  {id:'frontier',name:'視界の先を調べる',detail:'未発見の地形に接する未踏の床を調べる。'},
  {id:'explore-all',name:'未踏の床を調べる',detail:'まだ歩いていない床を調べる。'},
@@ -47,13 +45,13 @@ export const createCardRule=(target='self',conditions=[],kind='action',effect='s
 
 export function legacyToCards(o){
  if(o.cards)return structuredClone(o);
- let target='self',effect=o.id,kind='action';const conditions=[];
+ let target='self',effect=o.id==='collect-items'?'collect-weapons':o.id==='heal-item'?'collect-herbs':o.id,kind='action';const conditions=[];
  const add=(id,value)=>conditions.push({id,...(value===undefined?{}:{value})});
  if(o.id==='stairs-low'){effect='stairs';add('hp-below',o.hp);}
  if(o.id==='stairs-after'){effect='stairs';add('turns',o.turns);}
  if(o.id==='stairs-after-loot'){effect='stairs';add('loot-empty');}
  if(o.id==='chests-near'){effect='chests';add('range',o.range);}
- if(o.id.startsWith('heal-')){effect='heal-item';add('hp-below',o.hp);}
+ if(o.id.startsWith('heal-')){effect='collect-herbs';add('hp-below',o.hp);}
  if(o.id==='explore-near'){effect='explore-all';add('range',o.range);}
  if(o.id==='avoid-group'){effect='retreat';add('enemy-count',o.count);}
  if(o.id==='retreat-low'){effect='retreat';add('hp-below',o.hp);}
@@ -84,7 +82,7 @@ function subjects(s,r,ctx){
 function destinations(s,r,ctx){
  const id=r.effect.id;
  if(id==='stairs')return [s.stairs].filter(p=>s.seen[p.y][p.x]&&!s.enemies.some(e=>e.boss));
- const types={chests:['chest'],'collect-items':['gear'],'collect-weapons':['gear'],'collect-armor':['gear'],'collect-fragments':['fragment'],'collect-herbs':['herb'],'collect-springs':['potion'],'heal-item':['potion','herb'],letter:['letter']};
+ const types={chests:['chest'],'collect-weapons':['gear'],'collect-armor':['gear'],'collect-fragments':['fragment'],'collect-herbs':['herb'],'collect-springs':['potion'],letter:['letter']};
  if(types[id])return s.items.filter(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i)&&types[id].includes(i.type)&&(id!=='collect-weapons'||gearById[i.gear?.baseId]?.slot==='weapon')&&(id!=='collect-armor'||gearById[i.gear?.baseId]?.slot==='armor'));
  if(id==='avoid-traps')return (s.traps||[]).filter(t=>t.revealed&&!t.spent&&(s.gimmick?.id==='traps'||s.seen[t.y][t.x]));
  if(['retreat','tactics','warp'].includes(id))return s.enemies.filter(e=>ctx.canSee(s,e.x,e.y));
