@@ -586,3 +586,5 @@ button.illustrated-augment{cursor:pointer;transition:transform .15s,filter .15s}
 
 /* Transparent ornament panels: only artwork and text remain visible. */
 .illustrated-augment,button.illustrated-augment:hover{background:transparent}.augment-chip.illustrated-chip{background:transparent;box-shadow:none}.augment-illustration{mix-blend-mode:normal}
+
+.true-end-unimplemented{padding:9px 12px;border:1px solid #b99862;background:#121518d9;color:#f0d5a2;font:13px/1.7 sans-serif;letter-spacing:0;text-align:center;text-shadow:0 1px 3px #000}#title-unimplemented{font-size:clamp(9px,1.1cqw,14px);margin:2px 0 0}#ending-unimplemented{max-width:520px;margin:8px 0}

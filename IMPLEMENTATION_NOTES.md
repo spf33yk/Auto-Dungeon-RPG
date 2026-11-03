@@ -1250,3 +1250,8 @@ B1追加後も全233テスト成功（test-results/b1-map-subtitle-release-tests
 - node --test全258件成功。イラストのWebP alphaフラグ・192×240寸法・画像ハッシュ・全19種の網羅・PNG枠の透過・800KB未満を検証。途中のPNG出力は透明画素と本体の不透明画素も確認。画像を変形させずWebPへ再梱包する専用スクリプトを追加した。
 - ローカルlocalhost:4368の隔離セーブで選択画面の枠内外・アイコン周囲の透過を目視確認。準備から指定説明が消え、所持オーグメントが表示されること、オーグメント図鑑のCODEXが消えたことをAX表示で確認。CODEXは共通HTMLから削除しているため他の図鑑も同じ対応。画面保存test-results/transparent-augment-choice.png、transparent-augment-preparation.png、transparent-augment-codex.png（Git対象外）。普段の4317の保存は未変更。
 - node scripts/update-assets.js --checkとgit diff --check成功。ソース・素材・各資料は同じコミットに含める。公開版走行確認は未実施。ローカルの画像読み込みと共通UIで確認でき、配信基盤・ブラウザ固有機能変更がないため。公開版で動作確認済みとは報告しない。
+
+
+## 2026-11-03：TRUE ENDの未実装表示
+
+基準コミットa7a1b69へ表示追加した作業ツリーを確認。達成記録ありの倅版タイトルと、TRUE記録あり／手紙あり／通常END2回目以降の結果画面に未実装を明示。デバッグONの状態表示も同じ文言。実際のTRUE本編・達成判定・保存形式は変更なし。ローカルlocalhost:4369の隔離セーブで倅タイトルと手紙所持の2回目END→スキップ→結果表示を確認した。test-results/true-end-title-notice.pngとtrue-end-result-notice.pngへ画像保存（Git対象外）。共通定数と既存DOMによる表示追加で、通常のタイトル・通常END・プレビューには条件付きで影響を限定。node --test全258件成功、update-assets.js --checkとgit diff --checkを確認。公開版の走行確認は未実施。ローカルの2経路の画面と配信URL整合で確認でき、配信基盤変更がないため。普段の4317セーブは未変更。
