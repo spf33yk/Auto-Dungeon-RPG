@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {dimmedWallTileset,floorLight,actorFootOffset,renderSightState,MEMORY_SHADE} from './scene-lighting.js';import {canSee,radius,newGame} from './engine.js';import {drawFootShadow} from './scene-depth.js';
+import {dimmedWallTileset,drawSightWall,floorLight,actorFootOffset,renderSightState,MEMORY_SHADE} from './scene-lighting.js';import {canSee,radius,newGame} from './engine.js';import {drawFootShadow} from './scene-depth.js';
 test('wall shade uses the sprite alpha and caches an independent opaque-color atlas',()=>{
  const ops=[],ctx={drawImage(...a){ops.push(['image',...a]);},fillRect(...a){ops.push(['shade',this.globalCompositeOperation,this.fillStyle,...a]);}},canvas={getContext:()=>ctx},source={naturalWidth:128,naturalHeight:144},set={definition:{id:'crypt'},image:source};
  const dark=dimmedWallTileset(set,()=>canvas);assert.equal(dark.definition,set.definition);assert.equal(dark.image,canvas);assert.equal(canvas.width,128);assert.equal(canvas.height,144);assert.deepEqual(ops[1],['shade','source-atop',MEMORY_SHADE,0,0,128,144]);assert.equal(ctx.globalCompositeOperation,'source-over');assert.equal(dimmedWallTileset(set,()=>{throw Error('Should be cached');}),dark);assert.equal(dimmedWallTileset(null),null);assert.equal(set.image,source);
@@ -7,9 +7,14 @@ test('wall shade uses the sprite alpha and caches an independent opaque-color at
 test('all out-of-sight terrain remains dim without affecting discovery',()=>{
  assert.equal(floorLight(false,false),'memory');assert.equal(floorLight(false,true),'visible');assert.equal(floorLight(true,false),'memory');assert.equal(floorLight(true,true),'visible');
 });
-test('visual sight follows the rendered tile without changing AI range or seeing through walls',()=>{
+test('camera interpolation does not delay committed visibility or reveal through walls',()=>{
  const s=newGame(4);s.player={x:4,y:4};s.grid=Array.from({length:10},()=>Array(10).fill(1));s.grid[4][5]=0;const before=JSON.stringify(s);
- const view=renderSightState(s,{x:3.2,y:4});assert.deepEqual(view.player,{x:3,y:4});assert.equal(radius(view),radius(s));assert.ok(canSee(view,5,4));assert.equal(canSee(view,6,4),false);assert.deepEqual(renderSightState(s,{x:3.6,y:4}).player,s.player);assert.equal(JSON.stringify(s),before);
+ for(const position of [{x:3.2,y:4},{x:3.6,y:4},{x:4,y:3.2}]){const view=renderSightState(s,position);assert.equal(view,s);assert.equal(radius(view),radius(s));for(let y=0;y<10;y++)for(let x=0;x<10;x++)assert.equal(canSee(view,x,y),canSee(s,x,y));}assert.ok(canSee(s,5,4));assert.equal(canSee(s,6,4),false);assert.equal(JSON.stringify(s),before);
+});
+test('raised wall light clips projected cells without spilling into neighbouring shadow',()=>{
+ const ops=[],ctx={save(){},restore(){},beginPath(){},rect(...a){ops.push(a);},clip(){ops.push('clip');}},dark={id:'dark'},wall={dimmed:dark},draw=[];
+ drawSightWall(ctx,wall,{x:128,y:80,width:64,height:112},64,(x,y)=>x===2&&y===2,set=>draw.push(set));assert.deepEqual(ops,[[128,128,64,64],'clip']);assert.deepEqual(draw,[dark,wall]);
+ ops.length=0;draw.length=0;drawSightWall(ctx,wall,{x:128,y:80,width:64,height:112},64,()=>false,set=>draw.push(set));assert.deepEqual(ops,[]);assert.deepEqual(draw,[dark]);
 });
 test('different transparent sprite padding shares a fixed ground contact and shadow',()=>{
  const height=28.32,top=24-height;for(const rows of [['....','xxxx','....','....'],['xxxx','xxxx','xxxx','xxxx']]){const last=rows.map((r,i)=>r.includes('x')?i:-1).reduce((a,b)=>Math.max(a,b));assert.ok(Math.abs(top+actorFootOffset(rows,height)+(last+1)*height/rows.length-22)<1e-9);}

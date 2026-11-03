@@ -7,8 +7,12 @@ export function dimmedWallTileset(tileset,makeCanvas=()=>document.createElement(
  return tileset.dimmed={definition:tileset.definition,image:canvas};
 }
 export function floorLight(known,visible){return visible?'visible':'memory';}
-// Wall corners are surfaces lit by nearby visible floor, not walkable sight targets.
-export function wallSurfaceVisible(grid,x,y,visible){if(visible(x,y))return true;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(grid[y+dy]?.[x+dx]&&visible(x+dx,y+dy))return true;return false;}
 export function actorFootOffset(rows,height){let last=rows.length-1;while(last>=0&&!/[^.]/.test(rows[last]))last--;return (rows.length-1-last)*height/rows.length-2;}
-// Animation follows the nearest rendered cell; AI continues to use its committed position.
-export function renderSightState(state,position){return {...state,player:{...state.player,x:Math.round(position.x),y:Math.round(position.y)}};}
+// Camera interpolation must not create a second, delayed visibility state.
+export function renderSightState(state,position){return state;}
+// Raised artwork uses the same world-space light cells as the floor below it.
+export function drawSightWall(ctx,tileset,box,size,visible,draw){
+ draw(dimmedWallTileset(tileset));ctx.save();ctx.beginPath();let count=0;
+ for(let y=Math.floor(box.y/size);y<Math.ceil((box.y+box.height)/size);y++)for(let x=Math.floor(box.x/size);x<Math.ceil((box.x+box.width)/size);x++)if(visible(x,y)){ctx.rect(x*size,y*size,size,size);count++;}
+ if(count){ctx.clip();draw(tileset);}ctx.restore();
+}

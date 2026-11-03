@@ -3,12 +3,12 @@ import{chestPresentation,drawLegendaryChestEffect}from'./chest-view.js';
 import {drawEnemySprite,drawEnemyLabel,layoutEnemyLabels} from './enemy-view.js';
 import {skinById,nextPreparationSkin} from './preparation-skins.js';
 import {CharacterAnimation,loadCharacterSheet,drawCharacter,characterFrame,characterPresentation,characterAttackDuration} from './character-animation.js';
-import {loadWallTilesets} from './wall-tileset.js';
+import {loadWallTilesets,wallDrawBox} from './wall-tileset.js';
 import {entranceWallFrames} from './entrance-view.js';
 import {readUiSettings,saveUiSettings} from './ui-settings.js';
 import {forecastExploration,forecastSignature} from './exploration-forecast.js';
 import {forecastSummary} from './forecast-view.js';
-import {MEMORY_SHADE,dimmedWallTileset,floorLight,wallSurfaceVisible,actorFootOffset,renderSightState} from './scene-lighting.js';
+import {MEMORY_SHADE,floorLight,drawSightWall,actorFootOffset,renderSightState} from './scene-lighting.js';
 import {standingBox,sceneDrawOrder,drawFootShadow} from './scene-depth.js';
 import {drawProp,drawMapProp} from './prop-view.js';
 import {drawFloorTexture,drawRaisedWall} from './terrain-view.js';
@@ -100,7 +100,7 @@ function draw(){
    if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+13+n*2,py+21,5,5);}
   }
   if(floor&&light==='memory'){ctx.fillStyle=MEMORY_SHADE;ctx.fillRect(px,py,CELL,CELL);}
-  if(!floor)queue.push({footY:(y+1)*CELL,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,wallSurfaceVisible(surface,x,y,visible)?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme,CELL,entranceFrames.get(x+','+y));ctx.restore();}});
+  if(!floor)queue.push({footY:(y+1)*CELL,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawSightWall(ctx,walls,wallDrawBox(surface,x,y,walls?.definition.rise??.75,CELL),CELL,visible,lit=>drawRaisedWall(ctx,lit,surface,x,y,state.seed,theme,CELL,entranceFrames.get(x+','+y)));ctx.restore();}});
  }
  const stair=state.stairs;
  for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;sprite(ctx,t.spent?'trap-spent':'trap',t.x*CELL,t.y*CELL);ctx.restore();}
