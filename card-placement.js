@@ -1,4 +1,5 @@
 import {targetCards,conditionById,actionCards,skillCards,conditionDefault,legacyToCards,validCardRule,effectUnlocked} from './card-orders.js';
+import{cardOwned}from'./card-access.js';
 
 // Editing is atomic: invalid or locked combinations leave every rule untouched.
 export function placeCard(s,source,destination){
@@ -7,6 +8,7 @@ export function placeCard(s,source,destination){
  if(!['target','condition','effect'].includes(slot))return false;
  const ci=Number(destination.index);if(slot==='condition'&&(!Number.isInteger(ci)||ci<0||ci>dest.conditions.length))return false;
  if(source.origin==='palette'){
+  if(!cardOwned(s,source.type,source.id))return false;
   if(source.type==='target'&&slot==='target'&&targetCards.some(c=>c.id===source.id)){
    if(dest.target!==source.id){dest.target=source.id;dest.conditions=dest.conditions.filter(c=>dest.target!=='self'||!['one-hit','injured'].includes(c.id));dest.effect=dest.target==='self'?{kind:'action',id:'stairs'}:{kind:'action',id:'attack'};}
   }else if(source.type==='condition'&&slot==='condition'&&conditionById[source.id]){

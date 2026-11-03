@@ -316,3 +316,8 @@ output/march-in-place-20261102-r1/とoutput/march-fullbody-20261102-r2/はユー
 カメラの短辺表示マス数を2×ceil(視界半径)+7から+5へ変更。横持ちでは上下各1マス分表示範囲を狭める。半径3では縦13→11マス。視界判定・MAP公開・マップ生成・移動・セーブv13は変更なし。敵の方向別・歩行・攻撃アニメーションは今回追加しない。
 
 床134,999bytes＋敵130,259bytes＝265,258bytes（約259KiB）。生成ルートはhost_image/image_gen。原画はart/local-originals/environment-refresh-20261103/へローカル保管し、大きい原画・比較画像はGitに含めない。各素材フォーマットとPROMPT.txtを保持。scripts/build-environment-refresh.pyで生成原画を64px減色・周期補正・足元位置合わせして配信する。
+
+
+## 2026-11-03 赤いスキル宝箱
+
+art/props/chest-skill-64.pngはimage_gen（host_image）で現行宝箱を参照し、新しく赤い閉箱を生成。透明背景を維持して32色・二値alpha・64pxセルへ書き出し、既存箱と同じ足元と可視サイズへ等倍率で合わせる。生成原画はart/local-originals/card-loot-20261103/にローカル保管。金色の光と粒子はCanvasの表示エフェクトで、画像の変形やカード内容の再抽選をしない。新規主人公・足踏み素材は制作しない。

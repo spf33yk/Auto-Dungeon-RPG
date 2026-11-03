@@ -1,3 +1,5 @@
+import{cardCodexRows}from'./card-catalog.js';
+import{chestPresentation,drawLegendaryChestEffect}from'./chest-view.js';
 import {drawEnemySprite,drawEnemyLabel,layoutEnemyLabels} from './enemy-view.js';
 import {skinById,nextPreparationSkin} from './preparation-skins.js';
 import {CharacterAnimation,loadCharacterSheet,drawCharacter,characterFrame,characterPresentation,characterAttackDuration} from './character-animation.js';
@@ -6,7 +8,7 @@ import {entranceWallFrames} from './entrance-view.js';
 import {readUiSettings,saveUiSettings} from './ui-settings.js';
 import {forecastExploration,forecastSignature} from './exploration-forecast.js';
 import {forecastSummary} from './forecast-view.js';
-import {MEMORY_SHADE,dimmedWallTileset,floorLight,actorFootOffset,renderSightState} from './scene-lighting.js';
+import {MEMORY_SHADE,dimmedWallTileset,floorLight,wallSurfaceVisible,actorFootOffset,renderSightState} from './scene-lighting.js';
 import {standingBox,sceneDrawOrder,drawFootShadow} from './scene-depth.js';
 import {drawProp,drawMapProp} from './prop-view.js';
 import {drawFloorTexture,drawRaisedWall} from './terrain-view.js';
@@ -64,6 +66,7 @@ const sprites={
  stairs:['............','.........ll.','.......llbl.','.....llbbbl.','...llbbbbbl.','.llbbbbbbbl.','.lbbbbbbbbl.','.llllllllll.','............','............','............','............']};
 const mapItemsAtlas=new Image();mapItemsAtlas.src=$('map').dataset.mapItems;
 const propsAtlas=new Image();propsAtlas.src=$('map').dataset.props;document.documentElement.style.setProperty('--prop-atlas','url("'+propsAtlas.src+'")');
+const redChestAtlas=new Image();redChestAtlas.src=$('map').dataset.redChest;
 const enemyAtlas=new Image();enemyAtlas.src=$('map').dataset.enemies;
 const CELL=64;
 const palette={h:'#57695a',b:'#e2dfbd',d:'#27352f',a:'#899e85',s:'#b8b2a1',g:'#3e715f',l:'#9bbba6',r:'#66424a',p:'#ad7276',y:'#bfa266',o:'#634e32',Y:'#e3d49d'};
@@ -97,7 +100,7 @@ function draw(){
    if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+13+n*2,py+21,5,5);}
   }
   if(floor&&light==='memory'){ctx.fillStyle=MEMORY_SHADE;ctx.fillRect(px,py,CELL,CELL);}
-  if(!floor)queue.push({footY:(y+1)*CELL,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,light==='visible'?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme,CELL,entranceFrames.get(x+','+y));ctx.restore();}});
+  if(!floor)queue.push({footY:(y+1)*CELL,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawRaisedWall(ctx,wallSurfaceVisible(surface,x,y,visible)?walls:dimmedWallTileset(walls),surface,x,y,state.seed,theme,CELL,entranceFrames.get(x+','+y));ctx.restore();}});
  }
  const stair=state.stairs;
  for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;sprite(ctx,t.spent?'trap-spent':'trap',t.x*CELL,t.y*CELL);ctx.restore();}
@@ -107,7 +110,8 @@ function draw(){
   queue.push({footY:box.footY,layer,x:at.x,draw(){ctx.save();ctx.globalAlpha=hero||visible(o.x,o.y)?1:.4;
    const oldPalette={g:palette.g,l:palette.l,r:palette.r,p:palette.p};if(enemy){if(type==='slime'){palette.g=theme.wallColor;palette.l='#c0c7b1';}else{palette.r=theme.floorColor;palette.p=theme.wallColor;}}
    const footOffset=enemy?0:(hero?actorFootOffset(sprites[type],box.height):0);
-   if(hero&&heroSheet)drawCharacter(ctx,heroSheet,heroFrame,at.x,at.y,CELL);else if(!enemy||!drawEnemySprite(ctx,enemyAtlas,o,box))sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
+   const chest=type==='chest'?chestPresentation(o):null;if(chest?.legendary)drawLegendaryChestEffect(ctx,box,performance.now(),matchMedia('(prefers-reduced-motion: reduce)').matches);
+   if(type==='chest'&&chest?.red&&redChestAtlas.complete&&redChestAtlas.naturalWidth===64){ctx.imageSmoothingEnabled=false;ctx.drawImage(redChestAtlas,box.x,box.y,box.width,box.height);}else if(hero&&heroSheet)drawCharacter(ctx,heroSheet,heroFrame,at.x,at.y,CELL);else if(!enemy||!drawEnemySprite(ctx,enemyAtlas,o,box))sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
    // The chest artwork supplies its own latch: no oversized yellow lock rectangle.
    if(o.type==='letter'){ctx.fillStyle='#292a26';ctx.fillRect(box.x+40,box.y+8,21,16);ctx.fillStyle='#e4dfc3';ctx.fillRect(box.x+43,box.y+11,16,11);}
 
@@ -235,7 +239,10 @@ function renderScreens(){
 }
 function openDialog(id){if(!document.querySelector('dialog[open]'))dialogWasPaused=paused;paused=true;$(id).showModal();if(state.phase==='explore')render();}
 function finishDialog(){if(!document.querySelector('dialog[open]')){paused=dialogWasPaused;last=performance.now();render();}}
-function renderCodex(){if(codexKind==='skills'){const rows=codexRows(state,'skills');$('codex-title').textContent='スキル図鑑';$('codex-note').textContent='ドロップ・宝箱で取得したスキルと特殊指示を登録。記録は周回で保持し、効果はその旅だけ。';$('codex-body').innerHTML=`<p class="section-caption">登録済み ${rows.filter(r=>r.known).length} / ${rows.length}</p>`+rows.map(r=>r.known?`<article class="item-card"><strong>${esc(r.name)}</strong><small>${r.kind==='skill'?'戦闘スキル':'特殊探索指示'} · ${r.owned?'この旅で取得済み':'この旅では未取得'}</small><p>${esc(r.detail)}</p></article>`:'<article class="item-card"><span aria-label="未登録">？</span></article>').join('');return;}let rows=codexRows(state,codexKind);if(codexKind==='equipment')rows=rows.filter(r=>r.slot===codexSlot).sort((a,b)=>Number(b.known)-Number(a.known)||(a.known&&b.known?(codexSorts[codexSlot]==='acquired'?a.acquiredOrder-b.acquiredOrder:b[codexSorts[codexSlot]]-a[codexSorts[codexSlot]]):0));$('codex-title').textContent=codexKind==='monsters'?'モンスター図鑑':'装備図鑑';$('codex-note').textContent=codexKind==='monsters'?'視認した種類を登録。記録は周回でも引き継ぎます。':'入手した種類の名前と能力を登録。記録は周回でも引き継ぎます。';$('codex-body').innerHTML=(codexKind==='equipment'?categoryTabs('codex',codexSlot)+sortButtons('codex',codexSorts[codexSlot]):'')+`<p class="section-caption">公開済み ${rows.filter(r=>r.known).length} / ${rows.length}</p><table class="codex-table"><thead><tr><th>名前</th><th>攻撃</th><th>防御</th></tr></thead><tbody>${rows.map(r=>r.known?`<tr><td>${codexKind==='equipment'?'<span class="equipment-icon '+r.slot+'" aria-hidden="true"></span>':''}${esc(r.name)}${r.zone?`<small>${esc(r.zone)}</small>`:''}</td><td>${r.attack}</td><td>${r.defense}</td></tr>`:'<tr><td><span aria-label="未登録">？</span></td><td>―</td><td>―</td></tr>').join('')}</tbody></table>`;}
+let cardBookKind='all';
+function renderCardBook(){const names={all:'すべて',target:'ターゲット',condition:'条件',action:'アクション',skill:'スキル'};const all=cardCodexRows(state),rows=all.filter(c=>cardBookKind==='all'||c.kind===cardBookKind);$('codex-title').textContent='カード図鑑';$('codex-note').textContent='未所持カードもすべて公開。取得記録は周回後も保持し、所持と効果はその旅だけ。常時効果スキルもここで確認できます。';$('codex-body').innerHTML='<div class="subtabs">'+Object.entries(names).map(([id,name])=>'<button data-card-book-kind="'+id+'" aria-pressed="'+(cardBookKind===id)+'">'+name+'</button>').join('')+'</div><p class="section-caption">この旅の所持 '+all.filter(c=>c.owned).length+' / '+all.length+' · 取得記録 '+all.filter(c=>c.discovered).length+'</p><div class="card-codex-grid">'+rows.map(c=>'<article class="item-card card-codex-item '+c.rarity+'"><div><span class="rarity-badge '+c.rarity+'">'+c.rarity+'</span><strong>'+esc(c.name)+'</strong><small>'+esc(c.group)+' · '+(c.owned?'所持中':c.discovered?'過去に取得／現在未所持':'未取得')+'</small><p>'+esc(c.detail)+'</p><small>入手：'+(c.initial?'旅の開始時':'宝箱')+(c.passive?' · 常時効果／配置不要':'')+'</small></div></article>').join('')+'</div>';}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-card-book-kind]');if(b){cardBookKind=b.dataset.cardBookKind;renderCodex();}});
+function renderCodex(){if(codexKind==='cards'){renderCardBook();return;}if(codexKind==='skills'){codexKind='cards';renderCardBook();return;}let rows=codexRows(state,codexKind);if(codexKind==='equipment')rows=rows.filter(r=>r.slot===codexSlot).sort((a,b)=>Number(b.known)-Number(a.known)||(a.known&&b.known?(codexSorts[codexSlot]==='acquired'?a.acquiredOrder-b.acquiredOrder:b[codexSorts[codexSlot]]-a[codexSorts[codexSlot]]):0));$('codex-title').textContent=codexKind==='monsters'?'モンスター図鑑':'装備図鑑';$('codex-note').textContent=codexKind==='monsters'?'視認した種類を登録。記録は周回でも引き継ぎます。':'入手した種類の名前と能力を登録。記録は周回でも引き継ぎます。';$('codex-body').innerHTML=(codexKind==='equipment'?categoryTabs('codex',codexSlot)+sortButtons('codex',codexSorts[codexSlot]):'')+`<p class="section-caption">公開済み ${rows.filter(r=>r.known).length} / ${rows.length}</p><table class="codex-table"><thead><tr><th>名前</th><th>攻撃</th><th>防御</th></tr></thead><tbody>${rows.map(r=>r.known?`<tr><td>${codexKind==='equipment'?'<span class="equipment-icon '+r.slot+'" aria-hidden="true"></span>':''}${esc(r.name)}${r.zone?`<small>${esc(r.zone)}</small>`:''}</td><td>${r.attack}</td><td>${r.defense}</td></tr>`:'<tr><td><span aria-label="未登録">？</span></td><td>―</td><td>―</td></tr>').join('')}</tbody></table>`;}
 function showCodex(kind){codexKind=kind;renderCodex();openDialog('codex-dialog');}
 const getRef=r=>r.startsWith('i')?Number(r.slice(1)):r;
 $('tab-content').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;if(b.hasAttribute('data-best-equipment')){equipBest(state);render();return;}if(b.dataset.category){const type=b.dataset.category;if(type==='gear')gearSlot=b.dataset.value;}else if(b.dataset.sort){gearSorts[gearSlot]=b.dataset.value;}else if(handleOrderClick(e,$('tab-content')))return;else if(b.dataset.upgrade){if(upgrade(state,b.dataset.upgrade))tone(550);}else if(b.dataset.action){const ref=getRef(b.dataset.ref);switch(b.dataset.action){case'equip':equip(state,ref);break;case'discard':discard(state,ref);break;}}render();};
@@ -276,7 +283,7 @@ $('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettin
  document.addEventListener('click',e=>{if(e.target.closest('[data-forecast-run]'))refreshForecast(true);if(e.target.closest('[data-orders-undo]')&&state.phase==='prepare'&&forecastContext){state.orders=structuredClone(initialOrders);render();}});
  document.addEventListener('change',e=>{if(e.target.id==='forecast-samples'){forecastSamples=Number(e.target.value);refreshForecast(true);}});
  $('sound').onclick=()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');$('sound').textContent='効果音：'+(sound?'ON':'OFF');tone(440);};
-$('skill-book').onclick=()=>showCodex('skills');$('monster-book').onclick=()=>showCodex('monsters');$('equipment-book').onclick=()=>showCodex('equipment');
+$('skill-book').onclick=()=>showCodex('cards');$('monster-book').onclick=()=>showCodex('monsters');$('equipment-book').onclick=()=>showCodex('equipment');
 $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dialog').close();$('guide-start').onclick=()=>$('dialog').close();
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',finishDialog));
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.phase==='explore'){paused=true;dialogWasPaused=true;render();}});

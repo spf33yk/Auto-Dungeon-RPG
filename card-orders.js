@@ -1,4 +1,5 @@
 // Card data and evaluation are shared by the editor, AI and save migration.
+import{cardOwned,cardRarity}from'./card-access.js';
 export const targetCards=[{id:'self',name:'自分'},{id:'enemy',name:'近くの敵'},{id:'weak-enemy',name:'HPの低い敵'},{id:'danger-enemy',name:'攻撃力の高い敵'}];
 export const conditionCards=[
  {id:'hp-below',name:'HPが指定%以下',param:'value',value:50,min:5,max:100,step:5,unit:'%以下'},
@@ -28,10 +29,13 @@ export const skillCards=[
  {id:'mend',name:'再生の祈り',detail:'条件成立時に最大HP40%回復。各階1回。',ability:'mend'},
  {id:'warp',name:'窮地の転移',detail:'条件成立時にランダムな床へ転移。各階1回。',reward:'warp'},
 ];
+for(const[kind,list]of Object.entries({target:targetCards,condition:conditionCards,action:actionCards,skill:skillCards}))for(const c of list){c.cardKind=kind;c.rarity=cardRarity(kind,c.id);if(!c.detail)c.detail=kind==='target'?'指示が判断する対象を選びます。':c.param?`${c.name}を${c.min}〜${c.max}の範囲で指定します。`:'この条件が成立した場合だけ指示を実行します。';}
+const cardDetails={self:'自分のHPや周囲の状況を条件の判断対象にする。',enemy:'視界内の敵を近い順に対象にする。','weak-enemy':'視界内の敵を残りHPの低い順に対象にする。','danger-enemy':'視界内の敵を攻撃力の高い順に対象にする。','one-hit':'対象の残りHPと推定通常ダメージを比べ、一撃で倒せる場合だけ実行。',injured:'対象の敵の残りHPが最大HPの半分以下の場合に実行。','loot-empty':'発見済みで入手可能な品物が残っていない場合に実行。',visible:'目的地・対象が現在の視界に入っている場合に実行。'};
+for(const c of [...targetCards,...conditionCards])if(cardDetails[c.id])c.detail=cardDetails[c.id];
 export const cardCapacity=s=>4+(s.levels.cardSlots||0);
 export const conditionById=Object.fromEntries(conditionCards.map(c=>[c.id,c]));
 export const effectDefinition=r=>(r.effect?.kind==='skill'?skillCards:actionCards).find(c=>c.id===r.effect?.id);
-export const effectUnlocked=(s,e)=>Boolean(e&&(!e.ability||s.abilities?.includes(e.ability))&&(!e.reward||s.unlockedOrders?.includes(e.reward)));
+export const effectUnlocked=(s,e)=>Boolean(e&&cardOwned(s,e.cardKind||'action',e.id)&&(!e.ability||s.abilities?.includes(e.ability))&&(!e.reward||s.unlockedOrders?.includes(e.reward)));
 export const conditionDefault=id=>{const c=conditionById[id];return {id,...(c.param?{value:c.value}:{})};};
 export const createCardRule=(target='self',conditions=[],kind='action',effect='stairs')=>({id:'cards',cards:true,target,conditions:structuredClone(conditions),effect:{kind,id:effect}});
 
@@ -57,6 +61,7 @@ export function validCardRule(s,input,{requireOwned=true}={}){
  const r=legacyToCards(input),effect=effectDefinition(r);
  if(!r.cards||!r.effect||!targetCards.some(t=>t.id===r.target)||!['skill','action'].includes(r.effect.kind)||!effect||Boolean(effect.enemy)!==(r.target!=='self'))return false;
  if(requireOwned&&!effectUnlocked(s,effect))return false;
+ if(requireOwned&&(!cardOwned(s,'target',r.target)||(Array.isArray(r.conditions)&&r.conditions.some(c=>!c||!cardOwned(s,'condition',c.id)))))return false;
  if(!Array.isArray(r.conditions)||r.conditions.some(c=>!c||typeof c.id!=='string')||r.conditions.length+2>cardCapacity(s)||new Set(r.conditions.map(c=>c.id)).size!==r.conditions.length)return false;
  return r.conditions.every(c=>{const d=conditionById[c.id];return d&&(!['one-hit','injured'].includes(c.id)||r.target!=='self')&&(!d.param||(Number.isFinite(c.value)&&c.value>=d.min&&c.value<=d.max&&(c.value-d.min)%d.step===0));});
 }

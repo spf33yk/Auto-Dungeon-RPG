@@ -33,7 +33,7 @@ export const skills = [
 
 // Provisional loot balance. Each enemy owns a rate and an explicit weighted item pool.
 export const rewardDefinitions=[
- {id:'mend',kind:'skill',name:'再生の祈り',detail:'条件カードに従い最大HP40%回復。各階1回、1ターン使用。敵ドロップで取得し、準備でスキルカードを設定。'},
+ {id:'mend',kind:'skill',name:'再生の祈り',detail:'条件カードに従い最大HP40%回復。各階1回、1ターン使用。宝箱のカードで取得し、準備でスキルカードを設定。'},
  {id:'critical',kind:'skill',name:'会心の記憶',detail:'各打撃で10%の確率で与ダメージ1.5倍（切上げ）。'},
  {id:'leech',kind:'skill',name:'吸命の記憶',detail:'実際に与えたダメージの5%を回復（切捨て、最大HPまで）。'},
  {id:'double-strike',kind:'skill',name:'追撃の記憶',detail:'通常打撃の後に5%の確率で追加の1打。同ターン1回まで。'},
@@ -43,7 +43,7 @@ export const rewardDefinitions=[
 export const rewardById=Object.fromEntries(rewardDefinitions.map(r=>[r.id,r]));
 export const chestRewards=[{id:'critical',weight:30},{id:'leech',weight:25},{id:'double-strike',weight:20},{id:'warp',weight:15},{id:'avoid-traps',weight:10}];
 export const enemyDropTables=Object.fromEntries(monsters.map(m=>{
- const boss=m.id.startsWith('boss-'),gearWeight=99;
+ const boss=m.id.startsWith('boss-'),gearWeight=100;
  const weights=equipment.map(g=>1/Math.pow(1+Math.abs(g.rank-m.zone),4)),total=weights.reduce((a,b)=>a+b,0);
- return [m.id,{rate:boss?1:m.type==='brute'?.30:.22,entries:[...equipment.map((g,i)=>({type:'gear',id:g.id,weight:gearWeight*weights[i]/total})),{type:'reward',id:'mend',weight:1}]}];
+ return [m.id,{rate:boss?1:m.type==='brute'?.30:.22,entries:[...equipment.map((g,i)=>({type:'gear',id:g.id,weight:gearWeight*weights[i]/total}))]}];
 }));

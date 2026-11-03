@@ -1,3 +1,4 @@
+import{grantCard}from'./card-inventory.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,stats,gainExperience,experienceToNext,MAX_LEVEL,normalizeSave,validateSave,attackEnemy,monsters,tick,W,H,reveal,makeFloor,createCardRule} from './engine.js';
@@ -15,7 +16,7 @@ test('character levels use remaining experience and grow only HP, including mult
 });
 test('old save gains Lv1 without retroactive growth and v11 round-trips or rejects corrupt progression',()=>{
  const old=newGame(991);old.version=10;delete old.level;delete old.experience;old.kills=200;old.hp=21;
- const s=normalizeSave(old);assert.equal(s.level,1);assert.equal(s.experience,0);assert.equal(s.hp,21);assert.equal(s.version,13);
+ const s=normalizeSave(old);assert.equal(s.level,1);assert.equal(s.experience,0);assert.equal(s.hp,21);assert.equal(s.version,14);
  for(const key of ['grid','gear','profile','shards','rngState','kills'])assert.deepEqual(s[key],old[key]);
  gainExperience(s,12);assert.ok(validateSave(s));assert.deepEqual(normalizeSave(s),s);
  for(const [level,experience]of [[0,0],[31,0],[1,-1],[1,10],[30,1],[1,Infinity]])assert.equal(normalizeSave({...s,level,experience}),null);
@@ -33,7 +34,7 @@ test('each defeated enemy grants experience once and each strike emits its own d
 test('multiple incoming hits and traps emit damage events and reset the next turn',()=>{
  const s=newGame(78);s.phase='explore';s.grid=Array.from({length:H},()=>Array(W).fill(1));s.seen=s.grid.map(r=>r.map(()=>true));s.visited=s.grid.map(r=>r.map(()=>true));s.player={x:5,y:5};s.stairs={x:25,y:20};s.items=[];s.gimmick={id:'none'};s.traps=[];s.enemies=[{...monsters[0],baseId:monsters[0].id,x:5,y:6,hp:100,attack:5,aggro:true,period:1},{...monsters[0],baseId:monsters[0].id,x:6,y:5,hp:100,attack:6,aggro:true,period:1}];reveal(s);
  tick(s);assert.equal(s.damageEvents.filter(e=>e.hero).length,2);assert.equal(s.damageEvents.length,3);
- s.enemies=[];s.abilities=['mend'];s.orders=[createCardRule('self',[],'skill','mend')];s.traps=[{...s.player,spent:false,revealed:true}];tick(s);assert.equal(s.damageEvents.length,1);assert.equal(s.damageEvents[0].hero,true);assert.equal(s.damageEvents[0].damage,Math.ceil(stats(s).maxHp*.08));
+ s.enemies=[];grantCard(s,'skill:mend');s.orders=[createCardRule('self',[],'skill','mend')];s.traps=[{...s.player,spent:false,revealed:true}];tick(s);assert.equal(s.damageEvents.length,1);assert.equal(s.damageEvents[0].hero,true);assert.equal(s.damageEvents[0].damage,Math.ceil(stats(s).maxHp*.08));
  tick(s);assert.deepEqual(s.damageEvents,[]);
 });
 test('damage labels stack, expire and preserve simultaneous lethal and multiple-target hits',()=>{

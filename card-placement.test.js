@@ -1,8 +1,10 @@
+import{withCardInventory}from'./test-support/card-fixture.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,createCardRule,validCardRule,normalizeSave} from './engine.js';
+import {newGame as baseNewGame,createCardRule,validCardRule,normalizeSave} from './engine.js';
 import {placeCard,moveCardRow,canPlaceCard,removePlacedCard} from './card-placement.js';
 import {targetCards,conditionCards,actionCards,skillCards} from './card-orders.js';
+const newGame=(...args)=>withCardInventory(baseNewGame(...args));
 const prep=()=>{const s=newGame(31);s.phase='prepare';s.floor=2;s.orders=[createCardRule('self',[{id:'hp-below',value:45}],'action','stairs'),createCardRule('self',[{id:'visible'}],'action','chests')];return s;};
 const palette=(type,id)=>({origin:'palette',type,id}),slot=(row,slot,index)=>({origin:'slot',row,slot,index}),dest=(row,slot,index)=>({row,slot,index});
 test('insertion seams add and move conditions without replacing adjacent cards',()=>{
@@ -40,7 +42,7 @@ test('locked rewards, mismatched categories, duplicate conditions and capacity c
  s.phase='explore';const saved=structuredClone(s.orders);assert.equal(placeCard(s,palette('action','stairs'),dest(0,'effect')),false);assert.equal(moveCardRow(s,0,1),false);assert.deepEqual(s.orders,saved);
 });
 test('row priority is reordered and persists with existing save format',()=>{
- const s=prep();assert.equal(moveCardRow(s,0,1),true);assert.equal(s.orders[0].effect.id,'chests');const saved=normalizeSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(saved.orders,s.orders);assert.equal(saved.version,13);
+ const s=prep();assert.equal(moveCardRow(s,0,1),true);assert.equal(s.orders[0].effect.id,'chests');const saved=normalizeSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(saved.orders,s.orders);assert.equal(saved.version,14);
 });
 test('expanded capacity supports eight rows and four conditions without exceeding limits',()=>{
  const s=prep();s.levels.commandSlots=6;s.levels.cardSlots=2;s.orders=Array.from({length:8},()=>createCardRule());
