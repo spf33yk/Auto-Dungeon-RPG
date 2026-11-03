@@ -63,8 +63,8 @@ function refreshForecast(force=false){
  void forecastExploration(copy,{samples:forecastSamples,cancelled:()=>ticket!==forecastTicket,onProgress:(done,total)=>{if(ticket===forecastTicket){$('forecast-result').textContent=`試行中 ${done} / ${total}…`;$('forecast-summary').querySelectorAll('b').forEach(el=>el.textContent=`計算中 ${done} / ${total}…`);}}}).then(result=>{if(result&&ticket===forecastTicket){forecastCache=result;paintForecast(result);}}).catch(error=>{if(ticket===forecastTicket){forecastKey='';paintForecastSummary(null,'error');if($('forecast-result'))$('forecast-result').textContent='予測できませんでした。再予測してください。';}console.error('Forecast:',error);});
 }
 const fieldLogVisibility=createLogVisibility({
- show:()=>{$('field-log-host').classList.remove('is-expired');$('field-log-host').removeAttribute('aria-hidden');},
- hide:()=>{$('field-log-host').classList.add('is-expired');$('field-log-host').setAttribute('aria-hidden','true');}
+ show:()=>{$('field-log-host').classList.remove('is-expired');$('field-log-host').removeAttribute('aria-hidden');$('field-log-host').querySelector('.journal')?.removeAttribute('aria-hidden');$('logs').tabIndex=0;},
+ hide:()=>{$('field-log-host').classList.add('is-expired');$('field-log-host').querySelector('.journal')?.setAttribute('aria-hidden','true');$('logs').tabIndex=-1;}
 });
 let autoDisplayAttempted=false,ownsFullscreen=false,lockedOrientation=false;
 let damagePopups=[],damageScene='';
@@ -221,7 +221,7 @@ function renderTitle(){
  $('title-save-note').textContent=hasSave?`${floorLabel(state)} · Lv.${state.level} · 保存された旅の続きから`:'保存された旅はありません';
 }
 function renderJourneyLog(){
- const host=$('logs'),overlay=document.body.classList.contains('exploring'),rows=state.logs.slice(0,30),signature=JSON.stringify([overlay,rows]);
+ const host=$('logs'),overlay=document.body.classList.contains('exploring'),rows=[...state.logs],signature=JSON.stringify([overlay,rows]);
  fieldLogVisibility.sync(overlay,JSON.stringify(rows));
  if(host.dataset.signature===signature)return;
  const modeChanged=host.dataset.overlay!==String(overlay),follow=host.scrollHeight-host.clientHeight-host.scrollTop<8||modeChanged,top=host.scrollTop;
@@ -230,6 +230,12 @@ function renderJourneyLog(){
  host.innerHTML=(overlay?rows.reverse():rows).map(l=>`<div class="log-row ${esc(l.type)}"><time>${String(l.turn).padStart(3,'0')}</time><span>${esc(displayStoryText(l.text,runClears).replace(/記憶のかけら|かけら/g,'記憶の欠片'))}</span></div>`).join('');
  host.scrollTop=overlay&&follow?host.scrollHeight:modeChanged?0:top;
 }
+const logHolds=new Set();
+function holdLogs(key,hold){if(hold)logHolds.add(key);else logHolds.delete(key);fieldLogVisibility.setHeld(logHolds.size>0);}
+for(const [id,prefix]of [['field-log-host','log'],['log-open','icon']]){const el=$(id);el.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch')holdLogs(prefix+'-hover',true);});el.addEventListener('pointerleave',()=>holdLogs(prefix+'-hover',false));el.addEventListener('focusin',()=>holdLogs(prefix+'-focus',true));el.addEventListener('focusout',e=>{if(!el.contains(e.relatedTarget))holdLogs(prefix+'-focus',false);});}
+$('field-log-host').addEventListener('pointerdown',e=>{if(e.pointerType==='touch')holdLogs('touch',true);});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#field-log-host,#log-open')){holdLogs('touch',false);if($('field-log-host').contains(document.activeElement))document.activeElement.blur();}});
+$('log-open').onclick=()=>{const runClears=Math.max(0,state.profile.normalClears-(state.phase==='ending'?1:0));$('full-log-count').textContent='この旅の記録 '+state.logs.length+'件';$('full-logs').innerHTML=[...state.logs].reverse().map(l=>'<div class="log-row '+esc(l.type)+'"><time>TURN '+String(l.turn).padStart(3,'0')+'</time><span>'+esc(displayStoryText(l.text,runClears).replace(/記憶のかけら|かけら/g,'記憶の欠片'))+'</span></div>').join('');openDialog('history-dialog');$('full-log-scroll').scrollTop=$('full-log-scroll').scrollHeight;};
 function itemCard(g,ref,equipped=false){
  const b=gearById[g.baseId],st=gearStats(g),target=typeof ref==='number'?'i'+ref:ref;
  return '<article class="item-card"><div><small>'+ (b.slot==='weapon'?'武器':'防具')+(equipped?' · 装備中':'')+'</small><strong><span class="equipment-icon '+b.slot+'" aria-hidden="true"></span>'+esc(gearName(g))+'</strong><small>攻撃 '+st.attack+' / 防御 '+st.defense+'</small></div>'+(!equipped?'<div class="item-actions"><button data-action="equip" data-ref="'+target+'">装備</button><button data-action="discard" data-ref="'+target+'" class="text-button">処分</button></div>':'')+'</article>';

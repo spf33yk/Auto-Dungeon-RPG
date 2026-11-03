@@ -42,7 +42,7 @@ card-placement.jsは準備フェイズを確認し、ルールの複製上で置
 
 ## 思考記号・ログ自動非表示とHUD拡大（2026-10-27）
 
-app.jsはthoughtTextの表示時に「▶ 」を付ける。log-visibility.jsは探索オーバーレイへの移行またはログ内容の変更で3秒タイマーを設定し、変更がない再描画では延長しない。更新時の取消とgeneration検査で古いコールバックが新しいログを消さない。準備へ移る時はタイマーを取り消す。探索ログの非表示は親にis-expiredとaria-hiddenを設定し、共有journalを準備側へ移した場合の常時表示・既存のスクロール追従を維持する。
+app.jsはthoughtTextの表示時に「▶ 」を付ける。log-visibility.jsは探索オーバーレイへの移行またはログ内容の変更で5秒タイマーを設定し、変更がない再描画では延長しない。更新時の取消とgeneration検査で古いコールバックが新しいログを消さない。準備へ移る時はタイマーを取り消す。探索ログの非表示は親にis-expiredとjournal子にaria-hiddenを設定し、共有journalを準備側へ移した場合の常時表示・既存のスクロール追従を維持する。
 
 screens.cssは探索HUDの文字・操作部を各画面幅で拡大し、ログ領域の幅と右揃え、MAP幅を指定する。ResizeObserverは画面幅480px以下で上下余白8px、その他20pxを計算し、MAPの空き領域上限の下限を64pxへ変更する。レターボックス状の背景は追加しない。タイマーや表示状態は保存せず、v11の形式・探索ロジックを変更しない。
 
@@ -233,7 +233,7 @@ ResizeObserverでHUD高さをCSS変数へ伝え、MAP・ログボタン・メッ
 
 renderScreensでprepare/awakening以外のフェイズにbody.exploringを適用する。CSSでヘッダー・フッターを隠し、workspaceをviewportに内接する最大16:9へ配置する。map-wrapの幅・高さをworkspaceへ一致させ、旧380px指定を上書きする。
 
-journalの単一DOMは探索系フェイズでfield-log-host、準備でworkspaceへ移す。renderJourneyLogは探索では30件を逆順（古→新）にし、描画前の末尾距離が8px未満、または表示モード変更時だけ末尾へ追従する。ログが同じ場合はDOM更新せず、履歴閲覧中はscrollTopを維持する。表示は非モーダルで探索停止を発生させない。
+journalの単一DOMは探索系フェイズでfield-log-host、準備でworkspaceへ移す。renderJourneyLogは探索では全記録を逆順（古→新）にし、描画前の末尾距離が8px未満、または表示モード変更時だけ末尾へ追従する。ログが同じ場合はDOM更新せず、履歴閲覧中はscrollTopを維持する。表示は非モーダルで探索停止を発生させない。
 
 expeditionは探索時status-dialog-contentへ移し、status-openから既存のモーダル停止制御で閲覧する。準備ではworkspaceへ戻す。phase-label/memory-countはoptions-dialogへ、memory-quoteはthought-stackへ移し、従来のrender同期を維持する。field-gimmick/floor-messageはマップ内のhud-alertsへ移動。ゲーム保存v10と進行ロジックは変更しない。
 
@@ -641,3 +641,7 @@ scripts/verify-clearability.jsは検証専用の自動準備方針で、ゲー�
 
 ## 2026-11-03 通知背景の描画
 map-noticeへ表示用data-kindを付与し、rest／clearedだけをCSSで背景alpha0.70へ変更する。通知の本文・操作ボタンは不透明度1を維持。data属性は保存データには含めない。
+
+## 2026-11-03 ログ閲覧の制御
+createLogVisibilityへsetHeldを追加。hover/focus/touchの保持理由をappのSetで集約し、保持中はタイマーを取消、解除時は5秒を再設定。古いタイマーはgenerationで無効化。透明化はjournalのopacityへ適用し、field-log-hostの当たり領域を残して非表示後のpointerenterを検知する。スクリーンリーダー向けにjournalのaria-hiddenとlogsのtabIndexを切り替える。
+本番log関数は切り捨てずstate.logsへ追加。renderJourneyLogはコピーを古い順に描画し、既存の追従判定・scrollTop保持を再利用。history-dialogは共有journalとは別の一覧を作り、全記録の時刻・内容を表示する。スクロール本文とtoolbarを分け、closeを固定。保存データの形は変えない。

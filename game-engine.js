@@ -29,7 +29,7 @@ export function profileDefault(){return {normalClears:0,trueEnding:false,cards:[
 export function zoneFor(s){return zones[Math.min(9,zoneIndexForFloor(s.floor))];}
 export function floorLabel(s){return s.phase==='ending'?'地上 1F':`B${LAST_FLOOR+1-s.floor}`;}
 export function radius(s){return Math.max(2,3+s.levels.scout-(s.gimmick?.id==='fog'?2:0));}
-export function log(s,text,type=''){s.logs.unshift({text,type,turn:s.turn});s.logs=s.logs.slice(0,60);}
+export function log(s,text,type=''){s.logs.unshift({text,type,turn:s.turn});}
 function register(list,id){if(!list.includes(id))list.push(id);}
 export function createGear(baseId,{plus=0,cursed=false,identified=true}={}){if(!gearById[baseId])throw Error('Unknown equipment');return {baseId,plus,cursed,identified,boundKnown:false};}
 export function gearStats(g){const base=gearById[g.baseId];return {attack:base.attack+(base.slot==='weapon'?g.plus:0),defense:base.defense+(base.slot==='armor'?g.plus:0)};}

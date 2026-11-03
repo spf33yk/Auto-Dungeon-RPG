@@ -1195,3 +1195,7 @@ B1追加後も全233テスト成功（test-results/b1-map-subtitle-release-tests
 
 ## 2026-11-03 ひとやすみ・Clear背景を透過
 確認ベース4373763。対象2表示だけを背景alpha0.70へ変更し、本文・ボタンのopacity1を維持。ローカル隔離4361の表示用データでrestとcleared両方の計算済み背景rgba(38,40,46,0.7)とopacity1を確認し、床・主人公の透け具合と文字の可読性を目視確認。test-results/rest-translucent.png、clear-translucent.pngへ保存。app構文と配信URL更新・--check成功。低影響の表示調整のためゲーム全テストの再実行・新規単体テストは不要と判断。公開走行確認はローカルで対象表示が確認できるため省略。物理スマホ実機は未確認。
+
+## 2026-11-03 ログのホバー・スクロール・全件表示
+確認ベース9ebf58e。5秒表示と保持API、hover/focus/touch操作、3行の幅と文字の拡大、右上アイコンと固定×付き全件ダイアログを実装。state.logsの60件制限・画面30件制限を廃止。保存v14の形式は維持し、旧保存から失われた履歴は復元しない。
+全236テスト成功（test-results/log-history-release-tests.txt）。5秒タイマー、変更なし再描画、保持中の非表示防止、保持解除から5秒、古いタイマー無効化、140件以上の保存・再読込・旅のリセットを検証。ローカル独立領域4362で122件の全件表示、TURN000の最初の記録とTURN120の最新記録、本文スクロールtop7152→0と固定×top59px、閉じる操作を確認。コンパクト欄は14px・高さ72px・3行、スクロールtop2856→2544で過去へ戻れることを確認。画像test-results/log-expanded-overlay.png、log-full-history.png、log-full-history-oldest.png、log-overlay-scrolled.png。構文確認と配信URL更新・--check成功。公開走行は既存DOM/保存配列の拡張でローカルで確認可能なため省略。物理スマホのタップ・スワイプは未確認。
