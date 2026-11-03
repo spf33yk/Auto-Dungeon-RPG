@@ -1,0 +1,18 @@
+# 準備画面装飾 preparation-decor/v1
+
+背景プレートと古金・骨・黒鉄の透過装飾枠を組込みimagegenで新規制作し、準備画面へ採用。原本とプロンプトを保持し、配信用はWebP2点・合計167,098bytes（約163KiB）。ワールドのマス素材・キャラクター素材とは別のUI規格。
+
+## ファイルと描画
+
+- background.webp：1440×810。原本の縦横比を保って収める。UIではcoverによる等倍率拡大縮小と中央トリミングを使用。中央は暗く、燭台・古書・赤い布などの装飾は周辺へ配置。
+- frame.webp：512×512、alpha付きlossless WebP。外周透明余白を四辺同量で除いた後、等倍率縮小。中央は透明。
+- format.json：背景・枠の寸法、スライス48px、外枠20px／パネル16px、repeat、スキン一覧を定義。
+- 枠はborder-imageの9分割。角を固定し、辺はrepeat（中央側の余りはクリップ）で接続。stretchやroundによる辺の引き伸ばしを行わない。本文・ボタン・カードは画像へ焼き込まない。
+- 装飾はbefore疑似要素で重ね、pointer-events:none。パネルの占有領域と操作座標は変えず、上部ヒントと下部操作だけ枠の厚みに合わせて内側余白を調整。
+- 古金は原色、黒鉄は低彩度、骨白は明るめ、黒曜石は紫寄りの色調で共用。カード自体と透過オーグメントの素材・比率は維持する。
+
+## 再生成と追加
+
+原本はGit対象外art/local-originals/preparation-decor-v1/background-source.png、frame-source.pngへ保存。PillowのあるPythonでscripts/build-preparation-decor.pyを実行し、node scripts/update-assets.jsでindex.htmlの画像URLハッシュとCSS変数を更新する。--checkで旧キャッシュ混在の原因になる差分を検知する。原本がない環境でも完成素材だけで本編は動く。制作プロンプトはPROMPTS.md。
+
+背景の差替えは同じ静かな中央・周辺装飾の構図を推奨。枠は四角形・透明な中央・直線の辺を守り、formatのsliceと表示幅を調整する。新しいスキンで別画像を使う場合も比率保持とrepeatを維持する。本背景はUIの装飾であり、物語上の新しい場所・イベントを追加するものではない。

@@ -1,0 +1,27 @@
+{
+  "schema": "preparation-decor/v1",
+  "background": {
+    "file": "background.webp",
+    "width": 1440,
+    "height": 810,
+    "fit": "cover",
+    "preserveAspectRatio": true
+  },
+  "frame": {
+    "file": "frame.webp",
+    "width": 512,
+    "height": 512,
+    "slice": 48,
+    "repeat": "repeat",
+    "outerBorder": 20,
+    "panelBorder": 16,
+    "center": "transparent"
+  },
+  "interaction": "decorative-only; pointer-events:none",
+  "skins": [
+    "classic",
+    "black-iron",
+    "bone-parchment",
+    "obsidian-runes"
+  ]
+}

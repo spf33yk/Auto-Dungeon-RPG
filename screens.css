@@ -588,3 +588,19 @@ button.illustrated-augment{cursor:pointer;transition:transform .15s,filter .15s}
 .illustrated-augment,button.illustrated-augment:hover{background:transparent}.augment-chip.illustrated-chip{background:transparent;box-shadow:none}.augment-illustration{mix-blend-mode:normal}
 
 .true-end-unimplemented{padding:9px 12px;border:1px solid #b99862;background:#121518d9;color:#f0d5a2;font:13px/1.7 sans-serif;letter-spacing:0;text-align:center;text-shadow:0 1px 3px #000}#title-unimplemented{font-size:clamp(9px,1.1cqw,14px);margin:2px 0 0}#ending-unimplemented{max-width:520px;margin:8px 0}
+
+/* preparation-decor/v1: generated illustration with repeatable ornamental edges. */
+body.preparing #prepare-scene{isolation:isolate;border-color:transparent;background-image:linear-gradient(#090c0ee0,#090c0e50),var(--prep-decor-background);background-size:cover;background-position:center;box-shadow:0 10px 35px #0009}
+body.preparing #prepare-scene:before{content:'';position:absolute;inset:0;z-index:8;box-sizing:border-box;border:var(--prep-decor-outer) solid transparent;border-image-source:var(--prep-decor-frame);border-image-slice:var(--prep-decor-slice);border-image-repeat:repeat;pointer-events:none}
+body.preparing #prepare-scene .card-library,body.preparing #prepare-scene .card-rules{position:relative;isolation:isolate;background:linear-gradient(115deg,#0b1013e8,#151714d4)!important;border-color:transparent;box-shadow:inset 0 0 18px #0009}
+body.preparing #prepare-scene .card-library:before,body.preparing #prepare-scene .card-rules:before{content:'';position:absolute;inset:0;z-index:6;box-sizing:border-box;border:var(--prep-decor-panel) solid transparent;border-image-source:var(--prep-decor-frame);border-image-slice:var(--prep-decor-slice);border-image-repeat:repeat;pointer-events:none}
+body.preparing #prepare-scene>.tabs{background:linear-gradient(90deg,#0e1313d9,#29231ccc,#0e1313d9);border-top-color:#cab37c66;border-bottom-color:var(--prep-theme-edge);box-shadow:0 3px 9px #0006}
+body.preparing #prepare-scene>.tabs button.active{background:linear-gradient(#8d75454d,#24231cbb);box-shadow:inset 0 2px var(--prep-theme-accent),inset 0 -1px #e2ce9d55;text-shadow:0 1px 3px #000}
+body.preparing #prepare-scene #prep-hint{background:linear-gradient(90deg,#121612dc,#1b1b13aa,#121612dc);text-shadow:0 1px 3px #000}
+body.preparing #prepare-scene>.preparation-launch{background:linear-gradient(90deg,#111715e0,#27221ac9,#111715e0);border-top-color:#b39a5f99;box-shadow:0 -3px 12px #0008}
+body.preparing #prepare-scene #primary{background:linear-gradient(120deg,#d4b977,#b59549 50%,#dcc58b);box-shadow:inset 0 1px #fff8,inset 0 0 0 2px #70552466,0 2px 8px #0008}
+html[data-preparation-skin="black-iron"] body.preparing #prepare-scene:before,html[data-preparation-skin="black-iron"] body.preparing #prepare-scene :is(.card-library,.card-rules):before{filter:grayscale(.85) brightness(1.05)}
+html[data-preparation-skin="bone-parchment"] body.preparing #prepare-scene:before,html[data-preparation-skin="bone-parchment"] body.preparing #prepare-scene :is(.card-library,.card-rules):before{filter:sepia(.3) brightness(1.2)}
+html[data-preparation-skin="obsidian-runes"] body.preparing #prepare-scene:before,html[data-preparation-skin="obsidian-runes"] body.preparing #prepare-scene :is(.card-library,.card-rules):before{filter:hue-rotate(235deg) saturate(.65)}
+
+body.preparing #prepare-scene #prep-hint{padding-left:26px;padding-right:26px}body.preparing #prepare-scene>.preparation-launch{padding-left:22px;padding-right:22px}

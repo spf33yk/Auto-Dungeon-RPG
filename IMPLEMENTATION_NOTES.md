@@ -1255,3 +1255,13 @@ B1追加後も全233テスト成功（test-results/b1-map-subtitle-release-tests
 ## 2026-11-03：TRUE ENDの未実装表示
 
 基準コミットa7a1b69へ表示追加した作業ツリーを確認。達成記録ありの倅版タイトルと、TRUE記録あり／手紙あり／通常END2回目以降の結果画面に未実装を明示。デバッグONの状態表示も同じ文言。実際のTRUE本編・達成判定・保存形式は変更なし。ローカルlocalhost:4369の隔離セーブで倅タイトルと手紙所持の2回目END→スキップ→結果表示を確認した。test-results/true-end-title-notice.pngとtrue-end-result-notice.pngへ画像保存（Git対象外）。共通定数と既存DOMによる表示追加で、通常のタイトル・通常END・プレビューには条件付きで影響を限定。node --test全258件成功、update-assets.js --checkとgit diff --checkを確認。公開版の走行確認は未実施。ローカルの2経路の画面と配信URL整合で確認でき、配信基盤変更がないため。普段の4317セーブは未変更。
+
+
+## 2026-11-03：準備画面の新規背景・装飾枠
+
+- 基準コミット822e85aへ本変更を適用した完成作業ツリーを確認。組込みimagegenで準備用の暗い石造り背景と、古金・骨・黒鉄の透過枠をそれぞれ新規制作。中央を低コントラストに保ち、燭台・古書・赤い布を周辺へ寄せた。物語上の新しい場所・イベントは追加しない。
+- art/ui/preparation-decor-v1へ背景1440×810WebP・枠512×512alpha付きlossless WebP・format・README・PROMPTSを保存。画像2点167,098bytes（約163KiB）。原本はGit対象外art/local-originals/preparation-decor-v1に保持。Pillowの書出しスクリプトは等倍率と透明余白の四辺同量除去だけを行い、絵を描き直さない。
+- 枠は48pxの9分割、角固定、辺をrepeatで描画。外20px／内部16px。端数はクリップし、stretch/roundを使わない。外枠とカード一覧・指示パネルに疑似要素で重ね、pointer-events:noneで操作領域を維持。上部ヒントと下部操作には左右余白を追加。4スキンの色調、カードと透過オーグメントの素材・比率を維持。
+- ローカルlocalhost:4370の隔離セーブで探索指示・装備・スキルツリー・状態の切替、黒鉄スキンへの切替を確認。装飾が操作を遮らず、長い指示列とスクロール領域が保持されることを確認。844×390のiframeで横向きスマホ相当の全体表示、編集領域・探索開始ボタンの収まりを確認（実機タッチ操作は未確認）。test-results/preparation-decor-orders-final.png、preparation-decor-equipment.png、preparation-decor-black-iron.png、preparation-decor-mobile.pngへ画像保存（Git対象外）。普段の4317のセーブは未変更。
+- node --test全259件成功（約11秒）。追加1件で画像の実寸・alphaフラグ・9分割可能な寸法・repeat指定・250KB未満の予算と画像URLハッシュの整合を検証。node scripts/update-assets.js --check、git diff --checkを確認。
+- ソース・素材・仕様・設計・README・検証メモを同じコミットに含める。公開版での走行確認は未実施。今回はCSSと静的画像の追加でローカルの完成画像読込・各メニュー操作・配信URL整合を確認でき、配信基盤変更がないため。公開版で動作確認済みとは報告しない。戦闘・探索・成長・保存v16は変更なし。

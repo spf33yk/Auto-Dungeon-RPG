@@ -19,6 +19,10 @@ let updated=html.includes('id="asset-imports"')?html.replace(/<script type="impo
 const preparationAssets=['card-target','card-condition','card-skill','card-action','tray-left','tray-middle','tray-right'];
 const preparationStyle='<style id="preparation-assets">:root{'+preparationAssets.map(name=>'--prep-'+name+':url("./art/ui/preparation/'+name+'.png?v='+version('art/ui/preparation/'+name+'.png')+'")').join(';')+'}'+PREPARATION_SKINS.slice(1).map(s=>'html[data-preparation-skin="'+s.id+'"]{'+preparationAssets.map(name=>'--prep-'+name+':url("./art/ui/preparation/'+s.id+'/'+name+'.png?v='+version('art/ui/preparation/'+s.id+'/'+name+'.png')+'")').join(';')+'}').join('')+'</style>';
 updated=updated.includes('id="preparation-assets"')?updated.replace(/<style id="preparation-assets">[\s\S]*?<\/style>/,preparationStyle):updated.replace('</head>',preparationStyle+'</head>');
+const decor=JSON.parse(readFileSync(root+'art/ui/preparation-decor-v1/format.json','utf8'));
+const decorFolder='art/ui/preparation-decor-v1/';
+const decorStyle='<style id="preparation-decor-assets">:root{--prep-decor-background:url("./'+decorFolder+decor.background.file+'?v='+version(decorFolder+decor.background.file)+'");--prep-decor-frame:url("./'+decorFolder+decor.frame.file+'?v='+version(decorFolder+decor.frame.file)+'");--prep-decor-slice:'+decor.frame.slice+';--prep-decor-outer:'+decor.frame.outerBorder+'px;--prep-decor-panel:'+decor.frame.panelBorder+'px}</style>';
+updated=updated.includes('id="preparation-decor-assets"')?updated.replace(/<style id="preparation-decor-assets">[\s\S]*?<\/style>/,decorStyle):updated.replace('</head>',decorStyle+'</head>');
 const textLayout=JSON.parse(readFileSync(root+'art/ui/preparation/layout.json','utf8'));
 const textRect=textLayout.contentRect,cardSize=textLayout.cardSize,number=textLayout.rowNumber;
 const textStyle='<style id="preparation-text-layout">:root{'+[

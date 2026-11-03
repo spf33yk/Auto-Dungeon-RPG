@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createHash} from 'node:crypto';
+function webpInfo(b){assert.equal(b.toString('ascii',0,4),'RIFF');assert.equal(b.toString('ascii',8,12),'WEBP');const type=b.toString('ascii',12,16);if(type==='VP8X')return {width:b.readUIntLE(24,3)+1,height:b.readUIntLE(27,3)+1,alpha:Boolean(b[20]&16)};if(type==='VP8L'){const bits=b.readUInt32LE(21);return {width:(bits&16383)+1,height:((bits>>>14)&16383)+1,alpha:Boolean(bits&(1<<28))};}return {width:b.readUInt16LE(26)&16383,height:b.readUInt16LE(28)&16383,alpha:false};}
+test('preparation artwork fits its reusable format, keeps alpha and stays lightweight',()=>{const dir='art/ui/preparation-decor-v1/',format=JSON.parse(fs.readFileSync(dir+'format.json')),html=fs.readFileSync('index.html','utf8');let bytes=0;for(const kind of ['background','frame']){const asset=format[kind],buffer=fs.readFileSync(dir+asset.file),info=webpInfo(buffer);assert.equal(info.width,asset.width);assert.equal(info.height,asset.height);if(kind==='frame')assert.ok(info.alpha);bytes+=buffer.length;const hash=createHash('sha256').update(buffer).digest('hex').slice(0,12);assert.ok(html.includes(asset.file+'?v='+hash));}assert.equal(format.frame.repeat,'repeat');assert.ok(format.frame.slice*2<format.frame.width);assert.ok(bytes<250000);});
