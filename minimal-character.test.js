@@ -62,7 +62,7 @@ test('lunge and slash only affect rendering, return to origin and keep four dire
  assert.equal(64*64/128*d.displayScale,55);
 });
 test('speed1/2/4 completes before the next action, pause is stable, and move/teleport cancel old attacks',()=>{
- assert.deepEqual([1,2,4].map(s=>characterAttackDuration(d,s)),[300,168,84]);
+ assert.deepEqual([.5,1,2,4].map(s=>characterAttackDuration(d,s)),[600,300,168,84]);
  for(const speed of [1,2,4]){
   const actor=new CharacterAnimation({x:1,y:1});const duration=characterAttackDuration(d,speed);
   actor.attackTo(2,1,0,duration);assert.equal(actor.sample(duration-1).state,'attacking');

@@ -39,7 +39,7 @@ export function characterActionFrame(d,sample){
  const [col,row]=clip.cells[index];return {x:col*d.tileSize,y:row*d.tileSize,width:d.tileSize,height:d.tileSize};
 }
 export function characterDrawBox(x,y,d,size=24){const scale=size/d.tileSize*d.displayScale;return {x:(x+.5)*size-d.anchor[0]*scale,y:(y+1)*size-d.anchor[1]*scale,width:d.tileSize*scale,height:d.tileSize*scale,footY:(y+1)*size};}
-export function characterAttackDuration(d,speed=1){return d?.format==='character-minimal-4dir'?Math.round(Math.min(d.animation.attackMs,420/Math.max(1,Number.isFinite(speed)?speed:1)*.8)):300;}
+export function characterAttackDuration(d,speed=1){const slow=Number.isFinite(speed)&&speed>0?Math.min(1,speed):1;return Math.round((d?.format==='character-minimal-4dir'?Math.min(d.animation.attackMs,420/Math.max(1,Number.isFinite(speed)?speed:1)*.8):300)/slow);}
 export function characterPresentation(d,sample,size=24){
  const visual={offsetX:0,offsetY:0,opacity:1,effectFrame:-1,effectOpacity:0};
  if(d?.format!=='character-minimal-4dir')return visual;

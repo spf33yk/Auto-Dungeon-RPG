@@ -43,7 +43,7 @@ export function newGame(seed=Date.now()%10000000,profile=profileDefault()){
  for(const g of Object.values(s.gear)){g.acquiredOrder=s.nextAcquisition++;register(p.equipment,g.baseId);register(p.knownEquipment,g.baseId);}
  makeFloor(s);log(s,'目が覚めると、そこには骨だけの手があった。','story');log(s,p.normalClears?'息子に会いたい。今度こそ、あの手紙を届けよう。':'なぜだろう。上へ行かなければならない気がする。','story');return s;
 }
-export function abandonRun(s){return s.phase==='prepare'?newGame(undefined,s.profile):null;}
+export function abandonRun(s){return ['prepare','explore'].includes(s.phase)?newGame(undefined,s.profile):null;}
 export function price(s,k){return k.cost+s.levels[k.id]*(k.costStep??4);}
 export function locked(s,k){return Boolean((k.requires&&!s.levels[k.requires])||(k.event&&!s.profile.normalClears));}
 export function upgrade(s,id){const k=skills.find(k=>k.id===id);if(!k||s.phase!=='prepare'||s.floor===1||locked(s,k)||s.levels[id]>=k.max||s.shards<price(s,k))return false;s.shards-=price(s,k);s.levels[id]++;if(id==='vitality')s.hp+=12;reveal(s);log(s,`「${k.name}」を思い出した。`,'good');return true;}

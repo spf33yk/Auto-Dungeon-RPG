@@ -632,3 +632,6 @@ minibossesへbasement:1のboss-b1を追加し、bossForFloor／fieldPlan／階�
 
 ## 2026-11-03 対称ボス部屋の生成
 boss-arena.jsのbossArenaが、マップ中心と共通部屋寸法から地形・柱・開始・階段・ボス・回復品を返す。柱の左上(x,y)、幅w、高さhに対して(2*cx-x-w+1,2*cy-y-h+1)を使い、占有マス全体を反転する。中心軸をまたぐ柱はSetで重複を除く。makeBossFloorは生成結果と既存ボス定義を組み合わせる。中央通路を塞がず、全床到達をテストする。
+
+## 2026-11-03 速度と探索中断
+既存data-speedと420/speedのターン制御へ0.5を追加。0.5時のみ歩行補間・characterAttackDurationを2倍とし、1/2/4の表示時間を維持する。表示速度は永続化せずゲームstateから独立。abandonRunの許可フェイズをprepareからprepare/exploreへ拡張。準備・探索の2ボタンをaskAbandonへ束ね、共通ダイアログでopenDialog/finishDialogの停止状態復帰を使用する。確定時は既存newGameのプロフィール複製処理で記録を保持する。
