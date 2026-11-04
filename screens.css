@@ -642,3 +642,5 @@ body.preparing #prepare-scene .fitted-card-editor :is(.card-library,.card-rules)
 
 /* The ornament has transparent pixels outside its structural edge. Keep scenery inside that edge. */
 body.preparing #prepare-scene{clip-path:inset(5px)}
+
+.fitted-card-editor .tray-surface[data-drag-source]{cursor:grab;touch-action:none}.fitted-card-editor .tray-surface[data-drag-source]:active{cursor:grabbing}

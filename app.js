@@ -1,5 +1,3 @@
-import{performanceHighlights}from'./build-performance.js';
-import{performanceMarkup}from'./build-feedback-view.js';
 import{compareForecast,createPreparationBaseline}from'./forecast-comparison.js';
 import {screenTutorials} from './screen-tutorial.js';
 import{augmentCard,augmentChip}from'./augment-view.js';
@@ -207,7 +205,7 @@ function render(){
  const resting=state.phase==='explore'&&paused&&!document.querySelector('dialog[open]');
  $('map-notice').dataset.kind=resting?'rest':state.phase;
  const n=notices[state.phase]||(resting?['ひとやすみ','少し骨を休めよう。下の「探索を再開」で旅を続けられます。']:null);$('map-notice').hidden=!n;$('map-notice').classList.toggle('has-hint',Boolean(n&&hint));
- $('notice-copy').innerHTML=n?'<strong>'+n[0]+'</strong><small>'+n[1]+'</small>'+(['cleared','dead'].includes(state.phase)&&state.buildReport?'<p class="clear-build-spotlight">'+esc(performanceHighlights(state.buildReport).slice(0,2).map(h=>h.text).join(' ／ ')||('与ダメージ '+state.buildReport.damageDealt+' · 被ダメージ '+state.buildReport.damageTaken))+'</p><details class="clear-build-report"><summary>この階のビルドの活躍</summary>'+performanceMarkup(state.buildReport)+'</details>':''):'';
+ $('notice-copy').innerHTML=n?'<strong>'+n[0]+'</strong><small>'+n[1]+'</small>':'';
  $('notice-hint').innerHTML=hint?'<div class="clear-hint"><h3>'+esc(displayStoryText(hint.title.replace(/^次は/,''),state.profile.normalClears))+'</h3><p>'+esc(displayStoryText(hint.text,state.profile.normalClears))+'</p></div>':'';
  $('primary').innerHTML=({awakening:'思い出す',prepare:'探索を始める',cleared:state.floor===LAST_FLOOR?'地上1Fへ':'準備画面へ',dead:'B30で再び目覚める',ending:'次の旅をはじめる'})[state.phase]||'';
  $('primary').hidden=state.phase==='explore';$('pause-toggle').hidden=state.phase!=='explore';$('explore-abandon').hidden=state.phase!=='explore';$('pause-toggle').textContent=paused?'探索を再開':'ひとやすみ';

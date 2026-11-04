@@ -1,3 +1,0 @@
-import{performanceHighlights}from'./build-performance.js';
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-export function performanceMarkup(report){if(!report)return '<p class="build-empty">次の探索から、構成の活躍を記録します。</p>';const highlights=performanceHighlights(report);return `<p class="build-report-total">B${31-report.floor} · ${report.turns}ターン${report.startStep>0?"（途中からの記録）":""} · 与ダメージ ${report.damageDealt} · 被ダメージ ${report.damageTaken}</p><ul class="build-achievements">${highlights.map(h=>'<li>'+esc(h.text)+'</li>').join('')||'<li>発動を伴う効果の記録はありません</li>'}</ul><p class="build-rule-uses">${report.ruleUses.map((n,i)=>n?'当時の指示'+(i+1)+'：'+n+'回':'').filter(Boolean).join(' ／ ')||'基本行動で探索'}</p>`;}

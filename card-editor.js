@@ -50,7 +50,7 @@ function renderCardBoard(host,s,capacity){
   const insertion=i=>r.conditions.length+2<cardCapacity(s)?`<span class="condition-insertion"><button type="button" class="insert-condition" data-insert-condition data-drop-slot="${index}|condition|${i}|insert" aria-label="指示${index+1}の条件${i+1}の位置に追加">＋条件</button></span>`:'';
   const conditions=r.conditions.map((c,ci)=>insertion(ci)+cardSlot('condition',ci,`条件${ci+1}`,conditionName(c))).join('');
   const empty=insertion(r.conditions.length);
-  return `<article class="board-rule" data-card-row="${index}" data-drop-row="${index}"><div class="tray-scroll" tabindex="0" aria-label="指示${index+1}のカード列・横スクロール"><div class="tray-surface"><button type="button" class="row-handle" data-drag-source="row|${index}" data-drop-row="${index}" aria-label="指示${index+1}を移動"><span class="priority-number">${index+1}</span></button><div class="board-slots">${cardSlot('target',0,'ターゲット',target.name)}${conditions}${empty}${cardSlot('effect',0,r.effect.kind==='skill'?'スキル':'アクション',effect.name)}</div></div></div><div class="tray-caption"><span>${esc(describeCardRule(r))}</span></div></article>`;
+  return `<article class="board-rule" data-card-row="${index}" data-drop-row="${index}"><div class="tray-scroll" tabindex="0" aria-label="指示${index+1}のカード列・横スクロール"><div class="tray-surface" data-drag-source="row|${index}"><button type="button" class="row-handle" data-drag-source="row|${index}" data-drop-row="${index}" aria-label="指示${index+1}を移動"><span class="priority-number">${index+1}</span></button><div class="board-slots">${cardSlot('target',0,'ターゲット',target.name)}${conditions}${empty}${cardSlot('effect',0,r.effect.kind==='skill'?'スキル':'アクション',effect.name)}</div></div></div><div class="tray-caption"><span>${esc(describeCardRule(r))}</span></div></article>`;
  }).join('')}${fixedStairRow()}</div></section></div></div>`;
  selectSource(host,'',s);
 }
@@ -96,6 +96,7 @@ export function installCardDragging(host,getState,onCommit){
  let pending=null,ghost=null;
  const clearDrag=drag=>{host.querySelector('[data-drop-return]')?.classList.remove('return-ready');drag?.element?.classList.remove('is-drag-source');ghost?.remove();ghost=null;host.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));};
  host.addEventListener('pointerdown',e=>{
+  if(e.target.closest('[data-insert-condition]'))return;
   const source=e.target.closest('[data-drag-source]');if(!source||source.disabled||getState().phase!=='prepare'||e.button!==0)return;
   const rowDrag=source.dataset.dragSource.startsWith('row|'),dragElement=rowDrag?source.closest('[data-card-row]'):source;
   const rect=dragElement.getBoundingClientRect(),style=getComputedStyle(dragElement),width=parseFloat(style.width),height=parseFloat(style.height);
