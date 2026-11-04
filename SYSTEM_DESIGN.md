@@ -85,8 +85,8 @@ scripts/update-assets.jsがroot JS・CSS・指定画像と音等の内容ハッ�
 - game-engine.jsのplanHeroTurnを本編と予測の共通判断入口とする。削除したbuild-lab.js／build-insights.js／build-workshop.jsを読み込まない。
 - card-orders.jsのFIXED_STAIR_RULEをeffectiveCardOrdersで編集行の末尾に付加。未所持カードの照合から独立し、既知・封印解除済みの階段だけを候補にする。ruleIndexはnull、fixedはtrueとして編集行統計と区別。セーブordersは編集行だけ保持する。
 - card-editor.jsは操作属性のない常設行を描画。編集入力から常設行を除外し、card-placement.jsの配列範囲チェックでも保護する。
-- screens.cssはdata-card-kind／data-palette-tabで4種類の色を共通化し、既存画像をマスクとして色を重ねる。準備背景はpadding-boxでクリップし、20pxの暗い単色境界を設ける。準備中のCanvasを隠し、HUDと画面端の装飾を保持する。
+- screens.cssはdata-card-kind／data-palette-tabで4種類の色を共通化し、既存画像をマスクとして色を重ねる。準備背景はborder-boxまで描画し、20pxの透明境界で内容配置を保持する。準備中のCanvasを隠し、HUDと画面端の装飾を保持する。
 - forecast-comparison.jsは準備入口の複製を基準として同じ試行系列で差分比較する。世代・階・試行数を検証し古い非同期結果を捨てる。基準はセーブしない。
 - build-performance.jsは実イベントを集計。build-feedback-view.jsはClear・死亡時の要約と詳細を表示。任意のbuildReport／lastBuildReportは保存v16で検証し、旧保存の欠落を許可する。予測内の記録は実レポートに合算しない。
 
-2026-11-04：カードの種類別カラーを低彩度に調整。準備の内側は維持し、外周の装飾下だけ暗い単色で覆う。詳細はSPEC.mdを参照。
+2026-11-04：カードの種類別カラーを低彩度に調整。準備の内側は維持し、外側だけ暗い単色にする。装飾下の内側背景はフレームまで描画する。詳細はSPEC.mdを参照。

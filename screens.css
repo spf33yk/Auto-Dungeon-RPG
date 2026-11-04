@@ -635,4 +635,4 @@ body.preparing #prepare-scene .card-library-tabs [data-palette-tab].active{backg
 /* No map or illustration can show beyond the ornamental preparation border. */
 body.preparing :is(#workspace,.adventure,#map-wrap){background:#070b0d!important}
 body.preparing #map{visibility:hidden}
-body.preparing #prepare-scene{box-sizing:border-box;border:var(--prep-decor-outer) solid #070b0d!important;border-image:none!important;background-clip:padding-box;box-shadow:none}
+body.preparing #prepare-scene{box-sizing:border-box;border:var(--prep-decor-outer) solid transparent!important;border-image:none!important;background-clip:border-box;box-shadow:none}
