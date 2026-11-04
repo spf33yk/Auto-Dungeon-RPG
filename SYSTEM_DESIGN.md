@@ -1,6 +1,6 @@
 # 骸の旅路 ― システム設計書
 
-更新日：2026-11-04。保存v16。基準実装a4ee1abと、本書と同時コミットのビルド工房変更。現行の機能仕様は[SPEC.md](SPEC.md)、企画は[DESIGN.md](DESIGN.md)。[整理前の設計履歴](docs/history/2026-11-04/SYSTEM_DESIGN.md)は互換・制作経緯の参照専用。
+更新日：2026-11-04。保存v16。基準実装034f3b8と、本書と同時コミットの準備画面簡素化。現行の機能仕様は[SPEC.md](SPEC.md)、企画は[DESIGN.md](DESIGN.md)。[整理前の設計履歴](docs/history/2026-11-04/SYSTEM_DESIGN.md)は互換・制作経緯の参照専用。
 
 ## 1. 構成と責務
 
@@ -75,15 +75,16 @@ openDialog／finishDialogは元のpausedを保持し、他のダイアログが�
 
 scripts/update-assets.jsがroot JS・CSS・指定画像と音等の内容ハッシュをindex.htmlや配信定義へ反映。--checkはGitHubテストでも実行。Node標準テストとローカル画面確認を基本とし、公開障害時にはPagesのbuild／deployと公開HTMLの実URLまで確認する。
 
-直近の検証は261件成功。横向きサイズ検証はPC内iframeであり、スマホ実機のタッチやSafari・回転・全画面が検証済みという意味ではない。実施コミット・配信確認・未確認はIMPLEMENTATION_NOTESへ記録する。
+直近の検証は271件成功。横向きサイズ検証はPC内iframeであり、スマホ実機のタッチやSafari・回転・全画面が検証済みという意味ではない。実施コミット・配信確認・未確認はIMPLEMENTATION_NOTESへ記録する。
 
-戦術と明示攻撃の競合・罠回避の基本探索への未適用はビルド工房実装時に解消。一部条件の常時成立は既知のまま。TRUE分岐、将来の合成等、現在の全旅クリア率は未実装／未測定として扱う。
+戦術と明示攻撃の競合・罠回避の基本探索への未適用は判断処理の共通化時に解消。一部条件の常時成立は既知のまま。TRUE分岐、将来の合成等、現在の全旅クリア率は未実装／未測定として扱う。
 
 
-## 9. ビルド工房と判断の共通化（2026-11-04）
+## 9. 準備表示と判断・集計（2026-11-04）
 
-- game-engine.jsのplanHeroTurnはtickから分離した読み取り専用の判断入口。本編とbuild-lab.jsの仮想状況が同じ関数を使用する。明示攻撃候補への戦術ソート、基本行動も含む罠回避ルート、発見済み階段への最終移動を共通化。
-- build-insights.jsは取得済み効果と配置行から関係データを返す。build-workshop.jsが準備の関係チップ・対応する記憶／行の強調・状況入力と判断結果・前階記録を描画。合成マップは本編を複製して作り、乱数を進めない。
-- forecast-comparison.jsは準備入口の状態複製と試行数別の基準結果を保持。app.jsの既存世代番号・階／旅コンテキストと組み合わせ、古い結果を表示しない。Clear率・ターン・HPの差分を同一サンプル系列で比較。基準自体はセーブしない。
-- build-performance.jsは実イベントの非負整数を集計。tick／attackEnemy／takeHeroDamage／スキル／Clearが追記し、ascendが前階のスナップショットを残す。makeFloorで当階をリセット。任意のbuildReport・lastBuildReportを保存v16で検証し、旧保存のフィールド欠落を許可。途中からの記録はstartStepで区別する。
-- 行の実行回数は実際に選ばれた行動だけを加算。オーグメント等の補助が成立した回数と混同しない。予測・仮想テストの記録は複製内に留め、実レポートへ合算しない。
+- game-engine.jsのplanHeroTurnを本編と予測の共通判断入口とする。削除したbuild-lab.js／build-insights.js／build-workshop.jsを読み込まない。
+- card-orders.jsのFIXED_STAIR_RULEをeffectiveCardOrdersで編集行の末尾に付加。未所持カードの照合から独立し、既知・封印解除済みの階段だけを候補にする。ruleIndexはnull、fixedはtrueとして編集行統計と区別。セーブordersは編集行だけ保持する。
+- card-editor.jsは操作属性のない常設行を描画。編集入力から常設行を除外し、card-placement.jsの配列範囲チェックでも保護する。
+- screens.cssはdata-card-kind／data-palette-tabで4種類の色を共通化し、既存画像をマスクとして色を重ねる。準備背景はpadding-boxでクリップし、20pxの透明境界を設ける。準備中のCanvasを隠し、HUDと画面端の装飾を保持する。
+- forecast-comparison.jsは準備入口の複製を基準として同じ試行系列で差分比較する。世代・階・試行数を検証し古い非同期結果を捨てる。基準はセーブしない。
+- build-performance.jsは実イベントを集計。build-feedback-view.jsはClear・死亡時の要約と詳細を表示。任意のbuildReport／lastBuildReportは保存v16で検証し、旧保存の欠落を許可する。予測内の記録は実レポートに合算しない。

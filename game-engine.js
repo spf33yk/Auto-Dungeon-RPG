@@ -149,7 +149,7 @@ function warpDestination(s){const cells=[];for(let y=1;y<s.grid.length-1;y++)for
 export function planHeroTurn(s){
  const ctx={canSee,stats,obtainable},avoid=modifierActive(s,'avoid-traps');
  const heroRoute=(state,test,options={})=>{const blocked=new Set(options.blocked||[]);if(avoid)for(const t of state.traps||[])if(t.revealed&&!t.spent&&(state.gimmick?.id==='traps'||state.seen[t.y]?.[t.x]))blocked.add(key(t));return route(state,test,{...options,blocked})||(avoid?route(state,test,options):null);};ctx.route=heroRoute;
- const cardPlan=s.orders.some(o=>o.cards)?chooseCardOrder(s,ctx):null,adjacentEnemy=targetEnemy(s);
+ const cardPlan=(!s.orders.length||s.orders.some(o=>o.cards))?chooseCardOrder(s,ctx):null,adjacentEnemy=targetEnemy(s);
  const emergency=!s.orders.some(o=>o.cards)&&adjacentEnemy?chooseOrder(s,ctx,true):null;
  const escapePlan=cardPlan&&(cardPlan.skill||cardPlan.warp||cardPlan.flee),enemy=cardPlan?.enemy||(escapePlan||emergency?null:adjacentEnemy);
  let action=cardPlan||emergency;

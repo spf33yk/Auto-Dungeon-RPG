@@ -1,5 +1,5 @@
 import{performanceHighlights}from'./build-performance.js';
-import{createBuildWorkshop,performanceMarkup}from'./build-workshop.js';
+import{performanceMarkup}from'./build-feedback-view.js';
 import{compareForecast,createPreparationBaseline}from'./forecast-comparison.js';
 import {screenTutorials} from './screen-tutorial.js';
 import{augmentCard,augmentChip}from'./augment-view.js';
@@ -86,7 +86,6 @@ let state,tab='orders',speed=1,paused=false,last=0,sound=false,volume=35,audio,m
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 try{const data=JSON.parse(localStorage.getItem(key));state=normalizeSave(data);if(state){hasSave=true;paused=state.phase==='explore';if(data.version!==state.version){try{const backup=key+'-v'+data.version+'-before-ui';if(!localStorage.getItem(backup))localStorage.setItem(backup,JSON.stringify(data));}catch{}}}}catch{}
 state ||= newGame();
-const buildWorkshop=createBuildWorkshop({getState:()=>state,openDialog});
 function save(){try{localStorage.setItem(key,JSON.stringify(state,(name,value)=>name==='damageEvents'?undefined:value));hasSave=true;$('save-status').textContent='端末に保存済み';}catch{$('save-status').textContent='保存できません（空き容量・設定）';}}
 function tone(freq=330){if(!sound||volume===0)return;try{audio ||= new AudioContext();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(volume/100*.1,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.15);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+.15);}catch{}}
 // Every sprite is an original pixel matrix. No external game assets are used.
@@ -216,7 +215,7 @@ function render(){
  $('memory-count').textContent=`記憶の断片 ${state.memories.length} / 4 · 通常エンド ${state.profile.normalClears}回`;
  $('memory-quote').textContent=displayStoryText(state.memories.at(-1)||openingThought(runClears),runClears);
 
- renderTab();renderThoughtSubtitle();draw();renderTitle();renderNormalEnding();renderAugments();buildWorkshop.render();syncSceneMusic();if(!showingTitle)save();maybeTutorial();
+ renderTab();renderThoughtSubtitle();draw();renderTitle();renderNormalEnding();renderAugments();syncSceneMusic();if(!showingTitle)save();maybeTutorial();
 }
 function syncTitleEffect(){
  const video=$('title-fx'),variant=openingVariant(state.profile);

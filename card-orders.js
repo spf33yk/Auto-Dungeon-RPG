@@ -14,7 +14,7 @@ export const conditionCards=[
  {id:'loot-empty',name:'既知の回収品がない'},
 ];
 export const actionCards=[
- {id:'stairs',name:'階段を上る',detail:'他の目的より階段を優先。未配置でも実行できる指示がなければ基本行動で階段へ向かう。'},
+ {id:'stairs',name:'階段を上る',detail:'他の目的より階段を優先。最終行にも変更できない階段指示を常設。'},
  {id:'chests',name:'宝箱を取得',detail:'開封可能な通常宝箱へ向かう。'},
  {id:'collect-weapons',name:'武器を取得',detail:'発見済みの武器へ向かう。'},
  {id:'collect-armor',name:'防具を取得',detail:'発見済みの防具へ向かう。'},
@@ -42,6 +42,9 @@ export const effectDefinition=r=>(r.effect?.kind==='skill'?skillCards:actionCard
 export const effectUnlocked=(s,e)=>Boolean(e&&cardOwned(s,e.cardKind||'action',e.id)&&(!e.ability||s.abilities?.includes(e.ability))&&(!e.reward||s.unlockedOrders?.includes(e.reward)));
 export const conditionDefault=id=>{const c=conditionById[id];return {id,...(c.param?{value:c.value}:{})};};
 export const createCardRule=(target='self',conditions=[],kind='action',effect='stairs')=>({id:'cards',cards:true,target,conditions:structuredClone(conditions),effect:{kind,id:effect}});
+
+export const FIXED_STAIR_RULE=Object.freeze({id:'cards',cards:true,target:'self',conditions:Object.freeze([]),effect:Object.freeze({kind:'action',id:'stairs'})});
+export const effectiveCardOrders=s=>[...s.orders,FIXED_STAIR_RULE];
 
 export function legacyToCards(o){
  if(o.cards)return structuredClone(o);
@@ -116,10 +119,10 @@ export function chooseCardOrder(s,ctx){
  const visible=s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)),blocked=new Set(visible.map(key));
  if(cardModifier(s,'avoid-traps',ctx))for(const t of s.traps||[])if(t.revealed&&!t.spent&&(s.gimmick?.id==='traps'||s.seen[t.y][t.x]))blocked.add(key(t));
  const seek=test=>ctx.route(s,test,{blocked})||ctx.route(s,test,{blocked:new Set(visible.map(key))});
- for(let index=0;index<s.orders.length;index++){
-  const r=legacyToCards(s.orders[index]),effect=effectDefinition(r),targets=matchingCardTargets(s,r,ctx);
+ const rules=effectiveCardOrders(s);for(let index=0;index<rules.length;index++){
+  const fixed=index===s.orders.length,r=legacyToCards(rules[index]),effect=effectDefinition(r),targets=fixed?([s.stairs].filter(p=>s.seen[p.y]?.[p.x]&&!s.enemies.some(e=>e.boss))):matchingCardTargets(s,r,ctx);
   if(!targets.length||effect?.modifier)continue;
-  const base={id:'cards',ruleIndex:index,intent:`カード指示：${effect.name}`};
+  const base={id:'cards',ruleIndex:fixed?null:index,fixed,intent:`カード指示：${effect.name}`};
   if(r.effect.kind==='skill'){
    if(effect.id==='mend'&&!s.mended&&s.hp<ctx.stats(s).maxHp)return {...base,skill:'mend'};
    if(effect.id==='warp'&&!s.warped&&visible.length)return {...base,warp:true};
