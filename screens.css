@@ -622,12 +622,12 @@ body.preparing #prepare-scene #prep-hint{padding-top:8px;padding-bottom:8px}
 .forecast-comparison-detail{padding:8px 12px;margin:10px 0;border-left:2px solid #c2a160;background:#c1a45c0a}.forecast-comparison-detail p{font-size:12px;margin:4px 0}
 .build-report-total,.build-rule-uses{font-size:11px;line-height:1.7;color:#bac7b7}.build-achievements{padding-left:18px;font-size:13px;line-height:1.9;color:#e0cf9e}.clear-build-report{font-size:12px;line-height:1.5;text-align:left;max-height:150px;overflow:auto;margin-top:8px;padding:7px 10px;background:#0c161544}.clear-build-report summary{cursor:pointer;color:#e6cc91}.clear-build-spotlight{font-size:13px;color:#e9d39e;margin:8px 0 0}.clear-build-report .build-achievements{font-size:12px}#prep-augments>b{flex:none;white-space:nowrap}
 /* Card categories keep the original silhouette and artwork proportions. */
-[data-card-kind=target],[data-palette-tab=target]{--card-type-color:#67c9ea;--card-tab-bg:#14313e;--card-tab-active:#22546a}
-[data-card-kind=condition],[data-palette-tab=condition]{--card-type-color:#e7c567;--card-tab-bg:#3b3219;--card-tab-active:#665226}
-[data-card-kind=action],[data-palette-tab=action]{--card-type-color:#ed9678;--card-tab-bg:#3e251f;--card-tab-active:#684235}
-[data-card-kind=skill],[data-palette-tab=skill]{--card-type-color:#c398ef;--card-tab-bg:#30223e;--card-tab-active:#513665}
+[data-card-kind=target],[data-palette-tab=target]{--card-type-color:#91a9ae;--card-tab-bg:#202b2e;--card-tab-active:#34454a}
+[data-card-kind=condition],[data-palette-tab=condition]{--card-type-color:#b9ab83;--card-tab-bg:#2d2b23;--card-tab-active:#484333}
+[data-card-kind=action],[data-palette-tab=action]{--card-type-color:#b29182;--card-tab-bg:#302724;--card-tab-active:#4a3932}
+[data-card-kind=skill],[data-palette-tab=skill]{--card-type-color:#a399ae;--card-tab-bg:#29262f;--card-tab-active:#40394a}
 .fitted-card-editor :is(.palette-card,.board-slot){isolation:isolate}
-.fitted-card-editor :is(.palette-card,.board-slot):before{content:'';position:absolute;inset:0;background:var(--card-type-color);-webkit-mask:var(--prep-card) center/contain no-repeat;mask:var(--prep-card) center/contain no-repeat;mix-blend-mode:color;pointer-events:none;z-index:0}
+.fitted-card-editor :is(.palette-card,.board-slot):before{content:'';position:absolute;inset:0;background:var(--card-type-color);-webkit-mask:var(--prep-card) center/contain no-repeat;mask:var(--prep-card) center/contain no-repeat;mix-blend-mode:color;opacity:.32;pointer-events:none;z-index:0}
 .fitted-card-editor :is(.palette-card,.board-slot) .card-content-text{color:var(--card-type-color);text-shadow:0 1px 2px #000}
 body.preparing #prepare-scene .card-library-tabs [data-palette-tab]{color:var(--card-type-color);border-color:var(--card-type-color);background:linear-gradient(var(--card-tab-bg),#101617)!important}
 body.preparing #prepare-scene .card-library-tabs [data-palette-tab].active{background:linear-gradient(var(--card-tab-active),var(--card-tab-bg))!important;box-shadow:inset 0 -3px var(--card-type-color),inset 0 1px #fff2}
@@ -635,4 +635,4 @@ body.preparing #prepare-scene .card-library-tabs [data-palette-tab].active{backg
 /* No map or illustration can show beyond the ornamental preparation border. */
 body.preparing :is(#workspace,.adventure,#map-wrap){background:#070b0d!important}
 body.preparing #map{visibility:hidden}
-body.preparing #prepare-scene{box-sizing:border-box;border:var(--prep-decor-outer) solid transparent!important;border-image:none!important;background-clip:padding-box;box-shadow:none}
+body.preparing #prepare-scene{box-sizing:border-box;border:var(--prep-decor-outer) solid #070b0d!important;border-image:none!important;background-clip:padding-box;box-shadow:none}
