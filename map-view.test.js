@@ -44,4 +44,11 @@ test('minimap leaves undiscovered cells transparent and preserves mapped grid bo
  }
 });
 
-test("fog and floor changes preserve camera framing while scout upgrades remain supported",()=>{for(const scout of [0,1,4]){const base={levels:{scout},floor:1,gimmick:{id:"none"}},fog={...base,floor:9,gimmick:{id:"fog"}};assert.equal(cameraSight(base),3+scout);assert.deepEqual(cameraFor({x:10,y:8},cameraSight(base)),cameraFor({x:10,y:8},cameraSight(fog)));}});
+test('scout upgrades and floors keep normal framing while fog retains a closer view',()=>{
+ for(const scout of [0,1,4]){
+  const s={levels:{scout},floor:1,gimmick:{id:'none'}},other={...s,floor:20};
+  assert.equal(cameraSight(s),3);assert.equal(cameraSight(other),3);
+  assert.deepEqual(cameraFor({x:10,y:8},cameraSight(s)),cameraFor({x:10,y:8},3));
+  assert.equal(cameraSight({...s,gimmick:{id:'fog'}}),2);
+ }
+});

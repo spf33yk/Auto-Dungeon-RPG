@@ -11,8 +11,8 @@ export function autoMapModel(s,visible){
  markers.push({...s.player,type:'player'});return {tiles,markers};
 }
 
-// Temporary fog changes visibility, not camera framing.
-export const cameraSight=s=>3+s.levels.scout;
+// Scout upgrades expand visibility without rescaling the world; fog keeps its closer framing.
+export const cameraSight=s=>s.gimmick?.id==='fog'?2:3;
 
 // The camera follows the interpolated hero; padding keeps the full sight square on screen.
 export function cameraFor(position,sight,width=744,height=552){
