@@ -10,7 +10,7 @@ test('portrait and landscape cameras fit the full sight range without stretching
   assert.ok(Math.abs(c.scale*64-Math.min(width,height)/(2*Math.ceil(sight)+5))<1e-8);
  }
 });
-import {cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';
+import {cameraSight,cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';
 
 test('zoom camera fits every sight radius and follows fractional positions at map edges',()=>{
  for(const sight of [2,3,4,5,6,7,8])for(const p of [{x:1,y:1},{x:15.25,y:11.5},{x:29,y:21}]){
@@ -43,3 +43,5 @@ test('minimap leaves undiscovered cells transparent and preserves mapped grid bo
   assert.equal(pixels.get((30*cell+1)+','+(22*cell+1)),'#ffb44e');
  }
 });
+
+test("fog and floor changes preserve camera framing while scout upgrades remain supported",()=>{for(const scout of [0,1,4]){const base={levels:{scout},floor:1,gimmick:{id:"none"}},fog={...base,floor:9,gimmick:{id:"fog"}};assert.equal(cameraSight(base),3+scout);assert.deepEqual(cameraFor({x:10,y:8},cameraSight(base)),cameraFor({x:10,y:8},cameraSight(fog)));}});

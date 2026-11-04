@@ -25,7 +25,7 @@ import {openingVariant,TRUE_END_UNIMPLEMENTED_NOTICE} from './opening.js';
 import {createLogVisibility} from './log-visibility.js';
 import {queueDamage,damageFrame} from './damage-view.js';
 import {renderCardEditor,handleCardClick,handleCardChange,installCardDragging} from './card-editor.js';
-import {autoMapModel,cameraFor,miniMapGeometry,drawMiniMap} from './map-view.js';
+import {autoMapModel,cameraFor,cameraSight,miniMapGeometry,drawMiniMap} from './map-view.js';
 import {thoughtText} from './thought-view.js';
 import {displayStoryText,openingThought,letterFloorThought} from './story-text.js';
 import {memoryGroups} from './skill-tree.js';
@@ -124,7 +124,7 @@ function draw(){
  const position=motion?{x:motion.from.x+(state.player.x-motion.from.x)*eased,y:motion.from.y+(state.player.y-motion.from.y)*eased}:state.player;
  const sightState=renderSightState(state,position),visible=(x,y)=>canSee(sightState,x,y);
  const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y),hop=moving?Math.sin(progress*Math.PI)*CELL/12:0;
- const camera=cameraFor(position,radius(state),map.width,map.height);ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);
+ const camera=cameraFor(position,cameraSight(state),map.width,map.height);ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);
  const graves=new Set((state.obstacles||[]).map(o=>o.x+','+o.y)),surface=state.grid.map((r,y)=>r.map((v,x)=>(v||graves.has(x+','+y))?1:0)),queue=[];
  if(entranceGrid!==state.grid){entranceGrid=state.grid;entranceFrames=entranceWallFrames(surface);}
  for(let y=0;y<state.grid.length;y++)for(let x=0;x<state.grid[y].length;x++){

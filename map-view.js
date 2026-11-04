@@ -11,6 +11,9 @@ export function autoMapModel(s,visible){
  markers.push({...s.player,type:'player'});return {tiles,markers};
 }
 
+// Temporary fog changes visibility, not camera framing.
+export const cameraSight=s=>3+s.levels.scout;
+
 // The camera follows the interpolated hero; padding keeps the full sight square on screen.
 export function cameraFor(position,sight,width=744,height=552){
  const cell=64,rows=2*Math.ceil(sight)+5,scale=Math.min(width,height)/(rows*cell);
