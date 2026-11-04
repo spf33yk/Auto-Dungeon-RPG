@@ -14,7 +14,7 @@ export const conditionCards=[
  {id:'loot-empty',name:'既知の回収品がない'},
 ];
 export const actionCards=[
- {id:'stairs',name:'階段を上る',detail:'階段へ向かい、実際に乗ると次の階へ。'},
+ {id:'stairs',name:'階段を上る',detail:'他の目的より階段を優先。未配置でも実行できる指示がなければ基本行動で階段へ向かう。'},
  {id:'chests',name:'宝箱を取得',detail:'開封可能な通常宝箱へ向かう。'},
  {id:'collect-weapons',name:'武器を取得',detail:'発見済みの武器へ向かう。'},
  {id:'collect-armor',name:'防具を取得',detail:'発見済みの防具へ向かう。'},
@@ -126,6 +126,7 @@ export function chooseCardOrder(s,ctx){
    continue;
   }
   if(effect.id==='attack'){
+   const adjacent=targets.filter(e=>dist(s.player,e)===1);if(adjacent.length&&cardModifier(s,'tactics',ctx)){const atk=ctx.stats(s).attack;adjacent.sort((a,b)=>Number(b.hp<=Math.max(1,atk-b.defense))-Number(a.hp<=Math.max(1,atk-a.defense))||b.attack-a.attack||dirs.findIndex(([dx,dy])=>s.player.x+dx===a.x&&s.player.y+dy===a.y)-dirs.findIndex(([dx,dy])=>s.player.x+dx===b.x&&s.player.y+dy===b.y));return {...base,enemy:adjacent[0]};}
    for(const e of targets){if(dist(s.player,e)===1)return {...base,enemy:e};const next=seek(p=>dist(p,e)===1);if(next)return {...base,next};}
   }else if(effect.id==='retreat'){
    if(s.retreatCooldown>0||!visible.length)continue;

@@ -1,3 +1,4 @@
+import{recordBuild}from'./build-performance.js';
 // 仮バランス。描画・予測・本編で共通の定義を使う。
 export const augments=[
  ['ripen','熟成の刃','熟成','NORMAL','この階の40ターンごとに攻撃力+1、最大+8。'],
@@ -29,6 +30,6 @@ export function augmentBonus(s,maxHp,visibleEnemies=0){const has=id=>hasAugment(
  defense:(has('shell')&&s.hp/maxHp>=.8?3:0)+(has('patience')?Math.min(6,Math.floor(steps/50)):0),
  critical:(has('critical')?.10:0)+(has('hunter')?Math.min(.40,(s.floorKills||0)*.04):0)+(has('rush')&&steps<=60?.25:0),
  leech:(has('leech')?.05:0)+(has('blood')?missing*.20:0),charged:has('charge')&&(s.unharmedTurns||0)>=10};}
-export function takeHeroDamage(s,damage){s.unharmedTurns=0;if(damage>=s.hp&&hasAugment(s,'undying')&&!s.undyingUsed){s.hp=1;s.undyingUsed=true;return true;}s.hp=Math.max(0,s.hp-damage);return false;}
+export function takeHeroDamage(s,damage){s.unharmedTurns=0;if(damage>=s.hp&&hasAugment(s,'undying')&&!s.undyingUsed){recordBuild(s,'damageTaken',Math.max(0,s.hp-1));recordBuild(s,'undyingUses');s.hp=1;s.undyingUsed=true;return true;}recordBuild(s,'damageTaken',Math.min(s.hp,damage));s.hp=Math.max(0,s.hp-damage);return false;}
 
 export function clearAugmentHealing(s,maxHp){return hasAugment(s,'swift-ascent')&&s.steps<300?Math.max(0,Math.min(maxHp-s.hp,Math.ceil(maxHp*.15))):0;}
