@@ -636,3 +636,6 @@ body.preparing #prepare-scene .card-library-tabs [data-palette-tab].active{backg
 body.preparing :is(#workspace,.adventure,#map-wrap){background:#070b0d!important}
 body.preparing #map{visibility:hidden}
 body.preparing #prepare-scene{box-sizing:border-box;border:0!important;border-image:none!important;background-clip:border-box;box-shadow:none}
+
+/* Only the outer scene hides scenery; inset panel ornaments remain transparent. */
+body.preparing #prepare-scene .fitted-card-editor :is(.card-library,.card-rules){background:transparent!important;box-shadow:none}
