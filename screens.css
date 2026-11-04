@@ -639,3 +639,6 @@ body.preparing #prepare-scene{box-sizing:border-box;border:0!important;border-im
 
 /* Only the outer scene hides scenery; inset panel ornaments remain transparent. */
 body.preparing #prepare-scene .fitted-card-editor :is(.card-library,.card-rules){background:transparent!important;box-shadow:none}
+
+/* The ornament has transparent pixels outside its structural edge. Keep scenery inside that edge. */
+body.preparing #prepare-scene{clip-path:inset(5px)}
