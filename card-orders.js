@@ -1,3 +1,5 @@
+import{themedSkills}from'./build-themes.js';
+import{skillCanRun}from'./theme-runtime.js';
 import{gearById}from'./data.js';
 // Card data and evaluation are shared by the editor, AI and save migration.
 import{cardOwned,cardRarity}from'./card-access.js';
@@ -29,15 +31,7 @@ export const actionCards=[
  {id:'tactics',name:'戦術で敵を選ぶ',detail:'条件成立中、隣接敵の一撃撃破・攻撃力を優先。',modifier:true},
  {id:'avoid-traps',name:'トラップを避ける',detail:'安全な経路を優先。迂回できないときは罠を踏んで進む（ダメージあり）。',modifier:true,reward:'avoid-traps'},
 ];
-export const skillCards=[
- {id:'blood-cut',name:'捨て身の斬撃',detail:'最大HP10%を消費（HP1は残る）し隣接敵1体へ通常の2倍攻撃。背水・吸命と好相性。各階1回。',ability:'blood-cut'},
- {id:'sweep',name:'円環の斬撃',detail:'隣接する全敵へ通常の80%で攻撃。会心・吸命・撃破時効果も適用。各階1回。',ability:'sweep'},
- {id:'guard',name:'骨の守り',detail:'次の3回の被ダメージを半減（切上げ）。守護テーマのHP維持を助ける。各階1回。',ability:'guard'},
- {id:'focus',name:'静寂の構え',detail:'次の攻撃を1.25倍にし、無被弾の蓄積を5ターン進める。静寂の一閃を補助。各階1回。',ability:'focus'},
-
- {id:'mend',name:'再生の祈り',detail:'条件成立時に最大HP40%回復。各階1回。',ability:'mend'},
- {id:'warp',name:'窮地の転移',detail:'条件成立時にランダムな床へ転移。各階1回。',reward:'warp'},
-];
+export const skillCards=themedSkills.map(c=>({...c,detail:c.detail+' 各階1回。',...(c.id==='warp'?{reward:'warp'}:{ability:c.id})}));
 for(const[kind,list]of Object.entries({target:targetCards,condition:conditionCards,action:actionCards,skill:skillCards}))for(const c of list){c.cardKind=kind;c.rarity=cardRarity(kind,c.id);if(!c.detail)c.detail=kind==='target'?'指示が判断する対象を選びます。':c.param?`${c.name}を${c.min}〜${c.max}の範囲で指定します。`:'この条件が成立した場合だけ指示を実行します。';}
 const cardDetails={self:'自分のHPや周囲の状況を条件の判断対象にする。',enemy:'視界内の敵を近い順に対象にする。','weak-enemy':'視界内の敵を残りHPの低い順に対象にする。','danger-enemy':'視界内の敵を攻撃力の高い順に対象にする。','one-hit':'対象の残りHPと推定通常ダメージを比べ、一撃で倒せる場合だけ実行。',injured:'対象の敵の残りHPが最大HPの半分以下の場合に実行。','loot-empty':'発見済みで入手可能な品物が残っていない場合に実行。',visible:'目的地・対象が現在の視界に入っている場合に実行。'};
 for(const c of [...targetCards,...conditionCards])if(cardDetails[c.id])c.detail=cardDetails[c.id];
@@ -128,12 +122,7 @@ export function chooseCardOrder(s,ctx){
   const fixed=index===s.orders.length,r=legacyToCards(rules[index]),effect=effectDefinition(r),targets=fixed?([s.stairs].filter(p=>s.seen[p.y]?.[p.x]&&!s.enemies.some(e=>e.boss))):matchingCardTargets(s,r,ctx);
   if(!targets.length||effect?.modifier)continue;
   const base={id:'cards',ruleIndex:fixed?null:index,fixed,intent:`カード指示：${effect.name}`};
-  if(r.effect.kind==='skill'){
-   if(effect.id==='mend'&&!s.mended&&s.hp<ctx.stats(s).maxHp)return {...base,skill:'mend'};
-   if(effect.id==='warp'&&!s.warped&&visible.length)return {...base,warp:true};
-   if(['blood-cut','sweep','guard','focus'].includes(effect.id)&&!(s.skillUses||[]).includes(effect.id)){const adjacent=visible.filter(e=>dist(s.player,e)===1);if((['blood-cut','sweep'].includes(effect.id)?adjacent.length>0:visible.length>0)&&(effect.id!=='blood-cut'||s.hp>1))return {...base,skill:effect.id};}
-   continue;
-  }
+  if(r.effect.kind==='skill'){if(skillCanRun(s,effect.id,ctx))return {...base,skill:effect.id,exit:effect.id==='homeward'};continue;}
   if(effect.id==='attack'){
    const adjacent=targets.filter(e=>dist(s.player,e)===1);if(adjacent.length&&cardModifier(s,'tactics',ctx)){const atk=ctx.stats(s).attack;adjacent.sort((a,b)=>Number(b.hp<=Math.max(1,atk-b.defense))-Number(a.hp<=Math.max(1,atk-a.defense))||b.attack-a.attack||dirs.findIndex(([dx,dy])=>s.player.x+dx===a.x&&s.player.y+dy===a.y)-dirs.findIndex(([dx,dy])=>s.player.x+dx===b.x&&s.player.y+dy===b.y));return {...base,enemy:adjacent[0]};}
    for(const e of targets){if(dist(s.player,e)===1)return {...base,enemy:e};const next=seek(p=>dist(p,e)===1);if(next)return {...base,next};}

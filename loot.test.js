@@ -33,7 +33,7 @@ test('ground gear is acquired and registered, herbs heal and fragments are commo
 });
 
 test('duplicates give five fragments without stacking; new journeys keep only codex records',()=>{
- const s=arena();for(const r of rewardDefinitions){assert.equal(grantReward(s,r.id),true);const shards=s.shards;assert.equal(grantReward(s,r.id),false);assert.equal(s.shards,shards+5);}assert.equal(codexRows(s,'skills').filter(r=>r.known).length,7);const fresh=newGame(2,s.profile);assert.deepEqual(fresh.abilities,[]);assert.deepEqual(fresh.unlockedOrders,[]);assert.equal(Object.hasOwn(fresh,'keys'),false);assert.equal(codexRows(fresh,'skills').filter(r=>r.known).length,7);assert.ok(codexRows(fresh,'skills').every(r=>!r.owned));
+ const s=arena();for(const r of rewardDefinitions){assert.equal(grantReward(s,r.id),true);const shards=s.shards;assert.equal(grantReward(s,r.id),false);assert.equal(s.shards,shards+5);}assert.equal(codexRows(s,'skills').filter(r=>r.known).length,31);const fresh=newGame(2,s.profile);assert.deepEqual(fresh.abilities,[]);assert.deepEqual(fresh.unlockedOrders,[]);assert.equal(Object.hasOwn(fresh,'keys'),false);assert.equal(codexRows(fresh,'skills').filter(r=>r.known).length,31);assert.ok(codexRows(fresh,'skills').every(r=>!r.owned));
 });
 
 test('special orders must be obtained and configured in an available slot',()=>{
@@ -54,7 +54,7 @@ test('regeneration is acquired from drops and fires once before enemy attacks',(
 
 test('critical and extra strikes are probabilistic, bounded and never duplicate a kill',()=>{
  let critical=0,double=0;for(let seed=0;seed<1000;seed++){const s=arena(seed);for(const id of ['critical','double-strike'])grantReward(s,id);s.orders=[];const e=foe(s,{hp:1000});attackEnemy(s,e);if(s.logs.some(l=>l.text.startsWith('会心')))critical++;if(s.logs.some(l=>l.text.startsWith('追撃')))double++;assert.ok(e.hp>=1000-stats(s).attack*4);}
- assert.ok(critical>65&&critical<160);assert.ok(double>25&&double<85);
+ assert.ok(critical>65&&critical<160);assert.ok(double>110&&double<200);
  const s=arena(123);grantReward(s,'double-strike');s.orders=[];const e=foe(s);attackEnemy(s,e);const snapshot=JSON.stringify(s);attackEnemy(s,e);assert.equal(s.kills,1);assert.equal(JSON.stringify(s),snapshot);
 });
 

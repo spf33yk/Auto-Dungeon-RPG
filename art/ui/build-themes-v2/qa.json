@@ -1,0 +1,218 @@
+{
+  "art_source": "host_image",
+  "route": "image_gen",
+  "warnings": [],
+  "icons": [
+    {
+      "id": "explorer",
+      "bytes": 3306,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "map-reader",
+      "bytes": 15326,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "scavenger",
+      "bytes": 15054,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "swift-ascent",
+      "bytes": 15346,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "trailblazer",
+      "bytes": 14074,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "treasure-sense",
+      "bytes": 19042,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "pioneer",
+      "bytes": 18096,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "monk",
+      "bytes": 3210,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "ripen",
+      "bytes": 16770,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "patience",
+      "bytes": 13942,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "breath",
+      "bytes": 15212,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "pilgrim",
+      "bytes": 18822,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "charge",
+      "bytes": 16298,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "enlightenment",
+      "bytes": 14626,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "berserker",
+      "bytes": 3264,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "desperate",
+      "bytes": 12282,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "leech",
+      "bytes": 9556,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "surrounded",
+      "bytes": 15376,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "blood",
+      "bytes": 14808,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "hunter",
+      "bytes": 16124,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "blood-pact",
+      "bytes": 15692,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "guardian",
+      "bytes": 2090,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "shell",
+      "bytes": 10804,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "first-shield",
+      "bytes": 13168,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "restful",
+      "bytes": 9530,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "moon",
+      "bytes": 8766,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "reserve",
+      "bytes": 12304,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "undying",
+      "bytes": 15946,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "gambler",
+      "bytes": 2874,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "critical",
+      "bytes": 18956,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "risky-blade",
+      "bytes": 7788,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "lucky-find",
+      "bytes": 12726,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "double-strike",
+      "bytes": 18858,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "pity",
+      "bytes": 14382,
+      "cornersTransparent": true,
+      "nonempty": true
+    },
+    {
+      "id": "destiny",
+      "bytes": 18326,
+      "cornersTransparent": true,
+      "nonempty": true
+    }
+  ],
+  "totalBytes": 452744
+}

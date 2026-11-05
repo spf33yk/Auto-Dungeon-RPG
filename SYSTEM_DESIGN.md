@@ -1,6 +1,6 @@
 # 骸の旅路 ― システム設計書
 
-更新日：2026-11-04。保存v16。基準実装034f3b8と、本書と同時コミットの準備画面簡素化。現行の機能仕様は[SPEC.md](SPEC.md)、企画は[DESIGN.md](DESIGN.md)。[整理前の設計履歴](docs/history/2026-11-04/SYSTEM_DESIGN.md)は互換・制作経緯の参照専用。
+更新日：2026-11-04。保存v16。基準実装fd464e0と、本書と同時コミットの5職業テーマ・セット実装。現行の機能仕様は[SPEC.md](SPEC.md)、企画は[DESIGN.md](DESIGN.md)。[整理前の設計履歴](docs/history/2026-11-04/SYSTEM_DESIGN.md)は互換・制作経緯の参照専用。
 
 ## 1. 構成と責務
 
@@ -12,9 +12,9 @@
 | 本編 | game-engine.js（入口engine.js） | 状態・地形配置・行動・戦闘・拾得・周回・保存正規化 |
 | 地形 | dungeon-layout.js、boss-arena.js、crypt-obstacles.js | 通常階ランダム・対称ボス部屋・墓石と到達可能性 |
 | 指示 | card-orders.js、card-placement.js、orders.js | カード判定・互換性・配置操作・旧指示互換 |
-| 所持 | card-access.js、card-catalog.js、card-inventory.js、retired-cards.js | 初期5枚・33カード・抽選・図鑑・旧カード移行 |
+| 所持 | card-access.js、card-catalog.js、card-inventory.js、retired-cards.js | 初期5枚・57カード・抽選・図鑑・旧カード移行 |
 | 成長・報酬 | progression.js、drop-system.js、reinforcements.js | EXP・二段階ドロップ・保存RNG・増援 |
-| オーグメント | augments.js、augment-view.js、augment-art.js | 19効果・3択・計算・共通画像付き表示・配信URL |
+| オーグメント | augments.js、augment-view.js、augment-art.js | 30効果・3択・計算・共通画像付き表示・配信URL |
 | 画面統括 | app.js、index.html、style.css、screens.css | 入力・フェイズ表示・ダイアログ停止・描画・保存 |
 | 指示UI | card-editor.js、editor-scroll.js | ドラッグ／タップ・行ゴースト・再描画前後の位置保持 |
 | 準備予測 | exploration-forecast.js、forecast-view.js | 複製状態の非同期試行、結果と警告 |
@@ -115,3 +115,14 @@ scripts/update-assets.jsがroot JS・CSS・指定画像と音等の内容ハッ�
 
 
 テーマ表記は持久・速攻・背水・守護・不屈・猛攻に統一。旧表記の熟成／焦燥／満月／傷跡／闘争はテーマ名として使用しない。個別オーグメント名（熟成の刃・満月の守り等）、効果・重み・IDは維持する。保存はIDを使うため既存セーブへ影響なし。スキルには正式なテーマ属性を追加せず、相性分類は分析として区別する。
+
+
+## 5テーマ制と素材・セットの共通化
+
+build-themes.jsは5職業・30オーグメント・30スキル・旧ID置換表の正規定義。card-access／card-orders／dataは同じ定義からレアリティと取得情報を構築する。set-bonuses.jsのskillSetActiveとsetBonusRowsを本編・準備UI・選択予告・図鑑で共有し、表示だけのセットを作らない。
+
+theme-runtime.jsは状態の初期化・検証・移行、発動可能判定、能動スキル実行、入室特典・一時強化・軽減処理を担当する。エンジンの戦闘・視界・経路・乱数はコンテキストで渡し、定義間の循環importを避ける。skillCanRunは状態を変更しない。通常階とボス階の生成前にresetThemeFloorを呼び、makeBossFloor経由でも使用回数を持ち越さない。
+
+保存v16へ任意themeStateを追加し、配列・数値・boolean・地形インデックス・使用スキルIDを検証。既存使用フラグを復元する。廃止4IDの所持統合による重複は欠片5で補填。正規化後に再保存されるため同じ補填を繰り返さない。
+
+art/ui/build-themes-v2/format.jsonに生成元ハッシュ・矩形・正方形出力を定義。scripts/build-theme-art.pyが等倍率でWebPへ出力し、scripts/update-assets.jsが専用絵とテーマアイコンのハッシュをaugment-art.jsへ生成。theme-view.jsが画像とSET表示を共通化。raw PNGはローカルoutputへ保管し配信しない。

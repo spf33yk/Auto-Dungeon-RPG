@@ -1,3 +1,4 @@
+import{themedSkills}from'./build-themes.js';
 // Balance values are provisional. IDs are shared by combat, inventory and codices.
 export const zones = [
   ['忘れられた地下墓所','crypt', '#293a32','#56614b','rooms'],
@@ -33,18 +34,7 @@ export const skills = [
 ];
 
 // Provisional loot balance. Each enemy owns a rate and an explicit weighted item pool.
-export const rewardDefinitions=[
- {id:'blood-cut',kind:'skill',name:'捨て身の斬撃',detail:'最大HP10%を消費（HP1は残る）し隣接敵1体へ通常の2倍攻撃。背水・吸命と好相性。各階1回。'},
- {id:'sweep',kind:'skill',name:'円環の斬撃',detail:'隣接する全敵へ通常の80%で攻撃。会心・吸命・撃破時効果も適用。各階1回。'},
- {id:'guard',kind:'skill',name:'骨の守り',detail:'次の3回の被ダメージを半減（切上げ）。守護テーマのHP維持を助ける。各階1回。'},
- {id:'focus',kind:'skill',name:'静寂の構え',detail:'次の攻撃を1.25倍にし、無被弾の蓄積を5ターン進める。静寂の一閃を補助。各階1回。'},
- {id:'mend',kind:'skill',name:'再生の祈り',detail:'条件カードに従い最大HP40%回復。各階1回、1ターン使用。宝箱のカードで取得し、準備でスキルカードを設定。'},
- {id:'critical',kind:'skill',name:'会心の記憶',detail:'オーグメントとして自動適用。各打撃で10%の確率で与ダメージ1.5倍（切上げ）。'},
- {id:'leech',kind:'skill',name:'吸命の記憶',detail:'オーグメントとして自動適用。実際に与えたダメージの5%を回復（切捨て、最大HPまで）。'},
- {id:'double-strike',kind:'skill',name:'追撃の記憶',detail:'オーグメントとして自動適用。通常打撃の後に5%の確率で追加の1打。同ターン1回まで。'},
- {id:'warp',kind:'order',name:'窮地の転移',detail:'敵が見え、設定したカード条件が成立するとランダムな床へ転移。各階1回。スキルカードとして設定が必要。'},
- {id:'avoid-traps',kind:'order',name:'トラップを避ける',detail:'この指示で移動するときは既知の未作動罠を避ける。迂回できなければ通過し、罠のダメージを受ける。'},
-];
+export const rewardDefinitions=[...themedSkills.map(s=>({id:s.id,name:s.name,themeId:s.themeId,kind:s.id==='warp'?'order':'skill',detail:s.detail+' 各階1回。'})),{id:'critical',kind:'skill',name:'会心の記憶',detail:'旧保存互換のオーグメント。'},{id:'leech',kind:'skill',name:'吸命の記憶',detail:'旧保存互換のオーグメント。'},{id:'double-strike',kind:'skill',name:'追撃の記憶',detail:'旧保存互換のオーグメント。'},{id:'avoid-traps',kind:'order',name:'トラップを避ける',detail:'安全な経路を優先し、迂回できない時は罠を通過。'}];
 export const rewardById=Object.fromEntries(rewardDefinitions.map(r=>[r.id,r]));
 export const chestRewards=[{id:'critical',weight:30},{id:'leech',weight:25},{id:'double-strike',weight:20},{id:'warp',weight:15},{id:'avoid-traps',weight:10}];
 export const enemyDropTables=Object.fromEntries(monsters.map(m=>{

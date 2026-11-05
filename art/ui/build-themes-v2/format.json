@@ -1,0 +1,565 @@
+{
+  "schema": "build-theme-art/v2",
+  "aspect": "square; equal-scale contain only",
+  "art_source": "host_image",
+  "sources": [
+    {
+      "theme": "explorer",
+      "source": "exec-0ee9423b-9a52-4c4e-b220-169c6405cd65.png",
+      "sourceWidth": 887,
+      "sourceHeight": 1774,
+      "art_source": "host_image",
+      "route": "image_gen",
+      "sha256": "c7a518a63c9b5eb7a7f14cbd960437210f18625ab1a3073439c62c45d7009ca4",
+      "grid": {
+        "columns": 2,
+        "rows": 4
+      }
+    },
+    {
+      "theme": "monk",
+      "source": "exec-9635df2f-3ef6-4f3c-887e-e126a18f832c.png",
+      "sourceWidth": 1086,
+      "sourceHeight": 1448,
+      "art_source": "host_image",
+      "route": "image_gen",
+      "sha256": "1a337f3b1cac3e2904bdb896fee78d5cadb9a56bff6317642fdf53de0090668e",
+      "grid": {
+        "columns": 2,
+        "rows": 4
+      }
+    },
+    {
+      "theme": "berserker",
+      "source": "exec-7bc0debf-6c98-4d23-b49e-09ef62110f83.png",
+      "sourceWidth": 1086,
+      "sourceHeight": 1448,
+      "art_source": "host_image",
+      "route": "image_gen",
+      "sha256": "40e5c5d9d442673df8952c5eb2d52ee23c75d73aa4e63c13667b76f30aa064d2",
+      "grid": {
+        "columns": 2,
+        "rows": 4
+      }
+    },
+    {
+      "theme": "guardian",
+      "source": "exec-f29ef1dc-474f-45a1-a137-1ed03362f970.png",
+      "sourceWidth": 1086,
+      "sourceHeight": 1448,
+      "art_source": "host_image",
+      "route": "image_gen",
+      "sha256": "19702b76d0dd8fa7f7c26bed0a8927c65f88190c4d28b6f354630d033dfa9946",
+      "grid": {
+        "columns": 2,
+        "rows": 4
+      },
+      "note": "Manually measured cell boundaries separate the sword tip from the following halo; source art remains unchanged."
+    },
+    {
+      "theme": "gambler",
+      "source": "exec-a2a436b2-c19c-4378-9285-bbfe36f5ae5a.png",
+      "sourceWidth": 1086,
+      "sourceHeight": 1448,
+      "art_source": "host_image",
+      "route": "image_gen",
+      "sha256": "94ff188d174fda09994aff001908db2b2a1de0bdb49a73234a2bd5b0dfa811c2",
+      "grid": {
+        "columns": 2,
+        "rows": 4
+      }
+    }
+  ],
+  "icons": [
+    {
+      "id": "explorer",
+      "kind": "theme",
+      "file": "theme-explorer.webp",
+      "width": 64,
+      "height": 64,
+      "source": "exec-0ee9423b-9a52-4c4e-b220-169c6405cd65.png",
+      "sourceBox": [
+        0,
+        0,
+        444,
+        444
+      ]
+    },
+    {
+      "id": "map-reader",
+      "kind": "augment",
+      "file": "map-reader.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-0ee9423b-9a52-4c4e-b220-169c6405cd65.png",
+      "sourceBox": [
+        444,
+        0,
+        887,
+        444
+      ]
+    },
+    {
+      "id": "scavenger",
+      "kind": "augment",
+      "file": "scavenger.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-0ee9423b-9a52-4c4e-b220-169c6405cd65.png",
+      "sourceBox": [
+        0,
+        444,
+        444,
+        887
+      ]
+    },
+    {
+      "id": "swift-ascent",
+      "kind": "augment",
+      "file": "swift-ascent.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-0ee9423b-9a52-4c4e-b220-169c6405cd65.png",
+      "sourceBox": [
+        444,
+        444,
+        887,
+        887
+      ]
+    },
+    {
+      "id": "trailblazer",
+      "kind": "augment",
+      "file": "trailblazer.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-0ee9423b-9a52-4c4e-b220-169c6405cd65.png",
+      "sourceBox": [
+        0,
+        887,
+        444,
+        1330
+      ]
+    },
+    {
+      "id": "treasure-sense",
+      "kind": "augment",
+      "file": "treasure-sense.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-0ee9423b-9a52-4c4e-b220-169c6405cd65.png",
+      "sourceBox": [
+        444,
+        887,
+        887,
+        1330
+      ]
+    },
+    {
+      "id": "pioneer",
+      "kind": "augment",
+      "file": "pioneer.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-0ee9423b-9a52-4c4e-b220-169c6405cd65.png",
+      "sourceBox": [
+        0,
+        1330,
+        444,
+        1774
+      ]
+    },
+    {
+      "id": "monk",
+      "kind": "theme",
+      "file": "theme-monk.webp",
+      "width": 64,
+      "height": 64,
+      "source": "exec-9635df2f-3ef6-4f3c-887e-e126a18f832c.png",
+      "sourceBox": [
+        0,
+        0,
+        543,
+        362
+      ]
+    },
+    {
+      "id": "ripen",
+      "kind": "augment",
+      "file": "ripen.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-9635df2f-3ef6-4f3c-887e-e126a18f832c.png",
+      "sourceBox": [
+        543,
+        0,
+        1086,
+        362
+      ]
+    },
+    {
+      "id": "patience",
+      "kind": "augment",
+      "file": "patience.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-9635df2f-3ef6-4f3c-887e-e126a18f832c.png",
+      "sourceBox": [
+        0,
+        362,
+        543,
+        724
+      ]
+    },
+    {
+      "id": "breath",
+      "kind": "augment",
+      "file": "breath.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-9635df2f-3ef6-4f3c-887e-e126a18f832c.png",
+      "sourceBox": [
+        543,
+        362,
+        1086,
+        724
+      ]
+    },
+    {
+      "id": "pilgrim",
+      "kind": "augment",
+      "file": "pilgrim.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-9635df2f-3ef6-4f3c-887e-e126a18f832c.png",
+      "sourceBox": [
+        0,
+        724,
+        543,
+        1086
+      ]
+    },
+    {
+      "id": "charge",
+      "kind": "augment",
+      "file": "charge.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-9635df2f-3ef6-4f3c-887e-e126a18f832c.png",
+      "sourceBox": [
+        543,
+        724,
+        1086,
+        1086
+      ]
+    },
+    {
+      "id": "enlightenment",
+      "kind": "augment",
+      "file": "enlightenment.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-9635df2f-3ef6-4f3c-887e-e126a18f832c.png",
+      "sourceBox": [
+        0,
+        1086,
+        543,
+        1448
+      ]
+    },
+    {
+      "id": "berserker",
+      "kind": "theme",
+      "file": "theme-berserker.webp",
+      "width": 64,
+      "height": 64,
+      "source": "exec-7bc0debf-6c98-4d23-b49e-09ef62110f83.png",
+      "sourceBox": [
+        0,
+        0,
+        543,
+        362
+      ]
+    },
+    {
+      "id": "desperate",
+      "kind": "augment",
+      "file": "desperate.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-7bc0debf-6c98-4d23-b49e-09ef62110f83.png",
+      "sourceBox": [
+        543,
+        0,
+        1086,
+        362
+      ]
+    },
+    {
+      "id": "leech",
+      "kind": "augment",
+      "file": "leech.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-7bc0debf-6c98-4d23-b49e-09ef62110f83.png",
+      "sourceBox": [
+        0,
+        362,
+        543,
+        724
+      ]
+    },
+    {
+      "id": "surrounded",
+      "kind": "augment",
+      "file": "surrounded.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-7bc0debf-6c98-4d23-b49e-09ef62110f83.png",
+      "sourceBox": [
+        543,
+        362,
+        1086,
+        724
+      ]
+    },
+    {
+      "id": "blood",
+      "kind": "augment",
+      "file": "blood.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-7bc0debf-6c98-4d23-b49e-09ef62110f83.png",
+      "sourceBox": [
+        0,
+        724,
+        543,
+        1086
+      ]
+    },
+    {
+      "id": "hunter",
+      "kind": "augment",
+      "file": "hunter.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-7bc0debf-6c98-4d23-b49e-09ef62110f83.png",
+      "sourceBox": [
+        543,
+        724,
+        1086,
+        1086
+      ]
+    },
+    {
+      "id": "blood-pact",
+      "kind": "augment",
+      "file": "blood-pact.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-7bc0debf-6c98-4d23-b49e-09ef62110f83.png",
+      "sourceBox": [
+        0,
+        1086,
+        543,
+        1448
+      ]
+    },
+    {
+      "id": "guardian",
+      "kind": "theme",
+      "file": "theme-guardian.webp",
+      "width": 64,
+      "height": 64,
+      "source": "exec-f29ef1dc-474f-45a1-a137-1ed03362f970.png",
+      "sourceBox": [
+        0,
+        0,
+        543,
+        355
+      ]
+    },
+    {
+      "id": "shell",
+      "kind": "augment",
+      "file": "shell.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-f29ef1dc-474f-45a1-a137-1ed03362f970.png",
+      "sourceBox": [
+        543,
+        0,
+        1086,
+        356
+      ]
+    },
+    {
+      "id": "first-shield",
+      "kind": "augment",
+      "file": "first-shield.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-f29ef1dc-474f-45a1-a137-1ed03362f970.png",
+      "sourceBox": [
+        0,
+        355,
+        543,
+        715
+      ]
+    },
+    {
+      "id": "restful",
+      "kind": "augment",
+      "file": "restful.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-f29ef1dc-474f-45a1-a137-1ed03362f970.png",
+      "sourceBox": [
+        543,
+        356,
+        1086,
+        716
+      ]
+    },
+    {
+      "id": "moon",
+      "kind": "augment",
+      "file": "moon.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-f29ef1dc-474f-45a1-a137-1ed03362f970.png",
+      "sourceBox": [
+        0,
+        715,
+        543,
+        1057
+      ]
+    },
+    {
+      "id": "reserve",
+      "kind": "augment",
+      "file": "reserve.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-f29ef1dc-474f-45a1-a137-1ed03362f970.png",
+      "sourceBox": [
+        543,
+        716,
+        1086,
+        1080
+      ]
+    },
+    {
+      "id": "undying",
+      "kind": "augment",
+      "file": "undying.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-f29ef1dc-474f-45a1-a137-1ed03362f970.png",
+      "sourceBox": [
+        0,
+        1057,
+        543,
+        1448
+      ]
+    },
+    {
+      "id": "gambler",
+      "kind": "theme",
+      "file": "theme-gambler.webp",
+      "width": 64,
+      "height": 64,
+      "source": "exec-a2a436b2-c19c-4378-9285-bbfe36f5ae5a.png",
+      "sourceBox": [
+        0,
+        0,
+        543,
+        362
+      ]
+    },
+    {
+      "id": "critical",
+      "kind": "augment",
+      "file": "critical.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-a2a436b2-c19c-4378-9285-bbfe36f5ae5a.png",
+      "sourceBox": [
+        543,
+        0,
+        1086,
+        362
+      ]
+    },
+    {
+      "id": "risky-blade",
+      "kind": "augment",
+      "file": "risky-blade.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-a2a436b2-c19c-4378-9285-bbfe36f5ae5a.png",
+      "sourceBox": [
+        0,
+        362,
+        543,
+        724
+      ]
+    },
+    {
+      "id": "lucky-find",
+      "kind": "augment",
+      "file": "lucky-find.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-a2a436b2-c19c-4378-9285-bbfe36f5ae5a.png",
+      "sourceBox": [
+        543,
+        362,
+        1086,
+        724
+      ]
+    },
+    {
+      "id": "double-strike",
+      "kind": "augment",
+      "file": "double-strike.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-a2a436b2-c19c-4378-9285-bbfe36f5ae5a.png",
+      "sourceBox": [
+        0,
+        724,
+        543,
+        1086
+      ]
+    },
+    {
+      "id": "pity",
+      "kind": "augment",
+      "file": "pity.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-a2a436b2-c19c-4378-9285-bbfe36f5ae5a.png",
+      "sourceBox": [
+        543,
+        724,
+        1086,
+        1086
+      ]
+    },
+    {
+      "id": "destiny",
+      "kind": "augment",
+      "file": "destiny.webp",
+      "width": 192,
+      "height": 192,
+      "source": "exec-a2a436b2-c19c-4378-9285-bbfe36f5ae5a.png",
+      "sourceBox": [
+        0,
+        1086,
+        543,
+        1448
+      ]
+    }
+  ]
+}
