@@ -30,7 +30,7 @@ export const makeOrder=id=>{const d=orderById[id];return {id,...(d.param?{[d.par
 export const orderUnlocked=(s,id)=>Boolean(orderById[id]&&(!orderById[id].reward||s.unlockedOrders?.includes(id)));
 export function addOrder(s,id){if(s.phase!=='prepare'||!orderUnlocked(s,id)||s.orders.length>=orderCapacity(s)||s.orders.some(o=>o.id===id))return false;s.orders.push(makeOrder(id));s.mode='custom';return true;}
 export function editOrder(s,index,change){if(s.phase!=='prepare'||!s.orders[index])return false;const d=orderById[s.orders[index].id];if(change==='remove')s.orders.splice(index,1);else if(change==='up'||change==='down'){const to=index+(change==='up'?-1:1);if(to<0||to>=s.orders.length)return false;[s.orders[index],s.orders[to]]=[s.orders[to],s.orders[index]];}else {const n=Number(change);if(!d?.param||!Number.isFinite(n)||n<d.min||n>d.max||(n-d.min)%d.step!==0)return false;s.orders[index][d.param]=n;}s.mode='custom';return true;}
-export function activeOrders(s){return (s.orders||[]).filter(o=>orderUnlocked(s,o.id));}
+export function activeOrders(s){return (s.orders||[]).filter(o=>!o.disabled&&orderUnlocked(s,o.id));}
 const dist=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y),key=p=>`${p.x},${p.y}`,dirs=[[0,-1],[1,0],[0,1],[-1,0]];
 export function chooseOrder(s,ctx,emergencyOnly=false){
  if(s.orders.some(o=>o.cards))return emergencyOnly?null:chooseCardOrder(s,ctx);

@@ -12,7 +12,7 @@
 | 本編 | game-engine.js（入口engine.js） | 状態・地形配置・行動・戦闘・拾得・周回・保存正規化 |
 | 地形 | dungeon-layout.js、boss-arena.js、crypt-obstacles.js | 通常階ランダム・対称ボス部屋・墓石と到達可能性 |
 | 指示 | card-orders.js、card-placement.js、orders.js | カード判定・互換性・配置操作・旧指示互換 |
-| 所持 | card-access.js、card-catalog.js、card-inventory.js、retired-cards.js | 初期5枚・29カード・抽選・図鑑・旧カード移行 |
+| 所持 | card-access.js、card-catalog.js、card-inventory.js、retired-cards.js | 初期5枚・33カード・抽選・図鑑・旧カード移行 |
 | 成長・報酬 | progression.js、drop-system.js、reinforcements.js | EXP・二段階ドロップ・保存RNG・増援 |
 | オーグメント | augments.js、augment-view.js、augment-art.js | 19効果・3択・計算・共通画像付き表示・配信URL |
 | 画面統括 | app.js、index.html、style.css、screens.css | 入力・フェイズ表示・ダイアログ停止・描画・保存 |
@@ -102,3 +102,13 @@ scripts/update-assets.jsがroot JS・CSS・指定画像と音等の内容ハッ�
 2026-11-04 カメラ安定化：画面中央で主人公を追従し、通常のカメラ倍率は初期視界3相当で固定する。霧では2相当の近い表示にする。霧の視界・AI判定は従来のまま。マップ形状・階層による位置や倍率の変更は行わない。保存への影響なし。
 
 2026-11-04 カメラ仕様再確定：原因は感覚の記憶に応じた自動ズームアウト。通常倍率は初期視界3相当（縦11マス）で固定し、感覚の記憶を上げても画面内のマス・主人公の大きさを変えない。霧では視界2相当（縦9マス）へ寄る演出を維持する。視界・AI判定は従来の半径を使用し、強化後に画面外へ広がる範囲も判定対象。主人公中央追従と保存v16は維持。前項の「強化に伴う倍率調整を維持」「霧で倍率を変えない」は撤回。
+
+
+## 追加の指示・報酬制御
+
+- card-orders.js：任意disabledを検証・保持し、matchingCardTargetsで無効行を除外。行動・補助指示に共通適用。常設最終行は対象外。
+- game-engine.js：planHeroTurnの実行行だけexecutingRuleへ記録し、app.jsの思考表示で番号を付ける。描画専用値は予測署名から除外。追加4スキルは既存attackEnemy／ダメージ処理を共有、power倍率と一時防御を適用。
+- card-inventory.js：cardChestChoicesはアンカーと同種類・同階級で抽選。pickupでcardOfferを作り、chooseChestCardで候補1個だけ取得・消去。選択待ち中はtickを停止。予測は複製上で先頭候補を選択する。
+- tactics-ui.js：選択宝箱とプリセットのダイアログ。選択中は既存のdialog[open]判定で本編を停止する。プリセット名・カード文言はHTMLエスケープ。
+- order-presets.js：端末別10件の名前付き指示配列。読込時は最新の所有・枠を検証、失敗は変更なし。設定とは別のキーを使い周回を越えて保持する。
+- 追加の保存項目cardOffer／skillUses／guardHits／focusPowerは任意、既存v16では未使用扱い。disabledも任意boolean。配信コードを旧版へ戻す場合の前方互換は保証しない。

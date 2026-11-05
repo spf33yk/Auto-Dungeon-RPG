@@ -30,6 +30,11 @@ export const actionCards=[
  {id:'avoid-traps',name:'トラップを避ける',detail:'安全な経路を優先。迂回できないときは罠を踏んで進む（ダメージあり）。',modifier:true,reward:'avoid-traps'},
 ];
 export const skillCards=[
+ {id:'blood-cut',name:'捨て身の斬撃',detail:'最大HP10%を消費（HP1は残る）し隣接敵1体へ通常の2倍攻撃。背水・吸命と好相性。各階1回。',ability:'blood-cut'},
+ {id:'sweep',name:'円環の斬撃',detail:'隣接する全敵へ通常の80%で攻撃。会心・吸命・撃破時効果も適用。各階1回。',ability:'sweep'},
+ {id:'guard',name:'骨の守り',detail:'次の3回の被ダメージを半減（切上げ）。満月のHP維持を助ける。各階1回。',ability:'guard'},
+ {id:'focus',name:'静寂の構え',detail:'次の攻撃を1.25倍にし、無被弾の蓄積を5ターン進める。静寂の一閃を補助。各階1回。',ability:'focus'},
+
  {id:'mend',name:'再生の祈り',detail:'条件成立時に最大HP40%回復。各階1回。',ability:'mend'},
  {id:'warp',name:'窮地の転移',detail:'条件成立時にランダムな床へ転移。各階1回。',reward:'warp'},
 ];
@@ -60,11 +65,11 @@ export function legacyToCards(o){
  if(o.id==='retreat-low'){effect='retreat';add('hp-below',o.hp);}
  if(o.id.startsWith('hunt-')){target=o.id==='hunt-danger'?'danger-enemy':'enemy';effect='attack';add('range',o.range);if(o.id==='hunt-weak')add('one-hit');if(o.id==='hunt-injured')add('injured');}
  if(o.id==='warp'){effect='warp';kind='skill';add('hp-below',o.hp);}
- return createCardRule(target,conditions,kind,effect);
+ const converted=createCardRule(target,conditions,kind,effect);if(typeof o.disabled==='boolean')converted.disabled=o.disabled;return converted;
 }
 
 export function validCardRule(s,input,{requireOwned=true}={}){
- if(!input||typeof input.id!=='string')return false;
+ if(!input||typeof input.id!=='string'||input.disabled!==undefined&&typeof input.disabled!=='boolean')return false;
  const r=legacyToCards(input),effect=effectDefinition(r);
  if(!r.cards||!r.effect||!targetCards.some(t=>t.id===r.target)||!['skill','action'].includes(r.effect.kind)||!effect||Boolean(effect.enemy)!==(r.target!=='self'))return false;
  if(requireOwned&&!effectUnlocked(s,effect))return false;
@@ -109,7 +114,7 @@ function match(s,r,subject,destination,ctx){
  });
 }
 export function matchingCardTargets(s,input,ctx){
- const r=legacyToCards(input);if(!validCardRule(s,r))return [];
+ const r=legacyToCards(input);if(r.disabled||!validCardRule(s,r))return [];
  const list=r.target==='self'?destinations(s,r,ctx):subjects(s,r,ctx);
  return list.filter(p=>match(s,r,r.target==='self'?s.player:p,p,ctx));
 }
@@ -126,6 +131,7 @@ export function chooseCardOrder(s,ctx){
   if(r.effect.kind==='skill'){
    if(effect.id==='mend'&&!s.mended&&s.hp<ctx.stats(s).maxHp)return {...base,skill:'mend'};
    if(effect.id==='warp'&&!s.warped&&visible.length)return {...base,warp:true};
+   if(['blood-cut','sweep','guard','focus'].includes(effect.id)&&!(s.skillUses||[]).includes(effect.id)){const adjacent=visible.filter(e=>dist(s.player,e)===1);if((['blood-cut','sweep'].includes(effect.id)?adjacent.length>0:visible.length>0)&&(effect.id!=='blood-cut'||s.hp>1))return {...base,skill:effect.id};}
    continue;
   }
   if(effect.id==='attack'){

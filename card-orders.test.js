@@ -1,5 +1,6 @@
+import{chooseChestCard}from'./card-inventory.js';
 import{chooseAugment}from'./augments.js';
-function tick(s){baseTick(s);if(s.augmentOffer)chooseAugment(s,s.augmentOffer.choices[0]);}
+function tick(s){baseTick(s);if(s.cardOffer)chooseChestCard(s,s.cardOffer.choices[0]);if(s.augmentOffer)chooseAugment(s,s.augmentOffer.choices[0]);}
 import{withCardInventory}from'./test-support/card-fixture.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';

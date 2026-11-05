@@ -1,7 +1,8 @@
+import{chooseChestCard}from'./card-inventory.js';
 import{validCardRule}from'./engine.js';
 function beginExploration(s){let ok=baseBegin(s);if(s.augmentOffer){chooseAugment(s,s.augmentOffer.choices[0]);ok=baseBegin(s);}return ok;}
 import{chooseAugment}from'./augments.js';
-function tick(s){baseTick(s);if(s.augmentOffer)chooseAugment(s,s.augmentOffer.choices[0]);}
+function tick(s){baseTick(s);if(s.cardOffer)chooseChestCard(s,s.cardOffer.choices[0]);if(s.augmentOffer)chooseAugment(s,s.augmentOffer.choices[0]);}
 import{withCardInventory}from'./test-support/card-fixture.js';
 import {autoMapModel} from './map-view.js';
 import {memoryGroups} from './skill-tree.js';
@@ -52,7 +53,7 @@ test('JSON save restoration retains exact deterministic future and rejects legac
 test('complete playable runs reach the normal ending across multiple seeds without cheating stats',()=>{
  // With sixty-turn waves, use a legal stairs-first policy rather than farming every room.
  const priorities=['undying','swift-ascent','shell','haste','critical','desperate','ripen','patience','hunter','rush','pilgrim','surrounded','charge','leech','blood','double-strike','nova','thorns','moon'];
- const select=s=>{if(s.augmentOffer){const id=[...s.augmentOffer.choices].sort((a,b)=>priorities.indexOf(a)-priorities.indexOf(b))[0];chooseAugment(s,id);}};
+ const select=s=>{if(s.cardOffer)chooseChestCard(s,s.cardOffer.choices[0]);if(s.augmentOffer){const id=[...s.augmentOffer.choices].sort((a,b)=>priorities.indexOf(a)-priorities.indexOf(b))[0];chooseAugment(s,id);}};
  let wins=0;for(let seed=1;seed<=5;seed++){const s=newGame(seed);let n=0;while(!['dead','ending'].includes(s.phase)&&n++<25000){select(s);if(s.phase==='awakening'){baseBegin(s);select(s);baseBegin(s);}else if(s.phase==='cleared')ascend(s);else if(s.phase==='prepare'){equipBest(s);for(let t=0;t<6;t++)for(const k of ['guard','power','vitality'])upgrade(s,k);s.orders=[createCardRule()];if(s.ownedCards.includes('skill:mend'))s.orders.unshift(createCardRule('self',s.ownedCards.includes('condition:hp-below')?[{id:'hp-below',value:50}]:[],'skill','mend'));if(s.orders.length<orderCapacity(s))s.orders.push(createCardRule('self',[],'action','chests'));assert.ok(s.orders.every(r=>validCardRule(s,r)));baseBegin(s);}else baseTick(s);}assert.ok(['dead','ending'].includes(s.phase),`stalled seed ${seed}, floor ${s.floor}`);assert.ok(!s.debugUsed);if(s.phase==='ending'){wins++;assert.equal(s.profile.normalClears,1);assert.equal(s.memories.length,4);}}assert.ok(wins>=1,`${wins}/5 reached the ending`);
 });
 
