@@ -32,7 +32,7 @@ export const actionCards=[
 export const skillCards=[
  {id:'blood-cut',name:'捨て身の斬撃',detail:'最大HP10%を消費（HP1は残る）し隣接敵1体へ通常の2倍攻撃。背水・吸命と好相性。各階1回。',ability:'blood-cut'},
  {id:'sweep',name:'円環の斬撃',detail:'隣接する全敵へ通常の80%で攻撃。会心・吸命・撃破時効果も適用。各階1回。',ability:'sweep'},
- {id:'guard',name:'骨の守り',detail:'次の3回の被ダメージを半減（切上げ）。満月のHP維持を助ける。各階1回。',ability:'guard'},
+ {id:'guard',name:'骨の守り',detail:'次の3回の被ダメージを半減（切上げ）。守護テーマのHP維持を助ける。各階1回。',ability:'guard'},
  {id:'focus',name:'静寂の構え',detail:'次の攻撃を1.25倍にし、無被弾の蓄積を5ターン進める。静寂の一閃を補助。各階1回。',ability:'focus'},
 
  {id:'mend',name:'再生の祈り',detail:'条件成立時に最大HP40%回復。各階1回。',ability:'mend'},

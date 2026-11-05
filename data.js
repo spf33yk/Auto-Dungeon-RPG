@@ -36,7 +36,7 @@ export const skills = [
 export const rewardDefinitions=[
  {id:'blood-cut',kind:'skill',name:'捨て身の斬撃',detail:'最大HP10%を消費（HP1は残る）し隣接敵1体へ通常の2倍攻撃。背水・吸命と好相性。各階1回。'},
  {id:'sweep',kind:'skill',name:'円環の斬撃',detail:'隣接する全敵へ通常の80%で攻撃。会心・吸命・撃破時効果も適用。各階1回。'},
- {id:'guard',kind:'skill',name:'骨の守り',detail:'次の3回の被ダメージを半減（切上げ）。満月のHP維持を助ける。各階1回。'},
+ {id:'guard',kind:'skill',name:'骨の守り',detail:'次の3回の被ダメージを半減（切上げ）。守護テーマのHP維持を助ける。各階1回。'},
  {id:'focus',kind:'skill',name:'静寂の構え',detail:'次の攻撃を1.25倍にし、無被弾の蓄積を5ターン進める。静寂の一閃を補助。各階1回。'},
  {id:'mend',kind:'skill',name:'再生の祈り',detail:'条件カードに従い最大HP40%回復。各階1回、1ターン使用。宝箱のカードで取得し、準備でスキルカードを設定。'},
  {id:'critical',kind:'skill',name:'会心の記憶',detail:'オーグメントとして自動適用。各打撃で10%の確率で与ダメージ1.5倍（切上げ）。'},
