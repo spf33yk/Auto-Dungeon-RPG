@@ -107,7 +107,7 @@ scripts/update-assets.jsがroot JS・CSS・指定画像と音等の内容ハッ�
 ## 追加の指示・報酬制御
 
 - card-orders.js：任意disabledを検証・保持し、matchingCardTargetsで無効行を除外。行動・補助指示に共通適用。常設最終行は対象外。
-- game-engine.js：planHeroTurnの実行行だけexecutingRuleへ記録し、app.jsの思考表示で番号を付ける。描画専用値は予測署名から除外。追加4スキルは既存attackEnemy／ダメージ処理を共有、power倍率と一時防御を適用。
+- game-engine.js：planHeroTurnの実行行だけexecutingRuleへ記録し、app.jsがfield-log-host内のexecuting-orderへ番号と行動名を独立表示する。思考字幕へ番号を付けない（チャット直上への仮配置）。描画専用値は予測署名から除外。追加4スキルは既存attackEnemy／ダメージ処理を共有、power倍率と一時防御を適用。
 - card-inventory.js：cardChestChoicesはアンカーと同種類・同階級で抽選。pickupでcardOfferを作り、chooseChestCardで候補1個だけ取得・消去。選択待ち中はtickを停止。予測は複製上で先頭候補を選択する。
 - tactics-ui.js：選択宝箱とプリセットのダイアログ。選択中は既存のdialog[open]判定で本編を停止する。プリセット名・カード文言はHTMLエスケープ。
 - order-presets.js：端末別10件の名前付き指示配列。読込時は最新の所有・枠を検証、失敗は変更なし。設定とは別のキーを使い周回を越えて保持する。

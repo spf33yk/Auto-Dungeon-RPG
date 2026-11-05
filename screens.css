@@ -652,3 +652,6 @@ body.preparing #prepare-scene{clip-path:inset(5px)}
 .fitted-card-editor :is(.board-slot,.palette-card):has(.set-active){filter:drop-shadow(0 0 4px #bfa35a)}
 
 #prep-augments{display:block;max-height:none}.prep-augment-list{display:flex;align-items:center;gap:10px;overflow-x:auto;max-height:90px}.prep-augment-list>b{flex:none;white-space:nowrap}.set-bonus-ribbon{margin-top:4px;min-height:24px}.augment-codex-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.augment-card-content{overflow:auto;scrollbar-width:thin}#augment-dialog{max-height:88dvh;overflow:auto}.active-set-note{color:#f2d78d}
+
+/* Temporary placement above adventure chat; independent of thought subtitles and log expiry. */
+.executing-order{display:none}body.exploring .executing-order:not([hidden]){display:block;margin:0 0 6px;padding:4px 8px;border-left:2px solid #b7a56f;background:#0b100dcc;color:#e3d6b6;font-size:13px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px #000;pointer-events:none}@container(max-width:480px){body.exploring .executing-order:not([hidden]){font-size:11px}}
