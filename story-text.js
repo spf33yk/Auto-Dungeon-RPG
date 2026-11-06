@@ -9,7 +9,7 @@ export function displayStoryText(text,normalClears=0){
  text=legacyLogs[text]||text;
  const replacements=[['忘却の地下墓地','忘れられた地下墓所'],['苔むす水路','苔むした水路'],['灼熱の炉跡','燃え盛る炉跡'],['凍りついた聖堂','凍てついた聖堂'],['毒霧の庭園','毒の庭園'],['黎明への門','暁への門'],['階段の先で、誰かが剣を握っている。伝えたい想いがあるなら、その証を忘れずに。','階段の先から、かすかな風が吹いてくる。'],['骨は砕けても、旅の記録は残る。B30で装備と2枠の指示を確認しよう。','骨は砕けても、旅の記録は残る。再びB30から歩き始めよう。']];
  for(const [from,to] of replacements)text=text.replaceAll(from,to);
- return text;
+ return text.replace(/記憶のかけら|かけら|(?<!記憶の)欠片/g,'記憶の欠片').replace(/(?:記憶の欠片\s*)?(\d+)\s*pt\b/g,'記憶の欠片 $1個');
 }
 export const openingThought=normalClears=>normalClears>0?'息子に会いたい。今度こそ、あの手紙を届けよう。':'名前も、顔も、思い出せない。それでも、上へ行かなければ。';
 export const letterFloorThought=normalClears=>normalClears>0?'あの手紙を、息子に届けたい。':'何か大事なものを忘れている気がする';

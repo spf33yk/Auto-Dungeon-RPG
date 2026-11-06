@@ -48,6 +48,6 @@ export function migrateActorRules(s){
   }
  }
  s.actorRuleRevision=ACTOR_RULE_REVISION;
- s.logs?.unshift({text:'ターゲットを実行者指定へ移行。旧敵指定は自分へ置換し、HP等を参照する旧行は確認のため無効化。廃止ターゲットの補填 '+retired*5+'pt。',type:'good',turn:s.turn});
+ s.logs?.unshift({text:'ターゲットを実行者指定へ移行。旧敵指定は自分へ置換し、HP等を参照する旧行は確認のため無効化。廃止ターゲットの補填 記憶の欠片 '+retired*5+'個。',type:'good',turn:s.turn});
 }
 export function roomContains(r,p){return p.x>=r.x&&p.x<r.x+r.w&&p.y>=r.y&&p.y<r.y+r.h;}

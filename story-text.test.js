@@ -20,3 +20,6 @@ test('legacy fragments and hint names are converted for display without altering
  assert.equal(displayStoryText('B28 · 忘却の地下墓地',0),'B28 · 忘れられた地下墓所');
  assert.deepEqual([0,1,3,4,6,9].map(i=>zones[i].name),['忘れられた地下墓所','苔むした水路','燃え盛る炉跡','凍てついた聖堂','毒の庭園','暁への門']);
 });
+
+
+test('old currency labels display consistently without duplicating the canonical name',()=>{for(const [old,expected]of [['欠片＋5','記憶の欠片＋5'],['記憶のかけら＋3','記憶の欠片＋3'],['かけら＋2','記憶の欠片＋2'],['旧費用 8pt を返還','旧費用 記憶の欠片 8個 を返還'],['記憶の欠片 12 pt','記憶の欠片 12個'],['記憶の欠片＋5','記憶の欠片＋5']])assert.equal(displayStoryText(old),expected);});

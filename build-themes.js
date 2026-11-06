@@ -13,7 +13,7 @@ export const themedAugments=[
   "name": "収集の心得",
   "themeId": "explorer",
   "rarity": "NORMAL",
-  "detail": "床の記憶の欠片を拾うと、追加で欠片＋1。"
+  "detail": "床の記憶の欠片を拾うと、追加で記憶の欠片＋1。"
  },
  {
   "id": "swift-ascent",
@@ -41,7 +41,7 @@ export const themedAugments=[
   "name": "未知を拓く者",
   "themeId": "explorer",
   "rarity": "LEGENDARY",
-  "detail": "この階の全室を発見すると、最大HPの20%を回復・欠片＋8・この階のATK＋5。各階1回。"
+  "detail": "この階の全室を発見すると、最大HPの20%を回復・記憶の欠片＋8・この階のATK＋5。各階1回。"
  },
  {
   "id": "ripen",
@@ -188,7 +188,7 @@ export const themedAugments=[
   "name": "拾い物の運",
   "themeId": "gambler",
   "rarity": "NORMAL",
-  "detail": "床の欠片を拾うと、25%で追加の欠片＋4。"
+  "detail": "床の記憶の欠片を拾うと、25%で追加の記憶の欠片＋4。"
  },
  {
   "id": "double-strike",
@@ -209,7 +209,7 @@ export const themedAugments=[
   "name": "運命の賽",
   "themeId": "gambler",
   "rarity": "LEGENDARY",
-  "detail": "各階最初のカード宝箱で賭ける。50%で2枚取得、50%でカードの代わりに欠片＋10。"
+  "detail": "各階最初のカード宝箱で賭ける。50%で2枚取得、50%でカードの代わりに記憶の欠片＋10。"
  }
 ];
 export const themedSkills=[
@@ -400,7 +400,7 @@ export const themedSkills=[
   "name": "運試し",
   "themeId": "gambler",
   "rarity": "NORMAL",
-  "detail": "欠片3を消費。50%で欠片8を得る。失敗すると追加獲得なし。"
+  "detail": "記憶の欠片3を消費。50%で記憶の欠片8を得る。失敗すると追加獲得なし。"
  },
  {
   "id": "life-bet",
@@ -414,7 +414,7 @@ export const themedSkills=[
   "name": "宝探しの賭け",
   "themeId": "gambler",
   "rarity": "EPIC",
-  "detail": "発見済みの床の欠片へ向かい、50%で取得量3倍、50%で消失。"
+  "detail": "発見済みの床の記憶の欠片へ向かい、50%で取得量3倍、50%で消失。"
  },
  {
   "id": "all-in",

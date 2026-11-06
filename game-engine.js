@@ -228,7 +228,7 @@ export function normalizeSave(input){
   s.items=s.items.filter(i=>i.type!=='letter');
   if(s.floor===LETTER_FLOOR&&!s.letter){const p=s.grid.flatMap((row,y)=>row.map((c,x)=>({c,x,y}))).find(p=>p.c&&key(p)!==key(s.player)&&key(p)!==key(s.stairs)&&!s.enemies.some(e=>key(e)===key(p))&&!s.items.some(i=>key(i)===key(p)));if(p)s.items.push({x:p.x,y:p.y,type:'letter'});}
   s.nextHint=['cleared','dead','ending'].includes(s.phase)?nextStageHint(s):null;
-  s.version=6;log(s,'30階版へ移行。指示は全開放。旧指示スキル補償 '+refund+'pt を返還。','story');
+  s.version=6;log(s,'30階版へ移行。指示は全開放。旧指示スキル補償として記憶の欠片 '+refund+'個を返還。','story');
  }
  if(s.version<7){s.traps??=[];for(const t of s.traps)t.revealed=true;s.bossFloor=false;if(s.floor===1&&s.phase==='prepare')s.phase='awakening';s.version=7;}
  if(s.version<8){
@@ -240,14 +240,14 @@ export function normalizeSave(input){
   for(const g of [...Object.values(s.gear),...s.inventory,...s.items.filter(i=>i.type==='chest'&&i.gear).map(i=>i.gear)]){g.identified=true;g.cursed=false;g.boundKnown=false;}
   for(const id of s.profile.equipment)register(s.profile.knownEquipment,id);
   if(s.intent==='封じられた宝箱。絆の記憶が必要')s.intent='封じられた宝箱。まだ思い出せない';
-  s.version=8;log(s,'育成を整理。旧機能の習得費用 '+refund+'pt を返還。装備は鑑定済み・呪いなしへ移行。','story');
+  s.version=8;log(s,'育成を整理。旧機能の習得費用として記憶の欠片 '+refund+'個を返還。装備は鑑定済み・呪いなしへ移行。','story');
  }
  if(s.version<9){
   s.keys=0;s.abilities=[];s.unlockedOrders=[];s.rngState=s.seed>>>0;s.warped=false;s.profile.skills??=[];
   let refund=0;if(s.levels.tactics){refund+=8;}if(s.levels.mend){refund+=10;grantReward(s,'mend');}delete s.levels.tactics;delete s.levels.mend;s.shards+=refund;
   // Existing generated gear chests remain free legacy chests. New floors use locked reward chests.
   for(const i of s.items)if(i.type==='chest'&&i.gear)i.locked=false;
-  s.version=9;log(s,'ドロップ版へ移行。旧戦術・再生の費用 '+refund+'pt を返還。新しい階から特殊報酬宝箱が出現。','story');
+  s.version=9;log(s,'ドロップ版へ移行。旧戦術・再生の費用として記憶の欠片 '+refund+'個を返還。新しい階から特殊報酬宝箱が出現。','story');
  }
  if(s.version<10){
   s.levels.cardSlots=0;s.orders=s.orders.map(legacyToCards);
