@@ -124,6 +124,7 @@ function draw(){
  const scene=state.seed+':'+state.floor;if(damageScene!==scene){damagePopups=[];damageScene=scene;}
  if(heroScene!==scene||heroVisual.x!==state.player.x||heroVisual.y!==state.player.y){heroScene=scene;heroVisual.teleport(state.player.x,state.player.y,heroClock);}
  const heroFrame=heroVisual.sample(heroClock,{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
+ heroFrame.cycleElapsed=heroClock;
  const map=$('map');if(map.width!==1920||map.height!==1080){map.width=1920;map.height=1080;ctx.imageSmoothingEnabled=false;}
  ctx.fillStyle='#0c1416';ctx.fillRect(0,0,map.width,map.height);const theme=zoneFor(state);
  const progress=motion&&state.phase==='explore'?Math.min(1,(performance.now()-motion.time)/motion.duration):1,eased=1-Math.pow(1-progress,3);

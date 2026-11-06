@@ -1,0 +1,74 @@
+{
+  "approved_source": "output/imagegen/mukuro-march-native-r12",
+  "approved_by": "ユーザー：一旦こちらを正としてゲームに反映",
+  "files": [
+    {
+      "file": "frames/down-0.png",
+      "sha256": "78e040266588d2289d408be309e5cd964b14ed51fa9fa3e7b66f19ed167d46a8"
+    },
+    {
+      "file": "frames/down-1.png",
+      "sha256": "e0a034be52f22e09a2ba92f0657ce4a3357b2eb53464a2b84735a636674da74c"
+    },
+    {
+      "file": "frames/down-2.png",
+      "sha256": "18be923eb89476b6f068f8761166181ff4a5840a8003d8fdb8344832601d495b"
+    },
+    {
+      "file": "frames/down-3.png",
+      "sha256": "8c776a0301c4530abbc2f52f5606e3428d4860f1835e05a8f1bc353ec4449671"
+    },
+    {
+      "file": "frames/left-0.png",
+      "sha256": "9e3b881ed3f9046a0c9b399b7c7c8492c4f850640e31b5704a030d0e75b4cdc6"
+    },
+    {
+      "file": "frames/left-1.png",
+      "sha256": "b790aac2448487b28fed2fb987ed975199eaa1e8631ea09f6397befd3313c75c"
+    },
+    {
+      "file": "frames/left-2.png",
+      "sha256": "33d23d17c1973ff9ab662457b389dc3e86805fab20df9ff525c6194d97a2cc1c"
+    },
+    {
+      "file": "frames/left-3.png",
+      "sha256": "b75010ced36e236a3b0901b84b8d2b1e11743b3a9af2ff8ac8b1c0d93a080e0c"
+    },
+    {
+      "file": "frames/right-0.png",
+      "sha256": "a393ba7d912a08060be7c5417f5943d6a69280ca4efa2adedde97b05c9693b00"
+    },
+    {
+      "file": "frames/right-1.png",
+      "sha256": "ac08f25bfeedff053674078eea92a494996e3c8ea9d20067419857b59edff23b"
+    },
+    {
+      "file": "frames/right-2.png",
+      "sha256": "be6fe8d4488c23978e29360d3b71aceeccb8a034aec263ac1a94d25f80e22c6a"
+    },
+    {
+      "file": "frames/right-3.png",
+      "sha256": "a9c3c1d09d84ad1f7e83e18368736a460e242e04520bffff315890e41328fd52"
+    },
+    {
+      "file": "frames/up-0.png",
+      "sha256": "edc5d73190c076d1bed8bb2709afa76497bf3dfb090383a468b32f7ada2c3184"
+    },
+    {
+      "file": "frames/up-1.png",
+      "sha256": "0a606cc5f4ff1c01461bf8851fb9ec5396893eda399369a5ddf51d383ac66af5"
+    },
+    {
+      "file": "frames/up-2.png",
+      "sha256": "4ff47bc3e660660901b43bf87c7ab73117529d43882086800fb9538d8f2933ff"
+    },
+    {
+      "file": "frames/up-3.png",
+      "sha256": "8f402767e1c88fdc959cbd62f762615f186c0565b91df39c908c67ad81bf4a3f"
+    }
+  ],
+  "audit": "16コマ目視・8近傍成分各1・不要な分離ドットなし。原画修正なし。",
+  "character_pixels_modified_after_approval": false,
+  "sprites_sha256": "f9783a724e2043535bbc5be589bbc895de2f5e6a52d8fc6424041520423352f9",
+  "approval_date": "2026-11-06"
+}

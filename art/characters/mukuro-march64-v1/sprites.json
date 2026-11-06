@@ -1,0 +1,55 @@
+{
+  "format": "character-minimal-4dir",
+  "version": 1,
+  "id": "mukuro-march64-v1",
+  "image": "sprites.png?v=f9783a724e20",
+  "tileSize": 128,
+  "columns": 4,
+  "rows": 4,
+  "width": 512,
+  "height": 512,
+  "directions": [
+    "south",
+    "west",
+    "east",
+    "north"
+  ],
+  "anchor": [
+    64,
+    96
+  ],
+  "displayScale": 1.71875,
+  "portrait": [
+    16,
+    8,
+    96,
+    96
+  ],
+  "animation": {
+    "idleStepMs": 200,
+    "moveStepMs": 100,
+    "cycleDurationsMs": [
+      120,
+      280,
+      120,
+      280
+    ],
+    "attackMs": 300,
+    "deathMs": 780,
+    "lungePx": 16
+  },
+  "effect": {
+    "image": "slash.png?v=e13da716c7cb",
+    "tileSize": 64,
+    "columns": 3,
+    "rows": 4,
+    "width": 192,
+    "height": 256,
+    "anchor": [
+      32,
+      32
+    ],
+    "forwardPx": 34,
+    "heightPx": 32
+  }
+}

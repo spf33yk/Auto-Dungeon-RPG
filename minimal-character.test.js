@@ -10,12 +10,12 @@ const image={complete:true,naturalWidth:384,naturalHeight:512},effectImage={comp
 const sheet={definition:d,image,effectImage};
 const sample=(direction=0,state='idle',elapsed=0,progress=0,reducedMotion=false)=>({direction,state,elapsed,progress,reducedMotion,frame:0,x:2,y:3});
 function context(){return {globalAlpha:1,imageSmoothingEnabled:true,calls:[],stack:[],save(){this.stack.push(this.globalAlpha);},restore(){this.globalAlpha=this.stack.pop();},drawImage(...args){this.calls.push({args,alpha:this.globalAlpha});}};}
-test('active hero uses the approved12poses unchanged with valid minimal layout and versioned FX',()=>{
+test('legacy crouch keeps the approved12poses unchanged with valid minimal layout and versioned FX',()=>{
  assert.equal(validateCharacterSheet(d),d);
  const approved=JSON.parse(readFileSync(folder+'APPROVED_SOURCE.json'));
  const sha=createHash('sha256').update(readFileSync(folder+'sprites.png')).digest('hex');
  assert.equal(sha,approved.approved_sprites_sha256);
- assert.match(readFileSync('index.html','utf8'),/data-hero="\.\/art\/characters\/mukuro-minimal64-v1\/sprites.json\?v=/);
+ assert.match(readFileSync('index.html','utf8'),/data-hero="\.\/art\/characters\/mukuro-march64-v1\/sprites.json\?v=/);
  assert.equal(d.tileSize,128);assert.deepEqual(d.anchor,[64,96]);
  for(const change of [x=>x.animation.lungePx=Infinity,x=>x.animation.idleStepMs=0,x=>x.portrait=[120,0,96,96],x=>x.effect.width=64]){
   const bad=structuredClone(d);change(bad);assert.throws(()=>validateCharacterSheet(bad));

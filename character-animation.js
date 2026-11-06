@@ -11,12 +11,13 @@ export function validateCharacterSheet(d){
   for(const name of ['idle','move','attackA','attackB','death']){const clip=d.clips?.[name];if(!clip||!Array.isArray(clip.cells)||!clip.cells.length||clip.cells.length!==clip.durationsMs?.length||clip.cells.some(([x,y])=>!Number.isInteger(x)||!Number.isInteger(y)||x<0||x>=5||y<0||y>=4)||clip.durationsMs.some(ms=>!Number.isInteger(ms)||ms<=0))throw Error('Invalid character clip: '+name);}
   return d;
  }
- if(!['character-4dir','character-minimal-4dir'].includes(d?.format)||d.version!==1||!Number.isInteger(d.tileSize)||d.tileSize<8||d.tileSize>256||d.columns!==3||d.rows!==4||JSON.stringify(d.directions)!==JSON.stringify(CHARACTER_DIRECTIONS))throw Error('Invalid character-4dir layout');
- if(typeof d.id!=='string'||!d.id||typeof d.image!=='string'||!d.image||d.width!==d.tileSize*3||d.height!==d.tileSize*4)throw Error('Invalid character image definition');
+ if(!['character-4dir','character-minimal-4dir'].includes(d?.format)||d.version!==1||!Number.isInteger(d.tileSize)||d.tileSize<8||d.tileSize>256||!(d.columns===3||d.format==='character-minimal-4dir'&&d.columns===4)||d.rows!==4||JSON.stringify(d.directions)!==JSON.stringify(CHARACTER_DIRECTIONS))throw Error('Invalid character-4dir layout');
+ if(typeof d.id!=='string'||!d.id||typeof d.image!=='string'||!d.image||d.width!==d.tileSize*d.columns||d.height!==d.tileSize*4)throw Error('Invalid character image definition');
  if(!Array.isArray(d.anchor)||d.anchor.length!==2||d.anchor.some(v=>!Number.isFinite(v)||v<0||v>d.tileSize)||!Number.isFinite(d.displayScale)||d.displayScale<=0||d.displayScale>2)throw Error('Invalid character anchor or scale');
  if(d.format==='character-minimal-4dir'){
   const a=d.animation,e=d.effect,p=d.portrait;
   if(!a||['idleStepMs','moveStepMs','attackMs','deathMs'].some(k=>!Number.isFinite(a[k])||a[k]<=0)||!Number.isFinite(a.lungePx)||a.lungePx<0||a.lungePx>d.tileSize/4)throw Error('Invalid minimal character animation');
+  if(d.columns===4&&(!Array.isArray(a.cycleDurationsMs)||a.cycleDurationsMs.length!==4||a.cycleDurationsMs.some(ms=>!Number.isInteger(ms)||ms<=0)))throw Error('Invalid four-pose character cycle');
   if(!Array.isArray(p)||p.length!==4||p.some(v=>!Number.isInteger(v)||v<0)||!p[2]||!p[3]||p[0]+p[2]>d.tileSize||p[1]+p[3]>d.tileSize)throw Error('Invalid character portrait');
   if(!e||typeof e.image!=='string'||!e.image||!Number.isInteger(e.tileSize)||e.tileSize<8||e.tileSize>256||e.columns!==3||e.rows!==4||e.width!==e.tileSize*3||e.height!==e.tileSize*4||!Array.isArray(e.anchor)||e.anchor.length!==2||e.anchor.some(v=>!Number.isFinite(v)||v<0||v>e.tileSize)||!Number.isFinite(e.forwardPx)||e.forwardPx<0||!Number.isFinite(e.heightPx)||e.heightPx<0)throw Error('Invalid character effect');
  }
@@ -24,11 +25,20 @@ export function validateCharacterSheet(d){
 }
 export function characterFrame(d,direction,frame){
  if(d.format==='character-front-actions')return {x:frame*d.tileSize,y:0,width:d.tileSize,height:d.tileSize};
- if(!Number.isInteger(direction)||direction<0||direction>3||!Number.isInteger(frame)||frame<0||frame>2)throw Error('Invalid character direction/frame');
+ if(!Number.isInteger(direction)||direction<0||direction>3||!Number.isInteger(frame)||frame<0||frame>=d.columns)throw Error('Invalid character direction/frame');
  return {x:frame*d.tileSize,y:direction*d.tileSize,width:d.tileSize,height:d.tileSize};
 }
 export function characterActionFrame(d,sample){
  if(d.format==='character-minimal-4dir'){
+  if(d.columns===4){
+   let pose=0;
+   if(!sample.reducedMotion&&sample.state!=='dead'&&sample.state!=='attacking'){
+    const durations=d.animation.cycleDurationsMs,total=durations.reduce((a,b)=>a+b,0);
+    let elapsed=Math.max(0,sample.cycleElapsed??sample.elapsed)%total;
+    while(pose<durations.length-1&&elapsed>=durations[pose])elapsed-=durations[pose++];
+   }
+   return characterFrame(d,sample.direction,pose);
+  }
   const pose=sample.reducedMotion||sample.state==='dead'?0:sample.state==='attacking'?(sample.progress<.35?2:0):[0,1,2,1][Math.floor(sample.elapsed/(sample.state==='moving'?d.animation.moveStepMs:d.animation.idleStepMs))%4];
   return characterFrame(d,sample.direction,pose);
  }
