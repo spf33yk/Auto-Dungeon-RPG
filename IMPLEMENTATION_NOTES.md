@@ -1616,3 +1616,10 @@ GitHub ActionsのGame tests（run 42160397371）とpages build and deployment（
 ライティングを0d1ab583cb92aeecb5b85a2b78baad7c3dcc8730としてorigin/mainへpush。Pages run 42164293755はsuccessだったがGame tests run 42164294852は配信URL整合チェックでfailure、ゲームテストは未実行。並行する別作業の未コミットブラウザソースが、作業ツリーで生成したindex.htmlのハッシュに混入したことを確認した。今回コミットそのものをgit archiveで隔離展開し、そのソースだけを入力にupdate-assets.jsを再実行して修正する。並行作業中のindex.html／他ソースは上書きせず、修正済みの配信indexだけをGitへ登録する。これにより今回採用したソースと配信URLを一致させる。公開画面の走行確認は未実施。
 
 隔離した公開対象ソースで配信URL整合チェック成功、node --test全336件成功（作業ツリーの337件には別作業のテストが含まれていたため、今回の公開対象は336件）。この隔離検証を公開コミットの根拠とする。
+
+## 2026-11-06：ライティングのGitHub自動検証・公開処理成功
+
+配信URL修正コミット915f8b6をorigin/mainへpush成功。Game tests run 42164486182はcompleted/success、Pages run 42164485187もcompleted/successを確認した。これが今回確認した本編ソースコミットであり、後続の記録コミットは資料追記のみ。ローカル隔離検証は全336テスト成功。公開処理の完了と公開画面の実走行は区別し、公開画面の走行は未実施（同じ採用コードの無音ローカル画面と隔離自動テストを確認済みのため）。別作業中のソース・作業ツリーindex.html等は保持した。
+
+自動テスト：https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/42164486182
+Pages：https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/42164485187
