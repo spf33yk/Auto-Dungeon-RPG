@@ -22,7 +22,7 @@ import {entranceWallFrames} from './entrance-view.js';
 import {readUiSettings,saveUiSettings,resetJourneyTutorials} from './ui-settings.js';
 import {forecastExploration,forecastSignature} from './exploration-forecast.js';
 import {forecastSummary} from './forecast-view.js';
-import {MEMORY_SHADE,floorLight,drawSightWall,actorFootOffset,renderSightState} from './scene-lighting.js';
+import {MEMORY_SHADE,floorLight,drawSightWall,actorFootOffset,renderSightState,drawExplorationLight} from './scene-lighting.js';
 import {standingBox,sceneDrawOrder,drawFootShadow} from './scene-depth.js';
 import {drawProp,drawMapProp} from './prop-view.js';
 import {drawFloorTexture,drawRaisedWall} from './terrain-view.js';
@@ -167,6 +167,7 @@ function draw(){
  for(const e of state.enemies)if(visible(e.x,e.y))entity(e,e.type,{standing:true,layer:2,enemy:true});
  entity(state.player,'skeleton',{standing:true,layer:3,hero:true});
  for(const object of sceneDrawOrder(queue))object.draw();
+ drawExplorationLight(ctx,{position,visible,camera,width:map.width,height:map.height,size:CELL});
  for(const label of layoutEnemyLabels(state.enemies.filter(enemy=>visible(enemy.x,enemy.y)),CELL))drawEnemyLabel(ctx,label.enemy,CELL,label.offset);
  if(state.flash){ctx.fillStyle=state.flash.kind==='hurt'?'#e49a8c55':'#fff3b755';ctx.fillRect(state.flash.x*CELL,state.flash.y*CELL,CELL,CELL);}
  const now=performance.now();damagePopups=damagePopups.filter(p=>damageFrame(p,now).alive);

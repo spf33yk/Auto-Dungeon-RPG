@@ -20,3 +20,15 @@ test('different transparent sprite padding shares a fixed ground contact and sha
  const height=28.32,top=24-height;for(const rows of [['....','xxxx','....','....'],['xxxx','xxxx','xxxx','xxxx']]){const last=rows.map((r,i)=>r.includes('x')?i:-1).reduce((a,b)=>Math.max(a,b));assert.ok(Math.abs(top+actorFootOffset(rows,height)+(last+1)*height/rows.length-22)<1e-9);}
  const ellipses=[],ctx={save(){},restore(){},beginPath(){},fill(){},ellipse(...a){ellipses.push(a);}};drawFootShadow(ctx,2.5,4.25);assert.equal(ellipses[0][0],72);assert.equal(ellipses[0][1],124);
 });
+
+test('exploration cold lighting restores canvas state and clips its visibility aid to sight',async()=>{
+ const {drawExplorationLight,EXPLORATION_LIGHT}=await import('./scene-lighting.js');
+ const clips=[],fills=[],stops=[],stack=[];
+ const ctx={globalCompositeOperation:'source-over',globalAlpha:.8,fillStyle:'original',save(){stack.push([this.globalCompositeOperation,this.globalAlpha,this.fillStyle]);},restore(){[this.globalCompositeOperation,this.globalAlpha,this.fillStyle]=stack.pop();},beginPath(){},rect(...v){clips.push(v);},clip(){},createRadialGradient(){return {addColorStop(...v){stops.push(v);}};},fillRect(...v){fills.push({mode:this.globalCompositeOperation,alpha:this.globalAlpha,rect:v});}};
+ const position={x:4.25,y:3.5},before=JSON.stringify(position);
+ drawExplorationLight(ctx,{position,visible:(x,y)=>x===4&&y===3,camera:{left:100,top:200,scale:2},width:1920,height:1080});
+ assert.deepEqual(fills[0],{mode:'multiply',alpha:EXPLORATION_LIGHT.tintAlpha,rect:[100,200,960,540]});assert.deepEqual(clips,[[256,192,64,64]]);assert.equal(fills[1].mode,'screen');assert.equal(stops.at(-1)[1],'rgba(132,186,198,0)');assert.equal(ctx.globalCompositeOperation,'source-over');assert.equal(ctx.globalAlpha,.8);assert.equal(ctx.fillStyle,'original');assert.equal(stack.length,0);assert.equal(JSON.stringify(position),before);
+ // With no visible cells, the effect cannot emit any local light.
+ fills.length=0;clips.length=0;
+ drawExplorationLight(ctx,{position,visible:()=>false,camera:{left:0,top:0,scale:1},width:1920,height:1080});assert.equal(fills.length,1);assert.equal(fills[0].mode,'multiply');assert.deepEqual(clips,[]);
+});
