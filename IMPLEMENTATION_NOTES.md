@@ -1571,3 +1571,13 @@ index.htmlのdata-heroをmukuro-march64-v1へ変更。character-minimal-4dir/v1�
 ## 2026-11-06：承認した足踏み版のGitHub更新依頼
 
 ユーザーがGitHubへの更新を明示依頼。origin/mainをfetchし、基点17eb105とローカルHEADが一致（ahead/behind 0/0）することを確認。採用原画16枚・監査／承認記録・アトラス・4コマ再生実装・追加テスト・同期した仕様資料だけをコミット対象とする。別件の.gitignore変更と旧コンセプト3ファイルの削除、未採用試作・ローカル音源は含めない。直前の同一コードのローカル全332テスト成功・配信URL整合成功・本編と4方向描画の無音画面確認を根拠とする。公開版での再走行は今回も省略：表示内容は直前のローカル検証と同一で、配信固有の不具合を示す事象がない。GitHubリモート反映と公開画面の走行確認を区別し、公開版で動作確認済みとは扱わない。
+
+
+## 2026-11-06：GitHub反映・自動テスト・Pages公開処理の結果
+
+承認済み足踏み版をコミット521e6014c5dc8b192efb3322263da4cd3496de5b（Adopt approved four-direction march sprites）としてorigin/mainへpush成功。リモート追跡との差は0/0。初回はGit作成者未設定でコミットできず、その後のpushは自動承認レビューの利用上限エラーで実行されなかった。再開後、既存コミットと同じCodex/codex@localhostを今回のgitコマンドだけへ指定して解決し、グローバルGit設定は変更していない。
+
+GitHub ActionsのGame tests（run 42160397371）とpages build and deployment（run 42160396946）はいずれもcompleted/success。確認したソースコミットは521e601。ローカル全332テスト・配信URL整合・直前の無音本編画面確認と合わせて判定。公開処理の成功は確認したが、公開版の画面走行・全端末検証は今回は未実施。理由はローカル検証済みの同一コード／素材で、配信環境固有の不具合を示す事象がないため。別件の.gitignore変更と旧コンセプト3件の削除は未コミットのまま保持した。
+
+テスト：https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/42160397371
+公開処理：https://github.com/spf33yk/Auto-Dungeon-RPG/actions/runs/42160396946
