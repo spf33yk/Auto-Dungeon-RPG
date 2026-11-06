@@ -14,7 +14,6 @@ export const conditionCards=[
  {id:'enemy-count',name:'隣接敵が指定数以上',param:'value',value:2,min:1,max:4,step:1,unit:'体以上'},
  {id:'one-hit',name:'一撃で倒せる'},
  {id:'injured',name:'HPが半分以下'},
- {id:'loot-empty',name:'既知の回収品がない'},
 ];
 export const actionCards=[
  {id:'stairs',name:'階段を上る',detail:'他の目的より階段を優先。最終行にも変更できない階段指示を常設。'},
@@ -33,7 +32,7 @@ export const actionCards=[
 ];
 export const skillCards=themedSkills.map(c=>({...c,detail:c.detail+' 指示で発動。骸・敵で各階1回を共有。'+(enemySkillReasons[c.id]?' 敵には使用不可：'+enemySkillReasons[c.id]+'。':''),...(c.id==='warp'?{reward:'warp'}:{ability:c.id})}));
 for(const[kind,list]of Object.entries({target:targetCards,condition:conditionCards,action:actionCards,skill:skillCards}))for(const c of list){c.cardKind=kind;c.rarity=cardRarity(kind,c.id);if(!c.detail)c.detail=kind==='target'?'指示を実行する者を選びます。':c.param?`${c.name}を${c.min}〜${c.max}の範囲で指定します。`:'この条件が成立した場合だけ指示を実行します。';}
-const cardDetails={self:'骸を実行者にする。HP条件は骸のHPを参照する。',enemy:'視界内で最も近い通常敵1体を実行者にする。ボスは操作しない。HP条件はその敵のHPを参照し、攻撃は骸へ向かう。','weak-enemy':'視界内の敵を残りHPの低い順に対象にする。','danger-enemy':'視界内の敵を攻撃力の高い順に対象にする。','one-hit':'実行者の攻撃相手のHPと通常ダメージを比べ、一撃で倒せる場合だけ実行。',injured:'実行者の残りHPが最大HPの半分以下の場合に実行。','loot-empty':'発見済みで入手可能な品物が残っていない場合に実行。',visible:'目的地・対象が現在の視界に入っている場合に実行。'};
+const cardDetails={self:'骸を実行者にする。HP条件は骸のHPを参照する。',enemy:'視界内で最も近い通常敵1体を実行者にする。ボスは操作しない。HP条件はその敵のHPを参照し、攻撃は骸へ向かう。','weak-enemy':'視界内の敵を残りHPの低い順に対象にする。','danger-enemy':'視界内の敵を攻撃力の高い順に対象にする。','one-hit':'実行者の攻撃相手のHPと通常ダメージを比べ、一撃で倒せる場合だけ実行。',injured:'実行者の残りHPが最大HPの半分以下の場合に実行。',visible:'目的地・対象が現在の視界に入っている場合に実行。'};
 for(const c of [...targetCards,...conditionCards])if(cardDetails[c.id])c.detail=cardDetails[c.id];
 export const cardCapacity=s=>4+(s.levels.cardSlots||0);
 export const conditionById=Object.fromEntries(conditionCards.map(c=>[c.id,c]));
@@ -51,7 +50,7 @@ export function legacyToCards(o){
  const add=(id,value)=>conditions.push({id,...(value===undefined?{}:{value})});
  if(o.id==='stairs-low'){effect='stairs';add('hp-below',o.hp);}
  if(o.id==='stairs-after'){effect='stairs';add('turns',o.turns);}
- if(o.id==='stairs-after-loot'){effect='stairs';add('loot-empty');}
+ if(o.id==='stairs-after-loot'){effect='stairs';}
  if(o.id==='chests-near'){effect='chests';add('range',o.range);}
  if(o.id.startsWith('heal-')){effect='collect-herbs';add('hp-below',o.hp);}
  if(o.id==='explore-near'){effect='explore-all';add('range',o.range);}
@@ -59,7 +58,7 @@ export function legacyToCards(o){
  if(o.id==='retreat-low'){effect='retreat';add('hp-below',o.hp);}
  if(o.id.startsWith('hunt-')){target=o.id==='hunt-danger'?'danger-enemy':'enemy';effect='attack';add('range',o.range);if(o.id==='hunt-weak')add('one-hit');if(o.id==='hunt-injured')add('injured');}
  if(o.id==='warp'){effect='warp';kind='skill';add('hp-below',o.hp);}
- const converted=createCardRule(target,conditions,kind,effect);if(typeof o.disabled==='boolean')converted.disabled=o.disabled;return converted;
+ const converted=createCardRule(target,conditions,kind,effect);if(typeof o.disabled==='boolean')converted.disabled=o.disabled;if(o.id==='stairs-after-loot')converted.disabled=true;return converted;
 }
 
 export function validCardRule(s,input,{requireOwned=true}={}){
@@ -102,7 +101,6 @@ function match(s,r,subject,destination,ctx){
    case'enemy-count':return (enemy?(dist(subject,s.player)===1?1:0):s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)&&dist(s.player,e)===1).length)>=c.value;
    case'one-hit':return enemy?s.hp<=Math.max(1,subject.attack-ctx.stats(s).defense):destination.hp<=Math.max(1,ctx.stats(s).attack-destination.defense);
    case'injured':return hp<=maxHp*.5;
-   case'loot-empty':return !s.items.some(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i));
    default:return false;
   }
  });
