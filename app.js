@@ -22,7 +22,7 @@ import {entranceWallFrames} from './entrance-view.js';
 import {readUiSettings,saveUiSettings,resetJourneyTutorials} from './ui-settings.js';
 import {forecastExploration,forecastSignature} from './exploration-forecast.js';
 import {forecastSummary} from './forecast-view.js';
-import {MEMORY_SHADE,floorLight,drawSightWall,actorFootOffset,renderSightState,drawExplorationLight} from './scene-lighting.js';
+import {MEMORY_SHADE,floorLight,drawSightWall,actorFootOffset,renderSightState,drawExplorationLight,shadeSightFloor} from './scene-lighting.js';
 import {standingBox,sceneDrawOrder,drawFootShadow} from './scene-depth.js';
 import {drawProp,drawMapProp} from './prop-view.js';
 import {drawFloorTexture,drawRaisedWall} from './terrain-view.js';
@@ -130,6 +130,7 @@ function draw(){
  ctx.fillStyle='#0c1416';ctx.fillRect(0,0,map.width,map.height);const theme=zoneFor(state);
  const progress=motion&&state.phase==='explore'?Math.min(1,(performance.now()-motion.time)/motion.duration):1,eased=1-Math.pow(1-progress,3);
  const position=motion?{x:motion.from.x+(state.player.x-motion.from.x)*eased,y:motion.from.y+(state.player.y-motion.from.y)*eased}:state.player;
+ const appearance={position:state.player,radius:radius(state),size:CELL};
  const sightState=renderSightState(state,position),visible=(x,y)=>canSee(sightState,x,y);
  const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y),hop=moving?Math.sin(progress*Math.PI)*CELL/12:0;
  const camera=cameraFor(position,cameraSight(state),map.width,map.height);ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);
@@ -143,7 +144,8 @@ function draw(){
    if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+13+n*2,py+21,5,5);}
   }
   if(floor&&light==='memory'){ctx.fillStyle=MEMORY_SHADE;ctx.fillRect(px,py,CELL,CELL);}
-  if(!floor)queue.push({footY:(y+1)*CELL,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawSightWall(ctx,walls,wallDrawBox(surface,x,y,walls?.definition.rise??.75,CELL),CELL,visible,lit=>drawRaisedWall(ctx,lit,surface,x,y,state.seed,theme,CELL,entranceFrames.get(x+','+y)));ctx.restore();}});
+  if(floor&&light==='visible')shadeSightFloor(ctx,x,y,CELL,appearance);
+  if(!floor)queue.push({footY:(y+1)*CELL,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawSightWall(ctx,walls,wallDrawBox(surface,x,y,walls?.definition.rise??.75,CELL),CELL,visible,lit=>drawRaisedWall(ctx,lit,surface,x,y,state.seed,theme,CELL,entranceFrames.get(x+','+y)),appearance);ctx.restore();}});
  }
  const stair=state.stairs;
  for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;sprite(ctx,t.spent?'trap-spent':'trap',t.x*CELL,t.y*CELL);ctx.restore();}
@@ -167,7 +169,7 @@ function draw(){
  for(const e of state.enemies)if(visible(e.x,e.y))entity(e,e.type,{standing:true,layer:2,enemy:true});
  entity(state.player,'skeleton',{standing:true,layer:3,hero:true});
  for(const object of sceneDrawOrder(queue))object.draw();
- drawExplorationLight(ctx,{position,visible,camera,width:map.width,height:map.height,size:CELL});
+ drawExplorationLight(ctx,{position,visible,camera,width:map.width,height:map.height,size:CELL,appearance});
  for(const label of layoutEnemyLabels(state.enemies.filter(enemy=>visible(enemy.x,enemy.y)),CELL))drawEnemyLabel(ctx,label.enemy,CELL,label.offset);
  if(state.flash){ctx.fillStyle=state.flash.kind==='hurt'?'#e49a8c55':'#fff3b755';ctx.fillRect(state.flash.x*CELL,state.flash.y*CELL,CELL,CELL);}
  const now=performance.now();damagePopups=damagePopups.filter(p=>damageFrame(p,now).alive);
