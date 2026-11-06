@@ -13,7 +13,7 @@ const sourceFor=(type,id)=>`palette|${type}|${id}`;
 const parseSource=(value,host)=>{const p=value?.split('|')||[];if(p[0]==='row')return {origin:'row',row:Number(p[1])};if(p[0]==='palette'){let values={};try{values=JSON.parse(host?.dataset.conditionValues||'{}');}catch{}return {origin:'palette',type:p[1],id:p[2],...(values[p[2]]===undefined?{}:{value:values[p[2]]})};}if(p[0]==='slot')return {origin:'slot',row:Number(p[1]),slot:p[2],index:Number(p[3])};return null;};
 const parseDestination=value=>{const p=value?.split('|')||[];return {row:Number(p[0]),slot:p[1],index:Number(p[2]),insert:p[3]==='insert'};};
 function updateDropHints(host,s,value){
- const source=parseSource(value,host);host.querySelector('[data-drop-return]')?.classList.toggle('return-highlight',source?.origin==='slot');host.classList.toggle('placing-condition',Boolean(source&&(source.type==='condition'||source.slot==='condition')));host.querySelectorAll('[data-drop-slot]').forEach(el=>{const active=Boolean(source),valid=active&&source.origin!=='row'&&canPlaceCard(s,source,parseDestination(el.dataset.dropSlot));el.classList.toggle('valid-drop',valid);el.classList.toggle('invalid-drop',active&&source.origin!=='row'&&!valid);});
+ const source=parseSource(value,host);host.classList.toggle('placing-noncondition',Boolean(source&&source.origin!=='row'&&source.type!=='condition'&&source.slot!=='condition'));host.querySelector('[data-drop-return]')?.classList.toggle('return-highlight',source?.origin==='slot');host.classList.toggle('placing-condition',Boolean(source&&(source.type==='condition'||source.slot==='condition')));host.querySelectorAll('[data-drop-slot]').forEach(el=>{const active=Boolean(source)&&(el.dataset.dropSlot.split('|')[1]!=='condition'||source.type==='condition'||source.slot==='condition'),valid=active&&source.origin!=='row'&&canPlaceCard(s,source,parseDestination(el.dataset.dropSlot));el.classList.toggle('valid-drop',valid);el.classList.toggle('invalid-drop',active&&source.origin!=='row'&&!valid);});
  host.querySelectorAll('[data-drop-row]').forEach(el=>el.classList.toggle('row-drop-ready',source?.origin==='row'));
  const trash=host.querySelector('[data-drop-trash]');if(trash){const removable=source&&(source.origin==='row'||source.origin==='slot');trash.disabled=!removable;trash.classList.toggle('valid-drop',Boolean(removable));}
 }
@@ -98,33 +98,36 @@ export function handleCardClick(e,s){
 // Pointer Events support mouse, pen and touch. The same buttons remain clickable for keyboard/tap.
 export function installCardDragging(host,getState,onCommit){
  let pending=null,ghost=null;
+ const restorePaletteScroll=drag=>{if(!drag?.source.startsWith('palette|'))return;const nodes=host.querySelectorAll('.card-rules,.instruction-trays,.tray-scroll');drag.lockedScroll.forEach(({top,left},i)=>{if(nodes[i]){nodes[i].scrollTop=top;nodes[i].scrollLeft=left;}});};
+ const holdInstructionScroll=()=>{if(!pending?.dragging||!pending.source.startsWith('palette|'))return;for(const {el,top,left}of pending.lockedScroll){if(el.scrollTop!==top)el.scrollTop=top;if(el.scrollLeft!==left)el.scrollLeft=left;}};
+ host.addEventListener('scroll',holdInstructionScroll,true);
  const clearDrag=drag=>{host.querySelector('[data-drop-return]')?.classList.remove('return-ready');drag?.element?.classList.remove('is-drag-source');ghost?.remove();ghost=null;host.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));};
  host.addEventListener('pointerdown',e=>{
   if(e.target.closest('[data-insert-condition]'))return;
   const source=e.target.closest('[data-drag-source]');if(!source||source.disabled||getState().phase!=='prepare'||e.button!==0)return;
   e.preventDefault();const rowDrag=source.dataset.dragSource.startsWith('row|'),dragElement=rowDrag?source.closest('[data-card-row]'):source;
   const rect=dragElement.getBoundingClientRect(),style=getComputedStyle(dragElement),width=parseFloat(style.width),height=parseFloat(style.height);
-  pending={id:e.pointerId,source:source.dataset.dragSource,element:dragElement,rowDrag,scrollLeft:dragElement.querySelector('.tray-scroll')?.scrollLeft||0,style,width,height,scale:rect.width/width,grabX:e.clientX-rect.left,grabY:e.clientY-rect.top,x:e.clientX,y:e.clientY,dragging:false};
+  pending={lockedScroll:[...host.querySelectorAll('.card-rules,.instruction-trays,.tray-scroll')].map(el=>({el,top:el.scrollTop,left:el.scrollLeft})),id:e.pointerId,source:source.dataset.dragSource,element:dragElement,rowDrag,scrollLeft:dragElement.querySelector('.tray-scroll')?.scrollLeft||0,style,width,height,scale:rect.width/width,grabX:e.clientX-rect.left,grabY:e.clientY-rect.top,x:e.clientX,y:e.clientY,dragging:false};
  });
  document.addEventListener('pointermove',e=>{
   if(!pending||pending.id!==e.pointerId)return;
   if(!pending.dragging&&Math.hypot(e.clientX-pending.x,e.clientY-pending.y)>7){
-   pending.dragging=true;selectSource(host,pending.source,getState(),false);
+   pending.dragging=true;selectSource(host,pending.source,getState(),false);holdInstructionScroll();
    ghost=document.createElement('div');ghost.className='card-drag-ghost fitted-card-editor'+(pending.rowDrag?' dragging-row':'');ghost.setAttribute('aria-hidden','true');
    const clone=pending.element.cloneNode(true),cs=pending.style;clone.classList.remove('selected-card','valid-drop','invalid-drop','drop-hover');clone.classList.remove('row-drop-ready','is-drag-source');clone.querySelectorAll('.selected-card,.valid-drop,.invalid-drop,.drop-hover').forEach(el=>el.classList.remove('selected-card','valid-drop','invalid-drop','drop-hover'));clone.removeAttribute('id');clone.tabIndex=-1;
    Object.assign(clone.style,{width:pending.width+'px',height:pending.height+'px',minWidth:'0',minHeight:'0',margin:'0',flex:'none',opacity:'1',position:'relative',font:cs.font,color:cs.color,padding:cs.padding,border:cs.border,backgroundImage:cs.backgroundImage,backgroundSize:cs.backgroundSize,backgroundPosition:cs.backgroundPosition,pointerEvents:'none'});
    ghost.style.width=pending.width+'px';ghost.style.height=pending.height+'px';ghost.appendChild(clone);document.body.appendChild(ghost);if(pending.rowDrag){const viewport=clone.querySelector('.tray-scroll');if(viewport)viewport.scrollLeft=pending.scrollLeft;}pending.element.classList.add('is-drag-source');
   }
-  if(!pending.dragging)return;e.preventDefault();ghost.style.transform=`translate(${e.clientX-pending.grabX}px,${e.clientY-pending.grabY}px) scale(${pending.scale})`;
+  if(!pending.dragging)return;e.preventDefault();holdInstructionScroll();ghost.style.transform=`translate(${e.clientX-pending.grabX}px,${e.clientY-pending.grabY}px) scale(${pending.scale})`;
   const under=document.elementFromPoint(e.clientX,e.clientY),scroll=under?.closest('.card-library-list,.instruction-trays,.card-rules');if(scroll&&!pending.source.startsWith('palette|')){const r=scroll.getBoundingClientRect();if(e.clientY<r.top+24)scroll.scrollTop-=12;else if(e.clientY>r.bottom-24)scroll.scrollTop+=12;}
   host.querySelector('[data-drop-return]')?.classList.toggle('return-ready',pending.source.startsWith('slot|')||pending.source.startsWith('row|'));host.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));under?.closest('.valid-drop,[data-drop-row].row-drop-ready')?.classList.add('drop-hover');
   const horizontal=under?.closest('.tray-scroll');if(horizontal&&!pending.source.startsWith('palette|')){const r=horizontal.getBoundingClientRect();if(e.clientX<r.left+32)horizontal.scrollLeft-=16;else if(e.clientX>r.right-32)horizontal.scrollLeft+=16;}
  },{passive:false});
  document.addEventListener('pointerup',e=>{
   if(!pending||pending.id!==e.pointerId)return;const drag=pending;pending=null;if(!drag.dragging)return;
-  const target=document.elementFromPoint(e.clientX,e.clientY);clearDrag(drag);
+  e.preventDefault();const target=document.elementFromPoint(e.clientX,e.clientY);restorePaletteScroll(drag);clearDrag(drag);
   host.dataset.ignoreCardClick='1';setTimeout(()=>{delete host.dataset.ignoreCardClick;},0);
-  if(target&&host.contains(target)){applySource(host,getState(),drag.source,target);onCommit();}
+  if(target&&host.contains(target)){applySource(host,getState(),drag.source,target);onCommit();}restorePaletteScroll(drag);requestAnimationFrame(()=>restorePaletteScroll(drag));
  });
  const cancel=()=>{clearDrag(pending);pending=null;selectSource(host,'',getState());};
  document.addEventListener('pointercancel',cancel);window.addEventListener('blur',cancel);
