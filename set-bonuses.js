@@ -8,4 +8,4 @@ export function themeStars(s,theme){if(!theme||!s.augments?.some(id=>augTheme[id
 export function augmentStars(s,id){return themeStars(s,augTheme[id]);}
 export function augmentPower(s,id){return [1,1.25,1.5,2][augmentStars(s,id)];}
 export function augmentValue(s,id,n,integer=false){const v=n*augmentPower(s,id);return integer?Math.ceil(v-1e-9):v;}
-export function starText(s,id){const n=augmentStars(s,id);return n?'★'.repeat(n)+'☆'.repeat(3-n):'';}
+export function starText(s,id){const n=augmentStars(s,id);return '★'.repeat(n)+'☆'.repeat(3-n);}

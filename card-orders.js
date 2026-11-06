@@ -148,5 +148,6 @@ export function chooseCardOrder(s,ctx){
 export function describeCardRule(input){
  const r=legacyToCards(input),target=targetCards.find(t=>t.id===r.target)?.name||'？',effect=effectDefinition(r);
  const conditions=r.conditions.map(c=>{const d=conditionById[c.id];if(c.id==='visible')return (r.effect.id==='stairs'?'階段':r.effect.id==='chests'?'宝箱':r.effect.id==='avoid-traps'?'トラップ':r.target==='self'?'対象':'敵')+'が視界内';return d?.param?d.name.replace('指定%',String(c.value)+'%').replace('指定距離',String(c.value)+'マス').replace('指定ターン',String(c.value)+'ターン').replace('指定数',String(c.value)):d?.name||'？';});
+ if(effect?.id==='attack')return `${conditions.length?conditions.join('、かつ')+'のとき、':''}${target}を攻撃する。`;
  return `${target}は、${conditions.length?conditions.join('、かつ')+'のとき、':''}${effect?.name||'？'}${r.effect.kind==='skill'?'を発動する':''}。`;
 }

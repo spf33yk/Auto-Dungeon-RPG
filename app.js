@@ -1,3 +1,4 @@
+import{themedSkillById}from'./build-themes.js';
 import{installHoverHelp}from'./hover-help.js';
 import{THEME_IMAGES}from'./augment-art.js';
 import{skillSetActive}from'./set-bonuses.js';
@@ -18,7 +19,7 @@ import {skinById,nextPreparationSkin} from './preparation-skins.js';
 import {CharacterAnimation,loadCharacterSheet,drawCharacter,characterFrame,characterPresentation,characterAttackDuration} from './character-animation.js';
 import {loadWallTilesets,wallDrawBox} from './wall-tileset.js';
 import {entranceWallFrames} from './entrance-view.js';
-import {readUiSettings,saveUiSettings} from './ui-settings.js';
+import {readUiSettings,saveUiSettings,resetJourneyTutorials} from './ui-settings.js';
 import {forecastExploration,forecastSignature} from './exploration-forecast.js';
 import {forecastSummary} from './forecast-view.js';
 import {MEMORY_SHADE,floorLight,drawSightWall,actorFootOffset,renderSightState} from './scene-lighting.js';
@@ -33,16 +34,16 @@ import {renderCardEditor,handleCardClick,handleCardChange,installCardDragging} f
 import {autoMapModel,cameraFor,cameraSight,miniMapGeometry,drawMiniMap} from './map-view.js';
 import {thoughtText} from './thought-view.js';
 import {displayStoryText,openingThought,letterFloorThought} from './story-text.js';
-import {memoryGroups} from './skill-tree.js';
 import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment,debugTitleEnding} from './debug-tools.js';
 import {W,H,skills,newGame,abandonRun,stats,price,upgrade,equip,equipBest,tick,ascend,zoneFor,floorLabel,radius,canSee,gearById,gearStats,gearName,discard,locked,codexRows,sortedInventory,normalizeSave,orderDefinitions,orderById,orderCapacity,cardCapacity,orderUnlocked,addOrder,editOrder,beginExploration,equipment,LAST_FLOOR,LETTER_FLOOR,nextStageHint,rewardDefinitions,grantReward,experienceToNext,MAX_LEVEL,HP_PER_LEVEL,gainExperience} from './engine.js';
+const verificationMode=new URLSearchParams(location.search).get('verify')==='1';if(verificationMode)document.querySelectorAll('video,audio').forEach(el=>{el.muted=true;});
 const $=id=>document.getElementById(id), key='abyss-normal-v2';
 let uiStorage;try{uiStorage=localStorage;}catch{}let uiSettings=readUiSettings(uiStorage);document.documentElement.dataset.minimapSize=uiSettings.minimap;$('minimap-size').value=uiSettings.minimap;$('skip-opening').checked=uiSettings.skipOpening;
 function applyPreparationSkin(){const skin=skinById(uiSettings.preparationSkin);document.documentElement.dataset.preparationSkin=skin.id;for(const [key,value]of Object.entries(skin))if(['accent','edge','panel','text'].includes(key))document.documentElement.style.setProperty('--prep-theme-'+key,value);$('preparation-skin').textContent='スキン：'+skin.name;$('preparation-skin').title='次のスキン：'+nextPreparationSkin(skin.id).name;}
 applyPreparationSkin();$('preparation-skin').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,preparationSkin:nextPreparationSkin(uiSettings.preparationSkin).id});applyPreparationSkin();};
 const bgm=new SceneMusic($('scene-bgm'),$('scene-bgm').dataset);
 let endingPreview=false,endingPlayback=null,subtitlePreviewKind='first-end',musicAudition=null;
-function syncSceneMusic(){bgm.configure({enabled:uiSettings.bgmEnabled,volume:uiSettings.bgmVolume,hidden:document.hidden});bgm.select(musicAudition||(endingPreview?(subtitlePreviewKind.endsWith('intro')?'opening':'ending'):musicScene(state,{title:showingTitle,teaser:Boolean(pendingJourney)}))); }
+function syncSceneMusic(){bgm.configure({enabled:!verificationMode&&uiSettings.bgmEnabled,volume:uiSettings.bgmVolume,hidden:document.hidden});bgm.select(musicAudition||(endingPreview?(subtitlePreviewKind.endsWith('intro')?'opening':'ending'):musicScene(state,{title:showingTitle,teaser:Boolean(pendingJourney)}))); }
 function paintMusicOptions(){$('bgm-toggle').textContent='BGM：'+(uiSettings.bgmEnabled?'ON':'OFF');$('bgm-toggle').setAttribute('aria-pressed',String(uiSettings.bgmEnabled));$('bgm-volume').value=uiSettings.bgmVolume;$('bgm-volume-value').textContent=uiSettings.bgmVolume+'%';}
 paintMusicOptions();document.addEventListener('pointerdown',()=>bgm.unlock(),{capture:true});document.addEventListener('keydown',()=>bgm.unlock(),{capture:true});document.addEventListener('visibilitychange',()=>syncSceneMusic());
 function renderNormalEnding(){
@@ -90,7 +91,7 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 try{const data=JSON.parse(localStorage.getItem(key));state=normalizeSave(data);if(state){hasSave=true;paused=state.phase==='explore';if(data.version!==state.version){try{const backup=key+'-v'+data.version+'-before-ui';if(!localStorage.getItem(backup))localStorage.setItem(backup,JSON.stringify(data));}catch{}}}}catch{}
 state ||= newGame();
 function save(){try{localStorage.setItem(key,JSON.stringify(state,(name,value)=>name==='damageEvents'?undefined:value));hasSave=true;$('save-status').textContent='端末に保存済み';}catch{$('save-status').textContent='保存できません（空き容量・設定）';}}
-function tone(freq=330){if(!sound||volume===0)return;try{audio ||= new AudioContext();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(volume/100*.1,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.15);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+.15);}catch{}}
+function tone(freq=330){if(verificationMode||!sound||volume===0)return;try{audio ||= new AudioContext();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(volume/100*.1,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.15);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+.15);}catch{}}
 // Every sprite is an original pixel matrix. No external game assets are used.
 const sprites={
  skeleton:['....hhhhh...','...hbbbbb h..'.replace(' ',''),'...hbdbdbh..','...hbbbbbh..','....hdddh...','.....bb.....','...aabbaa...','..a.abb.a.s.','..a.abb.a.s.','....aaa...s.','....b.b.....','...bb.bb....'],
@@ -170,6 +171,7 @@ function draw(){
  if(state.flash){ctx.fillStyle=state.flash.kind==='hurt'?'#e49a8c55':'#fff3b755';ctx.fillRect(state.flash.x*CELL,state.flash.y*CELL,CELL,CELL);}
  const now=performance.now();damagePopups=damagePopups.filter(p=>damageFrame(p,now).alive);
  for(const p of damagePopups){if(!p.hero&&!visible(p.x,p.y))continue;const frame=damageFrame(p,now),at=p.hero?position:p;ctx.save();ctx.globalAlpha=frame.alpha;ctx.font='bold 29px monospace';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=6;ctx.strokeStyle='#200909';ctx.fillStyle='#ff5656';const x=at.x*CELL+CELL/2,y=at.y*CELL-19-frame.rise*CELL/24;ctx.strokeText(String(p.damage),x,y);ctx.fillText(String(p.damage),x,y);ctx.restore();}
+ if(skillPopup){const age=performance.now()-skillPopup.time;if(age<1000){ctx.save();ctx.globalAlpha=Math.min(1,(1000-age)/250);ctx.font='bold 18px serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#091013';ctx.fillStyle='#f4df9a';const sx=(position.x+.5)*CELL,sy=position.y*CELL-24-age*.018;ctx.strokeText(skillPopup.name,sx,sy);ctx.fillText(skillPopup.name,sx,sy);ctx.restore();}else skillPopup=null;}
  ctx.restore();if(state.gimmick?.id==='fog'){ctx.fillStyle='#a6bdc620';ctx.fillRect(0,0,map.width,map.height);}drawAutoMap();
 }
 
@@ -186,7 +188,8 @@ function renderThoughtSubtitle(){
 }
 function categoryTabs(type,selected,common=false){return `<div class="subtabs" role="group" aria-label="${type==='skill'?'スキル系統':'装備の種類'}">${(common?[['common','共通'],['weapon','武器'],['armor','防具']]:[['weapon','武器'],['armor','防具']]).map(([id,label])=>`<button data-category="${type}" data-value="${id}" aria-pressed="${selected===id}" class="${selected===id?'active':''}">${label}</button>`).join('')}</div>`;}
 function sortButtons(type,selected){return `<div class="sort-controls" role="group" aria-label="装備の並べ替え">${[['acquired','入手順'],['attack','攻撃力順'],['defense','防御力順']].map(([id,label])=>`<button data-sort="${type}" data-value="${id}" class="${selected===id?'active':''}" aria-pressed="${selected===id}">${label} ${id==='acquired'?'↑':'↓'}</button>`).join('')}</div>`;}
-function renderOrderEditor(host){renderCardEditor(host,state,orderCapacity(state));}
+function renderOrderEditor(host){renderCardEditor(host,state,orderCapacity(state));let shop=host.querySelector('.instruction-upgrades');if(!shop){shop=document.createElement('div');shop.className='instruction-upgrades';host.querySelector('.card-rules-heading')?.after(shop);}shop.innerHTML='<b>記憶の欠片 '+state.shards+' pt</b>'+skills.filter(k=>['commandSlots','cardSlots','scout'].includes(k.id)).map(k=>'<button data-upgrade="'+k.id+'" '+(state.phase!=='prepare'||state.floor===1||state.levels[k.id]>=k.max||state.shards<price(state,k)?'disabled':'')+' title="'+esc(k.detail)+'">'+k.name+' '+state.levels[k.id]+'/'+k.max+(state.levels[k.id]>=k.max?'（最大）':' · '+price(state,k)+'pt')+'</button>').join('');}
+
 function handleOrderClick(e,host){const result=handleCardClick(e,state);if(result!==null){if(result!=='selected'){delete host.dataset.orderSignature;render();}return true;}const b=e.target.closest('button');if(!b||b.disabled)return false;if(b.hasAttribute('data-rule-add')){const choice=host.querySelector('[data-order-choice]');if(choice&&addOrder(state,choice.value)){delete host.dataset.orderSignature;render();}return true;}if(b.dataset.ruleOp){editOrder(state,Number(b.dataset.index),b.dataset.ruleOp);delete host.dataset.orderSignature;render();return true;}return false;}
 function handleOrderChange(e){const result=handleCardChange(e,state);if(result!==null){if(result==='selected')return;delete $('live-orders').dataset.orderSignature;delete $('tab-content').dataset.orderSignature;render();return;}if(e.target.dataset.ruleValue!==undefined){editOrder(state,Number(e.target.dataset.ruleValue),e.target.value);delete $('live-orders').dataset.orderSignature;delete $('tab-content').dataset.orderSignature;render();}}
 const displayAttack=()=>state.gear.weapon.identified?stats(state).attack:'？';
@@ -199,7 +202,7 @@ $('debug-augment').innerHTML=augments.map(a=>'<option value="'+a.id+'">'+a.rarit
 $('augment-dialog').addEventListener('cancel',e=>e.preventDefault());
 $('augment-choices').onclick=e=>{const b=e.target.closest('[data-augment]');if(!b||!chooseAugment(state,b.dataset.augment))return;$('augment-dialog').close();if(state.phase==='awakening'){beginExploration(state);paused=false;last=performance.now();}render();};
 installHoverHelp();
-const renderTactics=installTacticsUi({getState:()=>state,onChange:()=>{delete $('tab-content').dataset.orderSignature;render();},storage:uiStorage});
+const renderTactics=installTacticsUi({getState:()=>state,onChange:()=>{delete $('tab-content').dataset.orderSignature;render();},storage:uiStorage,onResume:()=>{paused=false;dialogWasPaused=false;last=performance.now();}});
 function render(){
  const st=stats(state),prep=state.phase==='prepare',theme=zoneFor(state);renderScreens();if(!showingTitle)renderTactics();
  const runClears=Math.max(0,state.profile.normalClears-(state.phase==='ending'?1:0));
@@ -268,17 +271,8 @@ function itemCard(g,ref,equipped=false){
  const b=gearById[g.baseId],st=gearStats(g),target=typeof ref==='number'?'i'+ref:ref;
  return '<article class="item-card"><div><small>'+ (b.slot==='weapon'?'武器':'防具')+(equipped?' · 装備中':'')+'</small><strong><span class="equipment-icon '+b.slot+'" aria-hidden="true"></span>'+esc(gearName(g))+'</strong><small>攻撃 '+st.attack+' / 防御 '+st.defense+'</small></div>'+(!equipped?'<div class="item-actions"><button data-action="equip" data-ref="'+target+'">装備</button><button data-action="discard" data-ref="'+target+'" class="text-button">処分</button></div>':'')+'</article>';
 }
-function renderMemories(){
- const focused=document.activeElement?.dataset.upgrade;
- $('tab-content').innerHTML='<div class="memory-toolbar"><span>スキルツリー <b>'+state.shards+' pt</b></span><small>難易度：深淵</small></div><p class="section-caption">記憶の欠片で能力と指示枠を強化できます。指示行数と1行のカード数を別々に拡張できます。スキルカードは探索で取得します。</p>'+memoryGroups.map(group=>'<section class="memory-list-group"><h3>'+group.name+'</h3>'+group.ids.map(id=>{
-  const k=skills.find(k=>k.id===id),lv=state.levels[id],max=lv>=k.max,dep=skills.find(p=>p.id===k.requires),disabled=max||locked(state,k)||state.floor===1||state.phase!=='prepare'||state.shards<price(state,k);
-  const status=max?'習得済み':locked(state,k)?'未解放':state.floor===1?'B29から習得可能':state.shards<price(state,k)?'記憶の欠片不足':'習得する';
-  return '<article class="memory-list-card"><span class="skill-icon" aria-hidden="true">'+k.icon+'</span><div><strong>'+esc(k.name)+' <small>Lv.'+lv+' / '+k.max+'</small></strong><p>'+esc(k.detail)+'</p>'+(dep?'<small>前提：'+esc(dep.name)+' Lv.1</small>':'')+'</div><button data-upgrade="'+id+'" '+(disabled?'disabled':'')+' aria-label="'+esc(k.name+' '+status)+'">'+status+(max?'':' · '+price(state,k)+' pt')+'</button></article>';
- }).join('')+'</section>').join('');
- if(focused)document.querySelector('[data-upgrade="'+focused+'"]')?.focus({preventScroll:true});
-}
 function renderTab(){
- if(tab==='skills')renderMemories();
+ if(tab==='skills')tab='orders';
  if(tab==='status')$('tab-content').innerHTML=$('expedition-summary').innerHTML.replace(/\sid="[^"]*"/g,'');
  if(tab==='gear'){$('tab-content').innerHTML='<div class="equipment-toolbar"><button data-best-equipment class="primary">最強装備</button><small>武器は攻撃力、防具は防御力で選びます。</small></div>'+categoryTabs('gear',gearSlot)+sortButtons('gear',gearSorts[gearSlot])+'<p class="section-caption">本編の装備は鑑定済み・呪いなし。入手順は古い順、攻撃力順・防御力順は高い順です。</p>'+itemCard(state.gear[gearSlot],gearSlot,true)+`<h3>所持品</h3>`+(sortedInventory(state,gearSlot,gearSorts[gearSlot]).map(({g,index})=>itemCard(g,index)).join('')||'<p class="section-caption">この種類の装備はありません。</p>');}
  if(tab==='orders'){if(!$('tab-content').querySelector('.card-board'))delete $('tab-content').dataset.orderSignature;renderOrderEditor($('tab-content'));}
@@ -322,8 +316,9 @@ $('tab-content').onchange=handleOrderChange;
 $('codex-body').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.category)codexSlot=b.dataset.value;else if(b.dataset.sort)codexSorts[codexSlot]=b.dataset.value;renderCodex();};
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));renderTab();});
 document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{speed=Number(b.dataset.speed);document.querySelectorAll('[data-speed]').forEach(x=>x.classList.toggle('active',x===b));});
+let skillPopup=null;
 let memoryReveal=null;
-function reset(next=newGame(undefined,state.profile)){memoryReveal=null;state=next;resetHeroVisual();paused=false;motion=null;last=performance.now();render();}
+function reset(next=newGame(undefined,state.profile)){memoryReveal=null;state=next;resetHeroVisual();skillPopup=null;paused=false;dialogWasPaused=false;motion=null;last=performance.now();render();}
 function playJourneyTeaser(done){
  if(pendingJourney)return;
  if(uiSettings.skipOpening||openingVariant(state.profile)!=='mukuro'){done();return;}
@@ -337,7 +332,7 @@ $('teaser-skip').onclick=finishJourneyTeaser;
 $('teaser-retry').onclick=()=>{$('journey-teaser').play().then(()=>{$('teaser-retry').hidden=true;}).catch(()=>{});};
 document.addEventListener('keydown',e=>{if(pendingJourney&&e.key==='Escape')finishJourneyTeaser();});
 document.addEventListener('visibilitychange',()=>{if(!pendingJourney)return;const video=$('journey-teaser');if(document.hidden)video.pause();else video.play().catch(()=>{$('teaser-retry').hidden=false;});});
-function startNewJourney(){tryMobileDisplay();playJourneyTeaser(()=>{showingTitle=false;reset(hasSave?newGame(undefined,state.profile):state);});}
+function startNewJourney(){tryMobileDisplay();playJourneyTeaser(()=>{showingTitle=false;uiSettings=resetJourneyTutorials(uiStorage,uiSettings);reset(newGame(undefined,state.profile));});}
 
 $('title-new').onclick=()=>{if(hasSave)openDialog('new-game-dialog');else startNewJourney();};
 $('confirm-new-game').onclick=()=>{$('new-game-dialog').close();startNewJourney();};
@@ -388,7 +383,7 @@ $('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-d
  motion=null;save();render();debugStatus(message);});
 $('debug-import').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const loaded=normalizeSave(JSON.parse(await file.text()));if(!loaded)throw Error('このゲームの有効なセーブではありません');if(confirm('選択したセーブで現在の進行と図鑑・達成記録を置き換えますか？')){try{localStorage.setItem(key+'-before-import',JSON.stringify(state));}catch{}state=loaded;resetHeroVisual();motion=null;paused=true;dialogWasPaused=true;save();render();debugStatus('セーブを読み込みました');}}catch(err){debugStatus('読み込み失敗：'+err.message);}e.target.value='';};
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
-function loop(t){if(endingPlayback){if(!document.hidden&&!document.querySelector('dialog[open]'))endingPlayback.player.update(Math.max(0,Math.min(100,t-endingPlayback.last)));endingPlayback.last=t;renderNormalEnding();}if(memoryReveal){if(state.phase!=='awakening'||showingTitle)memoryReveal=null;else{if(!document.hidden&&!document.querySelector('dialog[open]'))memoryReveal.player.update(Math.max(0,Math.min(100,t-memoryReveal.last)));memoryReveal.last=t;$('awakening-text').textContent=memoryReveal.player.text;$('awakening-hint').textContent='';$('awakening-caret').hidden=!memoryReveal.player.full;}} const visualActive=!showingTitle&&!endingPreview&&(state.phase==='dead'||state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]'));if(visualActive&&lastVisualTime!==null)heroClock+=Math.max(0,Math.min(100,t-lastVisualTime));lastVisualTime=t;if(!showingTitle&&!endingPreview&&state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]')&&t-last>420/speed){last=t;const old=state.phase;motion={from:{...state.player},time:t,duration:reducedMotion.matches?1:Math.min(190,340/speed)/Math.min(1,speed)};tick(state);if(Math.abs(state.player.x-heroVisual.x)+Math.abs(state.player.y-heroVisual.y)>1)heroVisual.teleport(state.player.x,state.player.y,heroClock);else heroVisual.moveTo(state.player.x,state.player.y,heroClock,motion.duration);const heroHit=(state.damageEvents||[]).find(e=>!e.hero);if(heroHit)heroVisual.attackTo(heroHit.x,heroHit.y,heroClock,characterAttackDuration(heroSheet?.definition,speed));damagePopups=queueDamage(damagePopups,state.damageEvents||[],t);if(Math.abs(state.player.x-motion.from.x)+Math.abs(state.player.y-motion.from.y)>1)motion=null;if(state.flash?.kind==='hit')tone(180);if(state.phase!==old){motion=null;if(state.phase==='dead')heroVisual.die(heroClock);else heroVisual.teleport(state.player.x,state.player.y,heroClock);tone(state.phase==='dead'?110:660);}render();}if(state.phase==='explore'&&(!paused||motion&&t-motion.time<motion.duration+50)||damagePopups.length||state.phase==='dead'&&heroClock-heroVisual.since<800)draw();requestAnimationFrame(loop);}
+function loop(t){if(endingPlayback){if(!document.hidden&&!document.querySelector('dialog[open]'))endingPlayback.player.update(Math.max(0,Math.min(100,t-endingPlayback.last)));endingPlayback.last=t;renderNormalEnding();}if(memoryReveal){if(state.phase!=='awakening'||showingTitle)memoryReveal=null;else{if(!document.hidden&&!document.querySelector('dialog[open]'))memoryReveal.player.update(Math.max(0,Math.min(100,t-memoryReveal.last)));memoryReveal.last=t;$('awakening-text').textContent=memoryReveal.player.text;$('awakening-hint').textContent='';$('awakening-caret').hidden=!memoryReveal.player.full;}} const visualActive=!showingTitle&&!endingPreview&&(state.phase==='dead'||state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]'));if(visualActive&&lastVisualTime!==null)heroClock+=Math.max(0,Math.min(100,t-lastVisualTime));lastVisualTime=t;if(!showingTitle&&!endingPreview&&state.phase==='explore'&&!paused&&!document.querySelector('dialog[open]')&&t-last>420/speed){last=t;const old=state.phase;motion={from:{...state.player},time:t,duration:reducedMotion.matches?1:Math.min(190,340/speed)/Math.min(1,speed)};const usedBefore=new Set(state.themeState?.used||[]);tick(state);const usedSkill=state.themeState?.used?.find(id=>!usedBefore.has(id));if(usedSkill){skillPopup={name:themedSkillById[usedSkill]?.name||usedSkill,time:t};$('skill-announcement').textContent=skillPopup.name;}if(Math.abs(state.player.x-heroVisual.x)+Math.abs(state.player.y-heroVisual.y)>1)heroVisual.teleport(state.player.x,state.player.y,heroClock);else heroVisual.moveTo(state.player.x,state.player.y,heroClock,motion.duration);const heroHit=(state.damageEvents||[]).find(e=>!e.hero);if(heroHit)heroVisual.attackTo(heroHit.x,heroHit.y,heroClock,characterAttackDuration(heroSheet?.definition,speed));damagePopups=queueDamage(damagePopups,state.damageEvents||[],t);if(Math.abs(state.player.x-motion.from.x)+Math.abs(state.player.y-motion.from.y)>1)motion=null;if(state.flash?.kind==='hit')tone(180);if(state.phase!==old){motion=null;if(state.phase==='dead')heroVisual.die(heroClock);else heroVisual.teleport(state.player.x,state.player.y,heroClock);tone(state.phase==='dead'?110:660);}render();}if(state.phase==='explore'&&(!paused||motion&&t-motion.time<motion.duration+50)||damagePopups.length||skillPopup||state.phase==='dead'&&heroClock-heroVisual.since<800)draw();requestAnimationFrame(loop);}
 new ResizeObserver(()=>draw()).observe($('map'));
 const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap'),gap=wrap.clientWidth<=480?8:20;$('workspace').style.setProperty('--shared-hud-space',($('hud-top').offsetTop+$('hud-top').offsetHeight+gap)+'px');wrap.style.setProperty('--hud-top-space',($('hud-top').offsetHeight+gap)+'px');wrap.style.setProperty('--hud-bottom-space',($('hud-bottom').offsetHeight+gap)+'px');const available=wrap.clientHeight-$('hud-top').offsetHeight-$('hud-bottom').offsetHeight-$('field-log-host').offsetHeight-52;wrap.style.setProperty('--minimap-limit',Math.max(64,(available-22)*31/23)+'px');});hudObserver.observe($('hud-top'));hudObserver.observe($('hud-bottom'));hudObserver.observe($('field-log-host'));
 installCardDragging($('tab-content'),()=>state,()=>{delete $('tab-content').dataset.orderSignature;render();});
