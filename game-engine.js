@@ -1,3 +1,4 @@
+import{removeTacticsCard}from'./retired-tactics.js';
 import{migrateActorRules,ACTOR_RULE_REVISION,retiredTargets}from'./actor-rules.js';
 import{planEnemyCommand,executeEnemyCommand,enemyDefense,enemyAttack,mitigateControlledDamage,validEnemyControls}from'./enemy-control.js';
 import{chestCategoryChoices,validChestCategories}from'./card-inventory.js';
@@ -128,11 +129,11 @@ export function makeFloor(s){
 // Route planning traverses only discovered walkable tiles. No hidden enemy data.
 export function route(s,test,{start=s.player,known=true,blocked=new Set()}={}){const q=[start],prev=new Map([[key(start),null]]);for(let i=0;i<q.length;i++){const p=q[i];if(test(p)){if(i===0)return start;let end=p;while(prev.get(key(end))!==start)end=prev.get(key(end));return end;}for(const [dx,dy]of dirs){const n={x:p.x+dx,y:p.y+dy},k=key(n);if(s.grid[n.y]?.[n.x]&&(!known||s.seen[n.y][n.x])&&!prev.has(k)&&!blocked.has(k)){prev.set(k,p);q.push(n);}}}return null;}
 function modifierActive(s,id){return s.orders.some(o=>o.cards)?cardModifier(s,id,{canSee,stats,obtainable}):activeOrders(s).some(o=>o.id===id);}
-export function targetEnemy(s){const near=dirs.map(([dx,dy])=>s.enemies.find(e=>e.x===s.player.x+dx&&e.y===s.player.y+dy)).filter(Boolean);if(!modifierActive(s,'tactics'))return near[0];const atk=stats(s).attack;return near.sort((a,b)=>Number(b.hp<=Math.max(1,atk-b.defense))-Number(a.hp<=Math.max(1,atk-a.defense))||b.attack-a.attack)[0];}
+export function targetEnemy(s){return dirs.map(([dx,dy])=>s.enemies.find(e=>e.x===s.player.x+dx&&e.y===s.player.y+dy)).find(Boolean);}
 export function obtainable(s,i){return i.type==='letter'?Boolean(s.profile.normalClears&&!s.letter):true;}
 function receiveReward(s,id){const fresh=grantReward(s,id);log(s,fresh?'「'+rewardById[id].name+'」を手に入れた。'+(rewardById[id].kind==='order'?'次の準備で探索指示に設定できる。':'この旅で使用できる。'):'「'+rewardById[id].name+'」は取得済み。記憶の欠片 +5','good');}
 function pickup(s){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);
- if(item.type==='potion'||item.type==='herb'){const heal=Math.min(stats(s).maxHp-s.hp,item.type==='herb'?10:BALANCE.springHeal);s.hp+=heal;log(s,(item.type==='herb'?'薬草':'回復の泉')+'。HP +'+heal,'good');}
+ if(item.type==='potion'||item.type==='herb'){const heal=Math.min(stats(s).maxHp-s.hp,item.type==='herb'?10:BALANCE.springHeal);s.hp+=heal;log(s,(item.type==='herb'?'ハート':'回復の泉')+'。HP +'+heal,'good');}
  else if(item.type==='fragment'){const amount=3+(hasAugment(s,'scavenger')?av(s,'scavenger',1,true):0)+(hasAugment(s,'lucky-find')&&nextRandom(s)<Math.min(1,av(s,'lucky-find',.25))?4:0);s.shards+=amount;log(s,'床の記憶の欠片を拾った。＋'+amount,'good');}
  else if(item.type==='gear'){acquire(s,item.gear);log(s,gearName(item.gear)+'を拾った。','good');}
  else if(item.type==='reward')receiveReward(s,item.rewardId);
@@ -179,7 +180,7 @@ export function tick(s){
  const {enemy,action:plannedAction,ruleIndex}=planHeroTurn(s);let action=plannedAction;s.activeOrder=null;s.executingRule=ruleIndex===null?(!enemy&&action?.fixed?'fixed':null):ruleIndex;recordRule(s,ruleIndex);
  let controlledActor=null;
  if(action?.control){controlledActor=action.control.actor;executeEnemyCommand(s,action.control,{stats,route,lineOfSight,rng:()=>nextRandom(s),log,hitHero:controlledHitHero});s.intent='敵への指示：'+action.intent.replace('カード指示：','');if(s.hp<=0)return;}
- else if(enemy){const tactical=modifierActive(s,'tactics');s.intent=tactical?`戦術判断：${enemy.name}を優先`:`隣接する${enemy.name}と交戦`;if(tactical)log(s,s.intent);attackEnemy(s,enemy);}
+ else if(enemy){s.intent=`隣接する${enemy.name}と交戦`;attackEnemy(s,enemy);}
  else {
   if(action.warp&&!action.skill)action.skill='warp';
   if(action.skill){s.intent=action.intent;s.activeOrder='cards';executeThemedSkill(s,action.skill,{stats,canSee,route,reveal,attackEnemy,warpDestination,has:hasAugment,rng:()=>nextRandom(s),log,recordMend:n=>{recordBuild(s,'mendUses');recordBuild(s,'mendHealing',n);}});}
@@ -242,7 +243,7 @@ export function normalizeSave(input){
  }
  if(s.version<9){
   s.keys=0;s.abilities=[];s.unlockedOrders=[];s.rngState=s.seed>>>0;s.warped=false;s.profile.skills??=[];
-  let refund=0;if(s.levels.tactics){refund+=8;if(s.orders.length<orderCapacity(s)&&!s.orders.some(o=>o.id==='tactics'))s.orders.push(makeOrder('tactics'));}if(s.levels.mend){refund+=10;grantReward(s,'mend');}delete s.levels.tactics;delete s.levels.mend;s.shards+=refund;
+  let refund=0;if(s.levels.tactics){refund+=8;}if(s.levels.mend){refund+=10;grantReward(s,'mend');}delete s.levels.tactics;delete s.levels.mend;s.shards+=refund;
   // Existing generated gear chests remain free legacy chests. New floors use locked reward chests.
   for(const i of s.items)if(i.type==='chest'&&i.gear)i.locked=false;
   s.version=9;log(s,'ドロップ版へ移行。旧戦術・再生の費用 '+refund+'pt を返還。新しい階から特殊報酬宝箱が出現。','story');
@@ -263,9 +264,9 @@ export function normalizeSave(input){
  if(s.version<14){if(!s.profile||!Array.isArray(s.profile.skills)||!Array.isArray(s.abilities)||!Array.isArray(s.unlockedOrders)||!Array.isArray(s.orders)||s.orders.some(r=>!r||typeof r.id!=='string'||r.cards&&(!Array.isArray(r.conditions)||r.conditions.some(c=>!c||typeof c.id!=='string'))))return null;migrateCardInventory(s);s.version=14;log(s,'カード所持制へ移行。設定済みの指示と所持スキルを維持しました。','story');}
  if(s.version<15){s.augments=[];s.profile.augments=(s.profile.skills||[]).filter(id=>augmentById[id]);s.augmentOffer=null;s.augmentStarted=s.phase!=='awakening';s.trapTriggers=0;s.unharmedTurns=0;s.undyingUsed=false;s.firstAttackUsed=false;
  for(const id of ['critical','leech','double-strike'])if(s.abilities.includes(id)){s.augments.push(id);if(!s.profile.augments.includes(id))s.profile.augments.push(id);}
- s.orders=s.orders.filter(r=>!['critical','leech','double-strike'].includes(r.effect?.id));s.abilities=s.abilities.filter(id=>!['critical','leech','double-strike'].includes(id));s.ownedCards=s.ownedCards.filter(k=>cardByKey[k]||retiredTargets.includes(k));s.profile.cards=s.profile.cards.filter(k=>cardByKey[k]||retiredTargets.includes(k));
- for(const i of s.items)if(i.type==='chest'&&!i.gear&&i.cardId&&!cardByKey[i.cardId]&&!retiredTargets.includes(i.cardId)&&!retiredCollectionCards[i.cardId.replace('action:','')]){const id=i.cardId.replace('skill:','');delete i.cardId;if(augmentById[id])i.rewardId=id;else i.cardId=rollCardChest(s,()=>nextRandom(s));}else if(i.cardId==='action:letter'){i.cardId=rollCardChest(s,()=>nextRandom(s));}
+ s.orders=s.orders.filter(r=>!['critical','leech','double-strike'].includes(r.effect?.id));s.abilities=s.abilities.filter(id=>!['critical','leech','double-strike'].includes(id));s.ownedCards=s.ownedCards.filter(k=>cardByKey[k]||retiredTargets.includes(k)||k==='action:tactics');s.profile.cards=s.profile.cards.filter(k=>cardByKey[k]||retiredTargets.includes(k)||k==='action:tactics');
+ for(const i of s.items)if(i.type==='chest'&&!i.gear&&i.cardId&&!cardByKey[i.cardId]&&i.cardId!=='action:tactics'&&!retiredTargets.includes(i.cardId)&&!retiredCollectionCards[i.cardId.replace('action:','')]){const id=i.cardId.replace('skill:','');delete i.cardId;if(augmentById[id])i.rewardId=id;else i.cardId=rollCardChest(s,()=>nextRandom(s));}else if(i.cardId==='action:letter'){i.cardId=rollCardChest(s,()=>nextRandom(s));}
  if(s.profile.normalClears&&!s.ownedCards.includes('action:letter'))grantCard(s,'action:letter');s.version=15;log(s,'常時スキルをオーグメントへ移行。品物取得は装備取得へ変更しました。','story');}
- if(s.version<16){migrateRetiredCards(s,input);s.version=16;log(s,'一括取得カードを削除。旧指示は武器／薬草に置換し、防具／泉カードも補填しました。増援はこの階の経過ターンに従って出現します。','story');}
- normalizeThemes(s);if(s.actorRuleRevision!==undefined&&s.actorRuleRevision!==1)return null;if(!Array.isArray(s.orders)||!Array.isArray(s.items)||!Array.isArray(s.ownedCards)||!Array.isArray(s.profile?.cards))return null;if(s.actorRuleRevision===undefined)s.orders=s.orders.map(r=>r&&!r.cards&&typeof r.id==='string'?legacyToCards(r):r);migrateActorRules(s);if(!validateSave(s))return null;const t=themeState(s);for(const id of [...(s.skillUses||[]),...(s.mended?['mend']:[]),...(s.warped?['warp']:[])])if(!t.used.includes(id))t.used.push(id);reveal(s);return s;
+ if(s.version<16){migrateRetiredCards(s,input);s.version=16;log(s,'一括取得カードを削除。旧指示は武器／ハートに置換し、防具／泉カードも補填しました。増援はこの階の経過ターンに従って出現します。','story');}
+ removeTacticsCard(s);normalizeThemes(s);if(s.actorRuleRevision!==undefined&&s.actorRuleRevision!==1)return null;if(!Array.isArray(s.orders)||!Array.isArray(s.items)||!Array.isArray(s.ownedCards)||!Array.isArray(s.profile?.cards))return null;if(s.actorRuleRevision===undefined)s.orders=s.orders.map(r=>r&&!r.cards&&typeof r.id==='string'?legacyToCards(r):r);migrateActorRules(s);if(!validateSave(s))return null;const t=themeState(s);for(const id of [...(s.skillUses||[]),...(s.mended?['mend']:[]),...(s.warped?['warp']:[])])if(!t.used.includes(id))t.used.push(id);reveal(s);return s;
 }

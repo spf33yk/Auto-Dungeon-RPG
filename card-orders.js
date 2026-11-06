@@ -22,14 +22,13 @@ export const actionCards=[
  {id:'collect-weapons',name:'武器を取得',detail:'発見済みの武器へ向かう。'},
  {id:'collect-armor',name:'防具を取得',detail:'発見済みの防具へ向かう。'},
  {id:'collect-fragments',name:'記憶の欠片を取得',detail:'床の記憶の欠片へ向かう。'},
- {id:'collect-herbs',name:'薬草を取得',detail:'床の薬草へ向かう。'},
+ {id:'collect-herbs',name:'ハートを取得',detail:'床のハートへ向かう。'},
  {id:'collect-springs',name:'回復の泉へ向かう',detail:'発見済みの回復の泉へ向かう。'},
  {id:'letter',name:'手紙の箱を開ける',detail:'物語条件を満たす手紙の箱へ向かう。'},
  {id:'frontier',name:'全ての部屋を探索する',detail:'まだ入っていない部屋を優先し、全ての部屋へ入ったら完了。'},
  {id:'explore-all',name:'全てのマスを探索する',detail:'到達できる未踏の床を順に歩く。'},
  {id:'retreat',name:'相手から離れる',detail:'骸なら敵から、操作する敵なら骸から、距離を取れる隣の床へ移動。'},
  {id:'attack',name:'攻撃する',detail:'実行者の相手へ接近し、隣接したら攻撃。骸なら敵、敵なら骸を攻撃。',enemy:true},
- {id:'tactics',name:'戦術で敵を選ぶ',detail:'条件成立中、隣接敵の一撃撃破・攻撃力を優先。',modifier:true},
  {id:'avoid-traps',name:'トラップを避ける',detail:'安全な経路を優先。迂回できないときは罠を踏んで進む（ダメージあり）。',modifier:true,reward:'avoid-traps'},
 ];
 export const skillCards=themedSkills.map(c=>({...c,detail:c.detail+' 指示で発動。骸・敵で各階1回を共有。'+(enemySkillReasons[c.id]?' 敵には使用不可：'+enemySkillReasons[c.id]+'。':''),...(c.id==='warp'?{reward:'warp'}:{ability:c.id})}));
@@ -88,7 +87,7 @@ function destinations(s,r,ctx){
  const types={chests:['chest'],'collect-weapons':['gear'],'collect-armor':['gear'],'collect-fragments':['fragment'],'collect-herbs':['herb'],'collect-springs':['potion'],letter:['letter']};
  if(types[id])return s.items.filter(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i)&&types[id].includes(i.type)&&(id!=='collect-weapons'||gearById[i.gear?.baseId]?.slot==='weapon')&&(id!=='collect-armor'||gearById[i.gear?.baseId]?.slot==='armor'));
  if(id==='avoid-traps')return (s.traps||[]).filter(t=>t.revealed&&!t.spent&&(s.gimmick?.id==='traps'||s.seen[t.y][t.x]));
- if(['retreat','tactics','warp'].includes(id))return s.enemies.filter(e=>ctx.canSee(s,e.x,e.y));
+ if(['retreat','warp'].includes(id))return s.enemies.filter(e=>ctx.canSee(s,e.x,e.y));
  return [s.player];
 }
 function match(s,r,subject,destination,ctx){
@@ -126,7 +125,6 @@ export function chooseCardOrder(s,ctx){
   if(r.target==='enemy'){const command=ctx.enemyPlan?.(s,r,targets[0]);if(command)return {...base,control:command};continue;}
   if(r.effect.kind==='skill'){if(skillCanRun(s,effect.id,ctx))return {...base,skill:effect.id,exit:effect.id==='homeward'};continue;}
   if(effect.id==='attack'){
-   const adjacent=targets.filter(e=>dist(s.player,e)===1);if(adjacent.length&&cardModifier(s,'tactics',ctx)){const atk=ctx.stats(s).attack;adjacent.sort((a,b)=>Number(b.hp<=Math.max(1,atk-b.defense))-Number(a.hp<=Math.max(1,atk-a.defense))||b.attack-a.attack||dirs.findIndex(([dx,dy])=>s.player.x+dx===a.x&&s.player.y+dy===a.y)-dirs.findIndex(([dx,dy])=>s.player.x+dx===b.x&&s.player.y+dy===b.y));return {...base,enemy:adjacent[0]};}
    for(const e of targets){if(dist(s.player,e)===1)return {...base,enemy:e};const next=seek(p=>dist(p,e)===1);if(next)return {...base,next};}
   }else if(effect.id==='retreat'){
    if(s.retreatCooldown>0||!visible.length)continue;

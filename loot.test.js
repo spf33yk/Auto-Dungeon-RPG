@@ -37,7 +37,7 @@ test('duplicates give five fragments without stacking; new journeys keep only co
 });
 
 test('special orders must be obtained and configured in an available slot',()=>{
- const s=arena();s.phase='prepare';assert.equal(orderUnlocked(s,'tactics'),true);assert.equal(addOrder(s,'warp'),false);grantReward(s,'warp');assert.equal(addOrder(s,'warp'),true);assert.equal(s.orders.length,2);grantReward(s,'avoid-traps');assert.equal(addOrder(s,'avoid-traps'),false);
+ const s=arena();s.phase='prepare';assert.equal(orderUnlocked(s,'tactics'),false);assert.equal(addOrder(s,'warp'),false);grantReward(s,'warp');assert.equal(addOrder(s,'warp'),true);assert.equal(s.orders.length,2);grantReward(s,'avoid-traps');assert.equal(addOrder(s,'avoid-traps'),false);
 });
 
 test('warp is once per floor, preserves saved usage, and resets on the next floor',()=>{
@@ -67,7 +67,7 @@ test('saved RNG state produces identical future loot and combat after reload',()
 });
 
 test('v8 migration refunds retired purchases once and keeps legacy boxes and records',()=>{
- const old=arena();old.version=8;old.levels.tactics=1;old.levels.mend=1;old.items=[{x:7,y:5,type:'chest',gear:{baseId:'weapon-3',plus:0,identified:true,cursed:false}}];for(const k of ['abilities','unlockedOrders','keys','rngState','warped'])delete old[k];delete old.profile.skills;const before=JSON.stringify(old),s=normalizeSave(old);assert.equal(JSON.stringify(old),before);assert.equal(s.version,16);assert.equal(s.shards,old.shards+18);assert.ok(s.abilities.includes('mend'));assert.ok(s.orders.some(o=>o.effect.id==='tactics'));assert.equal(s.items[0].locked,undefined);assert.equal(s.levels.tactics,undefined);assert.equal(s.levels.mend,undefined);assert.deepEqual(normalizeSave(s),s);
+ const old=arena();old.version=8;old.levels.tactics=1;old.levels.mend=1;old.items=[{x:7,y:5,type:'chest',gear:{baseId:'weapon-3',plus:0,identified:true,cursed:false}}];for(const k of ['abilities','unlockedOrders','keys','rngState','warped'])delete old[k];delete old.profile.skills;const before=JSON.stringify(old),s=normalizeSave(old);assert.equal(JSON.stringify(old),before);assert.equal(s.version,16);assert.equal(s.shards,old.shards+18);assert.ok(s.abilities.includes('mend'));assert.ok(!s.orders.some(o=>o.effect.id==='tactics'));assert.equal(s.items[0].locked,undefined);assert.equal(s.levels.tactics,undefined);assert.equal(s.levels.mend,undefined);assert.deepEqual(normalizeSave(s),s);
  const full=structuredClone(old);full.orders=['stairs','collect-weapons'].map(makeOrder);assert.equal(normalizeSave(full).orders.length,2);
 });
 

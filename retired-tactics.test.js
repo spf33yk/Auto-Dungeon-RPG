@@ -1,0 +1,7 @@
+import test from'node:test';import assert from'node:assert/strict';
+import{newGame,normalizeSave,createCardRule}from'./engine.js';
+import{cardByKey}from'./card-catalog.js';
+import{readPresets,PRESET_KEY}from'./order-presets.js';
+test('retired tactics migrates inventory, rows, boxes and locked offers once',()=>{const s=newGame(9);s.phase='explore';s.ownedCards.push('action:tactics');s.profile.cards.push('action:tactics');s.orders=[createCardRule('self',[],'action','tactics'),createCardRule()];s.items.push({x:4,y:4,type:'chest',cardId:'action:tactics'});s.cardOffer={choices:['action:tactics'],categories:{action:['action:tactics']},selectedKind:'action',categoryLocked:true};const before=s.shards,r=normalizeSave(s);assert.ok(r);assert.equal(r.shards,before+5);assert.equal(r.orders.length,1);assert.ok(!r.ownedCards.includes('action:tactics'));assert.equal(r.items.at(-1).cardId,'action:avoid-traps');assert.deepEqual(r.cardOffer.choices,['action:avoid-traps']);assert.deepEqual(normalizeSave(r),r);assert.equal(cardByKey['action:tactics'],undefined);assert.equal(cardByKey['action:collect-herbs'].name,'ハートを取得');});
+test('preset keeps other rows when retiring tactics',()=>{const p={name:'old',actorRuleRevision:1,orders:[createCardRule('self',[],'action','tactics'),createCardRule()]};const result=readPresets({getItem:k=>k===PRESET_KEY?JSON.stringify([p]):null});assert.equal(result.length,1);assert.equal(result[0].orders.length,1);});
+

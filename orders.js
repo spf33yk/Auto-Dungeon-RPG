@@ -1,7 +1,6 @@
 import {chooseCardOrder} from './card-orders.js';
 // Ordered, capacity-limited rules. Only discovered terrain and visible enemies are considered.
 export const orderDefinitions=[
- {id:'tactics',name:'戦術判断の記憶',detail:'隣接敵は一撃で倒せる敵を優先し、次に攻撃力で選ぶ。設定中だけ有効。'},
  {id:'warp',reward:true,name:'窮地の転移',detail:'指定HP以下で敵が見えると、ランダムな床へ転移。各階1回。',param:'hp',value:25,min:10,max:50,step:5,unit:'%以下'},
  {id:'avoid-traps',reward:true,name:'罠を見切る',detail:'既知の罠を避ける。迂回できない場合は作動する。'},
  {id:'stairs',name:'階段を発見したら向かう',detail:'既知の階段へ直行する。'},
@@ -11,8 +10,8 @@ export const orderDefinitions=[
  {id:'collect-weapons',name:'武器を取得',detail:'発見した武器のみ回収する。',},
  {id:'chests',name:'宝箱を優先して回収',detail:'通常宝箱だけを集める。中身は開封まで不明。',},
  {id:'chests-near',name:'近くの宝箱だけ回収',detail:'指定距離内の通常宝箱へ向かう。',param:'range',value:6,min:1,max:20,step:1,unit:'マス以内'},
- {id:'heal-critical',name:'瀕死時に泉へ向かう',detail:'指定HP以下で、発見済みの泉や薬草へ向かう。',param:'hp',value:35,min:10,max:90,step:5,unit:'%以下'},
- {id:'heal-wounded',name:'負傷したら泉へ向かう',detail:'泉や薬草で回復を早めに使うHP基準を指定する。',param:'hp',value:70,min:10,max:95,step:5,unit:'%以下'},
+ {id:'heal-critical',name:'瀕死時に泉へ向かう',detail:'指定HP以下で、発見済みの泉やハートへ向かう。',param:'hp',value:35,min:10,max:90,step:5,unit:'%以下'},
+ {id:'heal-wounded',name:'負傷したら泉へ向かう',detail:'泉やハートで回復を早めに使うHP基準を指定する。',param:'hp',value:70,min:10,max:95,step:5,unit:'%以下'},
  {id:'letter',name:'手紙の宝箱を優先',detail:'開封条件を満たす手紙の宝箱へ向かう。',},
  {id:'frontier',name:'視界の先を優先して調べる',detail:'未発見の地形に接する既知かつ未踏の床へ進む。'},
  {id:'explore-near',name:'近くの未踏床を調べる',detail:'指定距離内の、まだ踏んでいない床へ。',param:'range',value:6,min:1,max:20,step:1,unit:'マス以内'},
