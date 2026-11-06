@@ -11,4 +11,4 @@ export function augmentSetHint(a,s,{preview=false}={}){if(!s||!a.themeId)return 
 export function skillTitle(c,s){return (c?.detail||c?.name||'')+(c?.themeId?' ／ '+themeById[c.themeId].name+'：'+(skillSetActive(s,c.id)?'セット発動中。':'同テーマの記憶を強化する配置。')+SET_EFFECTS[c.themeId]:'');}
 
 export function skillSetEffect(k){return '同テーマのオーグメント強化に寄与（スキル性能は変化なし）';}
-export function augmentHoverText(a,s){return augmentName(a,s)+'\n'+augmentStrength(a,s)+'\nセット効果：'+SET_EFFECTS[a.themeId]+(s?'\n配置中：'+(setBonusRows(s).find(t=>t.id===a.themeId)?.skills.map(k=>k.name+'：'+skillSetEffect(k)).join(' ／ ')||'対象スキルなし'):'');}
+export function augmentHoverText(a,s){return augmentName(a,s)+'\n所持で自動適用。指示への配置は不要。\n'+augmentStrength(a,s)+'\nセット効果：'+SET_EFFECTS[a.themeId]+(s?'\n配置中：'+(setBonusRows(s).find(t=>t.id===a.themeId)?.skills.map(k=>k.name+'：'+skillSetEffect(k)).join(' ／ ')||'対象スキルなし'):'');}

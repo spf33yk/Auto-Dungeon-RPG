@@ -34,7 +34,7 @@ export const skills = [
 ];
 
 // Provisional loot balance. Each enemy owns a rate and an explicit weighted item pool.
-export const rewardDefinitions=[...themedSkills.map(s=>({id:s.id,name:s.name,themeId:s.themeId,kind:s.id==='warp'?'order':'skill',detail:s.detail+' 各階1回。'})),{id:'critical',kind:'skill',name:'会心の記憶',detail:'旧保存互換のオーグメント。'},{id:'leech',kind:'skill',name:'吸命の記憶',detail:'旧保存互換のオーグメント。'},{id:'double-strike',kind:'skill',name:'追撃の記憶',detail:'旧保存互換のオーグメント。'},{id:'avoid-traps',kind:'order',name:'トラップを避ける',detail:'安全な経路を優先し、迂回できない時は罠を通過。'}];
+export const rewardDefinitions=[...themedSkills.map(s=>({id:s.id,name:s.name,themeId:s.themeId,kind:s.id==='warp'?'order':'skill',detail:s.detail+' 各階1回。'})),{id:'critical',legacy:true,kind:'skill',name:'会心の記憶',detail:'旧保存互換のオーグメント。'},{id:'leech',legacy:true,kind:'skill',name:'吸命の記憶',detail:'旧保存互換のオーグメント。'},{id:'double-strike',legacy:true,kind:'skill',name:'追撃の記憶',detail:'旧保存互換のオーグメント。'},{id:'avoid-traps',kind:'order',name:'トラップを避ける',detail:'安全な経路を優先し、迂回できない時は罠を通過。'}];
 export const rewardById=Object.fromEntries(rewardDefinitions.map(r=>[r.id,r]));
 export const chestRewards=[{id:'critical',weight:30},{id:'leech',weight:25},{id:'double-strike',weight:20},{id:'warp',weight:15},{id:'avoid-traps',weight:10}];
 export const enemyDropTables=Object.fromEntries(monsters.map(m=>{

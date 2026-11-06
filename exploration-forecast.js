@@ -1,7 +1,7 @@
 import {tick,stats,chooseChestCard} from './engine.js';import {thoughtText} from './thought-view.js';
 import {describeCardRule} from './card-orders.js';
 // Rendering/logging must not invalidate an in-flight forecast of the same expedition.
-export const forecastSignature=(s,samples)=>JSON.stringify([s,samples],(key,value)=>['logs','damageEvents','flash','intent','activeOrder','buildReport','lastBuildReport','executingRule'].includes(key)?undefined:value);
+export const forecastSignature=(s,samples)=>JSON.stringify([s,samples],(key,value)=>['logs','damageEvents','flash','intent','activeOrder','buildReport','lastBuildReport','executingRule','actorSkillEvent'].includes(key)?undefined:value);
 export function forecastWarnings(s){const effects=s.orders.filter(o=>!o.disabled).map(o=>o.effect?.id);const warnings=['宝箱報酬は候補の先頭を選んだ場合の予測です。'];if(!effects.some(id=>['mend','collect-herbs','collect-springs'].includes(id)))warnings.push('回復の指示がありません。');if(!s.orders.some(o=>!o.disabled&&o.conditions?.some(c=>c.id==='hp-below')&&['stairs','retreat','warp'].includes(o.effect?.id)))warnings.push('HP低下時の撤退・帰還指示がありません。');return warnings;}
 export function summarizeForecast(runs){const cleared=runs.filter(r=>r.phase==='cleared'),turns=cleared.map(r=>r.turns).sort((a,b)=>a-b);return {samples:runs.length,clearRate:Math.round(cleared.length/runs.length*100),turns:turns.length?turns[Math.floor(turns.length/2)]:null,remainingHp:Math.round(runs.reduce((a,r)=>a+r.hpRatio,0)/runs.length*100),incomplete:runs.filter(r=>r.phase==='explore').length,examples:runs[0]?.examples||[]};}
 // Real simulation on disposable clones; never advances the real game, save, profile or RNG.

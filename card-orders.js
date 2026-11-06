@@ -1,9 +1,10 @@
+import{actorCanUse,roomContains,enemySkillReasons}from'./actor-rules.js';
 import{themedSkills}from'./build-themes.js';
 import{skillCanRun}from'./theme-runtime.js';
 import{gearById}from'./data.js';
 // Card data and evaluation are shared by the editor, AI and save migration.
 import{cardOwned,cardRarity}from'./card-access.js';
-export const targetCards=[{id:'self',name:'自分'},{id:'enemy',name:'近くの敵'},{id:'weak-enemy',name:'HPの低い敵'},{id:'danger-enemy',name:'攻撃力の高い敵'}];
+export const targetCards=[{id:'self',name:'自分'},{id:'enemy',name:'敵'}];
 export const conditionCards=[
  {id:'hp-below',name:'HPが指定%以下',param:'value',value:50,min:5,max:100,step:5,unit:'%以下'},
  {id:'hp-above',name:'HPが指定%以上',param:'value',value:50,min:5,max:100,step:5,unit:'%以上'},
@@ -12,7 +13,7 @@ export const conditionCards=[
  {id:'turns',name:'指定ターン経過',param:'value',value:150,min:20,max:1000,step:10,unit:'ターン以上'},
  {id:'enemy-count',name:'隣接敵が指定数以上',param:'value',value:2,min:1,max:4,step:1,unit:'体以上'},
  {id:'one-hit',name:'一撃で倒せる'},
- {id:'injured',name:'敵のHPが半分以下'},
+ {id:'injured',name:'HPが半分以下'},
  {id:'loot-empty',name:'既知の回収品がない'},
 ];
 export const actionCards=[
@@ -24,16 +25,16 @@ export const actionCards=[
  {id:'collect-herbs',name:'薬草を取得',detail:'床の薬草へ向かう。'},
  {id:'collect-springs',name:'回復の泉へ向かう',detail:'発見済みの回復の泉へ向かう。'},
  {id:'letter',name:'手紙の箱を開ける',detail:'物語条件を満たす手紙の箱へ向かう。'},
- {id:'frontier',name:'視界の先を調べる',detail:'未発見の地形に接する未踏の床を調べる。'},
- {id:'explore-all',name:'未踏の床を調べる',detail:'まだ歩いていない床を調べる。'},
- {id:'retreat',name:'敵から離れる',detail:'敵が見えるとき、危険の少ない隣の床へ退避。'},
- {id:'attack',name:'敵を攻撃',detail:'選んだ敵へ接近し、隣接したら攻撃。',enemy:true},
+ {id:'frontier',name:'全ての部屋を探索する',detail:'まだ入っていない部屋を優先し、全ての部屋へ入ったら完了。'},
+ {id:'explore-all',name:'全てのマスを探索する',detail:'到達できる未踏の床を順に歩く。'},
+ {id:'retreat',name:'相手から離れる',detail:'骸なら敵から、操作する敵なら骸から、距離を取れる隣の床へ移動。'},
+ {id:'attack',name:'攻撃する',detail:'実行者の相手へ接近し、隣接したら攻撃。骸なら敵、敵なら骸を攻撃。',enemy:true},
  {id:'tactics',name:'戦術で敵を選ぶ',detail:'条件成立中、隣接敵の一撃撃破・攻撃力を優先。',modifier:true},
  {id:'avoid-traps',name:'トラップを避ける',detail:'安全な経路を優先。迂回できないときは罠を踏んで進む（ダメージあり）。',modifier:true,reward:'avoid-traps'},
 ];
-export const skillCards=themedSkills.map(c=>({...c,detail:c.detail+' 各階1回。',...(c.id==='warp'?{reward:'warp'}:{ability:c.id})}));
-for(const[kind,list]of Object.entries({target:targetCards,condition:conditionCards,action:actionCards,skill:skillCards}))for(const c of list){c.cardKind=kind;c.rarity=cardRarity(kind,c.id);if(!c.detail)c.detail=kind==='target'?'指示が判断する対象を選びます。':c.param?`${c.name}を${c.min}〜${c.max}の範囲で指定します。`:'この条件が成立した場合だけ指示を実行します。';}
-const cardDetails={self:'自分のHPや周囲の状況を条件の判断対象にする。',enemy:'視界内の敵を近い順に対象にする。','weak-enemy':'視界内の敵を残りHPの低い順に対象にする。','danger-enemy':'視界内の敵を攻撃力の高い順に対象にする。','one-hit':'対象の残りHPと推定通常ダメージを比べ、一撃で倒せる場合だけ実行。',injured:'対象の敵の残りHPが最大HPの半分以下の場合に実行。','loot-empty':'発見済みで入手可能な品物が残っていない場合に実行。',visible:'目的地・対象が現在の視界に入っている場合に実行。'};
+export const skillCards=themedSkills.map(c=>({...c,detail:c.detail+' 指示で発動。骸・敵で各階1回を共有。'+(enemySkillReasons[c.id]?' 敵には使用不可：'+enemySkillReasons[c.id]+'。':''),...(c.id==='warp'?{reward:'warp'}:{ability:c.id})}));
+for(const[kind,list]of Object.entries({target:targetCards,condition:conditionCards,action:actionCards,skill:skillCards}))for(const c of list){c.cardKind=kind;c.rarity=cardRarity(kind,c.id);if(!c.detail)c.detail=kind==='target'?'指示を実行する者を選びます。':c.param?`${c.name}を${c.min}〜${c.max}の範囲で指定します。`:'この条件が成立した場合だけ指示を実行します。';}
+const cardDetails={self:'骸を実行者にする。HP条件は骸のHPを参照する。',enemy:'視界内で最も近い通常敵1体を実行者にする。ボスは操作しない。HP条件はその敵のHPを参照し、攻撃は骸へ向かう。','weak-enemy':'視界内の敵を残りHPの低い順に対象にする。','danger-enemy':'視界内の敵を攻撃力の高い順に対象にする。','one-hit':'実行者の攻撃相手のHPと通常ダメージを比べ、一撃で倒せる場合だけ実行。',injured:'実行者の残りHPが最大HPの半分以下の場合に実行。','loot-empty':'発見済みで入手可能な品物が残っていない場合に実行。',visible:'目的地・対象が現在の視界に入っている場合に実行。'};
 for(const c of [...targetCards,...conditionCards])if(cardDetails[c.id])c.detail=cardDetails[c.id];
 export const cardCapacity=s=>4+(s.levels.cardSlots||0);
 export const conditionById=Object.fromEntries(conditionCards.map(c=>[c.id,c]));
@@ -65,11 +66,11 @@ export function legacyToCards(o){
 export function validCardRule(s,input,{requireOwned=true}={}){
  if(!input||typeof input.id!=='string'||input.disabled!==undefined&&typeof input.disabled!=='boolean')return false;
  const r=legacyToCards(input),effect=effectDefinition(r);
- if(!r.cards||!r.effect||!targetCards.some(t=>t.id===r.target)||!['skill','action'].includes(r.effect.kind)||!effect||Boolean(effect.enemy)!==(r.target!=='self'))return false;
+ if(!r.cards||!r.effect||!targetCards.some(t=>t.id===r.target)||!['skill','action'].includes(r.effect.kind)||!effect||!actorCanUse(r.target,effect))return false;
  if(requireOwned&&!effectUnlocked(s,effect))return false;
  if(requireOwned&&(!cardOwned(s,'target',r.target)||(Array.isArray(r.conditions)&&r.conditions.some(c=>!c||!cardOwned(s,'condition',c.id)))))return false;
  if(!Array.isArray(r.conditions)||r.conditions.some(c=>!c||typeof c.id!=='string')||r.conditions.length+2>cardCapacity(s)||new Set(r.conditions.map(c=>c.id)).size!==r.conditions.length)return false;
- return r.conditions.every(c=>{const d=conditionById[c.id];return d&&(!['one-hit','injured'].includes(c.id)||r.target!=='self')&&(!d.param||(Number.isFinite(c.value)&&c.value>=d.min&&c.value<=d.max&&(c.value-d.min)%d.step===0));});
+ return r.conditions.every(c=>{const d=conditionById[c.id];return d&&(c.id!=='one-hit'||r.target!=='self'||r.effect.id==='attack')&&(!d.param||(Number.isFinite(c.value)&&c.value>=d.min&&c.value<=d.max&&(c.value-d.min)%d.step===0));});
 }
 export function addCardRule(s){if(s.phase!=='prepare'||s.orders.length>=2+s.levels.commandSlots)return false;s.orders.push(createCardRule());s.mode='custom';return true;}
 export function replaceCardRule(s,index,rule){if(s.phase!=='prepare'||!s.orders[index]||!validCardRule(s,rule))return false;s.orders[index]=legacyToCards(rule);s.mode='custom';return true;}
@@ -77,12 +78,12 @@ export function replaceCardRule(s,index,rule){if(s.phase!=='prepare'||!s.orders[
 const dist=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y),key=p=>`${p.x},${p.y}`,dirs=[[0,-1],[1,0],[0,1],[-1,0]];
 function subjects(s,r,ctx){
  if(r.target==='self')return [s.player];
- const enemies=s.enemies.filter(e=>ctx.canSee(s,e.x,e.y));
- enemies.sort(r.target==='weak-enemy'?(a,b)=>a.hp-b.hp:r.target==='danger-enemy'?(a,b)=>b.attack-a.attack:(a,b)=>dist(s.player,a)-dist(s.player,b));
+ const enemies=s.enemies.filter(e=>!e.boss&&ctx.canSee(s,e.x,e.y)).sort((a,b)=>dist(s.player,a)-dist(s.player,b)||a.y-b.y||a.x-b.x).slice(0,1);
  return enemies;
 }
 function destinations(s,r,ctx){
  const id=r.effect.id;
+ if(id==='attack')return s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)).sort((a,b)=>dist(s.player,a)-dist(s.player,b));
  if(id==='stairs')return [s.stairs].filter(p=>s.seen[p.y][p.x]&&!s.enemies.some(e=>e.boss));
  const types={chests:['chest'],'collect-weapons':['gear'],'collect-armor':['gear'],'collect-fragments':['fragment'],'collect-herbs':['herb'],'collect-springs':['potion'],letter:['letter']};
  if(types[id])return s.items.filter(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i)&&types[id].includes(i.type)&&(id!=='collect-weapons'||gearById[i.gear?.baseId]?.slot==='weapon')&&(id!=='collect-armor'||gearById[i.gear?.baseId]?.slot==='armor'));
@@ -99,9 +100,9 @@ function match(s,r,subject,destination,ctx){
    case'visible':return ctx.canSee(s,destination.x,destination.y);
    case'range':return dist(s.player,destination)<=c.value;
    case'turns':return s.steps>=c.value;
-   case'enemy-count':return s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)&&dist(s.player,e)===1).length>=c.value;
-   case'one-hit':return subject.hp<=Math.max(1,ctx.stats(s).attack-subject.defense);
-   case'injured':return subject.hp<=subject.maxHp*.5;
+   case'enemy-count':return (enemy?(dist(subject,s.player)===1?1:0):s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)&&dist(s.player,e)===1).length)>=c.value;
+   case'one-hit':return enemy?s.hp<=Math.max(1,subject.attack-ctx.stats(s).defense):destination.hp<=Math.max(1,ctx.stats(s).attack-destination.defense);
+   case'injured':return hp<=maxHp*.5;
    case'loot-empty':return !s.items.some(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i));
    default:return false;
   }
@@ -122,6 +123,7 @@ export function chooseCardOrder(s,ctx){
   const fixed=index===s.orders.length,r=legacyToCards(rules[index]),effect=effectDefinition(r),targets=fixed?([s.stairs].filter(p=>s.seen[p.y]?.[p.x]&&!s.enemies.some(e=>e.boss))):matchingCardTargets(s,r,ctx);
   if(!targets.length||effect?.modifier)continue;
   const base={id:'cards',ruleIndex:fixed?null:index,fixed,intent:`カード指示：${effect.name}`};
+  if(r.target==='enemy'){const command=ctx.enemyPlan?.(s,r,targets[0]);if(command)return {...base,control:command};continue;}
   if(r.effect.kind==='skill'){if(skillCanRun(s,effect.id,ctx))return {...base,skill:effect.id,exit:effect.id==='homeward'};continue;}
   if(effect.id==='attack'){
    const adjacent=targets.filter(e=>dist(s.player,e)===1);if(adjacent.length&&cardModifier(s,'tactics',ctx)){const atk=ctx.stats(s).attack;adjacent.sort((a,b)=>Number(b.hp<=Math.max(1,atk-b.defense))-Number(a.hp<=Math.max(1,atk-a.defense))||b.attack-a.attack||dirs.findIndex(([dx,dy])=>s.player.x+dx===a.x&&s.player.y+dy===a.y)-dirs.findIndex(([dx,dy])=>s.player.x+dx===b.x&&s.player.y+dy===b.y));return {...base,enemy:adjacent[0]};}
@@ -135,7 +137,8 @@ export function chooseCardOrder(s,ctx){
    const range=r.conditions.find(c=>c.id==='range')?.value??Infinity;
    const nearby=visible.filter(e=>dist(s.player,e)<=range),combat=nearby.length?seek(p=>dist(s.player,p)<=range&&nearby.some(e=>dist(p,e)===1)):null;
    if(combat)return {...base,next:combat,intent:'進路の敵に向き合う'};
-   const next=seek(p=>dist(s.player,p)<=range&&(effect.id==='frontier'?!s.visited[p.y][p.x]&&dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false):!s.visited[p.y][p.x]));
+   const rooms=s.rooms||[],entered=i=>(s.themeState?.rooms||[]).includes(i)||roomContains(rooms[i],s.player);if(effect.id==='frontier'&&rooms.length&&rooms.every((_,i)=>entered(i)))continue;
+   const roomStep=effect.id==='frontier'?seek(p=>dist(s.player,p)<=range&&rooms.some((room,i)=>!entered(i)&&roomContains(room,p))):null;const next=roomStep||seek(p=>dist(s.player,p)<=range&&!s.visited[p.y][p.x]&&(effect.id==='explore-all'||dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false)));
    if(next)return {...base,next};
   }else{
    const next=seek(p=>targets.some(t=>key(t)===key(p)));
@@ -148,6 +151,6 @@ export function chooseCardOrder(s,ctx){
 export function describeCardRule(input){
  const r=legacyToCards(input),target=targetCards.find(t=>t.id===r.target)?.name||'？',effect=effectDefinition(r);
  const conditions=r.conditions.map(c=>{const d=conditionById[c.id];if(c.id==='visible')return (r.effect.id==='stairs'?'階段':r.effect.id==='chests'?'宝箱':r.effect.id==='avoid-traps'?'トラップ':r.target==='self'?'対象':'敵')+'が視界内';return d?.param?d.name.replace('指定%',String(c.value)+'%').replace('指定距離',String(c.value)+'マス').replace('指定ターン',String(c.value)+'ターン').replace('指定数',String(c.value)):d?.name||'？';});
- if(effect?.id==='attack')return `${conditions.length?conditions.join('、かつ')+'のとき、':''}${target}を攻撃する。`;
- return `${target}は、${conditions.length?conditions.join('、かつ')+'のとき、':''}${effect?.name||'？'}${r.effect.kind==='skill'?'を発動する':''}。`;
+ if(effect?.id==='attack')return `${target}が、${conditions.length?conditions.join('、かつ')+'のとき、':''}${r.target==='self'?'敵':'骸'}を攻撃する。`;
+ return `${target}が、${conditions.length?conditions.join('、かつ')+'のとき、':''}${effect?.name||'？'}${r.effect.kind==='skill'?'を発動する':''}。`;
 }

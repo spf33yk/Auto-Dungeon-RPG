@@ -43,7 +43,7 @@ export function executeThemedSkill(s,id,ctx){const d=themedSkillById[id],t=theme
  case 'fortress':heal(.3);t.immunity=2;break;
  case 'coin-strike':hit(target,rng()<chance?2:.5);break;
  case 'gamble-heal':if(rng()<chance)heal(.3);else cost(st.maxHp*.05);break;
- case 'fortune':s.shards-=3;if(rng()<chance){s.shards+=av(s,'pioneer',8,true);ctx.log(s,'運試しに勝った。記憶の欠片＋8。','good');}else ctx.log(s,'運試しに敗れた。','bad');break;
+ case 'fortune':s.shards-=3;if(rng()<chance){s.shards+=8;ctx.log(s,'運試しに勝った。記憶の欠片＋8。','good');}else ctx.log(s,'運試しに敗れた。','bad');break;
  case 'life-bet':cost(st.maxHp*.1);hit(target,rng()<chance?4:1);break;
  case 'all-in':if(rng()<chance)hit(target,6);else{t.immunity=1;ctx.log(s,'大勝負は外れた。次の一撃に備える。');}break;
  }
