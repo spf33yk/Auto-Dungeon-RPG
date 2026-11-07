@@ -1717,3 +1717,10 @@ newCardsは初期空、初取得の追加カードのみ登録。準備出発の
 土台の内枠・影（tray-surface:afterのz-index3）がカードの独立描画層より前に重なっていたため、探索指示のboard-slotsをz-index4、レアリティを6にする。カードからのはみ出しクリップも解除し、正式名称・下端位置・サイズ・素材形状は維持。比較用N／E／Lバッジは未採用。
 
 検証：ベース2d3f1fd。ローカル関連9テスト（preparation-ui／preparation-assets）通過、配信URLチェック通過。無音verify=1、独立localhost保存の1280×720でNORMAL／EPIC／LEGENDARYが土台上で欠けず表示され、セット有効スキルのフィルターがある場合も見えることを確認。2行と数値入力・土台の位置は維持。画像：output/actor-control-check/rarity-front-preview.png。CSSの重なり順のみのため全自動テストと公開版走行は省略。全スキン・実機スマホの今回再確認は未実施。ゲーム処理・保存・物語・画像素材は未変更。
+
+
+## 2026-11-07 実行中の指示を回想文の上へ移動
+
+executing-orderをチャットからthought-stackのmemory-quote直前へ移動。active-directive.jsがexecutingRuleの実行行から番号・対象・条件・実行内容を生成。固定階段行は最終行、基本行動は空欄にする。探索中は空欄の高さを維持し、ログ消去で消えない。思考・回想の本文とゲーム処理、保存形式は変更なし。
+
+検証対象：33feda7からの変更。ローカル関連テストと配信URLチェックを実施。無音verify=1の独立localhost保存、1280×720で実行行が回想文の上に表示され、チャットには重複せず、ログ表示終了後も表示されることを確認。画像：output/actor-control-check/active-directive-hud.png。公開確認はUI内の配置変更でローカル確認が十分なため省略。実機スマホ・全条件文の見切れ方は未確認。

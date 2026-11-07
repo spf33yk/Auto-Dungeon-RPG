@@ -1,3 +1,4 @@
+import{activeDirectiveText}from'./active-directive.js';
 import{themedSkillById}from'./build-themes.js';
 import{installHoverHelp}from'./hover-help.js';
 import{THEME_IMAGES}from'./augment-art.js';
@@ -185,8 +186,7 @@ function drawAutoMap(){
 }
 function renderThoughtSubtitle(){
  const text='▶ '+thoughtText(state.intent),subtitle=$('thought-subtitle');
- const active=$('executing-order'),label=Number.isInteger(state.executingRule)?'指示'+(state.executingRule+1):state.executingRule==='fixed'?'常設':'';
- active.hidden=!label;active.textContent=label?'実行中 · '+label+'：'+state.intent.replace(/^(カード指示：|指示：)/,''):'';
+ const active=$('executing-order'),label=activeDirectiveText(state);active.hidden=!label;if(active.textContent!==label)active.textContent=label;
  if(subtitle.textContent!==text)subtitle.textContent=text;
 }
 function categoryTabs(type,selected,common=false){return `<div class="subtabs" role="group" aria-label="${type==='skill'?'スキル系統':'装備の種類'}">${(common?[['common','共通'],['weapon','武器'],['armor','防具']]:[['weapon','武器'],['armor','防具']]).map(([id,label])=>`<button data-category="${type}" data-value="${id}" aria-pressed="${selected===id}" class="${selected===id?'active':''}">${label}</button>`).join('')}</div>`;}
