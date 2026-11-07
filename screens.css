@@ -696,3 +696,6 @@ body.preparing #prepare-scene .instruction-upgrades{margin:1px 0 3px;gap:4px}
 @media(max-height:500px){body.preparing #prepare-scene .fitted-card-editor .tray-surface{zoom:.58}body.preparing #prepare-scene .fitted-card-editor .tray-caption{font-size:9px}#tutorial-task{font-size:12px;padding:6px 10px}}
 
 #tutorial-task.at-bottom{top:auto;bottom:12px}
+
+/* A selected placed card returns anywhere in the library, including over disabled cards. */
+.card-library.return-highlight .palette-card{pointer-events:none}
