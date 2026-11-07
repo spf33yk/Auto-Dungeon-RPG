@@ -59,6 +59,8 @@ routeは既知床を使う幅優先探索で、敵側の経路だけ未知床も
 
 ## 6. 準備UI・スクロール
 
+renderOrderEditorがinstruction-upgradesをcard-rules-heading内のプリセット直前へ配置する。ツールバーは折返し可能にし、指示のスクロール領域とは分離する。
+
 HUDは探索・準備で共用。ResizeObserverがHUD下端＋余白を--shared-hud-spaceへ設定。#workspace:beforeの上端をこの値、左右・下端を0にして準備枠を描画する。主枠20px・パネル16px、48pxスライスの9分割、辺repeat、pointer-events:none。画像比率保持・内容の安全余白を設ける。
 
 renderCardEditorは指示・能力・所持・phase等の署名で不要なDOM置換を避ける。変更がある場合だけeditor-scroll.jsがホスト・パネル・一覧の縦横位置を採取し復元。WeakMapで前回の指示オブジェクトと行の対応を保持し、移動後の横位置をその指示へ追従する。保存へDOM情報を含めない。

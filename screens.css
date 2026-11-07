@@ -712,3 +712,6 @@ body.preparing #prepare-scene .instruction-upgrades{margin:1px 0 3px;gap:4px}
 .fitted-card-editor .tray-surface>.board-slots{position:relative;z-index:4}
 .fitted-card-editor .tray-surface .board-slot{overflow:visible}
 .fitted-card-editor .tray-surface .board-slot>.card-rarity{z-index:6}
+
+/* Keep the instruction upgrade controls immediately left of presets. */
+body.preparing #prepare-scene .card-rules-heading>.instruction-controls{flex:1;min-width:0;flex-wrap:wrap;justify-content:flex-end;align-items:center}body.preparing #prepare-scene .card-rules-heading .instruction-upgrades{margin:0;gap:4px}body.preparing #prepare-scene .card-rules-heading .instruction-upgrades>b{white-space:nowrap}
