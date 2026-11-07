@@ -6,210 +6,210 @@ export const themedAugments=[
   "name": "地図読み",
   "themeId": "explorer",
   "rarity": "NORMAL",
-  "detail": "未踏の部屋に入ると5ターン、視界半径＋1。"
+  "detail": "この階で初めて入る部屋ごとに、5ターン視界半径＋1マス。重複時は時間を更新。"
  },
  {
   "id": "scavenger",
   "name": "収集の心得",
   "themeId": "explorer",
   "rarity": "NORMAL",
-  "detail": "床の記憶の欠片を拾うと、追加で記憶の欠片＋1。"
+  "detail": "床の記憶の欠片を拾うたび、記憶の欠片を通常の取得量に加えて1個獲得。"
  },
  {
   "id": "swift-ascent",
   "name": "駆け上がる記憶",
   "themeId": "explorer",
   "rarity": "NORMAL",
-  "detail": "150ターン未満でClearすると最大HPの15%を回復。"
+  "detail": "この階を150ターン未満でクリアすると、自分のHPを最大HPの15%回復（端数切上げ）。"
  },
  {
   "id": "trailblazer",
   "name": "踏破の心得",
   "themeId": "explorer",
   "rarity": "EPIC",
-  "detail": "未踏の部屋を発見するたび、この階のATK＋1。最大＋5。"
+  "detail": "この階で入った異なる部屋の数に応じてATKが増加。部屋数×1（端数切上げ）、最大＋5。次の階でリセット。"
  },
  {
   "id": "treasure-sense",
   "name": "宝探しの勘",
   "themeId": "explorer",
   "rarity": "EPIC",
-  "detail": "カード宝箱の候補数が最大3枚から最大4枚になる。"
+  "detail": "カード宝箱で、選んだ種類のカード候補数を最大3枚から最大4枚に増やす。取得枚数は変わらない。"
  },
  {
   "id": "pioneer",
   "name": "未知を拓く者",
   "themeId": "explorer",
   "rarity": "LEGENDARY",
-  "detail": "この階の全室を発見すると、最大HPの20%を回復・記憶の欠片＋8・この階のATK＋5。各階1回。"
+  "detail": "この階の全ての部屋に入ると、HPを最大HPの20%回復（端数切上げ）、記憶の欠片を8個獲得。この階のATK＋5。各階1回。"
  },
  {
   "id": "ripen",
   "name": "熟成の刃",
   "themeId": "monk",
   "rarity": "NORMAL",
-  "detail": "この階の40ターンごとにATK＋1。最大＋5。"
+  "detail": "この階の40ターンごとにATKが増加。増加量は経過区間数×1（端数切上げ）、最大＋5。次の階でリセット。"
  },
  {
   "id": "patience",
   "name": "熟成の鎧",
   "themeId": "monk",
   "rarity": "NORMAL",
-  "detail": "この階の60ターンごとにDEF＋1。最大＋3。"
+  "detail": "この階の60ターンごとにDEFが増加。増加量は経過区間数×1（端数切上げ）、最大＋3。次の階でリセット。"
  },
  {
   "id": "breath",
   "name": "調息の心得",
   "themeId": "monk",
   "rarity": "NORMAL",
-  "detail": "被弾せず20ターン過ごすごとに最大HPの3%を回復。各階5回まで。"
+  "detail": "ダメージを受けずに20ターン過ごすごとに、HPを最大HPの3%回復（端数切上げ）。各階5回まで。"
  },
  {
   "id": "pilgrim",
   "name": "積年の刃",
   "themeId": "monk",
   "rarity": "EPIC",
-  "detail": "累計200ターンごとにATK＋1。最大＋15。"
+  "detail": "旅の累計200ターンごとにATKが増加。増加量は経過区間数×1（端数切上げ）、最大＋15。"
  },
  {
   "id": "charge",
   "name": "静寂の一閃",
   "themeId": "monk",
   "rarity": "EPIC",
-  "detail": "被弾せず10ターン過ごすと、次の打撃が2倍。攻撃時に蓄積を消費。"
+  "detail": "ダメージを受けずに10ターン過ごすと、次の打撃のダメージが2倍。打撃後は無被弾ターン数を0に戻す。"
  },
  {
   "id": "enlightenment",
   "name": "悟りの境地",
   "themeId": "monk",
   "rarity": "LEGENDARY",
-  "detail": "この階の100ターンごとに悟り＋1、最大3。攻撃・回復スキル使用時に消費し、効果量を1段階につき25%増加。"
+  "detail": "この階の100ターンごとに悟りを1蓄積（最大3）。攻撃・回復スキル使用時に蓄積を全て消費し、ダメージ・回復量を1蓄積につき25%増加。次の階でリセット。"
  },
  {
   "id": "desperate",
   "name": "背水の刃",
   "themeId": "berserker",
   "rarity": "NORMAL",
-  "detail": "失ったHP10%ごとにATK＋1。最大＋9。"
+  "detail": "最大HPの10%を失うごとにATKが増加。失った割合の10%区間数×1（端数切上げ）、最大＋9。HPが回復すると補正も減る。"
  },
  {
   "id": "leech",
   "name": "吸命の記憶",
   "themeId": "berserker",
   "rarity": "NORMAL",
-  "detail": "実際に与えたダメージの3%を回復。"
+  "detail": "打撃で実際に減らした敵HPの3%を、自分のHPとして回復（端数切捨て）。"
  },
  {
   "id": "surrounded",
   "name": "包囲の闘志",
   "themeId": "berserker",
   "rarity": "NORMAL",
-  "detail": "視界内の敵1体につきATK＋1。最大＋5。"
+  "detail": "視界内の敵数×1だけATKが増加（端数切上げ、最大＋5）。見える敵数に応じて変動。"
  },
  {
   "id": "blood",
   "name": "渇いた骨",
   "themeId": "berserker",
   "rarity": "EPIC",
-  "detail": "失ったHPの割合×20%の吸命率を得る。"
+  "detail": "失ったHPの割合×20%を吸命率に加算。打撃で実際に減らした敵HP×吸命率を自分のHPとして回復（端数切捨て）。"
  },
  {
   "id": "hunter",
   "name": "連戦の昂り",
   "themeId": "berserker",
   "rarity": "EPIC",
-  "detail": "この階の通常敵撃破1体につき会心率＋4%。最大＋40%。増援は対象外。"
+  "detail": "この階の通常敵を倒すたびに会心率＋4%、最大＋40%。ボス・増援は対象外。次の階でリセット。"
  },
  {
   "id": "blood-pact",
   "name": "血戦の誓い",
   "themeId": "berserker",
   "rarity": "LEGENDARY",
-  "detail": "HP30%以下の間、与ダメージ1.5倍・吸命率＋15%。被ダメージも20%増加。"
+  "detail": "HP30%以下の間、打撃の与ダメージ1.5倍、吸命率＋15%、被ダメージ1.2倍。吸命は実際に減らした敵HPから計算（端数切捨て）。"
  },
  {
   "id": "shell",
   "name": "満月の守り",
   "themeId": "guardian",
   "rarity": "NORMAL",
-  "detail": "HP80%以上の間、DEF＋3。"
+  "detail": "HPが最大HPの80%以上の間、DEF＋3。"
  },
  {
   "id": "first-shield",
   "name": "骨の盾",
   "themeId": "guardian",
   "rarity": "NORMAL",
-  "detail": "各階1回、被ダメージを50%軽減。より強い防御がある間は温存。"
+  "detail": "各階1回、被ダメージを50%軽減。より強い防御効果が使われる場合は消費しない。"
  },
  {
   "id": "restful",
   "name": "休息の心得",
   "themeId": "guardian",
   "rarity": "NORMAL",
-  "detail": "次階への休息回復に最大HPの5%を追加。"
+  "detail": "次の階へ進む際の休息回復に、最大HPの5%分を追加。回復量の合計は端数切上げ。"
  },
  {
   "id": "moon",
   "name": "満月の初太刀",
   "themeId": "guardian",
   "rarity": "EPIC",
-  "detail": "各階最初の打撃時、HP満タンなら必ず会心。"
+  "detail": "各階の最初の打撃時にHP満タンなら必ず会心となり、ダメージ1.5倍。満タンでなくても最初の打撃で機会を消費。"
  },
  {
   "id": "reserve",
   "name": "守りの余力",
   "themeId": "guardian",
   "rarity": "EPIC",
-  "detail": "一撃で最大HPの20%以上を失うと、次の2回の被ダメージを30%軽減。各階1回。"
+  "detail": "一撃で最大HPの20%以上を失うと、その後2回の被ダメージを30%軽減。各階1回。より強い防御効果が使われる場合は回数を消費しない。"
  },
  {
   "id": "undying",
   "name": "骨の執念",
   "themeId": "guardian",
   "rarity": "LEGENDARY",
-  "detail": "各階1回、致命傷をHP1で耐え、続く被ダメージ1回を無効化。"
+  "detail": "各階1回、HPが0になるダメージをHP1で耐える。その後1回の被ダメージを無効化。"
  },
  {
   "id": "critical",
   "name": "会心の記憶",
   "themeId": "gambler",
   "rarity": "NORMAL",
-  "detail": "会心率＋10%。会心ダメージは通常の1.5倍。"
+  "detail": "会心率＋10%。通常の会心ダメージは1.5倍。"
  },
  {
   "id": "risky-blade",
   "name": "危うい刃",
   "themeId": "gambler",
   "rarity": "NORMAL",
-  "detail": "打撃ごとに50%で与ダメージ1.3倍、50%で0.8倍。"
+  "detail": "打撃ごとに50%で与ダメージ1.3倍、残り50%で0.8倍。"
  },
  {
   "id": "lucky-find",
   "name": "拾い物の運",
   "themeId": "gambler",
   "rarity": "NORMAL",
-  "detail": "床の記憶の欠片を拾うと、25%で追加の記憶の欠片＋4。"
+  "detail": "床の記憶の欠片を拾うたび、25%の確率で記憶の欠片を通常の取得量に加えて4個獲得。"
  },
  {
   "id": "double-strike",
   "name": "追撃の記憶",
   "themeId": "gambler",
   "rarity": "EPIC",
-  "detail": "通常攻撃の後、15%で追加の1打。追加攻撃から再発動しない。"
+  "detail": "通常攻撃の後、15%の確率で追加の通常攻撃を1回行う。攻撃スキルでは発動せず、追加攻撃から再発動しない。"
  },
  {
   "id": "pity",
   "name": "幸運の揺り戻し",
   "themeId": "gambler",
   "rarity": "EPIC",
-  "detail": "会心でない打撃ごとに会心率＋5%。最大＋30%、会心でリセット。"
+  "detail": "会心でない打撃ごとに会心率＋5%、最大＋30%。会心が出るか、次の階へ進むとリセット。"
  },
  {
   "id": "destiny",
   "name": "運命の賽",
   "themeId": "gambler",
   "rarity": "LEGENDARY",
-  "detail": "各階最初のカード宝箱で賭ける。50%で2枚取得、50%でカードの代わりに記憶の欠片＋10。"
+  "detail": "各階で最初に開けるカード宝箱のみ、50%の確率でカードを2枚取得。外れた場合はカードの代わりに記憶の欠片を10個獲得。抽選結果は保存される。"
  }
 ];
 export const themedSkills=[
