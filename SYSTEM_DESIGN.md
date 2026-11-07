@@ -69,7 +69,7 @@ renderCardEditorは指示・能力・所持・phase等の署名で不要なDOM�
 
 forecastExplorationは入力を複製して本編tickを試行し、実状態や乱数を変えない。入力署名は表示専用ログ・intent等を除外。変更時は世代を更新し古い結果を破棄、短い処理区間ごとにUIへ制御を返す。未選択の将来オーグメントは付与しない。
 
-openDialog／finishDialogは元のpausedを保持し、他のダイアログが残る間も停止。screenTutorialsのexplore5手順／prepare7手順を初回表示し、完了・閉じる・Escapeで画面別閲覧フラグを記録。オプションからどちらも再閲覧できる。ログはlog-visibility.jsが5000ms・ホバー／タップ保持を管理する。
+openDialog／finishDialogは元のpausedを保持し、他のダイアログが残る間も停止。screenTutorialsはprepare7手順のみ。探索はaugment-dialog内の短い案内に限定し、取得成功時に端末設定tutorials.exploreをtrueへ保存。NewGameで両フラグをfalseへ戻す。オプションは次のオーグメント選択時の案内を再予約する。ログはlog-visibility.jsが5000ms・ホバー／タップ保持を管理する。
 
 ## 8. 指示とセット・報酬の共通化
 

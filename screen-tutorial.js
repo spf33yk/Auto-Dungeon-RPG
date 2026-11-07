@@ -1,12 +1,5 @@
 // Each step names a real control; the guide never purchases upgrades automatically.
 export const screenTutorials={
- explore:[
-  {title:'ゆっくり見る',text:'「0.5×」を押してください。移動と戦闘は自動です。',selector:'[data-speed="0.5"]'},
-  {title:'速度を戻す',text:'「1×」を押してください。',selector:'[data-speed="1"]'},
-  {title:'記録を開く',text:'右上の記録アイコンを押してください。',selector:'#log-open'},
-  {title:'記録を閉じる',text:'記録の「×」を押してください。',selector:'[data-close="history-dialog"]'},
-  {title:'探索を再開',text:'「探索を再開」を押してください。「ひとやすみ」で止められます。',selector:'#pause-toggle',lastAction:true}
- ],
  prepare:[
   {title:'条件を選ぶ',text:'カードリストの「条件」を押してください。上の指示から優先します。',selector:'#tab-content [data-palette-tab="condition"]'},
   {title:'ターン条件を選ぶ',text:'「指定ターン経過」を押してください。',selector:'#tab-content [data-drag-source="palette|condition|turns"]'},

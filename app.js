@@ -198,12 +198,12 @@ function handleOrderChange(e){const result=handleCardChange(e,state);if(result!=
 const displayAttack=()=>state.gear.weapon.identified?stats(state).attack:'？';
 const displayDefense=()=>state.gear.armor.identified?stats(state).defense:'？';
 function renderAugments(){
- const offer=state.augmentOffer,dialog=$('augment-dialog');if(!showingTitle&&offer&&!dialog.open){$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
+ const offer=state.augmentOffer,dialog=$('augment-dialog');$('augment-tutorial').hidden=!offer||uiSettings.tutorials.explore;if(!showingTitle&&offer&&!dialog.open){$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
  if(state.phase==='prepare'){const hint=nextStageHint({...state,floor:state.floor-1});$('prep-hint').textContent=hint.title.replace('次は','')+' · '+hint.text;$('prep-augments').innerHTML='<div class="prep-augment-list"><b>オーグメント</b>'+((state.augments||[]).map(id=>augmentChip(augmentById[id],state)).join('')||'<span>なし</span>')+'</div>'+setRibbon(state);}
 }
 $('debug-augment').innerHTML=augments.map(a=>'<option value="'+a.id+'">'+a.rarity+' · '+a.theme+' · '+a.name+'</option>').join('');
 $('augment-dialog').addEventListener('cancel',e=>e.preventDefault());
-$('augment-choices').onclick=e=>{const b=e.target.closest('[data-augment]');if(!b||!chooseAugment(state,b.dataset.augment))return;$('augment-dialog').close();if(state.phase==='awakening'){beginExploration(state);paused=false;last=performance.now();}render();};
+$('augment-choices').onclick=e=>{const b=e.target.closest('[data-augment]');if(!b||!chooseAugment(state,b.dataset.augment))return;uiSettings=saveUiSettings(uiStorage,{...uiSettings,tutorials:{...uiSettings.tutorials,explore:true}});$('tutorial-explore').textContent='オーグメントの案内を再表示';$('augment-dialog').close();if(state.phase==='awakening'){beginExploration(state);paused=false;last=performance.now();}render();};
 installHoverHelp();
 const renderTactics=installTacticsUi({getState:()=>state,onChange:()=>{delete $('tab-content').dataset.orderSignature;render();},storage:uiStorage,onResume:()=>{paused=false;dialogWasPaused=false;last=performance.now();}});
 function render(){
@@ -310,7 +310,8 @@ $('tutorial-skip').onclick=()=>finishTutorial();
 $('tutorial-task-close').onclick=()=>finishTutorial();
 $('tutorial-task-skip').onclick=()=>advanceTutorial();
 $('tutorial-dialog').addEventListener('cancel',e=>{e.preventDefault();finishTutorial();});
-for(const kind of ['explore','prepare'])$('tutorial-'+kind).onclick=()=>startTutorial(kind);
+$('tutorial-prepare').onclick=()=>startTutorial('prepare');
+$('tutorial-explore').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,tutorials:{...uiSettings.tutorials,explore:false}});$('tutorial-explore').textContent='次のオーグメント取得時に案内します';};
 function tutorialOperation(e){if(!tutorialKind||!tutorialActing)return;const kind=tutorialKind,index=tutorialStep,step=screenTutorials[kind][index],hit=e.type===(step.event||'click')&&e.target.closest(step.selector)&&(e.type!=='change'||e.target.checkValidity());if(!hit&&!step.placement)return;setTimeout(()=>{if(tutorialKind!==kind||tutorialStep!==index||!tutorialActing)return;const placed=state.orders.reduce((n,r)=>n+(r.conditions?.length||0),0)>tutorialPlacementCount;if(step.placement?!placed:!hit)return;advanceTutorial(true);},0);}
 document.addEventListener('click',tutorialOperation,true);
 document.addEventListener('pointerup',tutorialOperation,true);
