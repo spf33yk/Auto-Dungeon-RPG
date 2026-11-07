@@ -1,3 +1,4 @@
+import{DIRECTIVE_LIMITS}from'./directive-safety.js';
 import{actorCanUse,roomContains,enemySkillReasons}from'./actor-rules.js';
 import{themedSkills}from'./build-themes.js';
 import{skillCanRun}from'./theme-runtime.js';
@@ -13,7 +14,7 @@ export const conditionCards=[
  {id:'turns',name:'指定ターン経過',param:'value',value:150,min:20,max:1000,step:10,unit:'ターン以上'},
  {id:'enemy-count',name:'隣接敵が指定数以上',param:'value',value:2,min:1,max:4,step:1,unit:'体以上'},
  {id:'one-hit',name:'一撃で倒せる'},
- {id:'injured',name:'HPが半分以下'},
+ {id:'adjacent',name:'相手と隣接している',detail:'実行者の上下左右に攻撃相手がいるときに実行。斜めは含まない。'},
 ];
 export const actionCards=[
  {id:'stairs',name:'階段を上る',detail:'他の目的より階段を優先。最終行にも変更できない階段指示を常設。'},
@@ -26,13 +27,13 @@ export const actionCards=[
  {id:'letter',name:'手紙の箱を開ける',detail:'物語条件を満たす手紙の箱へ向かう。'},
  {id:'frontier',name:'全ての部屋を探索する',detail:'まだ入っていない部屋を優先し、全ての部屋へ入ったら完了。'},
  {id:'explore-all',name:'全てのマスを探索する',detail:'到達できる未踏の床を順に歩く。'},
+ {id:'wait',name:'1ターン待機',detail:`移動・通常攻撃をせず1ターン待つ。連続${DIRECTIVE_LIMITS.wait}ターンまで。その後${DIRECTIVE_LIMITS.waitCooldown}ターンは待機指示を飛ばす。`},
  {id:'retreat',name:'相手から離れる',detail:'骸なら敵から、操作する敵なら骸から、距離を取れる隣の床へ移動。'},
- {id:'attack',name:'攻撃する',detail:'実行者の相手へ接近し、隣接したら攻撃。骸なら敵、敵なら骸を攻撃。',enemy:true},
  {id:'avoid-traps',name:'トラップを避ける',detail:'安全な経路を優先。迂回できないときは罠を踏んで進む（ダメージあり）。',modifier:true,reward:'avoid-traps'},
 ];
 export const skillCards=themedSkills.map(c=>({...c,detail:c.detail+' 指示で発動。骸・敵で各階1回を共有。'+(enemySkillReasons[c.id]?' 敵には使用不可：'+enemySkillReasons[c.id]+'。':''),...(c.id==='warp'?{reward:'warp'}:{ability:c.id})}));
 for(const[kind,list]of Object.entries({target:targetCards,condition:conditionCards,action:actionCards,skill:skillCards}))for(const c of list){c.cardKind=kind;c.rarity=cardRarity(kind,c.id);if(!c.detail)c.detail=kind==='target'?'指示を実行する者を選びます。':c.param?`${c.name}を${c.min}〜${c.max}の範囲で指定します。`:'この条件が成立した場合だけ指示を実行します。';}
-const cardDetails={self:'骸を実行者にする。HP条件は骸のHPを参照する。',enemy:'視界内で最も近い通常敵1体を実行者にする。ボスは操作しない。HP条件はその敵のHPを参照し、攻撃は骸へ向かう。','weak-enemy':'視界内の敵を残りHPの低い順に対象にする。','danger-enemy':'視界内の敵を攻撃力の高い順に対象にする。','one-hit':'実行者の攻撃相手のHPと通常ダメージを比べ、一撃で倒せる場合だけ実行。',injured:'実行者の残りHPが最大HPの半分以下の場合に実行。',visible:'目的地・対象が現在の視界に入っている場合に実行。'};
+const cardDetails={self:'骸を実行者にする。HP条件は骸のHPを参照する。',enemy:'視界内で最も近い通常敵1体を実行者にする。ボスは操作しない。HP条件はその敵のHPを参照し、攻撃は骸へ向かう。','weak-enemy':'視界内の敵を残りHPの低い順に対象にする。','danger-enemy':'視界内の敵を攻撃力の高い順に対象にする。','one-hit':'最も近い視認相手のHPと通常攻撃ダメージを比べ、一撃で倒せる場合だけ実行。スキル倍率は含まない。',visible:'目的地・対象が現在の視界に入っている場合に実行。'};
 for(const c of [...targetCards,...conditionCards])if(cardDetails[c.id])c.detail=cardDetails[c.id];
 export const cardCapacity=s=>4+(s.levels.cardSlots||0);
 export const conditionById=Object.fromEntries(conditionCards.map(c=>[c.id,c]));
@@ -68,7 +69,7 @@ export function validCardRule(s,input,{requireOwned=true}={}){
  if(requireOwned&&!effectUnlocked(s,effect))return false;
  if(requireOwned&&(!cardOwned(s,'target',r.target)||(Array.isArray(r.conditions)&&r.conditions.some(c=>!c||!cardOwned(s,'condition',c.id)))))return false;
  if(!Array.isArray(r.conditions)||r.conditions.some(c=>!c||typeof c.id!=='string')||r.conditions.length+2>cardCapacity(s)||new Set(r.conditions.map(c=>c.id)).size!==r.conditions.length)return false;
- return r.conditions.every(c=>{const d=conditionById[c.id];return d&&(c.id!=='one-hit'||r.target!=='self'||r.effect.id==='attack')&&(!d.param||(Number.isFinite(c.value)&&c.value>=d.min&&c.value<=d.max&&(c.value-d.min)%d.step===0));});
+ return r.conditions.every(c=>{const d=conditionById[c.id];return d&&(!d.param||(Number.isFinite(c.value)&&c.value>=d.min&&c.value<=d.max&&(c.value-d.min)%d.step===0));});
 }
 export function addCardRule(s){if(s.phase!=='prepare'||s.orders.length>=2+s.levels.commandSlots)return false;s.orders.push(createCardRule());s.mode='custom';return true;}
 export function replaceCardRule(s,index,rule){if(s.phase!=='prepare'||!s.orders[index]||!validCardRule(s,rule))return false;s.orders[index]=legacyToCards(rule);s.mode='custom';return true;}
@@ -81,7 +82,6 @@ function subjects(s,r,ctx){
 }
 function destinations(s,r,ctx){
  const id=r.effect.id;
- if(id==='attack')return s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)).sort((a,b)=>dist(s.player,a)-dist(s.player,b));
  if(id==='stairs')return [s.stairs].filter(p=>s.seen[p.y][p.x]&&!s.enemies.some(e=>e.boss));
  const types={chests:['chest'],'collect-weapons':['gear'],'collect-armor':['gear'],'collect-fragments':['fragment'],'collect-herbs':['herb'],'collect-springs':['potion'],letter:['letter']};
  if(types[id])return s.items.filter(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i)&&types[id].includes(i.type)&&(id!=='collect-weapons'||gearById[i.gear?.baseId]?.slot==='weapon')&&(id!=='collect-armor'||gearById[i.gear?.baseId]?.slot==='armor'));
@@ -99,8 +99,8 @@ function match(s,r,subject,destination,ctx){
    case'range':return dist(s.player,destination)<=c.value;
    case'turns':return s.steps>=c.value;
    case'enemy-count':return (enemy?(dist(subject,s.player)===1?1:0):s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)&&dist(s.player,e)===1).length)>=c.value;
-   case'one-hit':return enemy?s.hp<=Math.max(1,subject.attack-ctx.stats(s).defense):destination.hp<=Math.max(1,ctx.stats(s).attack-destination.defense);
-   case'injured':return hp<=maxHp*.5;
+   case'adjacent':return enemy?dist(subject,s.player)===1:s.enemies.some(e=>ctx.canSee(s,e.x,e.y)&&dist(s.player,e)===1);
+   case'one-hit':{const opponent=enemy?{hp:s.hp,defense:ctx.stats(s).defense}:s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)).sort((a,b)=>dist(s.player,a)-dist(s.player,b))[0];return Boolean(opponent)&&opponent.hp<=Math.max(1,(enemy?subject.attack:ctx.stats(s).attack)-opponent.defense);}
    default:return false;
   }
  });
@@ -117,14 +117,13 @@ export function chooseCardOrder(s,ctx){
  if(cardModifier(s,'avoid-traps',ctx))for(const t of s.traps||[])if(t.revealed&&!t.spent&&(s.gimmick?.id==='traps'||s.seen[t.y][t.x]))blocked.add(key(t));
  const seek=test=>ctx.route(s,test,{blocked})||ctx.route(s,test,{blocked:new Set(visible.map(key))});
  const rules=effectiveCardOrders(s);for(let index=0;index<rules.length;index++){
-  const fixed=index===s.orders.length,r=legacyToCards(rules[index]),effect=effectDefinition(r),targets=fixed?([s.stairs].filter(p=>s.seen[p.y]?.[p.x]&&!s.enemies.some(e=>e.boss))):matchingCardTargets(s,r,ctx);
-  if(!targets.length||effect?.modifier)continue;
+  const fixed=index===s.orders.length;if(ctx.ignoreDirectives&&!fixed)continue;const r=legacyToCards(rules[index]),effect=effectDefinition(r),targets=fixed?([s.stairs].filter(p=>s.seen[p.y]?.[p.x]&&!s.enemies.some(e=>e.boss))):matchingCardTargets(s,r,ctx);
+  if(!targets.length||effect?.modifier||effect?.id==='wait'&&s.steps<(s.directiveSafety?.waitUntil||0))continue;
   const base={id:'cards',ruleIndex:fixed?null:index,fixed,intent:`カード指示：${effect.name}`};
   if(r.target==='enemy'){const command=ctx.enemyPlan?.(s,r,targets[0]);if(command)return {...base,control:command};continue;}
   if(r.effect.kind==='skill'){if(skillCanRun(s,effect.id,ctx))return {...base,skill:effect.id,exit:effect.id==='homeward'};continue;}
-  if(effect.id==='attack'){
-   for(const e of targets){if(dist(s.player,e)===1)return {...base,enemy:e};const next=seek(p=>dist(p,e)===1);if(next)return {...base,next};}
-  }else if(effect.id==='retreat'){
+  if(effect.id==='wait')return {...base,wait:true};
+  if(effect.id==='retreat'){
    if(s.retreatCooldown>0||!visible.length)continue;
    const danger=p=>visible.reduce((n,e)=>n+(dist(p,e)===1?20:0)+6/(1+dist(p,e)),0);
    const next=dirs.map(([dx,dy])=>({x:s.player.x+dx,y:s.player.y+dy})).filter(p=>s.grid[p.y]?.[p.x]&&s.seen[p.y][p.x]&&!blocked.has(key(p))).sort((a,b)=>danger(a)-danger(b))[0];
@@ -147,6 +146,5 @@ export function chooseCardOrder(s,ctx){
 export function describeCardRule(input){
  const r=legacyToCards(input),target=targetCards.find(t=>t.id===r.target)?.name||'？',effect=effectDefinition(r);
  const conditions=r.conditions.map(c=>{const d=conditionById[c.id];if(c.id==='visible')return (r.effect.id==='stairs'?'階段':r.effect.id==='chests'?'宝箱':r.effect.id==='avoid-traps'?'トラップ':r.target==='self'?'対象':'敵')+'が視界内';return d?.param?d.name.replace('指定%',String(c.value)+'%').replace('指定距離',String(c.value)+'マス').replace('指定ターン',String(c.value)+'ターン').replace('指定数',String(c.value)):d?.name||'？';});
- if(effect?.id==='attack')return `${target}が、${conditions.length?conditions.join('、かつ')+'のとき、':''}${r.target==='self'?'敵':'骸'}を攻撃する。`;
- return `${target}が、${conditions.length?conditions.join('、かつ')+'のとき、':''}${effect?.name||'？'}${r.effect.kind==='skill'?'を発動する':''}。`;
+ return `${target}が、${conditions.length?conditions.join('、かつ')+(/(?:いる|ある|できる|倒せる)$/.test(conditions.at(-1))?'とき、':'のとき、'):''}${effect?.name||'？'}${r.effect.kind==='skill'?'を発動する':r.effect.id==='wait'?'する':''}。`;
 }

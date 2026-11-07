@@ -16,7 +16,7 @@ export function actorCanUse(target,effect){
  if(target!=='enemy')return false;
  return effect.cardKind==='skill'||effect.themeId
   ?!enemyUnsupportedSkills.has(effect.id)
-  :['attack','retreat','frontier','explore-all'].includes(effect.id);
+  :['wait','retreat','frontier','explore-all'].includes(effect.id);
 }
 export function migrateActorRow(input){
  const r=structuredClone(input);

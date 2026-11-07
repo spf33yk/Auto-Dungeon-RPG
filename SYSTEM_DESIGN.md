@@ -1,6 +1,6 @@
 # 骸の旅路 ― システム設計書
 
-更新日：2026-11-04。保存v16。基準実装fd464e0と、本書と同時コミットの5職業テーマ・セット実装。現行の機能仕様は[SPEC.md](SPEC.md)、企画は[DESIGN.md](DESIGN.md)。[整理前の設計履歴](docs/history/2026-11-04/SYSTEM_DESIGN.md)は互換・制作経緯の参照専用。
+更新日：2026-11-07。保存v16。基準実装c09908dと、本書と同時コミットのカード整理・進行停止対策。現行の機能仕様は[SPEC.md](SPEC.md)、企画は[DESIGN.md](DESIGN.md)。[整理前の設計履歴](docs/history/2026-11-04/SYSTEM_DESIGN.md)は互換・制作経緯の参照専用。
 
 ## 1. 構成と責務
 
@@ -11,8 +11,8 @@
 | 定義 | data.js、field-events.js | 敵・装備・強化・エリア・階数・異変・次階ヒント |
 | 本編 | game-engine.js（入口engine.js） | 状態・地形配置・行動・戦闘・拾得・周回・保存正規化 |
 | 地形 | dungeon-layout.js、boss-arena.js、crypt-obstacles.js | 通常階ランダム・対称ボス部屋・墓石と到達可能性 |
-| 指示 | card-orders.js、card-placement.js、orders.js | カード判定・互換性・配置操作・旧指示互換 |
-| 所持 | card-access.js、card-catalog.js、card-inventory.js、retired-cards.js | 初期6枚・53カード・抽選・図鑑・旧カード移行 |
+| 指示 | card-orders.js、card-placement.js、orders.js、directive-safety.js | カード判定・配置・旧指示互換・停滞検出と基本行動への復帰 |
+| 所持 | card-access.js、card-catalog.js、card-inventory.js、retired-cards.js、directive-card-migration.js | 初期6枚・53カード・抽選・図鑑・旧カード移行 |
 | 成長・報酬 | progression.js、drop-system.js、reinforcements.js | EXP・二段階ドロップ・保存RNG・増援 |
 | オーグメント | augments.js、augment-view.js、augment-art.js | 30効果・3択・計算・共通画像付き表示・配信URL |
 | 画面統括 | app.js、index.html、style.css、screens.css | 入力・フェイズ表示・ダイアログ停止・描画・保存 |
@@ -237,3 +237,6 @@ actor-rules.jsは実行者適合・旧行移行・仲間追加時の拡張点。
 2026-11-07 強化名・操作案内更新：scout＝視界の拡張、cardSlots＝複数条件の解放、commandSlots＝新規行を追加。名称と説明のみ変更し価格・上限・既存強化値・保存v16は維持。条件枠は初期2枚から最大4枚（総カード4〜6枚）、指示は初期2行から最大10行。準備の土台・カードを等倍率0.7（画面高500px以下は0.58）で表示し、余白も縮めて通常表示で編集2行を見渡せるようにする。素材の縦横比と長い列の横スクロールを維持する。
 
 チュートリアルは探索5手順（0.5×・1×・記録を開く・閉じる・再開）、準備7手順（条件タブ・ターン条件選択・配置・条件設定を開く・装備タブ・探索指示へ戻る・出発）。短い指示→操作する→対象を強調→実操作完了で進む。条件配置はドラッグ／タップ対応。対象が無い・枠が一杯の場合はその操作を省略でき、案内全体も終了できる。練習中は探索停止、購入や記憶の欠片の消費を強制しない。実際に配置したカードは構成に残り、「元に戻す」で戻せる。初回表示・NewGame時の再表示・オプションからの再実行と既存の閲覧済み設定を維持する。遊び方の説明も現行操作へ短縮。
+
+
+2026-11-07 待機・隣接条件と進行停止対策：「HPが半分以下」「攻撃する」を廃止し、NORMAL「相手と隣接している」「1ターン待機」を追加。初期攻撃カードを待機へ置換し、通常自動戦闘は維持する。数値は仮採用で、連続待機8ターン→待機不可20ターン、進展なし10ターン→基本行動20ターン、この階で1000ターン以後は編集指示を飛ばし階段進行を優先。強制敗北・強制Clearは行わず、ボスの封印も維持。任意のdirectiveSafetyを保存v16へ追加し、ロードで保持・階移動でリセット。本編と予測で共通処理。移行・検出条件・未確認範囲の詳細は[進行停止対策の詳細](docs/cards/DIRECTIVE_SAFETY.md)。

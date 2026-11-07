@@ -24,7 +24,7 @@ test('insertion seams add and move conditions without replacing adjacent cards',
 test('palette cards replace target, effect or condition and preserve valid rules',()=>{
  const s=prep();assert.equal(placeCard(s,palette('condition','turns'),dest(0,'condition',1)),true);assert.deepEqual(s.orders[0].conditions[1],{id:'turns',value:150});
  assert.equal(placeCard(s,palette('condition','range'),dest(0,'condition',0)),true);assert.equal(s.orders[0].conditions[0].value,6);
- assert.equal(placeCard(s,palette('target','enemy'),dest(0,'target')),true);assert.equal(s.orders[0].effect.id,'attack');assert.equal(placeCard(s,palette('target','self'),dest(0,'target')),true);assert.equal(placeCard(s,palette('action','frontier'),dest(0,'effect')),true);assert.equal(placeCard(s,palette('target','enemy'),dest(0,'target')),true);assert.equal(s.orders[0].effect.id,'frontier');
+ assert.equal(placeCard(s,palette('target','enemy'),dest(0,'target')),true);assert.equal(s.orders[0].effect.id,'wait');assert.equal(placeCard(s,palette('target','self'),dest(0,'target')),true);assert.equal(placeCard(s,palette('action','frontier'),dest(0,'effect')),true);assert.equal(placeCard(s,palette('target','enemy'),dest(0,'target')),true);assert.equal(s.orders[0].effect.id,'frontier');
  assert.equal(placeCard(s,palette('target','self'),dest(0,'target')),true);assert.equal(s.orders[0].effect.id,'frontier');
  assert.equal(placeCard(s,palette('action','chests'),dest(0,'effect')),true);assert.equal(s.orders[0].effect.id,'chests');assert.ok(s.orders.every(r=>validCardRule(s,r)));
 });
@@ -36,7 +36,7 @@ test('reordering conditions, swapping and moving between rows are atomic',()=>{
  const before=structuredClone(s.orders);assert.equal(placeCard(s,palette('condition','range'),dest(0,'condition',0)),false);assert.deepEqual(s.orders,before);
 });
 test('locked rewards, mismatched categories, duplicate conditions and capacity cannot mutate data',()=>{
- const s=prep(),before=structuredClone(s.orders);for(const [a,b] of [[palette('skill','mend'),dest(0,'effect')],[palette('condition','one-hit'),dest(0,'condition',1)],[palette('action','stairs'),dest(0,'target')],[palette('condition','hp-below'),dest(0,'condition',1)]])assert.equal(placeCard(s,a,b),false);
+ const s=prep(),before=structuredClone(s.orders);for(const [a,b] of [[palette('skill','mend'),dest(0,'effect')],[palette('condition','injured'),dest(0,'condition',1)],[palette('action','stairs'),dest(0,'target')],[palette('condition','hp-below'),dest(0,'condition',1)]])assert.equal(placeCard(s,a,b),false);
  assert.deepEqual(s.orders,before);s.abilities.push('mend');assert.equal(placeCard(s,palette('skill','mend'),dest(0,'effect')),true);
  s.orders[0].conditions.push({id:'visible'});const full=structuredClone(s.orders);assert.equal(placeCard(s,palette('condition','range'),dest(0,'condition',2)),false);assert.deepEqual(s.orders,full);
  s.phase='explore';const saved=structuredClone(s.orders);assert.equal(placeCard(s,palette('action','stairs'),dest(0,'effect')),false);assert.equal(moveCardRow(s,0,1),false);assert.deepEqual(s.orders,saved);
@@ -51,9 +51,9 @@ test('expanded capacity supports eight rows and four conditions without exceedin
  assert.equal(moveCardRow(s,7,0),true);assert.equal(s.orders[0].conditions.length,4);assert.ok(s.orders.every(r=>validCardRule(s,r)));
 });
 test('every existing card can be placed on a compatible rule when acquired',()=>{
- for(const c of targetCards){const s=prep();s.orders[0]=createCardRule('self',[],'action','attack');assert.equal(placeCard(s,palette('target',c.id),dest(0,'target')),true,c.id);}
- for(const c of conditionCards){const s=prep();s.orders[0]=['one-hit','injured'].includes(c.id)?createCardRule('enemy',[],'action','attack'):createCardRule();assert.equal(placeCard(s,palette('condition',c.id),dest(0,'condition',0)),true,c.id);}
- for(const [kind,cards] of [['action',actionCards],['skill',skillCards]])for(const c of cards){const s=prep();s.abilities.push(...skillCards.filter(c=>c.ability).map(c=>c.id));s.unlockedOrders.push('warp','avoid-traps');s.orders[0]=c.enemy?createCardRule('enemy',[],'action','attack'):createCardRule();assert.equal(placeCard(s,palette(kind,c.id),dest(0,'effect')),true,c.id);}
+ for(const c of targetCards){const s=prep();s.orders[0]=createCardRule('self',[],'action','wait');assert.equal(placeCard(s,palette('target',c.id),dest(0,'target')),true,c.id);}
+ for(const c of conditionCards){const s=prep();s.orders[0]=['one-hit','injured'].includes(c.id)?createCardRule('enemy',[],'action','wait'):createCardRule();assert.equal(placeCard(s,palette('condition',c.id),dest(0,'condition',0)),true,c.id);}
+ for(const [kind,cards] of [['action',actionCards],['skill',skillCards]])for(const c of cards){const s=prep();s.abilities.push(...skillCards.filter(c=>c.ability).map(c=>c.id));s.unlockedOrders.push('warp','avoid-traps');s.orders[0]=c.enemy?createCardRule('enemy',[],'action','wait'):createCardRule();assert.equal(placeCard(s,palette(kind,c.id),dest(0,'effect')),true,c.id);}
 });
 
 test('configured palette values survive placement, while invalid values are atomic',()=>{

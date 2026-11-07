@@ -11,7 +11,7 @@ export function placeCard(s,source,destination){
  if(source.origin==='palette'){
   if(!cardOwned(s,source.type,source.id))return false;
   if(source.type==='target'&&slot==='target'&&targetCards.some(c=>c.id===source.id)){
-   if(dest.target!==source.id){dest.target=source.id;if(!actorCanUse(dest.target,effectDefinition(dest)))dest.effect={kind:'action',id:'attack'};}
+   if(dest.target!==source.id){dest.target=source.id;if(!actorCanUse(dest.target,effectDefinition(dest)))dest.effect={kind:'action',id:'wait'};}
   }else if(source.type==='condition'&&slot==='condition'&&conditionById[source.id]){
    const value=conditionDefault(source.id);if(source.value!==undefined&&conditionById[source.id].param)value.value=source.value;if(destination.insert)dest.conditions.splice(ci,0,value);else if(ci===dest.conditions.length)dest.conditions.push(value);else dest.conditions[ci]=value;
   }else if(['action','skill'].includes(source.type)&&slot==='effect'){
