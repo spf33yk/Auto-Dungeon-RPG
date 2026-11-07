@@ -1,0 +1,105 @@
+{
+  "date": "2026-11-08",
+  "baseline": "329137b",
+  "distinctSeeds": 100,
+  "initialRuns": 400,
+  "conditionalSecondRuns": 2,
+  "regressionRuns": 12,
+  "elapsedSeconds": 117.7889667,
+  "summary": [
+    {
+      "policy": "direct",
+      "label": "直行重視",
+      "samples": 100,
+      "clears": 1,
+      "deaths": 99,
+      "caps": 0,
+      "early": 53,
+      "reach20": 29,
+      "reach10": 1,
+      "reach1": 1,
+      "skillUses": 1063,
+      "controlledTurns": 0,
+      "recoveries": 21,
+      "maxFloorTurns": 185
+    },
+    {
+      "policy": "loot",
+      "label": "回収重視",
+      "samples": 100,
+      "clears": 0,
+      "deaths": 100,
+      "caps": 0,
+      "early": 51,
+      "reach20": 41,
+      "reach10": 20,
+      "reach1": 0,
+      "skillUses": 3542,
+      "controlledTurns": 0,
+      "recoveries": 104,
+      "maxFloorTurns": 543
+    },
+    {
+      "policy": "build",
+      "label": "テーマ重視",
+      "samples": 100,
+      "clears": 1,
+      "deaths": 99,
+      "caps": 0,
+      "early": 48,
+      "reach20": 43,
+      "reach10": 19,
+      "reach1": 1,
+      "skillUses": 4075,
+      "controlledTurns": 0,
+      "recoveries": 109,
+      "maxFloorTurns": 543
+    },
+    {
+      "policy": "control",
+      "label": "敵待機活用",
+      "samples": 100,
+      "clears": 0,
+      "deaths": 100,
+      "caps": 0,
+      "early": 63,
+      "reach20": 24,
+      "reach10": 2,
+      "reach1": 0,
+      "skillUses": 1530,
+      "controlledTurns": 6388,
+      "recoveries": 77,
+      "maxFloorTurns": 690
+    }
+  ],
+  "successfulRuns": [
+    {
+      "seed": 3875974,
+      "policy": "direct",
+      "turns": 2842
+    },
+    {
+      "seed": 4504348,
+      "policy": "build",
+      "turns": 3052
+    }
+  ],
+  "secondRuns": [
+    {
+      "seed": 3875993,
+      "policy": "direct",
+      "result": "dead",
+      "basement": 25,
+      "turns": 394,
+      "letter": false
+    },
+    {
+      "seed": 4504367,
+      "policy": "build",
+      "result": "dead",
+      "basement": 5,
+      "turns": 2438,
+      "letter": true
+    }
+  ]
+}

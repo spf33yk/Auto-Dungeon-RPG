@@ -1,1 +1,5 @@
-完成扱いのapproved-v1から本編へ登録した4方向・3姿勢の素材。sprites.pngは承認PNGと完全一致。身体64px、セル128px、原点[64,96]。表示倍率1.71875で従来の可視高約55pxへ合わせる。正面・左・右・背面を個別に描画し反転しない。列は立ち・1px屈伸・2px屈伸。斬撃だけ承認された別素材から64pxセル3列4行へ書き出す。実装仕様と検証はSPEC.md・IMPLEMENTATION_NOTES.mdを参照。
+# 旧3列形式の互換素材
+
+character-minimal-4dir/v1の旧3姿勢を読み込む互換確認用。身体64px・保存セル128px・原点[64,96]・displayScale1.71875。現在の本編主人公はart/characters/mukuro-march64-v1/を使用する。
+
+本フォルダーの画像は互換と斬撃素材の参照のため保持し、新しい足踏み・作画の入力には流用しない。現行仕様はdocs/characters/FORMAT.mdとMARCH64_INTEGRATION.mdを参照する。

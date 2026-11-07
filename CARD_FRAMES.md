@@ -1,19 +1,9 @@
-# カードの専用フレーム差し替え
+# カード・土台の現行フレーム
 
-現在は標準テーマの連結カード素材と土台を使用。詳細はdocs/ui/PREPARATION_UI.md。ドラッグ・タップ配置・条件値・取得制限・指示優先順位を維持する。
+本編はart/ui/preparation/のlayout.json・カード515×130・土台の左／中央／右画像を使用する。4種類のカード色は全スキン共通。スキン変更は土台・周辺装飾に適用する。
 
-カード一覧と配置カードに共通のdata-card-kindを付けている。値はtarget／condition／action／skill。screens.cssの共通変数で切り替える。
+カードは元の比率を保つ等倍率表示。指示内では土台と共に0.7倍（画面高500px以下は0.58倍）。土台は端を固定し中央を同倍率で繰り返す。接続部を合わせ、文字・条件入力・レアリティは前景へ描画する。長い列は横スクロール。数字・カード本文・条件値はHTMLで描画する。
 
-```css
-[data-card-kind="condition"] {
-  --card-frame-border-source: url('./art/cards/condition-frame.png');
-  --card-frame-slice: 8;
-}
-```
+[data-card-kind]のtarget／condition／action／skillで種類を識別。元画像に含むカテゴリ装飾と動的ラベルの領域を分ける。将来の差し替えも描画領域とドラッグ・タップ・入力の判定を維持する。
 
-上記のart/cardsパスは将来の差し替え例。現行の配信用素材はart/ui/preparation/へ配置し、PNGの内容ハッシュ付きURLをindex.htmlのpreparation-assetsスタイルに登録する。カードは幅260×高さ約65.63論理pxで元の515:130の比率を保ち、長い列は横スクロールする。生成・表示ともに縦横別の引き伸ばしは行わない。土台は端を等倍率で縮小し、中央を同倍率のまま繰り返す。透明余白・文字の可読性・配置可能な溝の強調も確認する。
-
-カードの内容と条件値はHTMLのまま残す。今回の標準素材はカテゴリ見出し・アイコンをそのまま使い、動的な内容を画像に焼き込まない。将来の文字なし枠への完全分離は別工程。追加画像はscripts/update-assets.jsの配信URL更新対象にも登録し、SPEC.mdとART_ASSETS.mdへ寸法・容量・変更点を記録する。
-
-## 制作サンプルと本番導入案（2026-10-29）
-確認用のカード原稿はcard-frame/v1、土台はcard-tray/v3まで制作済み。ただし画像にはカテゴリ名が焼き込まれており、現在のHTMLラベル・条件値と重ねる本番用の文字なし枠への分離は未実施。準備画面へ適用する際の課題・UI案はdocs/ui/PREPARATION_CARD_UI_PROPOSAL.mdを参照。装飾の画像領域とクリック／タップ領域を分け、ドラッグ・タップ・条件編集・探索中編集禁止を維持する。
+素材追加時はlayout.jsonと配信定義へ登録し、node scripts/update-assets.jsと--checkを実行する。寸法・透過・連結・文字位置を確認し、SPEC.mdとART_ASSETS.mdを更新する。画面と操作はdocs/ui/PREPARATION_UI.mdを参照。
