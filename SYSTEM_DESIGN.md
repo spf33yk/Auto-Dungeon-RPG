@@ -77,11 +77,13 @@ actor-rules.jsが実行者の対応範囲を定義し、敵はenemy-control.js�
 
 active-directive.jsが実際のexecutingRuleから番号・対象・条件・効果を整形し、thought-stack内のmemory-quote直前へ表示する。基本AI時は空欄。ログ消去と分離する。
 
-build-themes.jsが5テーマ・30オーグメント・30スキルを定義。set-bonuses.jsが所持・解放済み・有効配置の異なるスキル数から星を算出し、augmentValueで性能を補正。スキル基本性能は変更しない。augment-strength.jsが基本／星別の説明を整形、augment-view.js／theme-view.js／hover-help.jsを通して選択・準備・図鑑・説明ウィンドウへ共通反映する。
+build-themes.jsが5テーマ・30オーグメント・30スキルを定義。set-bonuses.jsが所持・解放済み・有効配置の異なるスキル数から星を算出し、augmentStatsがaugment-growth.jsの個別表から性能を取得。スキル基本性能は変更しない。augment-strength.jsが基本／星別の説明を整形、augment-view.js／theme-view.js／hover-help.jsを通して選択・準備・図鑑・説明ウィンドウへ共通反映する。
 
 card-inventory.jsで宝箱の種類別候補を生成・保存、selectChestCategoryで一度だけ種類を固定しchooseChestCardで取得。取得は次の準備で配置可能。newCardsは初取得の追加カードだけを記録し、準備出発成功時に解除する。
 
 カード内の数値入力は編集groupとinputを分離し、枠のドラッグと競合させない。カード返却はリストへ集約し、編集後に予測を再計算。order-presets.jsが端末の名前付き指示を保存し、現所持・容量・改訂番号を検証する。
+
+個別成長はaugment-growth.jsの数値表を本編・予測・説明で共有する。候補最大8枚とconsolation、能力補正ピークの小数を保存v16で検証し、旧箱の外れ報酬は10個のまま扱う。
 
 ## 9. 描画・配信・検証
 

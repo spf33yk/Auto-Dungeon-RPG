@@ -100,7 +100,7 @@ function match(s,r,subject,destination,ctx){
    case'turns':return s.steps>=c.value;
    case'enemy-count':return (enemy?(dist(subject,s.player)===1?1:0):s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)&&dist(s.player,e)===1).length)>=c.value;
    case'adjacent':return enemy?dist(subject,s.player)===1:s.enemies.some(e=>ctx.canSee(s,e.x,e.y)&&dist(s.player,e)===1);
-   case'one-hit':{const opponent=enemy?{hp:s.hp,defense:ctx.stats(s).defense}:s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)).sort((a,b)=>dist(s.player,a)-dist(s.player,b))[0];return Boolean(opponent)&&opponent.hp<=Math.max(1,(enemy?subject.attack:ctx.stats(s).attack)-opponent.defense);}
+   case'one-hit':{const opponent=enemy?{hp:s.hp,defense:ctx.stats(s).defense}:s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)).sort((a,b)=>dist(s.player,a)-dist(s.player,b))[0];return Boolean(opponent)&&opponent.hp<=Math.ceil(Math.max(1,(enemy?subject.attack:ctx.stats(s).attack)-opponent.defense));}
    default:return false;
   }
  });

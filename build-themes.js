@@ -27,14 +27,14 @@ export const themedAugments=[
   "name": "踏破の心得",
   "themeId": "explorer",
   "rarity": "EPIC",
-  "detail": "この階で入った異なる部屋の数に応じてATKが増加。部屋数×1（端数切上げ）、最大＋5。次の階でリセット。"
+  "detail": "この階で入った異なる部屋1つにつきATK＋1、最大＋5。次の階でリセット。"
  },
  {
   "id": "treasure-sense",
   "name": "宝探しの勘",
   "themeId": "explorer",
   "rarity": "EPIC",
-  "detail": "カード宝箱で、選んだ種類のカード候補数を最大3枚から最大4枚に増やす。取得枚数は変わらない。"
+  "detail": "カード宝箱の候補上限を3枚から4枚へ増やす。同種類・同レアリティのカード数が少ない場合はその枚数まで。取得枚数は変わらない。"
  },
  {
   "id": "pioneer",
@@ -48,14 +48,14 @@ export const themedAugments=[
   "name": "熟成の刃",
   "themeId": "monk",
   "rarity": "NORMAL",
-  "detail": "この階の40ターンごとにATKが増加。増加量は経過区間数×1（端数切上げ）、最大＋5。次の階でリセット。"
+  "detail": "この階の40ターンごとにATK＋1、最大＋5。次の階でリセット。"
  },
  {
   "id": "patience",
   "name": "熟成の鎧",
   "themeId": "monk",
   "rarity": "NORMAL",
-  "detail": "この階の60ターンごとにDEFが増加。増加量は経過区間数×1（端数切上げ）、最大＋3。次の階でリセット。"
+  "detail": "この階の60ターンごとにDEF＋1、最大＋3。次の階でリセット。"
  },
  {
   "id": "breath",
@@ -69,7 +69,7 @@ export const themedAugments=[
   "name": "積年の刃",
   "themeId": "monk",
   "rarity": "EPIC",
-  "detail": "旅の累計200ターンごとにATKが増加。増加量は経過区間数×1（端数切上げ）、最大＋15。"
+  "detail": "旅の累計200ターンごとにATK＋1、最大＋15。"
  },
  {
   "id": "charge",
@@ -90,7 +90,7 @@ export const themedAugments=[
   "name": "背水の刃",
   "themeId": "berserker",
   "rarity": "NORMAL",
-  "detail": "最大HPの10%を失うごとにATKが増加。失った割合の10%区間数×1（端数切上げ）、最大＋9。HPが回復すると補正も減る。"
+  "detail": "最大HPの10%を失うごとにATK＋1、最大＋9。HPが回復すると補正も減る。"
  },
  {
   "id": "leech",
@@ -104,7 +104,7 @@ export const themedAugments=[
   "name": "包囲の闘志",
   "themeId": "berserker",
   "rarity": "NORMAL",
-  "detail": "視界内の敵数×1だけATKが増加（端数切上げ、最大＋5）。見える敵数に応じて変動。"
+  "detail": "視界内の敵1体につきATK＋1、最大＋5。見える敵数に応じて変動。"
  },
  {
   "id": "blood",
