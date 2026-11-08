@@ -30,7 +30,7 @@ function selectSource(host,value,s,showSettings=true){
  if(s){updateDropHints(host,s,value);if(showSettings)conditionSettings(host,s,value);}
 }
 function applySource(host,s,source,target){
- if(target.closest('[data-fixed-order]')){host.dataset.cardMessage='最終行は常設のため変更できません。';selectSource(host,'',s);return false;}
+ if(target.closest('[data-fixed-order]')){host.dataset.cardMessage='固定指示は変更できません。';selectSource(host,'',s);return false;}
  const row=target.closest('[data-drop-row]'),spot=target.closest('[data-drop-slot]');let ok=false;
  if(target.closest('[data-drop-return]'))ok=removePlacedCard(s,parseSource(source,host));
  else if(source?.startsWith('row|')&&row)ok=moveCardRow(s,Number(source.split('|')[1]),Number(row.dataset.dropRow));
@@ -38,9 +38,15 @@ function applySource(host,s,source,target){
  host.dataset.cardMessage=ok?'指示を更新しました。':'その組み合わせには配置できません。対象・取得状況・条件の重複・枠数を確認してください。';selectSource(host,'',s);return ok;
 }
 function conditionName(c){const d=conditionById[c.id];return d.name.replace('指定%',c.value+'%').replace('指定数',String(c.value)).replace('指定距離',c.value+'マス').replace('指定ターン',c.value+'ターン');}
-function fixedStairRow(){
- const slot=(kind,name)=>`<div class="board-slot ${kind}" data-card-kind="${kind}"><span class="card-rarity NORMAL">NORMAL</span><span class="card-content"><span class="card-content-text">${name}</span></span></div>`;
- return `<article class="board-rule fixed-stair-order" data-fixed-order aria-label="常設の最終指示 自分 階段を上る"><div class="fixed-order-label">最終行</div><div class="tray-scroll" tabindex="0" aria-label="常設指示のカード列"><div class="tray-surface"><span class="row-handle" aria-hidden="true">固定</span><div class="board-slots">${slot('target','自分')}${slot('action','階段を上る')}</div></div></div><div class="tray-caption">自分は、階段を上る。／指示枠を消費しません。</div></article>`;
+function fixedInstructionRows(){
+ const slot=(kind,name)=>`<div class="board-slot ${kind}" data-card-kind="${kind}"><span class="card-rarity">固定</span><span class="card-content"><span class="card-content-text">${name}</span></span></div>`;
+ const rows=[
+  {condition:'相手と隣接している',action:'通常攻撃',detail:'隣接する敵を攻撃。移動指示中も交戦します。スキル・待機・退避・敵への指示は優先されます。'},
+  {condition:'階段を発見済み',action:'階段を上る',detail:'発見済みで、ボスに封印されていない階段へ向かいます。'},
+  {condition:'視界内に敵がいる',action:'敵に近づく',detail:'階段への固定指示が実行できない場合、視認中の敵へ近づきます。'},
+  {condition:'',action:'未探索のマスへ進む',detail:'見えている未踏マスを調べます。探索済みなら階段へ向かいます。'}
+ ];
+ return `<article class="board-rule fixed-stair-order" data-fixed-order aria-label="固定指示・変更不可"><div class="fixed-order-label">固定指示</div><p class="fixed-order-help">指示がない／実行できないときの基本行動です。上から順に判定します。</p>${rows.map((r,i)=>`<div class="fixed-basic-row"><div class="tray-scroll" tabindex="0" aria-label="固定指示${i+1} 自分 ${r.condition} ${r.action}"><div class="tray-surface"><span class="row-handle" aria-hidden="true">固定${i+1}</span><div class="board-slots">${slot('target','自分')}${r.condition?slot('condition',r.condition):''}${slot('action',r.action)}</div></div></div><div class="tray-caption">${r.detail}</div></div>`).join('')}<p class="fixed-order-help">編集・削除・並べ替えはできません。指示枠は消費しません。宝箱や回復ポーションなどは、通り道にある場合だけ取得します。</p></article>`;
 }
 function renderCardBoard(host,s,capacity){
  const group=paletteGroups[host.dataset.cardGroup]?host.dataset.cardGroup:'target',entries=paletteGroups[group][1].filter(c=>cardOwned(s,group,c.id));
@@ -54,7 +60,7 @@ function renderCardBoard(host,s,capacity){
   const conditions=r.conditions.map((c,ci)=>insertion(ci)+cardSlot('condition',ci,`条件${ci+1}`,conditionName(c))).join('');
   const empty=insertion(r.conditions.length);
   return `<article class="board-rule ${r.disabled?'rule-disabled':''}" data-card-row="${index}" data-drop-row="${index}"><button type="button" class="rule-toggle" data-toggle-rule="${index}" aria-pressed="${!r.disabled}">${r.disabled?'無効':'有効'}</button>${skillThemeBadge(effect,s)}<div class="tray-scroll" tabindex="0" aria-label="指示${index+1}のカード列・横スクロール"><div class="tray-surface" data-drag-source="row|${index}"><button type="button" class="row-handle" data-drag-source="row|${index}" data-drop-row="${index}" aria-label="指示${index+1}を移動"><span class="priority-number">${index+1}</span></button><div class="board-slots">${cardSlot('target',0,'ターゲット',target.name)}${conditions}${empty}${cardSlot('effect',0,r.effect.kind==='skill'?'スキル':'アクション',effect.name)}</div></div></div><div class="tray-caption"><span>${esc(describeCardRule(r))}</span></div></article>`;
- }).join('')}${fixedStairRow()}</div></section></div></div>`;
+ }).join('')}${fixedInstructionRows()}</div></section></div></div>`;
  selectSource(host,'',s);
 }
 
@@ -66,7 +72,7 @@ export function renderCardEditor(host,s,capacity){
  host.innerHTML=`<div class="card-order-editor"><p class="section-caption">指示 ${s.orders.length} / ${capacity}行 · 1行 ${cardCapacity(s)}枚まで（ターゲット1枚＋条件＋行動／スキル1枚）。<br>上から実行可能な指示を1つ選びます。条件はすべて成立が必要です。<br>${editable?'準備中だけ編集できます。行数とカード数は別々に拡張できます。':'探索中は閲覧のみ。ひとやすみ中も変更できません。'}</p>${s.orders.map((input,index)=>{
   const r=legacyToCards(input),effects=r.effect.kind==='skill'?skillCards:actionCards;
   return `<article class="rule-card card-rule" data-card-row="${index}"><div class="card-rule-heading"><strong>指示 ${index+1}${r.disabled?'（無効）':''}</strong><span>${r.conditions.length+2} / ${cardCapacity(s)}枚</span><button data-rule-op="up" data-index="${index}" aria-label="指示${index+1}を上へ" ${!editable||index===0?'disabled':''}>↑</button><button data-rule-op="down" data-index="${index}" aria-label="指示${index+1}を下へ" ${!editable||index===s.orders.length-1?'disabled':''}>↓</button><button data-rule-op="remove" data-index="${index}" ${disabled}>外す</button></div><div class="instruction-cards"><label class="instruction-card target-card"><small>ターゲットカード</small><select data-card-field="target" aria-label="指示${index+1}のターゲット" ${disabled}>${targetCards.map(t=>option(t.id,t.name,r.target)).join('')}</select></label>${r.conditions.map((c,ci)=>{const d=conditionById[c.id];return `<div class="instruction-card condition-card"><small>条件カード ${ci+1} · AND</small><select data-card-field="condition" data-condition="${ci}" aria-label="指示${index+1}の条件${ci+1}" ${disabled}>${conditionCards.map(d=>option(d.id,d.name,c.id,r.target==='self'&&['one-hit','injured'].includes(d.id)||r.conditions.some((c,j)=>j!==ci&&c.id===d.id))).join('')}</select>${d.param?`<label><input type="number" data-card-field="value" data-condition="${ci}" min="${d.min}" max="${d.max}" step="${d.step}" value="${c.value}" aria-label="指示${index+1}の条件${ci+1}の値" ${disabled}> ${d.unit}</label>`:''}<button data-card-op="remove-condition" data-condition="${ci}" ${disabled}>条件を外す</button></div>`;}).join('')}<label class="instruction-card effect-card"><small>実行カード</small><select data-card-field="kind" aria-label="指示${index+1}の実行種別" ${disabled}>${option('action','アクションカード',r.effect.kind)}${option('skill','スキルカード',r.effect.kind,r.target!=='self'||!skillCards.some(e=>effectUnlocked(s,e)))}</select><select data-card-field="effect" aria-label="指示${index+1}の実行内容" ${disabled}>${effects.map(e=>option(e.id,e.name+(effectUnlocked(s,e)?'':'（未取得）'),r.effect.id,Boolean(e.enemy)!==(r.target!=='self')||!effectUnlocked(s,e))).join('')}</select></label></div><button data-card-op="add-condition" ${!editable||r.conditions.length+2>=cardCapacity(s)?'disabled':''}>＋条件カード</button><p class="card-rule-preview">${esc(describeCardRule(r))}</p></article>`;
- }).join('')}<div class="fitted-card-editor fixed-order-preview">${fixedStairRow()}</div><button class="rule-add" data-card-op="add-row" ${!editable||s.orders.length>=capacity?'disabled':''}>行追加を追加</button><p class="section-caption">「視界内」は、行動先の階段・宝箱・敵・トラップを現在見えているかで判定します。通常の移動より隣接戦闘を優先します。該当指示がなければ基本探索を行います。戦術と罠回避は条件成立中の補助行動で、ターンを消費しません。</p></div>`;
+ }).join('')}<div class="fitted-card-editor fixed-order-preview">${fixedInstructionRows()}</div><button class="rule-add" data-card-op="add-row" ${!editable||s.orders.length>=capacity?'disabled':''}>行追加を追加</button><p class="section-caption">「視界内」は、行動先の階段・宝箱・敵・トラップを現在見えているかで判定します。通常の移動より隣接戦闘を優先します。該当指示がなければ基本探索を行います。戦術と罠回避は条件成立中の補助行動で、ターンを消費しません。</p></div>`;
 }
 
 export function handleCardClick(e,s){

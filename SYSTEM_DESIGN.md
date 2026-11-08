@@ -112,3 +112,5 @@ TRUE本編、仲間指定、追加アニメーション、実機スマホは残�
 app.jsはtick完了後に通知を積み、入場通知中だけ次tickと宝箱・オーグメントの自動表示を抑止する。専用native dialogをマップの実矩形へ位置合わせし、下部HUDの上へ配置。入場ダイアログの閉じるイベントには汎用finishDialogを適用せず、paused／dialogWasPausedを書き換えない。最後の確認でlastを更新しrenderを再実行して報酬表示へ引き継ぐ。resizeで位置を再計算、暗転やぼかしを使わず、prefers-reduced-motion時は▼を動かさない。
 
 スキル通知は別の非モーダルDOMとFIFO列で扱い、active（進行停止）は入場通知列だけを参照する。requestAnimationFrameで表示中の実時間2000msを消費。別ダイアログ・画面非表示時はタイマーを止めるが、スキル列の存在はtick・報酬表示・フォーカス・休止フラグへ影響しない。pointer-events:noneで操作を遮らず、階／旅変更で表示と列をともに破棄する。
+
+card-editor.jsのfixedInstructionRowsはplanHeroTurn／固定階段の現行フォールバックを説明する読取専用4行を描画する。data-fixed-orderだけを付け、data-card-row・data-drag-source・data-drop-slotを付けない。applySourceは固定領域への配置を拒否。実行ルールは従来のFIXED_STAIR_RULEとエンジンの基本AIを維持し、説明4行をs.ordersへ格納しない。active-directive.jsの固定階段表記は「固定指示」。

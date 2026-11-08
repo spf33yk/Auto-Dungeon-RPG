@@ -17,7 +17,7 @@ export const conditionCards=[
  {id:'adjacent',name:'相手と隣接している',detail:'実行者の上下左右に攻撃相手がいるときに実行。斜めは含まない。'},
 ];
 export const actionCards=[
- {id:'stairs',name:'階段を上る',detail:'他の目的より階段を優先。最終行にも変更できない階段指示を常設。'},
+ {id:'stairs',name:'階段を上る',detail:'他の目的より階段を優先。固定指示にも変更できない階段への行動を常設。'},
  {id:'chests',name:'宝箱を取得',detail:'開封可能な通常宝箱へ向かう。'},
  {id:'collect-weapons',name:'武器を取得',detail:'発見済みの武器へ向かう。'},
  {id:'collect-armor',name:'防具を取得',detail:'発見済みの防具へ向かう。'},
