@@ -116,3 +116,7 @@ app.jsはtick完了後に通知を積み、入場通知中だけ次tickと宝箱
 card-editor.jsのfixedInstructionRowsは隣接攻撃・階段探索の読取専用2行を描画する。data-fixed-order領域への配置を拒否し、説明行はs.ordersに格納しない。FIXED_STAIR_RULEとplanHeroTurnの未踏探索で階段探索を構成する。planHeroTurnから非隣接の可視敵への接近フォールバックを削除し、隣接戦闘と能動指示の優先は維持する。
 
 各行はarticle／divの操作欄・要約欄・非表示可能な本文で構成。有効／無効の隣の明示ボタンでhiddenとaria-expandedを更新し、selectedを返して再描画を抑止する。ホスト別WeakMap内で編集行の折りたたみをWeakSet、固定行の展開をSetで保持。初期は編集行展開／固定行折りたたみ。編集行のオブジェクト参照に追従して並べ替え後も保持し、階／旅変更ではリセットする。閉じた編集行も優先度からドラッグ可能。UI一時状態は保存・予測署名へ含めない。
+
+app.jsのsyncSceneViewportはany-pointer:coarseからdata-touch-controlsを設定。screens.cssでHUDの押下領域・アイコン・間隔を--game-scene-scaleの逆数で補正し、ResizeObserverで準備領域の開始位置を追従させる。行の有効／無効と折りたたみは同じ詳細度のCSSで寸法を統一する。
+
+INITIAL_CARDSからaction:waitを除外し、カード箱の既存NORMAL抽選へ含める。migrateDirectiveCardsの待機自動付与を廃止し、明示所持・配置済みの互換は維持する。保存v16は変更しない。

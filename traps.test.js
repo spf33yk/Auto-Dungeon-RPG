@@ -5,7 +5,7 @@ import{newGame,makeFloor,tick,stats,radius,normalizeSave,validateSave,createCard
 import{enemyAttack,executeEnemyCommand}from'./enemy-control.js';
 import{themeState,skillCanRun}from'./theme-runtime.js';
 import{forecastExploration,forecastSignature}from'./exploration-forecast.js';
-function arena(){const s=newGame(808);s.floor=2;makeFloor(s);s.phase='explore';s.augmentStarted=true;s.augmentOffer=null;s.grid=Array.from({length:H},(_,y)=>Array.from({length:W},(_,x)=>+(x>0&&y>0&&x<W-1&&y<H-1)));s.seen=s.grid.map(r=>r.map(Boolean));s.visited=s.grid.map(r=>r.map(()=>false));s.player={x:5,y:5};s.stairs={x:20,y:5};s.items=[];s.enemies=[];s.obstacles=[];s.traps=[];s.gimmick={id:'none'};s.orders=[createCardRule('self',[],'action','wait')];return s;}
+function arena(){const s=newGame(808);s.floor=2;makeFloor(s);s.phase='explore';s.augmentStarted=true;s.augmentOffer=null;s.grid=Array.from({length:H},(_,y)=>Array.from({length:W},(_,x)=>+(x>0&&y>0&&x<W-1&&y<H-1)));s.seen=s.grid.map(r=>r.map(Boolean));s.visited=s.grid.map(r=>r.map(()=>false));s.player={x:5,y:5};s.stairs={x:20,y:5};s.items=[];s.enemies=[];s.obstacles=[];s.traps=[];s.gimmick={id:'none'};s.ownedCards.push('action:wait');s.profile.cards.push('action:wait');s.orders=[createCardRule('self',[],'action','wait')];return s;}
 const enemy=(s,p={})=>{const e={...monsters[0],baseId:monsters[0].id,x:8,y:5,maxHp:100,hp:100,period:1,aggro:true,...p};s.enemies.push(e);return e;};
 const place=(s,type,p=s.player)=>{const t={x:p.x,y:p.y,type,spent:false,revealed:true};s.traps.push(t);return t;};
 function api(s,roll=.9){return {rng:()=>roll,maxHp:()=>100,log:()=>{},damage:(e,n)=>{if(e)e.hp-=n;else s.hp-=n;}};}

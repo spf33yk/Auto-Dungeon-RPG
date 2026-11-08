@@ -1,11 +1,11 @@
 {
   "date": "2026-11-08",
-  "baseline": "88c5fc437895310c8915f6bacc247ebaacd7eecb",
-  "workingTree": "固定指示を隣接攻撃・階段探索の2行へ整理し、非隣接敵への自動接近を廃止した作業ツリー。実測時runtimeHashesをローカルJSONに保存。",
+  "baseline": "ce2ad6c1940f9b5c738fd7afb4496e6ff971176d",
+  "workingTree": "1ターン待機を初期所持からNORMAL宝箱報酬へ移した作業ツリー。実測時runtimeHashesをローカルJSONに保存。",
   "distinctSeeds": 100,
   "initialRuns": 400,
   "conditionalSecondRuns": 4,
-  "elapsedSeconds": 165.5460828,
+  "elapsedSeconds": 192.6097035,
   "summary": [
     {
       "policy": "direct",
@@ -14,14 +14,14 @@
       "clears": 0,
       "deaths": 100,
       "caps": 0,
-      "early": 51,
+      "early": 50,
       "reach20": 32,
       "reach10": 10,
       "reach1": 0,
-      "skillUses": 1704,
+      "skillUses": 1620,
       "controlledTurns": 0,
-      "recoveries": 29,
-      "maxFloorTurns": 221
+      "recoveries": 31,
+      "maxFloorTurns": 215
     },
     {
       "policy": "loot",
@@ -31,70 +31,78 @@
       "deaths": 100,
       "caps": 0,
       "early": 38,
-      "reach20": 53,
-      "reach10": 20,
+      "reach20": 55,
+      "reach10": 22,
       "reach1": 0,
-      "skillUses": 4518,
+      "skillUses": 4630,
       "controlledTurns": 0,
-      "recoveries": 63,
+      "recoveries": 70,
       "maxFloorTurns": 247
     },
     {
       "policy": "build",
       "label": "テーマ重視",
       "samples": 100,
-      "clears": 4,
-      "deaths": 96,
+      "clears": 2,
+      "deaths": 98,
       "caps": 0,
       "early": 38,
-      "reach20": 49,
-      "reach10": 24,
-      "reach1": 4,
-      "skillUses": 5129,
+      "reach20": 52,
+      "reach10": 22,
+      "reach1": 2,
+      "skillUses": 4975,
       "controlledTurns": 0,
-      "recoveries": 72,
-      "maxFloorTurns": 267
+      "recoveries": 74,
+      "maxFloorTurns": 219
     },
     {
       "policy": "control",
       "label": "敵待機活用",
       "samples": 100,
-      "clears": 0,
-      "deaths": 100,
+      "clears": 2,
+      "deaths": 98,
       "caps": 0,
-      "early": 61,
-      "reach20": 16,
-      "reach10": 1,
-      "reach1": 0,
-      "skillUses": 1107,
-      "controlledTurns": 5040,
-      "recoveries": 23,
-      "maxFloorTurns": 181
+      "early": 41,
+      "reach20": 45,
+      "reach10": 18,
+      "reach1": 2,
+      "skillUses": 3916,
+      "controlledTurns": 0,
+      "recoveries": 59,
+      "maxFloorTurns": 294
     }
   ],
   "successfulRuns": [
+    {
+      "seed": 1257749,
+      "policy": "control",
+      "turns": 3119
+    },
     {
       "seed": 3038142,
       "policy": "build",
       "turns": 2962
     },
     {
+      "seed": 3038142,
+      "policy": "control",
+      "turns": 2969
+    },
+    {
       "seed": 3142871,
       "policy": "build",
       "turns": 3105
-    },
-    {
-      "seed": 3875974,
-      "policy": "build",
-      "turns": 2867
-    },
-    {
-      "seed": 8588779,
-      "policy": "build",
-      "turns": 3083
     }
   ],
   "secondRuns": [
+    {
+      "seed": 1257768,
+      "policy": "control",
+      "result": "dead",
+      "basement": 19,
+      "turns": 751,
+      "letter": false
+    },
     {
       "seed": 3038161,
       "policy": "build",
@@ -104,27 +112,19 @@
       "letter": false
     },
     {
+      "seed": 3038161,
+      "policy": "control",
+      "result": "dead",
+      "basement": 29,
+      "turns": 123,
+      "letter": false
+    },
+    {
       "seed": 3142890,
       "policy": "build",
       "result": "dead",
       "basement": 9,
       "turns": 2026,
-      "letter": true
-    },
-    {
-      "seed": 3875993,
-      "policy": "build",
-      "result": "dead",
-      "basement": 13,
-      "turns": 1426,
-      "letter": true
-    },
-    {
-      "seed": 8588798,
-      "policy": "build",
-      "result": "dead",
-      "basement": 5,
-      "turns": 2337,
       "letter": true
     }
   ]

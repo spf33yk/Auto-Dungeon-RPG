@@ -389,7 +389,7 @@ $('mobile-display').onclick=()=>void enterDisplay();
 $('landscape-fullscreen').onclick=()=>{autoDisplayAttempted=true;void enterDisplay();};
 $('landscape-gate').addEventListener('cancel',e=>{if(document.documentElement.dataset.landscapeRequired==='true')e.preventDefault();});
 function syncSceneViewport(){
- const layout=sceneLayout(innerWidth,innerHeight,matchMedia('(pointer: coarse)').matches),root=document.documentElement;root.style.setProperty('--game-scene-scale',layout.scale);root.dataset.landscapeRequired=String(layout.portrait);
+ const layout=sceneLayout(innerWidth,innerHeight,matchMedia('(pointer: coarse)').matches),root=document.documentElement;root.style.setProperty('--game-scene-scale',layout.scale);root.dataset.landscapeRequired=String(layout.portrait);root.dataset.touchControls=String(matchMedia('(any-pointer: coarse)').matches);
  const gate=$('landscape-gate');if(layout.portrait&&!gate.open){paused=true;dialogWasPaused=true;gate.showModal();if(state.phase==='explore')render();}else if(!layout.portrait&&gate.open)gate.close();
 }
 addEventListener('resize',()=>{syncSceneViewport();fieldMessages.place();});window.visualViewport?.addEventListener('resize',()=>{syncSceneViewport();fieldMessages.place();});document.addEventListener('fullscreenchange',syncSceneViewport);syncSceneViewport();
