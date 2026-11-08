@@ -7,6 +7,10 @@ import {targetCards,conditionCards,conditionById,actionCards,skillCards,cardCapa
 import {placeCard,moveCardRow,canPlaceCard,removePlacedCard} from './card-placement.js';
 
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const foldStates=new WeakMap();
+function foldsFor(host,s){const scene=[s.seed,s.profile?.runs,s.floor].join(':');let value=foldStates.get(host);if(!value||value.scene!==scene){value={scene,rows:new WeakSet(),fixed:new Set()};foldStates.set(host,value);}return value;}
+function rowSentence(rule){return describeCardRule(rule).replace(/^([^、]+)が、/,'$1は').replace(/。$/,'');}
+function foldSummary(label,sentence,drag=''){return `<summary class="order-fold-summary" data-order-fold title="${esc(sentence)}"><span class="fold-chevron" aria-hidden="true">▸</span><span class="fold-priority" ${drag}>${esc(label)}</span><span class="fold-description">${esc(sentence)}</span><span class="fold-open-hint" aria-hidden="true">折りたたむ</span></summary>`;}
 const option=(id,name,current,disabled=false)=>`<option value="${id}" ${id===current?'selected':''} ${disabled?'disabled':''}>${esc(name)}</option>`;
 const paletteGroups={target:['ターゲット',targetCards],condition:['条件',conditionCards],action:['アクション',actionCards],skill:['スキル',skillCards]};
 const sourceFor=(type,id)=>`palette|${type}|${id}`;
@@ -38,7 +42,8 @@ function applySource(host,s,source,target){
  host.dataset.cardMessage=ok?'指示を更新しました。':'その組み合わせには配置できません。対象・取得状況・条件の重複・枠数を確認してください。';selectSource(host,'',s);return ok;
 }
 function conditionName(c){const d=conditionById[c.id];return d.name.replace('指定%',c.value+'%').replace('指定数',String(c.value)).replace('指定距離',c.value+'マス').replace('指定ターン',c.value+'ターン');}
-function fixedInstructionRows(){
+function fixedInstructionRows(host,s){
+ const folds=foldsFor(host,s);
  const slot=(kind,name)=>`<div class="board-slot ${kind}" data-card-kind="${kind}"><span class="card-rarity">固定</span><span class="card-content"><span class="card-content-text">${name}</span></span></div>`;
  const rows=[
   {condition:'相手と隣接している',action:'通常攻撃',detail:'隣接する敵を攻撃。移動指示中も交戦します。スキル・待機・退避・敵への指示は優先されます。'},
@@ -46,9 +51,10 @@ function fixedInstructionRows(){
   {condition:'視界内に敵がいる',action:'敵に近づく',detail:'階段への固定指示が実行できない場合、視認中の敵へ近づきます。'},
   {condition:'',action:'未探索のマスへ進む',detail:'見えている未踏マスを調べます。探索済みなら階段へ向かいます。'}
  ];
- return `<article class="board-rule fixed-stair-order" data-fixed-order aria-label="固定指示・変更不可"><div class="fixed-order-label">固定指示</div><p class="fixed-order-help">指示がない／実行できないときの基本行動です。上から順に判定します。</p>${rows.map((r,i)=>`<div class="fixed-basic-row"><div class="tray-scroll" tabindex="0" aria-label="固定指示${i+1} 自分 ${r.condition} ${r.action}"><div class="tray-surface"><span class="row-handle" aria-hidden="true">固定${i+1}</span><div class="board-slots">${slot('target','自分')}${r.condition?slot('condition',r.condition):''}${slot('action',r.action)}</div></div></div><div class="tray-caption">${r.detail}</div></div>`).join('')}<p class="fixed-order-help">編集・削除・並べ替えはできません。指示枠は消費しません。宝箱や回復ポーションなどは、通り道にある場合だけ取得します。</p></article>`;
+ return `<article class="board-rule fixed-stair-order" data-fixed-order aria-label="固定指示・変更不可"><div class="fixed-order-label">固定指示</div><p class="fixed-order-help">指示がない／実行できないときの基本行動です。上から順に判定します。</p>${rows.map((r,i)=>`<details class="fixed-basic-row" data-fixed-fold="${i}" ${folds.fixed.has(i)?'':'open'}>${foldSummary('固定'+(i+1),'自分は'+(r.condition?r.condition+(r.condition.endsWith('済み')?'なら、':'とき、'):'')+r.action+(r.action==='通常攻撃'?'する':''))}<div class="tray-scroll" tabindex="0" aria-label="固定指示${i+1} 自分 ${r.condition} ${r.action}"><div class="tray-surface"><span class="row-handle" aria-hidden="true">固定${i+1}</span><div class="board-slots">${slot('target','自分')}${r.condition?slot('condition',r.condition):''}${slot('action',r.action)}</div></div></div><div class="tray-caption">${r.detail}</div></details>`).join('')}<p class="fixed-order-help">編集・削除・並べ替えはできません。指示枠は消費しません。宝箱や回復ポーションなどは、通り道にある場合だけ取得します。</p></article>`;
 }
 function renderCardBoard(host,s,capacity){
+ const folds=foldsFor(host,s);
  const group=paletteGroups[host.dataset.cardGroup]?host.dataset.cardGroup:'target',entries=paletteGroups[group][1].filter(c=>cardOwned(s,group,c.id));
  const message=host.dataset.cardMessage||'';
  const isNew=c=>(s.newCards||[]).includes(c.cardKind+':'+c.id);
@@ -59,23 +65,24 @@ function renderCardBoard(host,s,capacity){
   const insertion=i=>r.conditions.length+2<cardCapacity(s)?`<span class="condition-insertion"><button type="button" class="insert-condition" data-insert-condition data-drop-slot="${index}|condition|${i}|insert" aria-label="指示${index+1}の条件${i+1}の位置に追加">＋条件</button></span>`:'';
   const conditions=r.conditions.map((c,ci)=>insertion(ci)+cardSlot('condition',ci,`条件${ci+1}`,conditionName(c))).join('');
   const empty=insertion(r.conditions.length);
-  return `<article class="board-rule ${r.disabled?'rule-disabled':''}" data-card-row="${index}" data-drop-row="${index}"><button type="button" class="rule-toggle" data-toggle-rule="${index}" aria-pressed="${!r.disabled}">${r.disabled?'無効':'有効'}</button>${skillThemeBadge(effect,s)}<div class="tray-scroll" tabindex="0" aria-label="指示${index+1}のカード列・横スクロール"><div class="tray-surface" data-drag-source="row|${index}"><button type="button" class="row-handle" data-drag-source="row|${index}" data-drop-row="${index}" aria-label="指示${index+1}を移動"><span class="priority-number">${index+1}</span></button><div class="board-slots">${cardSlot('target',0,'ターゲット',target.name)}${conditions}${empty}${cardSlot('effect',0,r.effect.kind==='skill'?'スキル':'アクション',effect.name)}</div></div></div><div class="tray-caption"><span>${esc(describeCardRule(r))}</span></div></article>`;
- }).join('')}${fixedInstructionRows()}</div></section></div></div>`;
+  return `<details class="board-rule ${r.disabled?'rule-disabled':''}" data-card-row="${index}" data-drop-row="${index}" ${folds.rows.has(input)?'':'open'}>${foldSummary('優先度 '+(index+1),rowSentence(r)+(r.disabled?'（無効）':''),'data-drag-source="row|'+index+'"')}<button type="button" class="rule-toggle" data-toggle-rule="${index}" aria-pressed="${!r.disabled}">${r.disabled?'無効':'有効'}</button>${skillThemeBadge(effect,s)}<div class="tray-scroll" tabindex="0" aria-label="指示${index+1}のカード列・横スクロール"><div class="tray-surface" data-drag-source="row|${index}"><button type="button" class="row-handle" data-drag-source="row|${index}" data-drop-row="${index}" aria-label="指示${index+1}を移動"><span class="priority-number">${index+1}</span></button><div class="board-slots">${cardSlot('target',0,'ターゲット',target.name)}${conditions}${empty}${cardSlot('effect',0,r.effect.kind==='skill'?'スキル':'アクション',effect.name)}</div></div></div><div class="tray-caption"><span>${esc(describeCardRule(r))}</span></div></details>`;
+ }).join('')}${fixedInstructionRows(host,s)}</div></section></div></div>`;
  selectSource(host,'',s);
 }
 
 export function renderCardEditor(host,s,capacity){
  const editable=s.phase==='prepare',disabled=editable?'':'disabled';
- const signature=JSON.stringify([s.orders,s.levels,s.abilities,s.unlockedOrders,s.ownedCards,s.newCards,s.augments,s.phase]);
+ const signature=JSON.stringify([s.seed,s.profile?.runs,s.floor,s.orders,s.levels,s.abilities,s.unlockedOrders,s.ownedCards,s.newCards,s.augments,s.phase]);
  if(host.dataset.orderSignature===signature)return;host.dataset.orderSignature=signature;
  if(editable){const scroll=captureEditorScroll(host,s.orders);renderCardBoard(host,s,capacity);restoreEditorScroll(host,s.orders,scroll);return;}
  host.innerHTML=`<div class="card-order-editor"><p class="section-caption">指示 ${s.orders.length} / ${capacity}行 · 1行 ${cardCapacity(s)}枚まで（ターゲット1枚＋条件＋行動／スキル1枚）。<br>上から実行可能な指示を1つ選びます。条件はすべて成立が必要です。<br>${editable?'準備中だけ編集できます。行数とカード数は別々に拡張できます。':'探索中は閲覧のみ。ひとやすみ中も変更できません。'}</p>${s.orders.map((input,index)=>{
   const r=legacyToCards(input),effects=r.effect.kind==='skill'?skillCards:actionCards;
   return `<article class="rule-card card-rule" data-card-row="${index}"><div class="card-rule-heading"><strong>指示 ${index+1}${r.disabled?'（無効）':''}</strong><span>${r.conditions.length+2} / ${cardCapacity(s)}枚</span><button data-rule-op="up" data-index="${index}" aria-label="指示${index+1}を上へ" ${!editable||index===0?'disabled':''}>↑</button><button data-rule-op="down" data-index="${index}" aria-label="指示${index+1}を下へ" ${!editable||index===s.orders.length-1?'disabled':''}>↓</button><button data-rule-op="remove" data-index="${index}" ${disabled}>外す</button></div><div class="instruction-cards"><label class="instruction-card target-card"><small>ターゲットカード</small><select data-card-field="target" aria-label="指示${index+1}のターゲット" ${disabled}>${targetCards.map(t=>option(t.id,t.name,r.target)).join('')}</select></label>${r.conditions.map((c,ci)=>{const d=conditionById[c.id];return `<div class="instruction-card condition-card"><small>条件カード ${ci+1} · AND</small><select data-card-field="condition" data-condition="${ci}" aria-label="指示${index+1}の条件${ci+1}" ${disabled}>${conditionCards.map(d=>option(d.id,d.name,c.id,r.target==='self'&&['one-hit','injured'].includes(d.id)||r.conditions.some((c,j)=>j!==ci&&c.id===d.id))).join('')}</select>${d.param?`<label><input type="number" data-card-field="value" data-condition="${ci}" min="${d.min}" max="${d.max}" step="${d.step}" value="${c.value}" aria-label="指示${index+1}の条件${ci+1}の値" ${disabled}> ${d.unit}</label>`:''}<button data-card-op="remove-condition" data-condition="${ci}" ${disabled}>条件を外す</button></div>`;}).join('')}<label class="instruction-card effect-card"><small>実行カード</small><select data-card-field="kind" aria-label="指示${index+1}の実行種別" ${disabled}>${option('action','アクションカード',r.effect.kind)}${option('skill','スキルカード',r.effect.kind,r.target!=='self'||!skillCards.some(e=>effectUnlocked(s,e)))}</select><select data-card-field="effect" aria-label="指示${index+1}の実行内容" ${disabled}>${effects.map(e=>option(e.id,e.name+(effectUnlocked(s,e)?'':'（未取得）'),r.effect.id,Boolean(e.enemy)!==(r.target!=='self')||!effectUnlocked(s,e))).join('')}</select></label></div><button data-card-op="add-condition" ${!editable||r.conditions.length+2>=cardCapacity(s)?'disabled':''}>＋条件カード</button><p class="card-rule-preview">${esc(describeCardRule(r))}</p></article>`;
- }).join('')}<div class="fitted-card-editor fixed-order-preview">${fixedInstructionRows()}</div><button class="rule-add" data-card-op="add-row" ${!editable||s.orders.length>=capacity?'disabled':''}>行追加を追加</button><p class="section-caption">「視界内」は、行動先の階段・宝箱・敵・トラップを現在見えているかで判定します。通常の移動より隣接戦闘を優先します。該当指示がなければ基本探索を行います。戦術と罠回避は条件成立中の補助行動で、ターンを消費しません。</p></div>`;
+ }).join('')}<div class="fitted-card-editor fixed-order-preview">${fixedInstructionRows(host,s)}</div><button class="rule-add" data-card-op="add-row" ${!editable||s.orders.length>=capacity?'disabled':''}>行追加を追加</button><p class="section-caption">「視界内」は、行動先の階段・宝箱・敵・トラップを現在見えているかで判定します。通常の移動より隣接戦闘を優先します。該当指示がなければ基本探索を行います。戦術と罠回避は条件成立中の補助行動で、ターンを消費しません。</p></div>`;
 }
 
 export function handleCardClick(e,s){
+ if(e.target.closest('[data-order-fold]')){if(e.currentTarget?.dataset.ignoreCardClick==='1')e.preventDefault();return 'selected';}
  if(e.target.closest('[data-inline-condition]')){if(e.currentTarget)selectSource(e.currentTarget,'',s);return 'selected';}
  const toggle=e.target.closest('[data-toggle-rule]');if(toggle&&s.phase==='prepare'){const r=s.orders[Number(toggle.dataset.toggleRule)];r.disabled=!r.disabled;return true;}
  const host=e.currentTarget,tab=e.target.closest('[data-palette-tab]');
@@ -105,6 +112,7 @@ export function handleCardClick(e,s){
 // Pointer Events support mouse, pen and touch. The same buttons remain clickable for keyboard/tap.
 export function installCardDragging(host,getState,onCommit){
  let pending=null,ghost=null;
+ host.addEventListener('toggle',e=>{const el=e.target;if(!el.matches('details[data-card-row],details[data-fixed-fold]'))return;const state=getState(),folds=foldsFor(host,state);if(el.dataset.fixedFold!==undefined){const key=Number(el.dataset.fixedFold);if(el.open)folds.fixed.delete(key);else folds.fixed.add(key);}else{const rule=state.orders[Number(el.dataset.cardRow)];if(rule){if(el.open)folds.rows.delete(rule);else folds.rows.add(rule);}}},true);
  host.addEventListener('keydown',e=>{if(e.target.matches('[data-inline-condition]')&&e.key==='Enter'){e.preventDefault();e.target.dispatchEvent(new Event('change',{bubbles:true}));}else if(e.target.matches('.board-slot[role="group"]')&&['Enter',' '].includes(e.key)){e.preventDefault();e.target.click();}});
  host.addEventListener('keydown',e=>{if(!['Enter',' '].includes(e.key)||!e.target.matches('[data-drop-return]')||getState().phase!=='prepare'||!/^(slot|row)\|/.test(host.dataset.cardSource||''))return;e.preventDefault();if(applySource(host,getState(),host.dataset.cardSource,e.target))onCommit();});
  const restorePaletteScroll=drag=>{if(!drag?.source.startsWith('palette|'))return;const nodes=host.querySelectorAll('.card-rules,.instruction-trays,.tray-scroll');drag.lockedScroll.forEach(({top,left},i)=>{if(nodes[i]){nodes[i].scrollTop=top;nodes[i].scrollLeft=left;}});};

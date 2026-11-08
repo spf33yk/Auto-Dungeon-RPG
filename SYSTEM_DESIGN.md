@@ -114,3 +114,5 @@ app.jsはtick完了後に通知を積み、入場通知中だけ次tickと宝箱
 スキル通知は別の非モーダルDOMとFIFO列で扱い、active（進行停止）は入場通知列だけを参照する。requestAnimationFrameで表示中の実時間2000msを消費。別ダイアログ・画面非表示時はタイマーを止めるが、スキル列の存在はtick・報酬表示・フォーカス・休止フラグへ影響しない。pointer-events:noneで操作を遮らず、階／旅変更で表示と列をともに破棄する。
 
 card-editor.jsのfixedInstructionRowsはplanHeroTurn／固定階段の現行フォールバックを説明する読取専用4行を描画する。data-fixed-orderだけを付け、data-card-row・data-drag-source・data-drop-slotを付けない。applySourceは固定領域への配置を拒否。実行ルールは従来のFIXED_STAIR_RULEとエンジンの基本AIを維持し、説明4行をs.ordersへ格納しない。active-directive.jsの固定階段表記は「固定指示」。
+
+土台の折りたたみはnative details／summary。card-editor.jsのホスト別WeakMapに階・旅のキー、編集行のオブジェクト参照を持つWeakSet、固定行番号のSetを保持。captureでtoggleを受け取り、行の並べ替えではオブジェクト参照に追従する。見出しクリックはselectedとして再描画を抑止し、nativeの開閉を妨げない。ドラッグ後の合成clickはignoreCardClickで開閉を抑制。閉じた行もdata-drop-rowを保ち、優先度のdata-drag-sourceから移動可能。指示本体・保存・予測署名へ表示状態を追加しない。

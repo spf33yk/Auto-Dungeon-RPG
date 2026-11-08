@@ -730,3 +730,8 @@ body.preparing #prepare-scene .card-rules-heading>.instruction-controls{flex:1;m
 .map-wrap.has-field-message .field-log-host{visibility:hidden}
 
 .fixed-order-label{font-size:14px;font-weight:600}.fixed-order-help{font-size:11px;line-height:1.6;color:#c7c4b7;margin:5px 0 8px}.fixed-basic-row{margin:8px 0}.fixed-stair-order .tray-caption{font-size:10px;line-height:1.5}.fixed-stair-order .row-handle{white-space:nowrap}
+
+.order-fold-summary{display:flex;align-items:center;gap:9px;min-height:34px;padding:6px 9px;box-sizing:border-box;list-style:none;cursor:pointer;color:var(--prep-theme-text,#dfd6c0);background:#11191cb3;border:1px solid #97845766;border-radius:3px;font-size:12px;line-height:1.5}
+.order-fold-summary::-webkit-details-marker{display:none}.order-fold-summary:focus-visible{outline:2px solid #e1c97e;outline-offset:2px}.fold-chevron{flex:none;color:#d8c38a}details[open]>.order-fold-summary>.fold-chevron{transform:rotate(90deg)}.fold-priority{flex:none;font-weight:600}.fold-priority[data-drag-source]{cursor:grab;touch-action:none}.fold-description{min-width:0;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.fold-open-hint{display:none;margin-left:auto;color:#bdb7a8;font-size:10px}details[open]>.order-fold-summary .fold-description{display:none}details[open]>.order-fold-summary .fold-open-hint{display:inline}.fitted-card-editor details.board-rule:not([open]){padding-bottom:0}.fixed-basic-row>.order-fold-summary{font-size:11px}.fixed-basic-row[open]>.order-fold-summary{margin-bottom:4px}
+
+@media(pointer:coarse){.order-fold-summary{min-height:44px}}
