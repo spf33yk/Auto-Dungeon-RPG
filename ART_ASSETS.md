@@ -10,9 +10,9 @@
 | 床 | art/terrain/floors-v2/atlas-64.png。1マス64px、256×256の4列4行。対向辺がつながる反復素材 |
 | 壁・入口 | art/terrain/walls/crypt/tileset.json・autotile-64.png。wall-autotile/v2、64×112セル、rise0.75、16接続＋統合入口 |
 | 敵とHP表示 | art/enemies/v2/atlas-64.png、enemy-view.js。64px、名称・HPバー・足元基準。enemy-attack-animation.jsで攻撃時の平行移動と接触マークを描画 |
-| 宝箱・階段・装備等 | art/props/atlas-64.pngとmap-items-64.png。回復はハート、小物は対応セルを参照 |
+| 宝箱・階段・装備等 | art/props/readable-v1/atlas-64.png。64px・4列3行。11種の小物を共通配置、旧アトラスはロード失敗時の互換 |
 | 罠 | art/props/traps-v1/atlas-64.png。64px・6種×発動可能／破損の12セル。format.jsonで配置を定義 |
-| スキル箱 | art/props/chest-skill-64.png。赤い宝箱。LEGENDARYはchest-view.jsの金色エフェクトを重ねる |
+| スキル箱 | readable-v1のchest-redセル。赤い宝箱。LEGENDARYはchest-view.jsの金色エフェクトを重ねる |
 | カード・土台 | art/ui/preparation/。ターゲット・条件・アクション・スキルと連結土台。layout.jsonとFORMAT.md、4スキン |
 | 準備背景・外枠 | art/ui/preparation-decor-v1/。背景1440×810、透過枠512×512。角固定・辺repeat、合計約163KiB |
 | オーグメント | augment-art.js登録の30種の専用透過WebPと5テーマアイコン。共通枠はart/ui/augments-v1/。縦横比を維持 |
@@ -37,3 +37,7 @@
 ## 罠の64px素材
 
 art/props/traps-v1/atlas-64.pngを採用。map-traps/v1、64pxセル、横2状態（発動可能／破損）×縦6種（棘・転移・拘束・衰弱・警報・霧）。原画を等倍率縮小・共通48色・二値アルファへ仕上げたもの。詳細と生成元は同フォルダのARTWORK.md、配置情報はformat.json。原画や大容量中間ファイルはGitへ含めない。
+
+## 視認性を整理したマップ小物
+
+ハート・記憶の欠片・武器・防具はhost_imageで新規生成し64pxへピクセル仕上げ。現行の宝箱・赤箱・階段・墓石・ひび割れ墓石・旧報酬は縦横比を保って拡縮し再配置。art/props/readable-v1/format.jsonにセル・別名・足元・色数を定義。原画はローカルoutput/object-icons-20261108-r1/、軽量なアトラス・プロンプト・SHA256のみGitへ保持。床・壁、主人公・敵、罠6種の採用素材は変更しない。

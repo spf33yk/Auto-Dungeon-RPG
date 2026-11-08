@@ -24,7 +24,7 @@ export function prepareAuditRun(s,policy){
  for(const k of skills){const heal=['mend','small-prayer','first-aid','breathe','fortress','gamble-heal'].includes(k.id);if(!heal)continue;add('skill',k.id,hp(k.id==='fortress'?40:65));}
  if(s.profile.normalClears&&s.floor===16)add('action','letter');
  for(const k of skills)if(!['mend','small-prayer','first-aid','breathe','fortress','gamble-heal','scout','waymark','treasure-bet','fortune','homeward','trap-step','blood-offering'].includes(k.id))add('skill',k.id,k.id==='warp'?hp(25):[]);
- if(policy!=='direct'){add('action','collect-herbs',hp(65));add('action','collect-springs',hp(65));add('action','chests');add('action','collect-armor');add('action','collect-weapons');add('action','collect-fragments');}else add('action','chests',[{id:'turns',value:1000}]);
+ if(policy!=='direct'){add('action','collect-herbs',hp(65));add('action','chests');add('action','collect-armor');add('action','collect-weapons');add('action','collect-fragments');}else add('action','chests',[{id:'turns',value:1000}]);
  if(policy==='build'||policy==='control'){
   const byTheme=k=>s.augments.some(id=>themedAugments.find(a=>a.id===id).themeId===k.themeId);
   for(const k of skills.filter(byTheme))if(!candidates.some(r=>r.effect.id===k.id&&r.effect.kind==='skill'))add('skill',k.id,k.id==='fortune'?[{id:'turns',value:1000}]:[]);

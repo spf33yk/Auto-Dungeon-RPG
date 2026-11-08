@@ -49,4 +49,4 @@ HP上下は実行者。経過ターンはフロア共通。距離は骸と実行
 
 視界条件は既知の階段・宝箱・品物を現在見えているものに限定する。敵操作など元から視界限定の組み合わせでは冗長になる。敵の隣接敵数は骸の有無（0／1）であり、整理の検討対象。
 
-全53種の名前・効果・レアリティは[CARD_CONTENTS](CARD_CONTENTS.md)、星は[BUILD_THEMES_V2](BUILD_THEMES_V2.md)、待機・進展なし・長時間の基本行動復帰は[DIRECTIVE_SAFETY](DIRECTIVE_SAFETY.md)、保存移行の現行契約は[CARD_SYSTEM](CARD_SYSTEM.md)を参照。通常攻撃は基本AIで行い、攻撃カードは設けない。
+全52種の名前・効果・レアリティは[CARD_CONTENTS](CARD_CONTENTS.md)、星は[BUILD_THEMES_V2](BUILD_THEMES_V2.md)、待機・進展なし・長時間の基本行動復帰は[DIRECTIVE_SAFETY](DIRECTIVE_SAFETY.md)、保存移行の現行契約は[CARD_SYSTEM](CARD_SYSTEM.md)を参照。通常攻撃は基本AIで行い、攻撃カードは設けない。

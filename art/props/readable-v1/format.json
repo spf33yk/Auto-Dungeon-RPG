@@ -1,0 +1,70 @@
+{
+  "format": "map-readable-props/v1",
+  "cellPx": 64,
+  "worldTilePx": 64,
+  "image": "atlas-64.png",
+  "atlasPx": [
+    256,
+    192
+  ],
+  "anchorPx": [
+    32,
+    56
+  ],
+  "frames": {
+    "heart": [
+      0,
+      0
+    ],
+    "fragment": [
+      1,
+      0
+    ],
+    "sword": [
+      2,
+      0
+    ],
+    "armor": [
+      3,
+      0
+    ],
+    "chest": [
+      0,
+      1
+    ],
+    "chest-red": [
+      1,
+      1
+    ],
+    "stairs": [
+      2,
+      1
+    ],
+    "tombstone": [
+      3,
+      1
+    ],
+    "tombstone-cracked": [
+      0,
+      2
+    ],
+    "reward": [
+      1,
+      2
+    ],
+    "letter": [
+      2,
+      2
+    ]
+  },
+  "aliases": {
+    "herb": "heart",
+    "potion": "heart",
+    "gear": "sword"
+  },
+  "finish": {
+    "palette": 64,
+    "alpha": "binary",
+    "scaling": "uniform"
+  }
+}

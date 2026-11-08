@@ -12,7 +12,8 @@
 | 本編 | game-engine.js（入口engine.js） | 状態・地形配置・行動・戦闘・拾得・周回・保存正規化 |
 | 地形 | dungeon-layout.js、boss-arena.js、crypt-obstacles.js | 通常階ランダム・対称ボス部屋・墓石と到達可能性 |
 | 指示 | card-orders.js、card-placement.js、orders.js、directive-safety.js | カード判定・配置・旧指示互換・停滞検出と基本行動への復帰 |
-| 所持 | card-access.js、card-catalog.js、card-inventory.js、retired-cards.js、directive-card-migration.js | 初期6枚・53カード・抽選・図鑑・旧カード移行 |
+| 回復互換 | healing-items.js | 泉とハート・取得カード・選択待ち候補・プリセットの固定移行 |
+| 所持 | card-access.js、card-catalog.js、card-inventory.js、retired-cards.js、directive-card-migration.js | 初期6枚・52カード・抽選・図鑑・旧カード移行 |
 | 罠 | traps.js、art/props/traps-v1/format.json | 6種類・接触検知・破損抽選・期限付き状態・共通64px素材 |
 | 成長・報酬 | progression.js、drop-system.js、reinforcements.js | EXP・二段階ドロップ・保存RNG・増援 |
 | オーグメント | augments.js、augment-view.js、augment-art.js | 30効果・3択・計算・共通画像付き表示・配信URL |
@@ -21,7 +22,7 @@
 | 準備予測 | exploration-forecast.js、forecast-view.js | 複製状態の非同期試行、結果と警告 |
 | 表示・設定 | display-mode.js、ui-settings.js、preparation-skins.js、screen-tutorial.js | 16:9拡縮・全画面要求・端末設定・スキン・案内 |
 | 視界・地図 | map-view.js、map-discovery.js、scene-lighting.js、scene-depth.js | 追従カメラ・入室式地図・明暗・足元ソート |
-| 素材描画 | character-animation.js、terrain-view.js、wall-tileset.js、entrance-view.js、prop-view.js、enemy-view.js | 形式検証・セル切出し・統合壁・小物・敵HP表示 |
+| 素材描画 | character-animation.js、terrain-view.js、wall-tileset.js、entrance-view.js、prop-view.js、readable-props.js、enemy-view.js | 形式検証・セル切出し・統合壁・小物・敵HP表示 |
 | 演出 | awakening.js、normal-ending.js、subtitle-player.js、opening.js、thought-view.js、story-text.js、damage-view.js、log-visibility.js | 回想・終了・文字送り・タイトル版・思考・ダメージ・5秒ログ |
 | 音 | scene-music.js、app.js | 場面BGM・ループ・音量・ブラウザの再生許可、Web Audio効果音 |
 | 検証 | *.test.js、test-support/ | Node標準テスト。画面確認は隔離したローカル保存で実施 |
@@ -101,3 +102,5 @@ scripts/update-assets.jsがブラウザJS・CSS・対象素材の内容ハッシ
 scripts/verify-clearability.jsは本番ロジックを直接使い、現行UIにある準備操作・報酬選択だけで旅を検証する。初期値・HP・敵・乱数・未所持カードを改変しない。ゲーム内に購入UIのない能力強化は使わない。検証値はdocs/verification/CURRENT_BALANCE.md、実施内容と未確認はIMPLEMENTATION_NOTES.mdへ記録する。
 
 TRUE本編、仲間指定、追加アニメーション、実機スマホは残課題。旧セーブ対応のコードと素材は互換機能として残すが、旧仕様の制作履歴は現行資料へ掲載しない。
+
+回復はheartを新規配置し、BALANCE.heartCount=2／heartHeal=10。isHealingItemは旧potion／herbも認識。migrateHealingItemsはvalidateSave前に行・カード集合・品物・候補を固定置換し、プリセットはhealingRowを使う。図鑑・新規抽選には泉カードを含めない。readable-props.jsのフレーム配置とformat.jsonはテストで照合。新アトラスを先に描画し、未ロード時のみ従来prop-viewへフォールバックする。

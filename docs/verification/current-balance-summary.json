@@ -1,11 +1,11 @@
 {
   "date": "2026-11-08",
-  "baseline": "5e7d1f19436df94e451c8fd0a45a60761a45c2f7",
-  "workingTree": "6種類の罠・敵作動・50%破損を適用した作業ツリー。実測時runtimeHashesをローカルJSONに保存。",
+  "baseline": "77109f0ea1459b380eea8a7e1db93dd8c7a018bb",
+  "workingTree": "回復のハート統合・取得カード一本化を適用した作業ツリー。実測時runtimeHashesをローカルJSONに保存。",
   "distinctSeeds": 100,
   "initialRuns": 400,
-  "conditionalSecondRuns": 3,
-  "elapsedSeconds": 163.821481,
+  "conditionalSecondRuns": 4,
+  "elapsedSeconds": 164.1737475,
   "summary": [
     {
       "policy": "direct",
@@ -14,14 +14,14 @@
       "clears": 0,
       "deaths": 100,
       "caps": 0,
-      "early": 46,
-      "reach20": 36,
-      "reach10": 3,
+      "early": 47,
+      "reach20": 37,
+      "reach10": 5,
       "reach1": 0,
-      "skillUses": 1326,
+      "skillUses": 1394,
       "controlledTurns": 0,
-      "recoveries": 29,
-      "maxFloorTurns": 251
+      "recoveries": 30,
+      "maxFloorTurns": 225
     },
     {
       "policy": "loot",
@@ -30,30 +30,30 @@
       "clears": 2,
       "deaths": 98,
       "caps": 0,
-      "early": 45,
-      "reach20": 46,
-      "reach10": 26,
+      "early": 44,
+      "reach20": 48,
+      "reach10": 24,
       "reach1": 2,
-      "skillUses": 4357,
+      "skillUses": 4275,
       "controlledTurns": 0,
-      "recoveries": 138,
-      "maxFloorTurns": 543
+      "recoveries": 132,
+      "maxFloorTurns": 503
     },
     {
       "policy": "build",
       "label": "テーマ重視",
       "samples": 100,
-      "clears": 1,
-      "deaths": 99,
+      "clears": 2,
+      "deaths": 98,
       "caps": 0,
       "early": 41,
-      "reach20": 48,
+      "reach20": 49,
       "reach10": 23,
-      "reach1": 1,
-      "skillUses": 4722,
+      "reach1": 2,
+      "skillUses": 4461,
       "controlledTurns": 0,
-      "recoveries": 136,
-      "maxFloorTurns": 543
+      "recoveries": 129,
+      "maxFloorTurns": 503
     },
     {
       "policy": "control",
@@ -63,25 +63,30 @@
       "deaths": 100,
       "caps": 0,
       "early": 53,
-      "reach20": 29,
-      "reach10": 4,
+      "reach20": 30,
+      "reach10": 2,
       "reach1": 0,
-      "skillUses": 1845,
-      "controlledTurns": 7705,
-      "recoveries": 101,
+      "skillUses": 1774,
+      "controlledTurns": 7564,
+      "recoveries": 104,
       "maxFloorTurns": 690
     }
   ],
   "successfulRuns": [
     {
-      "seed": 1886123,
+      "seed": 1571936,
       "policy": "loot",
-      "turns": 2610
+      "turns": 3173
     },
     {
-      "seed": 3875974,
+      "seed": 1886123,
       "policy": "build",
-      "turns": 2649
+      "turns": 2669
+    },
+    {
+      "seed": 3142871,
+      "policy": "build",
+      "turns": 2750
     },
     {
       "seed": 4504348,
@@ -91,27 +96,35 @@
   ],
   "secondRuns": [
     {
-      "seed": 1886142,
+      "seed": 1571955,
       "policy": "loot",
       "result": "dead",
-      "basement": 14,
-      "turns": 1410,
+      "basement": 22,
+      "turns": 613,
       "letter": false
     },
     {
-      "seed": 3875993,
+      "seed": 1886142,
       "policy": "build",
       "result": "dead",
-      "basement": 20,
-      "turns": 798,
+      "basement": 14,
+      "turns": 1386,
       "letter": false
+    },
+    {
+      "seed": 3142890,
+      "policy": "build",
+      "result": "dead",
+      "basement": 9,
+      "turns": 2030,
+      "letter": true
     },
     {
       "seed": 4504367,
       "policy": "loot",
       "result": "dead",
       "basement": 5,
-      "turns": 2495,
+      "turns": 2516,
       "letter": true
     }
   ]

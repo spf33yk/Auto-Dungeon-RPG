@@ -1,3 +1,4 @@
+import{drawReadableProp}from'./readable-props.js';
 import{TRAPS,trapType}from'./traps.js';
 import{queueEnemyAttacks,enemyAttackDuration,enemyAttackPresentation,enemyAttackFrame,drawEnemyAttackEffect}from'./enemy-attack-animation.js';
 import{activeDirectiveText}from'./active-directive.js';
@@ -108,6 +109,7 @@ const sprites={
  fragment:['............','.....ll.....','....lYYl....','...lYYYYl...','..lYYYYYYl..','...lYYYYl...','....lYYl....','.....ll.....','............','............','............','............'],
  reward:['............','...yyyyyy...','...ybbbbby..','...ybbbbby..','...ybbYbby..','...ybbbbby..','...ybbYbby..','...ybbbbby..','...yyyyyyy..','............','............','............'],
  stairs:['............','.........ll.','.......llbl.','.....llbbbl.','...llbbbbbl.','.llbbbbbbbl.','.lbbbbbbbbl.','.llllllllll.','............','............','............','............']};
+const readableAtlas=new Image();readableAtlas.src=$('map').dataset.readableProps;
 const trapAtlas=new Image();trapAtlas.src=$('map').dataset.traps;
 const mapItemsAtlas=new Image();mapItemsAtlas.src=$('map').dataset.mapItems;
 const propsAtlas=new Image();propsAtlas.src=$('map').dataset.props;document.documentElement.style.setProperty('--prop-atlas','url("'+propsAtlas.src+'")');
@@ -115,7 +117,7 @@ const redChestAtlas=new Image();redChestAtlas.src=$('map').dataset.redChest;
 const enemyAtlas=new Image();enemyAtlas.src=$('map').dataset.enemies;
 const CELL=64;
 const palette={h:'#57695a',b:'#e2dfbd',d:'#27352f',a:'#899e85',s:'#b8b2a1',g:'#3e715f',l:'#9bbba6',r:'#66424a',p:'#ad7276',y:'#bfa266',o:'#634e32',Y:'#e3d49d'};
-function sprite(ctx,type,x,y,size=CELL,height=size){if(drawMapProp(ctx,mapItemsAtlas,type,x,y,size,height)||drawProp(ctx,propsAtlas,type,x,y,size,height))return;if((type==='slime'||type==='brute')&&enemyAtlas.complete&&enemyAtlas.naturalWidth===128&&enemyAtlas.naturalHeight===64){ctx.imageSmoothingEnabled=false;ctx.drawImage(enemyAtlas,type==='slime'?0:64,0,64,64,x,y,size,height);return;}const rows=sprites[type]||(['tombstone','tombstone-cracked'].includes(type)?['............','....aaaa....','...abbbba...','..abbbbbba..','..abdbbbba..','..abbdbbba..','..abbbbbba..','..abbbbbba..','..abbbbbba..','.aabbbbbbaa.','.aaaaaaaaaa.','............']:sprites.reward);const scale=size/12,scaleY=height/12;for(let py=0;py<rows.length;py++)for(let px=0;px<rows[py].length;px++){const c=rows[py][px];if(c!=='.'&&palette[c]){ctx.fillStyle=palette[c];ctx.fillRect(x+px*scale,y+py*scaleY,Math.ceil(scale),Math.ceil(scaleY));}}}
+function sprite(ctx,type,x,y,size=CELL,height=size){if(drawReadableProp(ctx,readableAtlas,type,x,y,size,height)||drawMapProp(ctx,mapItemsAtlas,type,x,y,size,height)||drawProp(ctx,propsAtlas,type,x,y,size,height))return;if((type==='slime'||type==='brute')&&enemyAtlas.complete&&enemyAtlas.naturalWidth===128&&enemyAtlas.naturalHeight===64){ctx.imageSmoothingEnabled=false;ctx.drawImage(enemyAtlas,type==='slime'?0:64,0,64,64,x,y,size,height);return;}const rows=sprites[type]||(['tombstone','tombstone-cracked'].includes(type)?['............','....aaaa....','...abbbba...','..abbbbbba..','..abdbbbba..','..abbdbbba..','..abbbbbba..','..abbbbbba..','..abbbbbba..','.aabbbbbbaa.','.aaaaaaaaaa.','............']:sprites.reward);const scale=size/12,scaleY=height/12;for(let py=0;py<rows.length;py++)for(let px=0;px<rows[py].length;px++){const c=rows[py][px];if(c!=='.'&&palette[c]){ctx.fillStyle=palette[c];ctx.fillRect(x+px*scale,y+py*scaleY,Math.ceil(scale),Math.ceil(scaleY));}}}
 const ctx=$('map').getContext('2d');ctx.imageSmoothingEnabled=false;
 const cryptAtlas=new Image();cryptAtlas.src=$('map').dataset.terrain;
 let entranceGrid=null,entranceFrames=new Map();
@@ -161,10 +163,9 @@ function draw(){
    const oldPalette={g:palette.g,l:palette.l,r:palette.r,p:palette.p};if(enemy){if(type==='slime'){palette.g=theme.wallColor;palette.l='#c0c7b1';}else{palette.r=theme.floorColor;palette.p=theme.wallColor;}}
    const footOffset=enemy?0:(hero?actorFootOffset(sprites[type],box.height):0);
    const chest=type==='chest'?chestPresentation(o):null;if(chest?.legendary)drawLegendaryChestEffect(ctx,box,performance.now(),matchMedia('(prefers-reduced-motion: reduce)').matches);
-   if(type==='chest'&&chest?.red&&redChestAtlas.complete&&redChestAtlas.naturalWidth===64){ctx.imageSmoothingEnabled=false;ctx.drawImage(redChestAtlas,box.x,box.y,box.width,box.height);}else if(hero&&heroSheet)drawCharacter(ctx,heroSheet,heroFrame,at.x,at.y,CELL);else if(!enemy||!drawEnemySprite(ctx,enemyAtlas,o,box))sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
+   if(o.type==='letter'&&drawReadableProp(ctx,readableAtlas,'letter',box.x,box.y,box.width,box.height)){}else if(type==='chest'&&chest?.red&&drawReadableProp(ctx,readableAtlas,'chest-red',box.x,box.y,box.width,box.height)){}else if(type==='chest'&&chest?.red&&redChestAtlas.complete&&redChestAtlas.naturalWidth===64){ctx.imageSmoothingEnabled=false;ctx.drawImage(redChestAtlas,box.x,box.y,box.width,box.height);}else if(hero&&heroSheet)drawCharacter(ctx,heroSheet,heroFrame,at.x,at.y,CELL);else if(!enemy||!drawEnemySprite(ctx,enemyAtlas,o,box))sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy)Object.assign(palette,oldPalette);
    // The chest artwork supplies its own latch: no oversized yellow lock rectangle.
    if(type==='chest'&&o.cardId&&state.augments?.includes('destiny')&&!state.themeState?.destinyUsed&&gambleChestIcon.complete&&gambleChestIcon.naturalWidth){ctx.drawImage(gambleChestIcon,box.x+box.width*.62,box.y-12,24,24);}
-   if(o.type==='letter'){ctx.fillStyle='#292a26';ctx.fillRect(box.x+40,box.y+8,21,16);ctx.fillStyle='#e4dfc3';ctx.fillRect(box.x+43,box.y+11,16,11);}
 
    ctx.restore();}});
  }
@@ -409,4 +410,4 @@ const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap'),gap=wrap.clie
 installCardDragging($('tab-content'),()=>state,()=>{delete $('tab-content').dataset.orderSignature;render();});
 drawHeroPortraits();render();requestAnimationFrame(loop);
 
-await Promise.all([...['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})),cryptAtlas.decode().catch(()=>{}),trapAtlas.decode().catch(()=>{}),propsAtlas.decode().catch(()=>{}),heroAssetsReady,wallAssetsReady]);draw();
+await Promise.all([...['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})),cryptAtlas.decode().catch(()=>{}),readableAtlas.decode().catch(()=>{}),trapAtlas.decode().catch(()=>{}),propsAtlas.decode().catch(()=>{}),heroAssetsReady,wallAssetsReady]);draw();

@@ -8,5 +8,5 @@ export function bossArena(basement,width=47,height=35){
  const offset=basement===20?6:basement===10?7:8,vertical=basement===1?6:5;
  reflect(cx-offset,cy-vertical,2,2);
  if(basement!==20)reflect(cx-4,cy-1,2,3);
- return {grid,rooms:[room],player:{x:cx,y:cy+8},stairs:{x:cx,y:cy-8},boss:{x:cx,y:cy},items:[{x:cx-8,y:cy,type:'potion'},{x:cx+8,y:cy,type:'potion'}],pillars};
+ return {grid,rooms:[room],player:{x:cx,y:cy+8},stairs:{x:cx,y:cy-8},boss:{x:cx,y:cy},items:[{x:cx-8,y:cy,type:'heart'},{x:cx+8,y:cy,type:'heart'}],pillars};
 }

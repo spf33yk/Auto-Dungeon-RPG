@@ -2,7 +2,7 @@ import{legacyToCards}from'./card-orders.js';
 // 一括回収カードは公開カタログから削除。旧セーブは行を増やさず個別指示へ変換する。
 export const retiredCollectionCards={
  'collect-items':['collect-weapons','collect-armor'],
- 'heal-item':['collect-herbs','collect-springs'],
+ 'heal-item':['collect-herbs'],
 };
 export function migrateRetiredCards(s,original){
  const owned=new Set(original.ownedCards||[]),discovered=new Set(original.profile?.cards||[]);

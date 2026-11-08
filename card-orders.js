@@ -23,7 +23,6 @@ export const actionCards=[
  {id:'collect-armor',name:'防具を取得',detail:'発見済みの防具へ向かう。'},
  {id:'collect-fragments',name:'記憶の欠片を取得',detail:'床の記憶の欠片へ向かう。'},
  {id:'collect-herbs',name:'ハートを取得',detail:'床のハートへ向かう。'},
- {id:'collect-springs',name:'回復の泉へ向かう',detail:'発見済みの回復の泉へ向かう。'},
  {id:'letter',name:'手紙の箱を開ける',detail:'物語条件を満たす手紙の箱へ向かう。'},
  {id:'frontier',name:'全ての部屋を探索する',detail:'まだ入っていない部屋を優先し、全ての部屋へ入ったら完了。'},
  {id:'explore-all',name:'全てのマスを探索する',detail:'到達できる未踏の床を順に歩く。'},
@@ -83,7 +82,7 @@ function subjects(s,r,ctx){
 function destinations(s,r,ctx){
  const id=r.effect.id;
  if(id==='stairs')return [s.stairs].filter(p=>s.seen[p.y][p.x]&&!s.enemies.some(e=>e.boss));
- const types={chests:['chest'],'collect-weapons':['gear'],'collect-armor':['gear'],'collect-fragments':['fragment'],'collect-herbs':['herb'],'collect-springs':['potion'],letter:['letter']};
+ const types={chests:['chest'],'collect-weapons':['gear'],'collect-armor':['gear'],'collect-fragments':['fragment'],'collect-herbs':['heart','herb','potion'],letter:['letter']};
  if(types[id])return s.items.filter(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i)&&types[id].includes(i.type)&&(id!=='collect-weapons'||gearById[i.gear?.baseId]?.slot==='weapon')&&(id!=='collect-armor'||gearById[i.gear?.baseId]?.slot==='armor'));
  if(id==='avoid-traps')return (s.traps||[]).filter(t=>t.revealed&&!t.spent&&(s.gimmick?.id==='traps'||s.seen[t.y][t.x]));
  if(['retreat','warp'].includes(id))return s.enemies.filter(e=>ctx.canSee(s,e.x,e.y));
