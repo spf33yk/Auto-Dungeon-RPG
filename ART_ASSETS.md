@@ -9,7 +9,7 @@
 | 主人公 | art/characters/mukuro-march64-v1/sprites.json・sprites.png。身体64px基準、128pxセル、4列4行512×512、原点[64,96]。800ms足踏み・踏み込み・斬撃。r12採用。原画16枚・承認ハッシュ・監査記録を同フォルダーへ保存 |
 | 床 | art/terrain/floors-v2/atlas-64.png。1マス64px、256×256の4列4行。対向辺がつながる反復素材 |
 | 壁・入口 | art/terrain/walls/crypt/tileset.json・autotile-64.png。wall-autotile/v2、64×112セル、rise0.75、16接続＋統合入口 |
-| 敵とHP表示 | art/enemies/v2/atlas-64.png、enemy-view.js。64px、名称・HPバー・足元基準 |
+| 敵とHP表示 | art/enemies/v2/atlas-64.png、enemy-view.js。64px、名称・HPバー・足元基準。enemy-attack-animation.jsで攻撃時の平行移動と接触マークを描画 |
 | 宝箱・階段・装備等 | art/props/atlas-64.pngとmap-items-64.png。回復はハート、小物は対応セルを参照 |
 | スキル箱 | art/props/chest-skill-64.png。赤い宝箱。LEGENDARYはchest-view.jsの金色エフェクトを重ねる |
 | カード・土台 | art/ui/preparation/。ターゲット・条件・アクション・スキルと連結土台。layout.jsonとFORMAT.md、4スキン |

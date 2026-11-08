@@ -57,6 +57,8 @@ routeは既知床を使う幅優先探索で、敵側の経路だけ未知床も
 
 床はシームレスfloor-texture/v2、壁はwall-material/v1入力・wall-autotile/v2配信。北1・東2・南4・西8で接続番号を求め、入口と角も同じ壁PNG・光源・riseで描く。15は埋め壁で外枠なし。旧entrance-parts/v1を別材質として重ねない。前景壁は通行床からはみ出さず、足元深度で描画順を決定する。明暗は実視界に合わせ、既知地形を薄暗く残す。
 
+敵の攻撃はcontrolledHitHeroがdamageEventsへsource座標を付加し、enemy-attack-animation.jsが対象個体の参照を解決する。app.jsのenemyAttacksは描画専用で、heroClockを共用して停止・倍速・動きを減らす設定へ対応。身体・影を同じoffsetで動かし、攻撃マークはラベルより後ろへ描く。種IDではなくオブジェクト参照で複数個体を区別。damageEventsは保存・予測署名から除外、読込時に消去。フロア／旅の切替と個体消滅で演出を破棄する。
+
 ## 6. 準備UI・スクロール
 
 renderOrderEditorがinstruction-upgradesをcard-rules-heading内のプリセット直前へ配置する。ツールバーは折返し可能にし、指示のスクロール領域とは分離する。
