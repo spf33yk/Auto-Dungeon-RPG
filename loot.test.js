@@ -75,6 +75,6 @@ test('save validator rejects corrupt new loot state and unearned special orders'
  for(const mutate of [s=>s.keys=-1,s=>s.rngState=NaN,s=>s.abilities=['unknown'],s=>s.orders=[makeOrder('warp')],s=>s.items=[{x:5,y:5,type:'chest',locked:true,rewardId:'unknown'}]]){const s=arena();mutate(s);assert.equal(validateSave(s),false);assert.equal(normalizeSave(s),null);}
 });
 
-test('when a visible enemy blocks loot, basic approach breaks the chase oscillation',()=>{
- const s=arena();s.player={x:4,y:4};const e=foe(s,{hp:100});e.x=6;e.y=4;s.orders=[makeOrder('chests')];s.items=[{x:6,y:4,type:'chest',locked:true,rewardId:'critical'}];tick(s);assert.deepEqual(s.player,{x:5,y:4});assert.equal(s.intent,'進路の敵に向き合う');tick(s);assert.ok(e.hp<100);
+test('blocked loot falls back to stairs and adjacent combat without chasing enemies',()=>{
+ const s=arena();s.player={x:4,y:4};const e=foe(s,{hp:100});e.x=6;e.y=4;s.orders=[makeOrder('chests')];s.items=[{x:6,y:4,type:'chest',locked:true,rewardId:'critical'}];tick(s);assert.deepEqual(s.player,{x:5,y:4});assert.equal(s.intent,'基本行動：見つけた階段へ向かう');tick(s);assert.ok(e.hp<100);
 });

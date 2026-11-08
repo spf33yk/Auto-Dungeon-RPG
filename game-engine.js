@@ -174,7 +174,6 @@ export function planHeroTurn(s){
  if(!enemy){
   if(!forceBasic)action ||= chooseOrder(s,ctx);
   // Cards prioritize tasks. When none applies, a known unsealed stair is a safe fallback.
-  if(!action){const visible=s.enemies.filter(e=>canSee(s,e.x,e.y)),next=visible.length?heroRoute(s,p=>visible.some(e=>distance(p,e)===1),{blocked:new Set(visible.map(key))}):null;if(next)action={next,intent:'進路の敵に向き合う'};}
   if(!action&&!s.enemies.some(e=>e.boss)&&s.seen[s.stairs.y]?.[s.stairs.x]){const next=heroRoute(s,p=>key(p)===key(s.stairs));if(next)action={next,exit:true,intent:'基本行動：見つけた階段へ向かう'};}
   if(!action){const next=heroRoute(s,p=>!s.visited[p.y][p.x]&&dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false))||heroRoute(s,p=>!s.visited[p.y][p.x]);action=next?{next,intent:'基本行動：視界の先を調べる'}:{next:heroRoute(s,p=>key(p)===key(s.stairs)),exit:true,intent:'基本行動：探索を終え、階段へ'};}
  }
