@@ -1,3 +1,4 @@
+import{TRAPS,trapType}from'./traps.js';
 import{queueEnemyAttacks,enemyAttackDuration,enemyAttackPresentation,enemyAttackFrame,drawEnemyAttackEffect}from'./enemy-attack-animation.js';
 import{activeDirectiveText}from'./active-directive.js';
 import{themedSkillById}from'./build-themes.js';
@@ -107,6 +108,7 @@ const sprites={
  fragment:['............','.....ll.....','....lYYl....','...lYYYYl...','..lYYYYYYl..','...lYYYYl...','....lYYl....','.....ll.....','............','............','............','............'],
  reward:['............','...yyyyyy...','...ybbbbby..','...ybbbbby..','...ybbYbby..','...ybbbbby..','...ybbYbby..','...ybbbbby..','...yyyyyyy..','............','............','............'],
  stairs:['............','.........ll.','.......llbl.','.....llbbbl.','...llbbbbbl.','.llbbbbbbbl.','.lbbbbbbbbl.','.llllllllll.','............','............','............','............']};
+const trapAtlas=new Image();trapAtlas.src=$('map').dataset.traps;
 const mapItemsAtlas=new Image();mapItemsAtlas.src=$('map').dataset.mapItems;
 const propsAtlas=new Image();propsAtlas.src=$('map').dataset.props;document.documentElement.style.setProperty('--prop-atlas','url("'+propsAtlas.src+'")');
 const redChestAtlas=new Image();redChestAtlas.src=$('map').dataset.redChest;
@@ -151,7 +153,7 @@ function draw(){
   if(!floor)queue.push({footY:(y+1)*CELL,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawSightWall(ctx,walls,wallDrawBox(surface,x,y,walls?.definition.rise??.75,CELL),CELL,visible,lit=>drawRaisedWall(ctx,lit,surface,x,y,state.seed,theme,CELL,entranceFrames.get(x+','+y)),appearance);ctx.restore();}});
  }
  const stair=state.stairs;
- for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;sprite(ctx,t.spent?'trap-spent':'trap',t.x*CELL,t.y*CELL);ctx.restore();}
+ for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;if(trapAtlas.complete&&trapAtlas.naturalWidth===128){ctx.imageSmoothingEnabled=false;ctx.drawImage(trapAtlas,t.spent?64:0,TRAPS.findIndex(k=>k.id===trapType(t))*64,64,64,t.x*CELL,t.y*CELL,CELL,CELL);}else sprite(ctx,t.spent?'trap-spent':'trap',t.x*CELL,t.y*CELL);ctx.restore();}
  function entity(o,type,{standing=false,layer=1,hero=false,enemy=false}={}){
   const at=hero?position:o,presentation=hero&&heroSheet?characterPresentation(heroSheet.definition,heroFrame,CELL):enemy?{...enemyAttackPresentation(o,enemyAttacks,heroClock,{size:CELL,reducedMotion:reducedMotion.matches}),opacity:1}:{offsetX:0,offsetY:0,opacity:1},visualAt={x:at.x+presentation.offsetX/CELL,y:at.y+presentation.offsetY/CELL},box=standing?standingBox(visualAt.x,visualAt.y,CELL,1):{x:at.x*CELL,y:at.y*CELL,width:CELL,height:CELL,footY:(at.y+1)*CELL};
   if(standing||type==='chest'){ctx.save();ctx.globalAlpha=(hero||visible(o.x,o.y)?1:.4)*presentation.opacity;drawFootShadow(ctx,visualAt.x,visualAt.y,CELL);ctx.restore();}
@@ -407,4 +409,4 @@ const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap'),gap=wrap.clie
 installCardDragging($('tab-content'),()=>state,()=>{delete $('tab-content').dataset.orderSignature;render();});
 drawHeroPortraits();render();requestAnimationFrame(loop);
 
-await Promise.all([...['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})),cryptAtlas.decode().catch(()=>{}),propsAtlas.decode().catch(()=>{}),heroAssetsReady,wallAssetsReady]);draw();
+await Promise.all([...['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})),cryptAtlas.decode().catch(()=>{}),trapAtlas.decode().catch(()=>{}),propsAtlas.decode().catch(()=>{}),heroAssetsReady,wallAssetsReady]);draw();

@@ -11,6 +11,7 @@
 | 壁・入口 | art/terrain/walls/crypt/tileset.json・autotile-64.png。wall-autotile/v2、64×112セル、rise0.75、16接続＋統合入口 |
 | 敵とHP表示 | art/enemies/v2/atlas-64.png、enemy-view.js。64px、名称・HPバー・足元基準。enemy-attack-animation.jsで攻撃時の平行移動と接触マークを描画 |
 | 宝箱・階段・装備等 | art/props/atlas-64.pngとmap-items-64.png。回復はハート、小物は対応セルを参照 |
+| 罠 | art/props/traps-v1/atlas-64.png。64px・6種×発動可能／破損の12セル。format.jsonで配置を定義 |
 | スキル箱 | art/props/chest-skill-64.png。赤い宝箱。LEGENDARYはchest-view.jsの金色エフェクトを重ねる |
 | カード・土台 | art/ui/preparation/。ターゲット・条件・アクション・スキルと連結土台。layout.jsonとFORMAT.md、4スキン |
 | 準備背景・外枠 | art/ui/preparation-decor-v1/。背景1440×810、透過枠512×512。角固定・辺repeat、合計約163KiB |
@@ -32,3 +33,7 @@
 旧形式のローダー・保存互換用素材は維持するが、本編の採用先は上表のみ。新規制作は64px基準。中止済み画像・旧生成プロンプト・旧保管原本を制作入力に流用しない。現在の主人公は承認済みmukuro-march64-v1を基準にする。
 
 追加の攻撃・被弾・崩壊死亡、敵や倅の全動作、追加スキン・ボイスは未完成部分を残す。試作を本編採用済みと扱わない。
+
+## 罠の64px素材
+
+art/props/traps-v1/atlas-64.pngを採用。map-traps/v1、64pxセル、横2状態（発動可能／破損）×縦6種（棘・転移・拘束・衰弱・警報・霧）。原画を等倍率縮小・共通48色・二値アルファへ仕上げたもの。詳細と生成元は同フォルダのARTWORK.md、配置情報はformat.json。原画や大容量中間ファイルはGitへ含めない。

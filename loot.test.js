@@ -45,7 +45,7 @@ test('warp is once per floor, preserves saved usage, and resets on the next floo
 });
 
 test('unavoidable traps still trigger despite avoidance',()=>{
- const s=arena();grantReward(s,'avoid-traps');s.stairs={...s.player};s.traps=[{...s.player,revealed:true,spent:false}];s.orders=[makeOrder('avoid-traps'),makeOrder('stairs')];tick(s);assert.equal(s.hp,49);assert.equal(s.traps[0].spent,true);s.phase='explore';s.orders=[makeOrder('stairs')];tick(s);assert.equal(s.hp,49);assert.equal(s.traps[0].spent,true);
+ const s=arena();grantReward(s,'avoid-traps');s.stairs={...s.player};s.traps=[{...s.player,revealed:true,spent:false}];s.orders=[makeOrder('avoid-traps'),makeOrder('stairs')];tick(s);assert.equal(s.hp,49);assert.equal(s.trapTriggers,1);const broken=s.traps[0].spent;s.phase='explore';s.orders=[makeOrder('stairs')];tick(s);assert.equal(s.hp,49);assert.equal(s.trapTriggers,1);assert.equal(s.traps[0].spent,broken);
 });
 
 test('regeneration is acquired from drops and fires once before enemy attacks',()=>{

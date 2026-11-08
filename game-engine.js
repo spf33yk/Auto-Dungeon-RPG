@@ -1,3 +1,4 @@
+import{rollTrap,triggerTrap,trapActive,trapAttackFactor,trapSightPenalty,validTraps}from'./traps.js';
 import{validDirectiveSafety,bypassDirectives,progressSnapshot,updateDirectiveSafety,beginDirectiveSafety}from'./directive-safety.js';
 import{migrateDirectiveCards}from'./directive-card-migration.js';
 import{migrateLootCondition}from'./retired-loot-condition.js';
@@ -44,7 +45,7 @@ export function random(seed){let a=seed>>>0;return()=>{a+=0x6D2B79F5;let t=Math.
 export function profileDefault(){return {normalClears:0,trueEnding:false,augments:[],cards:[],runs:0,monsters:[],equipment:[],knownEquipment:[],skills:[]};}
 export function zoneFor(s){return zones[Math.min(9,zoneIndexForFloor(s.floor))];}
 export function floorLabel(s){return s.phase==='ending'?'地上 1F':`B${LAST_FLOOR+1-s.floor}`;}
-export function radius(s){return Math.max(2,3+s.levels.scout+themeBuff(s,'sight')-(s.gimmick?.id==='fog'?2:0));}
+export function radius(s){return Math.max(2,3+s.levels.scout+themeBuff(s,'sight')-(s.gimmick?.id==='fog'?2:0)-trapSightPenalty(s));}
 export function log(s,text,type=''){s.logs.unshift({text,type,turn:s.turn});}
 function register(list,id){if(!list.includes(id))list.push(id);}
 export function createGear(baseId,{plus=0,cursed=false,identified=true}={}){if(!gearById[baseId])throw Error('Unknown equipment');return {baseId,plus,cursed,identified,boundKnown:false};}
@@ -52,7 +53,7 @@ export function gearStats(g){const base=gearById[g.baseId];return {attack:base.a
 export function gearName(g){return g.identified?gearById[g.baseId].name+(g.plus?`+${g.plus}`:''):gearById[g.baseId].slot==='weapon'?'未鑑定の剣':'未鑑定の防具';}
 export function acquire(s,g){g.identified=true;g.cursed=false;g.boundKnown=false;g.acquiredOrder=s.nextAcquisition++;s.inventory.push(g);register(s.profile.equipment,g.baseId);if(g.identified)register(s.profile.knownEquipment,g.baseId);}
 export const incomingDamage=(attack,defense)=>Math.max(1,Math.ceil(attack*.2),attack-defense);
-export function stats(s){const w=gearStats(s.gear.weapon),a=gearStats(s.gear.armor),maxHp=54+((s.level??1)-1)*HP_PER_LEVEL+s.levels.vitality*12,b=augmentBonus(s,maxHp,(s.enemies||[]).filter(e=>canSee(s,e.x,e.y)).length);return {maxHp,attack:Number((7+s.levels.power*2+w.attack+a.attack+b.attack).toFixed(6)),defense:Number((1+s.levels.guard+w.defense+a.defense+b.defense).toFixed(6))};}
+export function stats(s){const w=gearStats(s.gear.weapon),a=gearStats(s.gear.armor),maxHp=54+((s.level??1)-1)*HP_PER_LEVEL+s.levels.vitality*12,b=augmentBonus(s,maxHp,(s.enemies||[]).filter(e=>canSee(s,e.x,e.y)).length);return {maxHp,attack:Number(((7+s.levels.power*2+w.attack+a.attack+b.attack)*trapAttackFactor(s)).toFixed(6)),defense:Number((1+s.levels.guard+w.defense+a.defense+b.defense).toFixed(6))};}
 export function newGame(seed=Date.now()%10000000,profile=profileDefault()){
  const p=structuredClone(profile);p.augments??=[];p.skills??=[];p.cards??=[];for(const key of INITIAL_CARDS)if(!p.cards.includes(key))p.cards.push(key);p.trueEnding??=false;p.runs++;
  const s={version:16,actorRuleRevision:ACTOR_RULE_REVISION,heroWeakenedHits:0,augments:[],augmentOffer:null,augmentStarted:false,trapTriggers:0,ownedCards:[...INITIAL_CARDS],newCards:[],level:1,experience:0,damageEvents:[],abilities:[],unlockedOrders:[],rngState:seed>>>0,warped:false,nextAcquisition:0,b15HintShown:false,orders:[createCardRule()],seed,floor:1,phase:'awakening',hp:54,shards:12,levels:Object.fromEntries(skills.map(k=>[k.id,0])),gear:{weapon:createGear('weapon-0'),armor:createGear('armor-0')},inventory:[],mode:'stairs',turn:0,kills:0,logs:[],memories:[],profile:p,letter:false};
@@ -95,11 +96,13 @@ export function rollGear(floor,rng){const z=Math.min(9,zoneIndexForFloor(floor))
  // Preserve the previous random sequence without spawning cursed or unidentified gear.
  rng();rng();return createGear(base.id,{plus});}
 export function makeBossFloor(s,boss){
+ s.trapStatus={};s.trapContact=null;
  s.undyingUsed=false;s.firstAttackUsed=false;s.unharmedTurns=0;
  const arena=bossArena(boss.basement,W,H),{grid}=arena;
  Object.assign(s,{rooms:arena.rooms,grid,player:arena.player,stairs:arena.stairs,seen:grid.map(r=>r.map(()=>false)),visited:grid.map(r=>r.map(()=>false)),enemies:[{...boss,baseId:boss.id,...arena.boss,maxHp:boss.hp,aggro:true,boss:true}],items:arena.items,traps:[],obstacles:[],bossFloor:true,gimmick:{...fieldPlan(s.seed,s.floor),triggered:false,room:null},nextHint:null,warped:false,mended:false,floorKills:0,steps:0,flash:null,intent:'階段を封じる門番の気配',retreatTurns:0,retreatCooldown:0,activeOrder:null});reveal(s);
 }
 export function makeFloor(s){
+ s.trapStatus={};s.trapContact=null;
  resetThemeFloor(s);
  s.buildReport=emptyBuildReport(s.floor);
  s.undyingUsed=false;s.firstAttackUsed=false;s.unharmedTurns=0;
@@ -122,10 +125,10 @@ export function makeFloor(s){
   const count=Math.min(s.gimmick.id==='monsters'?4:8,houseTiles.length);
   for(let i=0;i<count;i++){const tile=houseTiles.splice(Math.floor(rng()*houseTiles.length),1)[0];
    if(s.gimmick.id==='monsters'){const base=monsters[z.index*2+(i%2)];s.enemies.push({...base,baseId:base.id,...tile,maxHp:base.hp,aggro:false,house:true});}
-   else s.traps.push({...tile,spent:false,revealed:true});
+   else s.traps.push({...tile,type:rollTrap(rng),spent:false,revealed:true});
   }
  }
- if(s.gimmick.id==='none'&&s.floor>1){const trapRng=random(s.seed+s.floor*7919+43);if(trapRng()<.25){for(let i=0,n=1+Math.floor(trapRng()*2);i<n&&free.length;i++)s.traps.push({...spot(),spent:false,revealed:true});}}
+ if(s.gimmick.id==='none'&&s.floor>1){const trapRng=random(s.seed+s.floor*7919+43);if(trapRng()<.25){for(let i=0,n=1+Math.floor(trapRng()*2);i<n&&free.length;i++)s.traps.push({...spot(),type:rollTrap(trapRng),spent:false,revealed:true});}}
  if(z.id==='crypt')placeCryptObstacles(s,rooms);
  reveal(s);
 }
@@ -153,11 +156,12 @@ export function attackEnemy(s,enemy,{splashDamage=null,power=1,skill=false,leech
  if(!s.enemies.includes(enemy)||enemy.hp<=0)return;
  const strike=()=>{const b=augmentBonus(s,stats(s).maxHp),critical=(hasAugment(s,'moon')&&!s.firstAttackUsed&&s.hp===stats(s).maxHp)||(splashDamage===null&&b.critical>0&&nextRandom(s)<b.critical),base=Math.max(1,stats(s).attack-enemyDefense(s,enemy))*power*(s.heroWeakenedHits>0?.5:1)*(b.charged?ap(s,'charge').damage:1)*(themeBuff(s,'nextPower')|| (s.focusPower?1.25:1))*b.damage*(hasAugment(s,'risky-blade')?(nextRandom(s)<.5?ap(s,'risky-blade').damage:.8):1),rawDamage=splashDamage??(critical?Math.ceil(base*(hasAugment(s,'moon')&&!s.firstAttackUsed&&s.hp===stats(s).maxHp?ap(s,'moon').damage:1.5)):Math.ceil(base)),damage=mitigateControlledDamage(s,enemy,rawDamage),actual=Math.min(enemy.hp,damage);enemy.hp-=damage;if(s.heroWeakenedHits>0)s.heroWeakenedHits--;recordBuild(s,'damageDealt',actual);if(critical)recordBuild(s,'criticalHits');if(b.charged&&splashDamage===null)recordBuild(s,'chargedHits');s.firstAttackUsed=true;s.focusPower=false;delete themeState(s).buffs.nextPower;if(critical)themeState(s).pity=0;else themeState(s).pity++;if(b.charged&&splashDamage===null)s.unharmedTurns=0;(s.damageEvents??=[]).push({x:enemy.x,y:enemy.y,damage,hero:false});s.flash={x:enemy.x,y:enemy.y,kind:'hit'};if(critical)log(s,'会心の一撃！ '+damage+'ダメージ。','good');if(b.leech+leech>0){const heal=Math.max(0,Math.min(stats(s).maxHp-s.hp,Math.floor(actual*(b.leech+leech))));s.hp+=heal;recordBuild(s,'leechHealing',heal);if(heal)log(s,'吸命の記憶。HP +'+heal,'good');}};
  strike();if(!skill&&splashDamage===null&&enemy.hp>0&&hasAugment(s,'double-strike')&&nextRandom(s)<Math.min(1,ap(s,'double-strike').chance)){recordBuild(s,'doubleStrikes');log(s,'追撃の記憶が発動！','good');strike();}
- if(enemy.hp<=0){s.enemies=s.enemies.filter(e=>e!==enemy);s.kills++;s.floorKills++;if(!enemy.reinforcement&&!enemy.boss)themeState(s).normalKills++;const exp=!enemy.reinforcement&&s.level<MAX_LEVEL?(monsterById[enemy.baseId||enemy.id]?.experience??3):0;const gained=gainExperience(s,exp);if(exp)log(s,`経験値 +${exp}`,'good');if(gained)log(s,`レベルアップ！ Lv.${s.level}。HP +${gained*HP_PER_LEVEL}`,'good');const fragments=enemy.reinforcement?0:enemy.boss?8:1;s.shards+=fragments;log(s,enemy.name+'を倒した。'+(fragments?'記憶の欠片 +'+fragments:'増援からの報酬はない。'),'good');if(!enemy.reinforcement)dropFromEnemy(s,enemy);if(enemy.boss){log(s,'門番の封印が解けた。階段を上れる。','story');offerAugments(s,()=>nextRandom(s),'boss:'+s.floor);}}
+ if(enemy.hp<=0)defeatEnemy(s,enemy);
  if(splashDamage===null&&hasAugment(s,'nova'))for(const other of [...s.enemies])if(other!==enemy&&canSee(s,other.x,other.y))attackEnemy(s,other,{splashDamage:Math.max(1,Math.floor(Math.max(1,stats(s).attack-other.defense)/(distance(s.player,other)+1)))});
 }
+function defeatEnemy(s,enemy){s.enemies=s.enemies.filter(e=>e!==enemy);s.kills++;s.floorKills++;if(!enemy.reinforcement&&!enemy.boss)themeState(s).normalKills++;const exp=!enemy.reinforcement&&s.level<MAX_LEVEL?(monsterById[enemy.baseId||enemy.id]?.experience??3):0;const gained=gainExperience(s,exp);if(exp)log(s,`経験値 +${exp}`,'good');if(gained)log(s,`レベルアップ！ Lv.${s.level}。HP +${gained*HP_PER_LEVEL}`,'good');const fragments=enemy.reinforcement?0:enemy.boss?8:1;s.shards+=fragments;log(s,enemy.name+'を倒した。'+(fragments?'記憶の欠片 +'+fragments:'増援からの報酬はない。'),'good');if(!enemy.reinforcement)dropFromEnemy(s,enemy);if(enemy.boss){log(s,'門番の封印が解けた。階段を上れる。','story');offerAugments(s,()=>nextRandom(s),'boss:'+s.floor);}}
 function controlledHitHero(s,e,{power=1,leech=0,controlled=true}={}){const b=themeBuff({steps:s.steps,themeState:e.control?.state},'nextPower')||1,weak=e.weakenedHits>0;if(weak)e.weakenedHits--;const damage=skillDamage(s,Math.ceil(incomingDamage(enemyAttack(s,e),stats(s).defense)*power*b*(weak?.5:1))),before=s.hp;if(takeHeroDamage(s,damage))log(s,'骨の執念で踏みとどまった。','good');const actual=before-s.hp;if(e.control?.state)delete e.control.state.buffs.nextPower;if(leech)e.hp=Math.min(e.maxHp,e.hp+Math.floor(actual*leech));s.damageEvents.push({...s.player,damage,hero:true,source:{x:e.x,y:e.y}});s.flash={...s.player,kind:'hurt'};log(s,e.name+(controlled?'が指示に従って攻撃。':'の攻撃。')+damage+'ダメージ。','bad');if(s.hp<=0){s.hp=0;s.phase='dead';s.cardOffer=null;s.nextHint=nextStageHint(s);log(s,'骨が崩れた。再び最深部へ。','story');}}
-function warpDestination(s){const cells=[];for(let y=1;y<s.grid.length-1;y++)for(let x=1;x<s.grid[y].length-1;x++)if(s.grid[y][x]&&key({x,y})!==key(s.player)&&key({x,y})!==key(s.stairs)&&!s.enemies.some(e=>e.x===x&&e.y===y))cells.push({x,y});return cells.length?cells[Math.floor(nextRandom(s)*cells.length)]:null;}
+function warpDestination(s){if(trapActive(s,null,'snare'))return null;const cells=[];for(let y=1;y<s.grid.length-1;y++)for(let x=1;x<s.grid[y].length-1;x++)if(s.grid[y][x]&&key({x,y})!==key(s.player)&&key({x,y})!==key(s.stairs)&&!s.enemies.some(e=>e.x===x&&e.y===y))cells.push({x,y});return cells.length?cells[Math.floor(nextRandom(s)*cells.length)]:null;}
 // Shared by real turns and the preparation decision tester. No mutations or RNG.
 export function planHeroTurn(s){
  const ctx={canSee,stats,obtainable,enemyPlan:(state,r,e)=>planEnemyCommand(state,r,e,{canSee,stats,route,lineOfSight})},avoid=modifierActive(s,'avoid-traps');
@@ -176,6 +180,16 @@ export function planHeroTurn(s){
  return {enemy,action,ruleIndex:enemy?(cardPlan?.enemy?cardPlan.ruleIndex:null):action?.ruleIndex??null};
 }
 function skillDamage(s,damage){return mitigateThemeDamage(s,damage,{has:hasAugment,stats});}
+function applyTrap(s,enemy=null){
+ return triggerTrap(s,enemy,{rng:()=>nextRandom(s),log,maxHp:()=>stats(s).maxHp,
+  protected:()=>{const t=themeState(s);if(t.trapPass>0){t.trapPass--;return true;}return false;},
+  damage:(e,n)=>{
+   const damage=e?mitigateControlledDamage(s,e,n):skillDamage(s,n);
+   if(e){e.hp=Math.max(0,e.hp-damage);s.damageEvents.push({x:e.x,y:e.y,damage,hero:false});if(e.hp<=0)defeatEnemy(s,e);}
+   else{if(takeHeroDamage(s,damage))log(s,'骨の執念で踏みとどまった。','good');s.damageEvents.push({...s.player,damage,hero:true});s.flash={...s.player,kind:'hurt'};if(s.hp<=0){s.hp=0;s.phase='dead';s.cardOffer=null;s.nextHint=nextStageHint(s);log(s,'罠で骨が崩れた。再び最深部へ。','story');}}
+   log(s,(e?e.name:'骸')+'に'+damage+'ダメージ。',e?'':'bad');
+  }});
+}
 export function tick(s){
  if(s.phase!=='explore'||s.augmentOffer||s.cardOffer)return;notifyB15(s);s.unharmedTurns=(s.unharmedTurns||0)+1;s.turn++;s.steps++;s.flash=null;s.damageEvents=[];reveal(s);const st=stats(s);const report=buildReport(s),bonus=augmentBonus(s,st.maxHp,s.enemies.filter(e=>canSee(s,e.x,e.y)).length);report.turns++;report.peakAttackBonus=Math.max(report.peakAttackBonus,bonus.attack);report.peakDefenseBonus=Math.max(report.peakDefenseBonus,bonus.defense);
  beginDirectiveSafety(s,log);const progressBefore=progressSnapshot(s);s.actorSkillEvent=null;for(const e of s.enemies)if(e.control)e.control.unharmedTurns++;if(s.retreatCooldown>0)s.retreatCooldown--;
@@ -188,7 +202,7 @@ export function tick(s){
   if(action.wait)s.intent=action.intent;
   if(action.warp&&!action.skill)action.skill='warp';
   if(action.skill){s.intent=action.intent;s.activeOrder='cards';executeThemedSkill(s,action.skill,{stats,canSee,route,reveal,attackEnemy,warpDestination,has:hasAugment,rng:()=>nextRandom(s),log,recordMend:n=>{recordBuild(s,'mendUses');recordBuild(s,'mendHealing',n);}});}
-  if(action.next){s.player={...action.next};s.intent=action.intent;s.activeOrder=action.id||null;reveal(s);}
+  if(action.next&&!trapActive(s,null,'snare')){s.player={...action.next};s.intent=action.intent;s.activeOrder=action.id||null;reveal(s);}
   if(action.flee){s.retreatTurns++;if(s.retreatTurns>=4){s.retreatTurns=0;s.retreatCooldown=6;}}else s.retreatTurns=0;
  }
  updateThemeExploration(s,{has:hasAugment,stats,log});
@@ -196,10 +210,23 @@ export function tick(s){
  pickup(s);
  const house=s.gimmick?.room;
  if(house&&!s.gimmick.triggered&&s.player.x>=house.x&&s.player.x<house.x+house.w&&s.player.y>=house.y&&s.player.y<house.y+house.h){s.gimmick.triggered=true;log(s,s.gimmick.name+'！','bad');if(s.gimmick.id==='monsters')for(const e of s.enemies)if(e.house)e.aggro=true;}
- const trap=s.traps?.find(t=>!t.spent&&t.x===s.player.x&&t.y===s.player.y);
-
- if(trap){trap.spent=true;trap.revealed=true;const t=themeState(s),pass=t.trapPass>0;if(pass)t.trapPass--;const damage=pass?0:skillDamage(s,Math.max(1,Math.ceil(st.maxHp*.08)));s.trapTriggers=(s.trapTriggers||0)+1;if(takeHeroDamage(s,damage))log(s,'骨の執念で踏みとどまった。','good');s.damageEvents.push({...s.player,damage,hero:true});s.flash={...s.player,kind:'hurt'};log(s,'棘の罠。'+damage+'ダメージ。','bad');if(s.hp===0){s.phase='dead';s.cardOffer=null;s.nextHint=nextStageHint(s);log(s,'罠で骨が崩れた。再び最深部へ。','story');return;}}
- for(const e of s.enemies){if(e===controlledActor)continue;if(distance(e,s.player)<=6+themeBuff({steps:s.steps,themeState:e.control?.state},'sight')&&lineOfSight(s,e,s.player))e.aggro=true;if((e.house&&!s.gimmick?.triggered)||!e.aggro||s.turn%e.period!==0)continue;if(distance(e,s.player)===1){controlledHitHero(s,e,{controlled:false});if(s.hp<=0)return;}else{const next=route(s,p=>distance(p,s.player)===1,{start:e,known:false,blocked:new Set(s.enemies.filter(o=>o!==e).map(key))});if(next&&key(next)!==key(s.player)){e.x=next.x;e.y=next.y;}}}
+ applyTrap(s);
+ if(s.hp<=0)return;
+ for(const e of [...s.enemies]){
+  if(!s.enemies.includes(e))continue;
+  if(e!==controlledActor){
+   const sight=Math.max(2,6+themeBuff({steps:s.steps,themeState:e.control?.state},'sight')-trapSightPenalty(s,e));
+   if(distance(e,s.player)<=sight&&lineOfSight(s,e,s.player))e.aggro=true;
+   const alarm=e.trapAlarm?.until>=s.steps?e.trapAlarm:null;
+   const obscured=trapSightPenalty(s,e)>0&&(distance(e,s.player)>sight||!lineOfSight(s,e,s.player));
+   if((!e.house||s.gimmick?.triggered||alarm)&&(!obscured||alarm)&&e.aggro&&s.turn%e.period===0){
+    if(distance(e,s.player)===1){controlledHitHero(s,e,{controlled:false});if(s.hp<=0)return;}
+    else if(!trapActive(s,e,'snare')){const next=route(s,p=>alarm?key(p)===key(alarm):distance(p,s.player)===1,{start:e,known:false,blocked:new Set(s.enemies.filter(o=>o!==e).map(key))});if(next&&key(next)!==key(s.player)){e.x=next.x;e.y=next.y;}}
+   }
+  }
+  applyTrap(s,e);
+  if(s.augmentOffer)return;
+ }
  reveal(s);
  updateDirectiveSafety(s,progressBefore,!enemy&&Boolean(action?.wait||action?.control?.wait),log);
  const bossAlive=s.enemies.some(e=>e.boss);
@@ -211,7 +238,7 @@ export function tick(s){
 export function ascend(s){if(s.phase!=='cleared')return false;if(s.floor===LAST_FLOOR){s.phase='ending';s.profile.normalClears++;if(!s.ownedCards.includes('action:letter'))grantCard(s,'action:letter');log(s,'地上で、若者が剣を抜いた。「魔物か」','story');log(s,'骸は言葉を伝えられないまま、若者の剣に倒れた。','story');return true;}if(s.buildReport)s.lastBuildReport=structuredClone(s.buildReport);s.floor++;s.phase='prepare';makeFloor(s);s.hp=Math.min(stats(s).maxHp,s.hp+Math.ceil(stats(s).maxHp*(BALANCE.restRatio+(hasAugment(s,'restful')?ap(s,'restful').heal:0))));log(s,`${floorLabel(s)}へ。休息して次の探索に備える。`,'good');return true;}
 export function codexRows(s,kind){if(kind==='augments')return augments.map(a=>({...a,known:true,owned:hasAugment(s,a.id),discovered:s.profile.augments?.includes(a.id)??false}));if(kind==='cards')return cardCodexRows(s);if(kind==='skills')return rewardDefinitions.filter(r=>Boolean(themedSkillById[r.id])).map(r=>s.profile.skills.includes(r.id)?{...r,known:true,owned:(r.kind==='skill'?s.abilities:s.unlockedOrders).includes(r.id)}:{known:false});if(kind==='monsters')return monsters.map(m=>s.profile.monsters.includes(m.id)?{name:m.name,attack:m.attack,defense:m.defense,zone:zones[m.zone].name,known:true}:{known:false});return equipment.map(g=>s.profile.knownEquipment.includes(g.id)&&s.profile.equipment.includes(g.id)?{name:g.name,attack:g.attack,defense:g.defense,slot:g.slot,acquiredOrder:s.profile.equipment.indexOf(g.id),known:true}:{known:false,slot:g.slot});}
 function validMapShape(s){const h=s.grid?.length,w=s.grid?.[0]?.length;return ((w===W&&h===H)||(w===31&&h===23))&&s.grid.every(r=>Array.isArray(r)&&r.length===w)&&[s.seen,s.visited].every(g=>Array.isArray(g)&&g.length===h&&g.every(r=>Array.isArray(r)&&r.length===w))&&(s.rooms===undefined||Array.isArray(s.rooms)&&s.rooms.every(r=>r&&['x','y','w','h'].every(k=>Number.isInteger(r[k]))&&r.x>=0&&r.y>=0&&r.w>0&&r.h>0&&r.x+r.w<=w&&r.y+r.h<=h));}
-function validTacticsSave(s){if(!s||!validDirectiveSafety(s)||!validEnemyControls(s)||!validThemeState(s.themeState)||!validChestCategories(s.cardOffer))return false;if(s.themeState&&(!s.themeState.rooms.every(i=>i<(s.rooms?.length||0))||!s.themeState.mappedRooms.every(i=>i<(s.rooms?.length||0))||!s.themeState.mappedTiles.every(i=>i<(s.grid?.length||0)*(s.grid?.[0]?.length||0))))return false;return (s.cardOffer==null||s.phase==='explore'&&(s.cardOffer.remaining===undefined||Number.isInteger(s.cardOffer.remaining)&&s.cardOffer.remaining>=1&&s.cardOffer.remaining<=2)&&(s.cardOffer.gamble===undefined||typeof s.cardOffer.gamble==='boolean')&&(s.cardOffer.lost===undefined||typeof s.cardOffer.lost==='boolean')&&(s.cardOffer.consolation===undefined||[10,12,16,24].includes(s.cardOffer.consolation))&&Array.isArray(s.cardOffer.choices)&&s.cardOffer.choices.length>=1&&s.cardOffer.choices.length<=8&&new Set(s.cardOffer.choices).size===s.cardOffer.choices.length&&s.cardOffer.choices.every(k=>cardByKey[k]&&!INITIAL_CARDS.includes(k)&&k!=='action:letter'&&cardByKey[k].kind===cardByKey[s.cardOffer.choices[0]]?.kind&&cardByKey[k].rarity===cardByKey[s.cardOffer.choices[0]]?.rarity))&&(s.skillUses===undefined||Array.isArray(s.skillUses)&&new Set(s.skillUses).size===s.skillUses.length&&s.skillUses.every(id=>Boolean(themedSkillById[id])))&&(s.focusPower===undefined||typeof s.focusPower==='boolean')&&(s.guardHits===undefined||Number.isInteger(s.guardHits)&&s.guardHits>=0&&s.guardHits<=4);}
+function validTacticsSave(s){if(!s||!validTraps(s)||!validDirectiveSafety(s)||!validEnemyControls(s)||!validThemeState(s.themeState)||!validChestCategories(s.cardOffer))return false;if(s.themeState&&(!s.themeState.rooms.every(i=>i<(s.rooms?.length||0))||!s.themeState.mappedRooms.every(i=>i<(s.rooms?.length||0))||!s.themeState.mappedTiles.every(i=>i<(s.grid?.length||0)*(s.grid?.[0]?.length||0))))return false;return (s.cardOffer==null||s.phase==='explore'&&(s.cardOffer.remaining===undefined||Number.isInteger(s.cardOffer.remaining)&&s.cardOffer.remaining>=1&&s.cardOffer.remaining<=2)&&(s.cardOffer.gamble===undefined||typeof s.cardOffer.gamble==='boolean')&&(s.cardOffer.lost===undefined||typeof s.cardOffer.lost==='boolean')&&(s.cardOffer.consolation===undefined||[10,12,16,24].includes(s.cardOffer.consolation))&&Array.isArray(s.cardOffer.choices)&&s.cardOffer.choices.length>=1&&s.cardOffer.choices.length<=8&&new Set(s.cardOffer.choices).size===s.cardOffer.choices.length&&s.cardOffer.choices.every(k=>cardByKey[k]&&!INITIAL_CARDS.includes(k)&&k!=='action:letter'&&cardByKey[k].kind===cardByKey[s.cardOffer.choices[0]]?.kind&&cardByKey[k].rarity===cardByKey[s.cardOffer.choices[0]]?.rarity))&&(s.skillUses===undefined||Array.isArray(s.skillUses)&&new Set(s.skillUses).size===s.skillUses.length&&s.skillUses.every(id=>Boolean(themedSkillById[id])))&&(s.focusPower===undefined||typeof s.focusPower==='boolean')&&(s.guardHits===undefined||Number.isInteger(s.guardHits)&&s.guardHits>=0&&s.guardHits<=4);}
 export function validateSave(s){return Boolean(validTacticsSave(s)&&s?.version===16&&validBuildReport(s.buildReport)&&validBuildReport(s.lastBuildReport)&&typeof s.augmentStarted==='boolean'&&['trapTriggers','unharmedTurns'].every(k=>Number.isSafeInteger(s[k])&&s[k]>=0)&&typeof s.undyingUsed==='boolean'&&typeof s.firstAttackUsed==='boolean'&&Array.isArray(s.profile?.augments)&&s.profile.augments.every(id=>augmentById[id])&&Array.isArray(s.augments)&&s.augments.every(id=>augmentById[id])&&new Set(s.augments).size===s.augments.length&&(!s.augmentOffer||['start',...['11','21','30'].map(f=>'boss:'+f)].includes(s.augmentOffer.source)&&Array.isArray(s.augmentOffer.choices)&&s.augmentOffer.choices.length>=1&&s.augmentOffer.choices.length<=3&&new Set(s.augmentOffer.choices).size===s.augmentOffer.choices.length&&s.augmentOffer.choices.every(id=>augmentById[id]&&!s.augments.includes(id)))&&(s.newCards===undefined||Array.isArray(s.newCards)&&new Set(s.newCards).size===s.newCards.length&&s.newCards.every(k=>Boolean(cardByKey[k])&&s.ownedCards?.includes(k)&&!INITIAL_CARDS.includes(k)))&&Array.isArray(s.ownedCards)&&s.ownedCards.every(key=>Boolean(cardByKey[key]))&&new Set(s.ownedCards).size===s.ownedCards.length&&Number.isInteger(s.level)&&s.level>=1&&s.level<=MAX_LEVEL&&Number.isSafeInteger(s.experience)&&s.experience>=0&&(s.level===MAX_LEVEL?s.experience===0:s.experience<experienceToNext(s.level))&&!Object.hasOwn(s,'keys')&&Number.isInteger(s.rngState)&&s.rngState>=0&&s.rngState<=4294967295&&typeof s.warped==='boolean'&&Array.isArray(s.abilities)&&s.abilities.every(id=>rewardById[id]?.kind==='skill')&&new Set(s.abilities).size===s.abilities.length&&Array.isArray(s.unlockedOrders)&&s.unlockedOrders.every(id=>rewardById[id]?.kind==='order')&&new Set(s.unlockedOrders).size===s.unlockedOrders.length&&Number.isInteger(s.nextAcquisition)&&s.nextAcquisition>=0&&Array.isArray(s.logs)&&Array.isArray(s.enemies)&&Array.isArray(s.items)&&s.items.every(i=>i&&Number.isInteger(i.x)&&Number.isInteger(i.y)&&i.x>=0&&i.x<W&&i.y>=0&&i.y<H&&(['potion','herb','fragment','letter'].includes(i.type)||i.type==='gear'&&gearById[i.gear?.baseId]||i.type==='reward'&&rewardById[i.rewardId]||i.type==='chest'&&(i.gear?gearById[i.gear.baseId]:Boolean((cardByKey[i.cardId]||rewardById[i.rewardId])&&!Object.hasOwn(i,'locked')))))&&Array.isArray(s.memories)&&Number.isInteger(s.floor)&&s.floor>=1&&s.floor<=LAST_FLOOR&&['awakening','prepare','explore','cleared','dead','ending'].includes(s.phase)&&validMapShape(s)&&s.levels&&skills.every(k=>Number.isInteger(s.levels[k.id])&&s.levels[k.id]>=0&&s.levels[k.id]<=k.max)&&Array.isArray(s.orders)&&s.orders.length<=orderCapacity(s)&&s.orders.every(o=>validCardRule(s,o))&&s.profile&&typeof s.profile.trueEnding==='boolean'&&['monsters','equipment','knownEquipment','skills','cards'].every(k=>Array.isArray(s.profile[k]))&&s.profile.skills.every(id=>rewardById[id])&&s.profile.cards.every(key=>Boolean(cardByKey[key]))&&s.gear&&Object.values(s.gear).every(g=>gearById[g.baseId])&&Array.isArray(s.inventory)&&s.inventory.every(g=>gearById[g.baseId])&&validCryptObstacles(s));}
 
 export function normalizeSave(input){

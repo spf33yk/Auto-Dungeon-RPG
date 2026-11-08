@@ -1,0 +1,25 @@
+{
+  "format": "map-traps/v1",
+  "worldTilePx": 64,
+  "cellPx": 64,
+  "image": "atlas-64.png",
+  "columns": [
+    "armed",
+    "broken"
+  ],
+  "rows": [
+    "spike",
+    "teleport",
+    "snare",
+    "weaken",
+    "alarm",
+    "mist"
+  ],
+  "anchorPx": [
+    32,
+    52
+  ],
+  "scale": "uniform",
+  "paletteColors": 48,
+  "source": "User approved trap-study-20261108-r1; host_image generated, downsampled and palette finished"
+}

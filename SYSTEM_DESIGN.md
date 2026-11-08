@@ -13,6 +13,7 @@
 | 地形 | dungeon-layout.js、boss-arena.js、crypt-obstacles.js | 通常階ランダム・対称ボス部屋・墓石と到達可能性 |
 | 指示 | card-orders.js、card-placement.js、orders.js、directive-safety.js | カード判定・配置・旧指示互換・停滞検出と基本行動への復帰 |
 | 所持 | card-access.js、card-catalog.js、card-inventory.js、retired-cards.js、directive-card-migration.js | 初期6枚・53カード・抽選・図鑑・旧カード移行 |
+| 罠 | traps.js、art/props/traps-v1/format.json | 6種類・接触検知・破損抽選・期限付き状態・共通64px素材 |
 | 成長・報酬 | progression.js、drop-system.js、reinforcements.js | EXP・二段階ドロップ・保存RNG・増援 |
 | オーグメント | augments.js、augment-view.js、augment-art.js | 30効果・3択・計算・共通画像付き表示・配信URL |
 | 画面統括 | app.js、index.html、style.css、screens.css | 入力・フェイズ表示・ダイアログ停止・描画・保存 |
@@ -34,6 +35,8 @@ app.jsのshowingTitleはエンジンphaseと別。タイトル中はtick・自�
 awakening → 字幕・開始選択 → explore → cleared → prepare → explore。B1 clearedからascendするとending、normalClearsを増やし手紙カードを付与。dead／あきらめる／次の旅ではprofileを引き継いでnewGame。TRUE本編へ進む遷移は存在しない。
 
 tickはexploreかつaugmentOffer・cardOfferなしでのみ実行。turnは旅の累計、stepsは階ごとの経過。カード行を判定し、隣接戦闘またはスキル・退避・移動を実行、拾得・罠・敵行動・Clear・増援の順に処理する。ボス撃破の3択発生時はその先の処理を停止する。
+
+罠はtriggerTrapで骸と敵の双方を処理。骸の行動後、各敵の行動後（操作済みの敵も1回）に接触を判定する。trapContactは同じマス上の再発動を防ぎ、空き床へ出ると解除。転移の着地点を記録し連鎖を防ぐ。trapStatusのsnare／weaken／mistは階のstepsによる絶対解除期限、trapAlarmは誘導先と期限。状態判定・攻撃倍率・視界減算は実戦と予測で共用。棘の撃破は既存defeatEnemyへ合流し報酬を一度だけ処理する。種類・状態・接触位置はv16の任意フィールドとして検証し、旧罠の種類省略は棘として扱う。
 
 ## 3. 保存・移行
 
