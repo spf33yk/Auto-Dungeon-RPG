@@ -1,131 +1,36 @@
 {
-  "date": "2026-11-08",
-  "baseline": "ce2ad6c1940f9b5c738fd7afb4496e6ff971176d",
-  "workingTree": "1ターン待機を初期所持からNORMAL宝箱報酬へ移した作業ツリー。実測時runtimeHashesをローカルJSONに保存。",
-  "distinctSeeds": 100,
-  "initialRuns": 400,
-  "conditionalSecondRuns": 4,
-  "elapsedSeconds": 192.6097035,
-  "summary": [
-    {
-      "policy": "direct",
-      "label": "直行重視",
-      "samples": 100,
-      "clears": 0,
-      "deaths": 100,
-      "caps": 0,
-      "early": 50,
-      "reach20": 32,
-      "reach10": 10,
-      "reach1": 0,
-      "skillUses": 1620,
-      "controlledTurns": 0,
-      "recoveries": 31,
-      "maxFloorTurns": 215
-    },
-    {
-      "policy": "loot",
-      "label": "回収重視",
-      "samples": 100,
-      "clears": 0,
-      "deaths": 100,
-      "caps": 0,
-      "early": 38,
-      "reach20": 55,
-      "reach10": 22,
-      "reach1": 0,
-      "skillUses": 4630,
-      "controlledTurns": 0,
-      "recoveries": 70,
-      "maxFloorTurns": 247
-    },
-    {
-      "policy": "build",
-      "label": "テーマ重視",
-      "samples": 100,
-      "clears": 2,
-      "deaths": 98,
-      "caps": 0,
-      "early": 38,
-      "reach20": 52,
-      "reach10": 22,
-      "reach1": 2,
-      "skillUses": 4975,
-      "controlledTurns": 0,
-      "recoveries": 74,
-      "maxFloorTurns": 219
-    },
-    {
-      "policy": "control",
-      "label": "敵待機活用",
-      "samples": 100,
-      "clears": 2,
-      "deaths": 98,
-      "caps": 0,
-      "early": 41,
-      "reach20": 45,
-      "reach10": 18,
-      "reach1": 2,
-      "skillUses": 3916,
-      "controlledTurns": 0,
-      "recoveries": 59,
-      "maxFloorTurns": 294
-    }
+  "baseline": "a6935989e83688c0cb61d4eb8f7f37ee4c2d6411",
+  "samples": 40,
+  "policies": [
+    "build",
+    "control"
   ],
-  "successfulRuns": [
+  "elapsedSeconds": 37.5265951,
+  "results": [
     {
-      "seed": 1257749,
-      "policy": "control",
-      "turns": 3119
-    },
-    {
-      "seed": 3038142,
       "policy": "build",
-      "turns": 2962
+      "runs": 40,
+      "ending": 0,
+      "dead": 40,
+      "timeout": 0,
+      "maxTurns": 198
     },
     {
-      "seed": 3038142,
       "policy": "control",
-      "turns": 2969
-    },
-    {
-      "seed": 3142871,
-      "policy": "build",
-      "turns": 3105
+      "runs": 40,
+      "ending": 1,
+      "dead": 39,
+      "timeout": 0,
+      "maxTurns": 217
     }
   ],
   "secondRuns": [
     {
-      "seed": 1257768,
+      "seed": 3980722,
       "policy": "control",
-      "result": "dead",
-      "basement": 19,
-      "turns": 751,
-      "letter": false
-    },
-    {
-      "seed": 3038161,
-      "policy": "build",
-      "result": "dead",
-      "basement": 29,
-      "turns": 93,
-      "letter": false
-    },
-    {
-      "seed": 3038161,
-      "policy": "control",
-      "result": "dead",
-      "basement": 29,
-      "turns": 123,
-      "letter": false
-    },
-    {
-      "seed": 3142890,
-      "policy": "build",
-      "result": "dead",
-      "basement": 9,
-      "turns": 2026,
-      "letter": true
+      "phase": "dead",
+      "turns": 402,
+      "basement": 25
     }
   ]
 }

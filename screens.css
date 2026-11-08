@@ -740,3 +740,5 @@ html[data-touch-controls=true] body:is(.preparing,.exploring) #hud-top .utility-
 html[data-touch-controls=true] body:is(.preparing,.exploring) #hud-top .utility-controls .icon-button{width:calc(44px / var(--game-scene-scale,1));height:calc(44px / var(--game-scene-scale,1));min-width:0;min-height:0;flex:none;padding:0;box-sizing:border-box;touch-action:manipulation;font-size:calc(22px / var(--game-scene-scale,1))}
 html[data-touch-controls=true] body:is(.preparing,.exploring) #hud-top .utility-controls .icon-button svg{width:calc(22px / var(--game-scene-scale,1));height:calc(22px / var(--game-scene-scale,1));pointer-events:none}
 html[data-touch-controls=true] .dialog-close{min-width:44px;min-height:44px;touch-action:manipulation}
+
+.fitted-card-editor .board-rule.is-folded[data-drag-source]{cursor:grab;touch-action:none}.fitted-card-editor .board-rule.is-folded[data-drag-source]:active{cursor:grabbing}

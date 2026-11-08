@@ -62,7 +62,7 @@ export function legacyToCards(o){
 }
 
 export function validCardRule(s,input,{requireOwned=true}={}){
- if(!input||typeof input.id!=='string'||input.disabled!==undefined&&typeof input.disabled!=='boolean')return false;
+ if(!input||input.folded!==undefined&&typeof input.folded!=='boolean'||typeof input.id!=='string'||input.disabled!==undefined&&typeof input.disabled!=='boolean')return false;
  const r=legacyToCards(input),effect=effectDefinition(r);
  if(!r.cards||!r.effect||!targetCards.some(t=>t.id===r.target)||!['skill','action'].includes(r.effect.kind)||!effect||!actorCanUse(r.target,effect))return false;
  if(requireOwned&&!effectUnlocked(s,effect))return false;
