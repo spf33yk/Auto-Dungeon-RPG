@@ -1,7 +1,7 @@
 {
   "date": "2026-11-08",
   "baseline": "77109f0ea1459b380eea8a7e1db93dd8c7a018bb",
-  "workingTree": "回復のハート統合・取得カード一本化を適用した作業ツリー。実測時runtimeHashesをローカルJSONに保存。",
+  "workingTree": "回復アイテムの統合・取得カード一本化を適用した作業ツリー。実測時runtimeHashesをローカルJSONに保存。",
   "distinctSeeds": 100,
   "initialRuns": 400,
   "conditionalSecondRuns": 4,

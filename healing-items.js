@@ -1,4 +1,4 @@
-// Canonical pickup is heart; potion/herb and the spring card are read-only aliases.
+// Save-compatible type heart is displayed as 回復ポーション. potion/herb remain aliases.
 export const isHealingItem=i=>['heart','herb','potion'].includes(i?.type);
 export const healingCardKey=k=>k==='action:collect-springs'?'action:collect-herbs':k;
 export function healingRow(input){const r=structuredClone(input);if(r?.effect?.kind==='action'&&r.effect.id==='collect-springs')r.effect.id='collect-herbs';return r;}

@@ -12,10 +12,6 @@
     56
   ],
   "frames": {
-    "heart": [
-      0,
-      0
-    ],
     "fragment": [
       1,
       0
@@ -55,11 +51,15 @@
     "letter": [
       2,
       2
+    ],
+    "potion": [
+      0,
+      0
     ]
   },
   "aliases": {
-    "herb": "heart",
-    "potion": "heart",
+    "heart": "potion",
+    "herb": "potion",
     "gear": "sword"
   },
   "finish": {

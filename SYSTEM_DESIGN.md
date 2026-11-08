@@ -12,7 +12,7 @@
 | 本編 | game-engine.js（入口engine.js） | 状態・地形配置・行動・戦闘・拾得・周回・保存正規化 |
 | 地形 | dungeon-layout.js、boss-arena.js、crypt-obstacles.js | 通常階ランダム・対称ボス部屋・墓石と到達可能性 |
 | 指示 | card-orders.js、card-placement.js、orders.js、directive-safety.js | カード判定・配置・旧指示互換・停滞検出と基本行動への復帰 |
-| 回復互換 | healing-items.js | 泉とハート・取得カード・選択待ち候補・プリセットの固定移行 |
+| 回復互換 | healing-items.js | 泉と回復ポーション・取得カード・選択待ち候補・プリセットの固定移行 |
 | 所持 | card-access.js、card-catalog.js、card-inventory.js、retired-cards.js、directive-card-migration.js | 初期6枚・52カード・抽選・図鑑・旧カード移行 |
 | 罠 | traps.js、art/props/traps-v1/format.json | 6種類・接触検知・破損抽選・期限付き状態・共通64px素材 |
 | 成長・報酬 | progression.js、drop-system.js、reinforcements.js | EXP・二段階ドロップ・保存RNG・増援 |
@@ -104,3 +104,5 @@ scripts/verify-clearability.jsは本番ロジックを直接使い、現行UIに
 TRUE本編、仲間指定、追加アニメーション、実機スマホは残課題。旧セーブ対応のコードと素材は互換機能として残すが、旧仕様の制作履歴は現行資料へ掲載しない。
 
 回復はheartを新規配置し、BALANCE.heartCount=2／heartHeal=10。isHealingItemは旧potion／herbも認識。migrateHealingItemsはvalidateSave前に行・カード集合・品物・候補を固定置換し、プリセットはhealingRowを使う。図鑑・新規抽選には泉カードを含めない。readable-props.jsのフレーム配置とformat.jsonはテストで照合。新アトラスを先に描画し、未ロード時のみ従来prop-viewへフォールバックする。
+
+回復の表示名・カード名は回復ポーション、アトラスの主フレーム名はpotion。保存中のheart／herbは同じフレームへ別名解決する。名称・絵の変更で回復量・配置数・抽選・指示処理・保存版を変えない。

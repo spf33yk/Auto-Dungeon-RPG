@@ -22,7 +22,7 @@ export const actionCards=[
  {id:'collect-weapons',name:'武器を取得',detail:'発見済みの武器へ向かう。'},
  {id:'collect-armor',name:'防具を取得',detail:'発見済みの防具へ向かう。'},
  {id:'collect-fragments',name:'記憶の欠片を取得',detail:'床の記憶の欠片へ向かう。'},
- {id:'collect-herbs',name:'ハートを取得',detail:'床のハートへ向かう。'},
+ {id:'collect-herbs',name:'回復ポーションを取得',detail:'床の回復ポーションへ向かう。'},
  {id:'letter',name:'手紙の箱を開ける',detail:'物語条件を満たす手紙の箱へ向かう。'},
  {id:'frontier',name:'全ての部屋を探索する',detail:'まだ入っていない部屋を優先し、全ての部屋へ入ったら完了。'},
  {id:'explore-all',name:'全てのマスを探索する',detail:'到達できる未踏の床を順に歩く。'},

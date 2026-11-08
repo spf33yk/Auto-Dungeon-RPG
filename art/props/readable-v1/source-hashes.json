@@ -1,7 +1,8 @@
 {
   "source-armor": "196b2cfe779fe9ee4c5df5f06b63a02f9874c4a15a6f9faaaadeffb07f44db93",
   "source-fragment": "39c0620aceaf0fb83ef16e5f843ed96826e7746ebc032a53307a084e7ca2a557",
-  "source-heart": "b485da4823a3e0f8923f2e2e3f8fea8a1ff938664fa98d7c5efdd058e3616fc8",
   "source-letter": "de075f0c613afb5a44bf7cb232aa6a78c72f106e013105e86d511546284d2f02",
-  "source-sword": "1160d94d41ba509d17c83c4fadb310d53003efaabd4ec602234d1f035b9079c7"
+  "source-sword": "1160d94d41ba509d17c83c4fadb310d53003efaabd4ec602234d1f035b9079c7",
+  "source-potion": "97ba9fa241c2a33737148659ac3b39ae391978437cecc1b4ffcdad88e8ef026c",
+  "source-stairs": "b19aa65cb03874ecd8f8d02e426437ec36ce3b9cd4feeb34678542fc3bc9cfca"
 }
