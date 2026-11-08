@@ -128,3 +128,9 @@ tick(s,{onSkillEffect})は任意の表示用観測者を受け取る。skill-eff
 app.jsは発動前に捕捉した敵の参照へイベント座標を対応づけ、skill-effects.jsのUI列へ渡す。各entity描画と同じ補間・presentation offsetを使って身体中心を計算。生存中はその中心、死亡済みは命中座標に元スプライトの中心補正を適用する。主人公の中心はcharacterDrawBoxと同じ等倍率変換。全FXをワールド描画の後へ置き、名前や数値はその上に描く。
 
 skill-effect-art.jsはscripts/update-assets.jsがformat.jsonから生成し、5画像のSHA256付きURLと登録データを一緒に提供する。5枚のアトラスだけを本編へ採用し、原画・試作GIFは配信しない。heroClockで単発700msを進め、休止では停止、Clear直後の残り再生を許可。動きを減らす時はピーク静止。場面変更でUI列を破棄し、保存へ含めない。
+
+## 起動と準備画面の表示
+
+app.jsはtitleAssetsReadyとgameAssetsReadyを分離。モジュールのtop-level awaitは前者だけとし、index.htmlがタイトル画像とレイアウトの確定後にdata-startupを解除する。全スキルアトラスの通信開始はtitleAssetsReadyの後へ移し、HTTP接続枠でタイトル画像と競合しないようにする。gameAssetsReadyは従来のマップ素材に加えマップ品物・赤箱・敵画像もdecodeし、enterJourneyが開始動画後／スキップ後の遷移を一度だけ実行する。未完了時はstartup-statusを待機表示に再利用。タイトル・開始動画・ENDプレビュー中のdrawは早期終了する。
+
+準備タブはorders／gear。gearの描画にexpedition-summaryのIDを除去したコピーと既存の装備UIを併置し、能力確認と装備操作を統合する。下部のprepare-journalと非表示のprepare-statusボタンを除去。ログ本体の保持と上部ログアイコンは維持する。abandon-runの左autoマージンとprimaryの左0マージンで右側へ2ボタンを隣接配置する。

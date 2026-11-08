@@ -126,7 +126,7 @@ const cryptAtlas=new Image();cryptAtlas.src=$('map').dataset.terrain;
 let entranceGrid=null,entranceFrames=new Map();
 let enemyAttacks=[],skillEffects=[],skillEffectScene='';
 const skillEffectAtlases=new Map();
-const skillEffectAssetsReady=Promise.all(Object.entries(SKILL_EFFECT_IMAGES).map(async([id,url])=>{const image=new Image();image.src=url;try{await image.decode();skillEffectAtlases.set(id,image);}catch(error){console.error('Skill effect atlas:',id,error);}}));
+const loadSkillEffectAssets=()=>Promise.all(Object.entries(SKILL_EFFECT_IMAGES).map(async([id,url])=>{const image=new Image();image.src=url;try{await image.decode();skillEffectAtlases.set(id,image);}catch(error){console.error('Skill effect atlas:',id,error);}}));
 let heroSheet=null,heroVisual=new CharacterAnimation(),heroClock=0,heroScene='',lastVisualTime=null;
 const heroAssetsReady=loadCharacterSheet($('map').dataset.hero).then(sheet=>{heroSheet=sheet;drawHeroPortraits();}).catch(error=>console.error('Character sheet:',error));
 function resetHeroVisual(){enemyAttacks=[];skillEffects=[];skillEffectScene='';heroVisual=new CharacterAnimation({x:state.player.x,y:state.player.y});heroClock=0;heroScene='';lastVisualTime=null;}
@@ -134,6 +134,7 @@ function drawHeroPortraits(){if(!heroSheet)return;const d=heroSheet.definition,f
 let wallSets=new Map();const wallAssetsReady=loadWallTilesets($('map').dataset.walls.split(/\s+/)).then(sets=>{wallSets=sets;}).catch(error=>console.error('Wall tileset:',error));
 const gambleChestIcon=new Image();gambleChestIcon.src=THEME_IMAGES.gambler;
 function draw(){
+ if(showingTitle||pendingJourney||endingPreview)return;
  const effectScene=[state.seed,state.profile.runs,state.floor].join(':');if(skillEffectScene!==effectScene){skillEffectScene=effectScene;skillEffects=[];}if(!['explore','dead','cleared'].includes(state.phase))skillEffects=[];skillEffects=skillEffects.filter(e=>skillEffectFrame(e,heroClock,SKILL_EFFECT_FORMAT).alive);
  const scene=state.seed+':'+state.floor;if(damageScene!==scene){damagePopups=[];enemyAttacks=[];damageScene=scene;}enemyAttacks=enemyAttacks.filter(a=>state.enemies.includes(a.actor)&&enemyAttackFrame(a,heroClock).alive);if(!['explore','dead'].includes(state.phase))enemyAttacks=[];
  if(heroScene!==scene||heroVisual.x!==state.player.x||heroVisual.y!==state.player.y){heroScene=scene;heroVisual.teleport(state.player.x,state.player.y,heroClock);}
@@ -291,8 +292,8 @@ function itemCard(g,ref,equipped=false){
 }
 function renderTab(){
  if(tab==='skills')tab='orders';
- if(tab==='status')$('tab-content').innerHTML=$('expedition-summary').innerHTML.replace(/\sid="[^"]*"/g,'');
- if(tab==='gear'){$('tab-content').innerHTML='<div class="equipment-toolbar"><button data-best-equipment class="primary">最強装備</button><small>武器は攻撃力、防具は防御力で選びます。</small></div>'+categoryTabs('gear',gearSlot)+sortButtons('gear',gearSorts[gearSlot])+'<p class="section-caption">本編の装備は鑑定済み・呪いなし。入手順は古い順、攻撃力順・防御力順は高い順です。</p>'+itemCard(state.gear[gearSlot],gearSlot,true)+`<h3>所持品</h3>`+(sortedInventory(state,gearSlot,gearSorts[gearSlot]).map(({g,index})=>itemCard(g,index)).join('')||'<p class="section-caption">この種類の装備はありません。</p>');}
+ if(tab==='status')tab='gear';
+ if(tab==='gear'){$('tab-content').innerHTML='<div class="equipment-status-layout"><section class="preparation-status-summary" aria-label="ステータス"><h3>ステータス</h3>'+$('expedition-summary').innerHTML.replace(/\sid="[^"]*"/g,'')+'</section><section class="preparation-equipment"><h3>装備</h3><div class="equipment-toolbar"><button data-best-equipment class="primary">最強装備</button><small>武器は攻撃力、防具は防御力で選びます。</small></div>'+categoryTabs('gear',gearSlot)+sortButtons('gear',gearSorts[gearSlot])+'<p class="section-caption">本編の装備は鑑定済み・呪いなし。入手順は古い順、攻撃力順・防御力順は高い順です。</p>'+itemCard(state.gear[gearSlot],gearSlot,true)+`<h3>所持品</h3>`+(sortedInventory(state,gearSlot,gearSorts[gearSlot]).map(({g,index})=>itemCard(g,index)).join('')||'<p class="section-caption">この種類の装備はありません。</p>')+'</section></div>';}
  if(tab==='orders'){if(!$('tab-content').querySelector('.card-board'))delete $('tab-content').dataset.orderSignature;renderOrderEditor($('tab-content'));}
  refreshForecast();
 
@@ -349,13 +350,21 @@ document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{speed=Number
 let skillPopup=null;
 let memoryReveal=null;
 function reset(next=newGame(undefined,state.profile)){memoryReveal=null;state=next;resetHeroVisual();skillPopup=null;paused=false;dialogWasPaused=false;motion=null;last=performance.now();render();}
+let enteringJourney=false;
+async function enterJourney(done){
+ if(enteringJourney)return;enteringJourney=true;
+ const waiting=!gameAssetsLoaded;
+ if(waiting){$('startup-message').textContent='ダンジョンを読み込み中…';$('startup-status').hidden=false;$('title-new').disabled=true;$('title-load').disabled=true;}
+ try{await gameAssetsReady;done();}finally{enteringJourney=false;$('startup-status').hidden=true;$('title-new').disabled=false;$('title-load').disabled=!hasSave;}
+}
 function playJourneyTeaser(done){
  if(pendingJourney)return;
- if(uiSettings.skipOpening||openingVariant(state.profile)!=='mukuro'){done();return;}
+ if(enteringJourney)return;
+ if(uiSettings.skipOpening||openingVariant(state.profile)!=='mukuro'){enterJourney(done);return;}
  pendingJourney=done;paused=true;dialogWasPaused=true;document.body.classList.add('watching-teaser');$('teaser-scene').hidden=false;$('teaser-retry').hidden=true;
  const video=$('journey-teaser');if(video.error){finishJourneyTeaser();return;}video.currentTime=0;syncTitleEffect();video.play().catch(()=>{$('teaser-retry').hidden=false;});$('teaser-skip').focus();syncSceneMusic();
 }
-function finishJourneyTeaser(){if(!pendingJourney)return;const done=pendingJourney;pendingJourney=null;$('journey-teaser').pause();$('teaser-scene').hidden=true;document.body.classList.remove('watching-teaser');done();}
+function finishJourneyTeaser(){if(!pendingJourney)return;const done=pendingJourney;pendingJourney=null;$('journey-teaser').pause();$('teaser-scene').hidden=true;document.body.classList.remove('watching-teaser');enterJourney(done);}
 $('journey-teaser').addEventListener('ended',finishJourneyTeaser);
 $('journey-teaser').addEventListener('error',()=>{if(pendingJourney)finishJourneyTeaser();});
 $('teaser-skip').onclick=finishJourneyTeaser;
@@ -402,9 +411,7 @@ function syncSceneViewport(){
 addEventListener('resize',()=>{syncSceneViewport();fieldMessages.place();});window.visualViewport?.addEventListener('resize',()=>{syncSceneViewport();fieldMessages.place();});document.addEventListener('fullscreenchange',syncSceneViewport);syncSceneViewport();
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){if(lockedOrientation)screen.orientation?.unlock?.();lockedOrientation=false;ownsFullscreen=false;$('fullscreen-open').textContent='横向きで全画面表示';displayMessage('横向きで全画面表示');}});
 $('status-open').onclick=()=>openDialog('status-dialog');
-$('prepare-status').onclick=()=>openDialog('status-dialog');
 $('prepare-forecast').onclick=()=>{if(state.phase==='prepare'){openDialog('forecast-dialog');refreshForecast();}};
-$('prepare-journal').onclick=()=>openDialog('prep-journal-dialog');
 $('sound-volume').oninput=e=>{volume=Number(e.target.value);uiSettings=saveUiSettings(uiStorage,{...uiSettings,soundVolume:volume});$('volume-value').textContent=volume+'%';};
 $('sound-volume').onchange=()=>tone(440);
 $('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');$('sound').textContent='効果音：'+(sound?'ON':'OFF');$('sound-volume').value=volume;$('volume-value').textContent=volume+'%';
@@ -420,4 +427,8 @@ const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap'),gap=wrap.clie
 installCardDragging($('tab-content'),()=>state,()=>{delete $('tab-content').dataset.orderSignature;render();});
 drawHeroPortraits();render();requestAnimationFrame(loop);
 
-await Promise.all([...['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})),cryptAtlas.decode().catch(()=>{}),readableAtlas.decode().catch(()=>{}),trapAtlas.decode().catch(()=>{}),propsAtlas.decode().catch(()=>{}),heroAssetsReady,wallAssetsReady,skillEffectAssetsReady]);draw();
+// Only title artwork gates startup. Gameplay images load concurrently and gate journey entry.
+let gameAssetsLoaded=false;
+const titleAssetsReady=Promise.all(['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})));
+const gameAssetsReady=titleAssetsReady.then(()=>Promise.all([cryptAtlas,readableAtlas,trapAtlas,propsAtlas,mapItemsAtlas,redChestAtlas,enemyAtlas].map(image=>image.decode().catch(()=>{})).concat([heroAssetsReady,wallAssetsReady,loadSkillEffectAssets()]))).then(()=>{gameAssetsLoaded=true;if(!showingTitle)draw();});
+await titleAssetsReady;

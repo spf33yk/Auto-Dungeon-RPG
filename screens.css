@@ -354,9 +354,9 @@ body.preparing #prepare-scene>#tab-content{order:1;padding:14px 18px;min-height:
 body.preparing #prepare-scene>.preparation-launch{order:2;display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:12px 18px;border-top:1px solid #38473e;background:#0b1511}
 body.preparing #prepare-scene .launch-area{display:flex;width:100%;gap:10px;align-items:center}
 body.preparing #prepare-scene #primary{order:5;margin-left:auto;min-width:185px;min-height:46px;font-size:16px;background:#d9b956;color:#182015}
-body.preparing #prepare-scene #prepare-journal{order:0}
+
 body.preparing #prepare-scene #abandon-run{order:1}
-body.preparing #prepare-scene #prepare-status{display:none}
+
 body.preparing #prepare-scene .prep-foot{margin:0;font-size:10px;max-width:none;line-height:1.4}
 .card-board{display:flex;flex-direction:column;height:100%;gap:8px}
 .card-board-info{font-size:11px;text-align:right;margin:0}
@@ -465,7 +465,7 @@ body.preparing #prepare-scene .fitted-card-editor .card-library,body.preparing #
 .forecast-dialog .dialog-toolbar{position:sticky;top:0;z-index:6;height:42px;background:#17201e}
 .forecast-dialog .forecast-panel{border:0;border-radius:0;min-height:260px;padding:16px;max-height:calc(86dvh - 42px);overflow:auto}
 .forecast-dialog #forecast-result{overflow:visible;flex:none}.forecast-dialog .forecast-heading h2{margin:0;font-size:20px}
-body.preparing #prepare-scene #prepare-forecast{order:0}body.preparing #prepare-scene #prepare-journal{order:1}body.preparing #prepare-scene #abandon-run{order:2}body.preparing #prepare-scene #primary{order:3;margin-left:auto}
+body.preparing #prepare-scene #prepare-forecast{order:0}body.preparing #prepare-scene #abandon-run{order:2}body.preparing #prepare-scene #primary{order:3;margin-left:auto}
 
 /* Artwork keeps its source aspect ratio; extra length uses repeated tray pieces. */
 .fitted-card-editor .palette-card,.fitted-card-editor .board-slot{background-size:contain!important}
@@ -499,7 +499,7 @@ body.preparing #prepare-scene .fitted-card-editor .card-library-list{display:fle
 .fitted-card-editor .is-drag-source{opacity:.25}
 .forecast-summary{display:grid;grid-template-columns:128px 122px 174px;gap:10px;flex:0 0 auto;align-items:center;color:#ddd9c9}
 .forecast-summary[hidden]{display:none!important}.forecast-summary-item{display:flex;flex-direction:column;gap:3px;min-width:0}.forecast-summary-item span{font-size:9px;line-height:1.3;white-space:nowrap}.forecast-summary-item b{font-size:12px;line-height:1.25;color:#dfcd8a;white-space:nowrap}
-body.preparing #prepare-scene #prepare-forecast{order:0}body.preparing #prepare-scene #forecast-summary{order:1}body.preparing #prepare-scene #prepare-journal{order:2}body.preparing #prepare-scene #abandon-run{order:3}body.preparing #prepare-scene #primary{order:4}
+body.preparing #prepare-scene #prepare-forecast{order:0}body.preparing #prepare-scene #forecast-summary{order:1}body.preparing #prepare-scene #abandon-run{order:3}body.preparing #prepare-scene #primary{order:4}
 @media(prefers-reduced-motion:reduce){.condition-insertion,.insert-condition{transition:none}}
 
 /* Preparation skin: shared metal, inset panels and readable controls. */
@@ -742,3 +742,7 @@ html[data-touch-controls=true] body:is(.preparing,.exploring) #hud-top .utility-
 html[data-touch-controls=true] .dialog-close{min-width:44px;min-height:44px;touch-action:manipulation}
 
 .fitted-card-editor .board-rule.is-folded[data-drag-source]{cursor:grab;touch-action:none}.fitted-card-editor .board-rule.is-folded[data-drag-source]:active{cursor:grabbing}
+
+body.preparing #prepare-scene #abandon-run{margin-left:auto}body.preparing #prepare-scene #primary{margin-left:0}.preparation-status-summary{margin-bottom:16px}
+
+.equipment-status-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}.equipment-status-layout>section{min-width:0}.equipment-status-layout h3:first-child{margin-top:0}
