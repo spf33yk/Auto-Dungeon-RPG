@@ -22,7 +22,7 @@
 | 準備予測 | exploration-forecast.js、forecast-view.js | 複製状態の非同期試行、結果と警告 |
 | 表示・設定 | display-mode.js、ui-settings.js、preparation-skins.js、screen-tutorial.js | 16:9拡縮・全画面要求・端末設定・スキン・案内 |
 | 視界・地図 | map-view.js、map-discovery.js、scene-lighting.js、scene-depth.js | 追従カメラ・入室式地図・明暗・足元ソート |
-| 素材描画 | character-animation.js、terrain-view.js、wall-tileset.js、entrance-view.js、prop-view.js、readable-props.js、enemy-view.js | 形式検証・セル切出し・統合壁・小物・敵HP表示 |
+| 素材描画 | skill-effects.js、character-animation.js、terrain-view.js、wall-tileset.js、entrance-view.js、prop-view.js、readable-props.js、enemy-view.js | 形式検証・セル切出し・統合壁・小物・敵HP表示 |
 | 演出 | awakening.js、normal-ending.js、subtitle-player.js、opening.js、thought-view.js、story-text.js、damage-view.js、log-visibility.js、field-messages.js | 回想・終了・文字送り・タイトル版・思考・ダメージ・5秒ログ |
 | 音 | scene-music.js、app.js | 場面BGM・ループ・音量・ブラウザの再生許可、Web Audio効果音 |
 | 検証 | *.test.js、test-support/ | Node標準テスト。画面確認は隔離したローカル保存で実施 |
@@ -120,3 +120,11 @@ card-editor.jsのfixedInstructionRowsは隣接攻撃・階段探索の読取専�
 app.jsのsyncSceneViewportはany-pointer:coarseからdata-touch-controlsを設定。screens.cssでHUDの押下領域・アイコン・間隔を--game-scene-scaleの逆数で補正し、ResizeObserverで準備領域の開始位置を追従させる。行の有効／無効と折りたたみは同じ詳細度のCSSで寸法を統一する。
 
 INITIAL_CARDSからaction:waitを除外し、カード箱の既存NORMAL抽選へ含める。migrateDirectiveCardsの待機自動付与を廃止し、明示所持・配置済みの互換は維持する。保存v16は変更しない。
+
+## スキルFXのイベントと描画
+
+tick(s,{onSkillEffect})は任意の表示用観測者を受け取る。skill-effect-events.jsが実行直前の使用済み集合・ダメージ列の先頭・使用者座標を取得し、実行直後に新しい消費と実際の命中座標を抽出する。敵の通常行動前に通知するため、後続の敵の攻撃をスキル命中として誤検出しない。敵操作にも同じ観測を適用。コールバック未指定の予測・検証は従来どおり動作し、sには演出列を格納しない。
+
+app.jsは発動前に捕捉した敵の参照へイベント座標を対応づけ、skill-effects.jsのUI列へ渡す。各entity描画と同じ補間・presentation offsetを使って身体中心を計算。生存中はその中心、死亡済みは命中座標に元スプライトの中心補正を適用する。主人公の中心はcharacterDrawBoxと同じ等倍率変換。全FXをワールド描画の後へ置き、名前や数値はその上に描く。
+
+skill-effect-art.jsはscripts/update-assets.jsがformat.jsonから生成し、5画像のSHA256付きURLと登録データを一緒に提供する。5枚のアトラスだけを本編へ採用し、原画・試作GIFは配信しない。heroClockで単発700msを進め、休止では停止、Clear直後の残り再生を許可。動きを減らす時はピーク静止。場面変更でUI列を破棄し、保存へ含めない。

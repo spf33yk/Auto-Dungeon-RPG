@@ -1,3 +1,4 @@
+import{captureSkillCast,collectSkillCast}from'./skill-effect-events.js';
 import{isHealingItem,migrateHealingItems}from'./healing-items.js';
 import{rollTrap,triggerTrap,trapActive,trapAttackFactor,trapSightPenalty,validTraps}from'./traps.js';
 import{validDirectiveSafety,bypassDirectives,progressSnapshot,updateDirectiveSafety,beginDirectiveSafety}from'./directive-safety.js';
@@ -190,18 +191,18 @@ function applyTrap(s,enemy=null){
    log(s,(e?e.name:'骸')+'に'+damage+'ダメージ。',e?'':'bad');
   }});
 }
-export function tick(s){
+export function tick(s,{onSkillEffect}={}){
  if(s.phase!=='explore'||s.augmentOffer||s.cardOffer)return;notifyB15(s);s.unharmedTurns=(s.unharmedTurns||0)+1;s.turn++;s.steps++;s.flash=null;s.damageEvents=[];reveal(s);const st=stats(s);const report=buildReport(s),bonus=augmentBonus(s,st.maxHp,s.enemies.filter(e=>canSee(s,e.x,e.y)).length);report.turns++;report.peakAttackBonus=Math.max(report.peakAttackBonus,bonus.attack);report.peakDefenseBonus=Math.max(report.peakDefenseBonus,bonus.defense);
  beginDirectiveSafety(s,log);const progressBefore=progressSnapshot(s);s.actorSkillEvent=null;for(const e of s.enemies)if(e.control)e.control.unharmedTurns++;if(s.retreatCooldown>0)s.retreatCooldown--;
  const sealedStart=s.enemies.some(e=>e.boss)&&key(s.player)===key(s.stairs);
  const {enemy,action:plannedAction,ruleIndex}=planHeroTurn(s);let action=plannedAction;s.activeOrder=null;s.executingRule=ruleIndex===null?(!enemy&&action?.fixed?'fixed':null):ruleIndex;recordRule(s,ruleIndex);
  let controlledActor=null;
- if(action?.control){controlledActor=action.control.actor;executeEnemyCommand(s,action.control,{stats,route,lineOfSight,rng:()=>nextRandom(s),log,hitHero:controlledHitHero});s.intent='敵への指示：'+action.intent.replace('カード指示：','');if(s.hp<=0)return;}
+ if(action?.control){controlledActor=action.control.actor;const cast=onSkillEffect&&action.control.skill?captureSkillCast(s,controlledActor):null;executeEnemyCommand(s,action.control,{stats,route,lineOfSight,rng:()=>nextRandom(s),log,hitHero:controlledHitHero});if(cast){const event=collectSkillCast(s,cast,action.control.skill,controlledActor);if(event)onSkillEffect(event);}s.intent='敵への指示：'+action.intent.replace('カード指示：','');if(s.hp<=0)return;}
  else if(enemy){s.intent=`隣接する${enemy.name}と交戦`;attackEnemy(s,enemy);}
  else {
   if(action.wait)s.intent=action.intent;
   if(action.warp&&!action.skill)action.skill='warp';
-  if(action.skill){s.intent=action.intent;s.activeOrder='cards';executeThemedSkill(s,action.skill,{stats,canSee,route,reveal,attackEnemy,warpDestination,has:hasAugment,rng:()=>nextRandom(s),log,recordMend:n=>{recordBuild(s,'mendUses');recordBuild(s,'mendHealing',n);}});}
+  if(action.skill){s.intent=action.intent;s.activeOrder='cards';const cast=onSkillEffect?captureSkillCast(s):null;executeThemedSkill(s,action.skill,{stats,canSee,route,reveal,attackEnemy,warpDestination,has:hasAugment,rng:()=>nextRandom(s),log,recordMend:n=>{recordBuild(s,'mendUses');recordBuild(s,'mendHealing',n);}});if(cast){const event=collectSkillCast(s,cast,action.skill);if(event)onSkillEffect(event);}}
   if(action.next&&!trapActive(s,null,'snare')){s.player={...action.next};s.intent=action.intent;s.activeOrder=action.id||null;reveal(s);}
   if(action.flee){s.retreatTurns++;if(s.retreatTurns>=4){s.retreatTurns=0;s.retreatCooldown=6;}}else s.retreatTurns=0;
  }
