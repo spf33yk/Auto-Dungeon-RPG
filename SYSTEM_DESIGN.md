@@ -23,7 +23,7 @@
 | 表示・設定 | display-mode.js、ui-settings.js、preparation-skins.js、screen-tutorial.js | 16:9拡縮・全画面要求・端末設定・スキン・案内 |
 | 視界・地図 | map-view.js、map-discovery.js、scene-lighting.js、scene-depth.js | 追従カメラ・入室式地図・明暗・足元ソート |
 | 素材描画 | character-animation.js、terrain-view.js、wall-tileset.js、entrance-view.js、prop-view.js、readable-props.js、enemy-view.js | 形式検証・セル切出し・統合壁・小物・敵HP表示 |
-| 演出 | awakening.js、normal-ending.js、subtitle-player.js、opening.js、thought-view.js、story-text.js、damage-view.js、log-visibility.js | 回想・終了・文字送り・タイトル版・思考・ダメージ・5秒ログ |
+| 演出 | awakening.js、normal-ending.js、subtitle-player.js、opening.js、thought-view.js、story-text.js、damage-view.js、log-visibility.js、field-messages.js | 回想・終了・文字送り・タイトル版・思考・ダメージ・5秒ログ |
 | 音 | scene-music.js、app.js | 場面BGM・ループ・音量・ブラウザの再生許可、Web Audio効果音 |
 | 検証 | *.test.js、test-support/ | Node標準テスト。画面確認は隔離したローカル保存で実施 |
 
@@ -106,3 +106,9 @@ TRUE本編、仲間指定、追加アニメーション、実機スマホは残�
 回復はheartを新規配置し、BALANCE.heartCount=2／heartHeal=10。isHealingItemは旧potion／herbも認識。migrateHealingItemsはvalidateSave前に行・カード集合・品物・候補を固定置換し、プリセットはhealingRowを使う。図鑑・新規抽選には泉カードを含めない。readable-props.jsのフレーム配置とformat.jsonはテストで照合。新アトラスを先に描画し、未ロード時のみ従来prop-viewへフォールバックする。
 
 回復の表示名・カード名は回復ポーション、アトラスの主フレーム名はpotion。保存中のheart／herbは同じフレームへ別名解決する。名称・絵の変更で回復量・配置数・抽選・指示処理・保存版を変えない。
+
+探索通知はfield-messages.jsがUI直前／直後のgimmick.triggeredとthemeState.usedの差分から抽出。実スキル消費の差分を使い、ログ文言や乱数へ依存しない。FieldMessageQueueはseed・profile.runs・floorの場面キーで同期し、別の階／旅では破棄する。エンジンや予測に通知待ち状態を追加しない。
+
+app.jsはtick完了後に通知を積み、入場通知中だけ次tickと宝箱・オーグメントの自動表示を抑止する。専用native dialogをマップの実矩形へ位置合わせし、下部HUDの上へ配置。入場ダイアログの閉じるイベントには汎用finishDialogを適用せず、paused／dialogWasPausedを書き換えない。最後の確認でlastを更新しrenderを再実行して報酬表示へ引き継ぐ。resizeで位置を再計算、暗転やぼかしを使わず、prefers-reduced-motion時は▼を動かさない。
+
+スキル通知は別の非モーダルDOMとFIFO列で扱い、active（進行停止）は入場通知列だけを参照する。requestAnimationFrameで表示中の実時間2000msを消費。別ダイアログ・画面非表示時はタイマーを止めるが、スキル列の存在はtick・報酬表示・フォーカス・休止フラグへ影響しない。pointer-events:noneで操作を遮らず、階／旅変更で表示と列をともに破棄する。
