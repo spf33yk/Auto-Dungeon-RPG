@@ -40,6 +40,6 @@ test('multiple incoming hits and traps emit damage events and reset the next tur
 });
 test('damage labels stack, expire and preserve simultaneous lethal and multiple-target hits',()=>{
  const q=queueDamage([],[{x:1,y:1,damage:9},{x:1,y:1,damage:4},{x:2,y:1,damage:6}],100);
- assert.deepEqual(q.map(p=>p.stack),[0,1,0]);assert.equal(damageFrame(q[1],100).rise,9);assert.equal(damageFrame(q[0],100).alpha,1);
+ assert.deepEqual(q.map(p=>p.stack),[0,1,0]);assert.equal(damageFrame(q[1],100).rise,13);assert.equal(damageFrame(q[0],100).alpha,1);
  assert.equal(damageFrame(q[0],100+DAMAGE_DURATION).alive,false);assert.deepEqual(queueDamage(q,[],100+DAMAGE_DURATION),[]);
 });

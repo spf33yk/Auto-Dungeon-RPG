@@ -1,6 +1,6 @@
 # 骸の旅路 ― システム設計書
 
-更新日：2026-11-08。保存v16。現行仕様は[SPEC.md](SPEC.md)、企画は[DESIGN.md](DESIGN.md)。
+更新日：2026-11-10。保存v16。現行仕様は[SPEC.md](SPEC.md)、企画は[DESIGN.md](DESIGN.md)。
 
 ## 1. 構成と責務
 
@@ -134,3 +134,11 @@ skill-effect-art.jsはscripts/update-assets.jsがformat.jsonから生成し、5�
 app.jsはtitleAssetsReadyとgameAssetsReadyを分離。モジュールのtop-level awaitは前者だけとし、index.htmlがタイトル画像とレイアウトの確定後にdata-startupを解除する。全スキルアトラスの通信開始はtitleAssetsReadyの後へ移し、HTTP接続枠でタイトル画像と競合しないようにする。gameAssetsReadyは従来のマップ素材に加えマップ品物・赤箱・敵画像もdecodeし、enterJourneyが開始動画後／スキップ後の遷移を一度だけ実行する。未完了時はstartup-statusを待機表示に再利用。タイトル・開始動画・ENDプレビュー中のdrawは早期終了する。
 
 準備タブはorders／gear。gearの描画にexpedition-summaryのIDを除去したコピーと既存の装備UIを併置し、能力確認と装備操作を統合する。下部のprepare-journalと非表示のprepare-statusボタンを除去。ログ本体の保持と上部ログアイコンは維持する。abandon-runの左autoマージンとprimaryの左0マージンで右側へ2ボタンを隣接配置する。
+
+## 戦闘接触の描画層
+
+combat-feedback.jsが被弾群を最大64件保持し、実時間相当のtimeと姿勢用actorTimeを分離する。advanceCombatFeedbackは次の接触と停止終了を区間積分し、フレームレートに依存せず同じ停止量を適用する。app.jsのheroClockは演出の経過時間、combat.actorTimeはCharacterAnimation・敵の踏み込み・移動補間へ使用する。スキルの8コマと粒子・火花・白化は停止中も進む。1tickにつき先頭の非罠被弾だけに停止枠を与え、同時対象／追撃で加算しない。
+
+damageEventsへ表示用source／impact（melee・skill・splash・trap）を付記。攻撃・被害の計算や乱数には使わず、保存・予測署名からも従来どおり除外する。UIはtick前の個体参照一覧から被弾者を対応づける。撃破後は短い描画用ghostだけを残す。元のゲーム配列へ戻さない。
+
+敵の純白画像は既存アトラスを起動後のcanvasへ描き、source-inで白くしたものをメモリ内に作る。PNG追加・形状変更・マス矩形のフラッシュは不要。身体描画へ反動を加え、同じ変換をスキル中心へ渡す。背景と世界FXの後で揺れを打ち消してラベル・数字を描き、HUDとミニマップへ伝播させない。damage-view.jsは接触で発行された数字の跳ね・フェード・末尾点滅を管理。新設定screenShakeはui-settings.jsで初期trueを補い、BGM等を維持して保存する。
