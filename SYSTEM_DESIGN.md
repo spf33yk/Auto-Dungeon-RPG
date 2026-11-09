@@ -152,3 +152,7 @@ field-messages.jsのhouseEntryReadyは移動補間のtime+durationで入場表�
 idleClockは探索表示中に進む足踏み専用時計。動作中はactorTimeの差分を加算しヒットストップを維持、休止・モーダル中はフレーム経過時間を加算する。idleFootstepSampleは休止中の姿勢だけ待機へ置換し、位置・向きと移動／攻撃状態本体は変更しない。非表示・タイトル・死亡はこの継続対象外。reduced-motionの固定コマも維持する。
 
 fieldMessageLayoutはhostとHUDのgetBoundingClientRectから実画面の幅・高さ・位置・文字サイズ・paddingを一度計算。ダイアログとbody直下へ移したスキル通知へ同じborder-box寸法を適用し、拡縮されたmainの祖先でviewport座標が二重変換されることを避ける。host/HUDのResizeObserver、resize、visualViewport.resize、fullscreenchangeで追従する。
+
+## 霧BGMと指示の一括折りたたみ
+
+scene-music.jsはgimmick.idがfogの場合もphaseを参照し、prepareはdungeon、explore／clearedはfogを返す。霧の視界・描画処理はこの変更で触らない。カード編集のdata-order-fold-allはcard-orders.jsのcollapseAllCardRowsを呼ぶ。prepare以外は変更せず、各orders[].folded=true、fixedOrderExpanded=[]だけを更新する。signatureへfixedOrderExpandedも含め、既存の再描画・スクロール保持・自動保存へ接続する。全行閉じ済みならボタンを無効にし、ゲーム判断・有効状態・カード所持には触れない。

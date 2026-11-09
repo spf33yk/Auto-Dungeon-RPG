@@ -147,3 +147,5 @@ export function describeCardRule(input){
  const conditions=r.conditions.map(c=>{const d=conditionById[c.id];if(c.id==='visible')return (r.effect.id==='stairs'?'階段':r.effect.id==='chests'?'宝箱':r.effect.id==='avoid-traps'?'トラップ':r.target==='self'?'対象':'敵')+'が視界内';return d?.param?d.name.replace('指定%',String(c.value)+'%').replace('指定距離',String(c.value)+'マス').replace('指定ターン',String(c.value)+'ターン').replace('指定数',String(c.value)):d?.name||'？';});
  return `${target}が、${conditions.length?conditions.join('、かつ')+(/(?:いる|ある|できる|倒せる)$/.test(conditions.at(-1))?'とき、':'のとき、'):''}${effect?.name||'？'}${r.effect.kind==='skill'?'を発動する':r.effect.id==='wait'?'する':''}。`;
 }
+
+export function collapseAllCardRows(s){if(s.phase!=='prepare')return false;for(const row of s.orders)row.folded=true;s.fixedOrderExpanded=[];return true;}
