@@ -746,3 +746,9 @@ html[data-touch-controls=true] .dialog-close{min-width:44px;min-height:44px;touc
 body.preparing #prepare-scene #abandon-run{margin-left:auto}body.preparing #prepare-scene #primary{margin-left:0}.preparation-status-summary{margin-bottom:16px}
 
 .equipment-status-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}.equipment-status-layout>section{min-width:0}.equipment-status-layout h3:first-child{margin-top:0}
+
+/* House and skill windows share viewport coordinates and exact border-box dimensions. */
+#field-event-dialog,#field-skill-message{box-sizing:border-box;max-height:none;min-height:0}
+#field-event-advance{box-sizing:border-box;position:relative;height:100%;min-height:0;padding:var(--field-message-padding,12px) 18px;font-size:var(--field-message-font,26px);overflow-wrap:anywhere}
+#field-skill-message{padding:var(--field-message-padding,12px) 18px;overflow-wrap:anywhere}
+#field-event-advance .field-event-caret{position:absolute;right:12px;bottom:7px}

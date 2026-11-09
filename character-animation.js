@@ -108,3 +108,6 @@ export function drawCharacter(ctx,sheet,sample,x=sample.x,y=sample.y,size=24){
  const directional=d.format==='character-front-actions'&&sample.direction>0&&sample.state!=='dead',source=directional?sheet.directionImage:image;if(directional&&(!source||(source.naturalWidth??source.width)!==d.directionsWidth))return false;
  const f=directional?{x:sample.direction*d.tileSize,y:0,width:d.tileSize,height:d.tileSize}:characterActionFrame(d,sample),box=characterDrawBox(x,y,d,size);ctx.imageSmoothingEnabled=false;ctx.drawImage(source,f.x,f.y,f.width,f.height,box.x,box.y,box.width,box.height);return true;
 }
+
+// Idle stepping is independent of paused movement/combat clocks and never changes actor state.
+export function idleFootstepSample(sample,time,resting=false){return resting?{...sample,state:'idle',progress:0,elapsed:time,cycleElapsed:time}:{...sample,cycleElapsed:time};}

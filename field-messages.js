@@ -20,12 +20,20 @@ export class FieldMessageQueue{
 }
 // UI-only queue: no engine, save, RNG or pause-flag mutations.
 export const SKILL_MESSAGE_MS=2000;
+export const houseEntryReady=(motion,time)=>!motion||time>=motion.time+motion.duration;
+export function fieldMessageLayout(r,hud){
+ const top=Number.isFinite(r.top)?r.top:r.bottom-r.height,inset=Math.min(8,r.width*.02),width=Math.max(1,r.width*.76),bottom=Math.max(r.height*.115,hud.height+12),height=Math.max(1,Math.min(Math.max(72,r.height*.14),r.height-bottom-inset)),left=Math.round((r.left+(r.width-width)/2)*1000)/1000,y=Math.max(top+inset,r.bottom-bottom-height);
+ return {left,top:y,width,height,font:Math.max(12,Math.min(42,r.width*.022,height*.28)),padding:Math.max(4,Math.min(12,height*.12))};
+}
+
 export function installFieldMessages({dialog,button,text,skillBox,skillText,host,hud,onIdle}){
+ // A body-level fixed layer avoids a transformed ancestor applying coordinates twice.
+ if(host.ownerDocument?.body&&skillBox.parentElement!==host.ownerDocument.body)host.ownerDocument.body.appendChild(skillBox);
  const queue=new FieldMessageQueue(),skills=new FieldMessageQueue();let displayed=null,remaining=0,lastTime=null;
  const visibility=()=>host.classList?.toggle('has-field-message',dialog.open||!skillBox.hidden);
- const position=element=>{const r=host.getBoundingClientRect(),bottom=Math.max(r.height*.115,hud.getBoundingClientRect().height+12),height=Math.max(72,r.height*.14);Object.assign(element.style,{left:r.left+r.width*.12+'px',top:r.bottom-bottom-height+'px',width:r.width*.76+'px',minHeight:height+'px'});element.style.setProperty('--field-message-font',Math.max(16,Math.min(42,r.width*.022))+'px');};
+ const position=element=>{const box=fieldMessageLayout(host.getBoundingClientRect(),hud.getBoundingClientRect());Object.assign(element.style,{left:box.left+'px',top:box.top+'px',width:box.width+'px',height:box.height+'px',minHeight:'0',boxSizing:'border-box'});element.style.setProperty('--field-message-font',box.font+'px');element.style.setProperty('--field-message-padding',box.padding+'px');};
  const place=()=>{if(dialog.open)position(dialog);if(!skillBox.hidden)position(skillBox);visibility();};
- const render=()=>{if(!queue.active){visibility();return;}if(!dialog.open)dialog.showModal();text.textContent=queue.current.text;dialog.dataset.kind=queue.current.kind;button.setAttribute('aria-label',queue.current.text+' クリック、タップ、Enterで続ける');place();button.focus({preventScroll:true});};
+ const render=({ready=true}={})=>{if(!ready)return;if(!queue.active){visibility();return;}if(!dialog.open)dialog.showModal();text.textContent=queue.current.text;dialog.dataset.kind=queue.current.kind;button.setAttribute('aria-label',queue.current.text+' クリック、タップ、Enterで続ける');place();button.focus({preventScroll:true});};
  const advance=()=>{if(!queue.active)return;queue.advance();if(queue.active)render();else{dialog.close();onIdle();}};
  button.addEventListener('click',advance);
  dialog.addEventListener('cancel',e=>{e.preventDefault();advance();});
@@ -39,5 +47,6 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
   if(skillText.textContent!==displayed.text)skillText.textContent=displayed.text;
   skillBox.hidden=false;position(skillBox);visibility();
  };
- return {get active(){return queue.active;},sync(s){if(queue.sync(s)&&dialog.open)dialog.close();if(skills.sync(s)){displayed=null;lastTime=null;skillBox.hidden=true;}},push(messages){queue.push(messages.filter(m=>m.kind!=='skill'));skills.push(messages.filter(m=>m.kind==='skill'));},render,place,animate};
+ if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(place);observer.observe(host);observer.observe(hud);}
+ return {get active(){return queue.active;},get waiting(){return queue.active&&!dialog.open;},sync(s){if(queue.sync(s)&&dialog.open)dialog.close();if(skills.sync(s)){displayed=null;lastTime=null;skillBox.hidden=true;}},push(messages){queue.push(messages.filter(m=>m.kind!=='skill'));skills.push(messages.filter(m=>m.kind==='skill'));},render,place,animate};
 }

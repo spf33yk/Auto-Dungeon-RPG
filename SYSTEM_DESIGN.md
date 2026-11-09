@@ -45,7 +45,7 @@ tickはexploreかつaugmentOffer・cardOfferなしでのみ実行。turnは旅�
 
 旧鍵・廃止カード・常時スキルは互換移行で処理し、新規取得とは分ける。data.jsの旧rewardDefinitions・chestRewards、orders.jsの旧形式、非公開の旧図鑑経路が残っていても、現在の画面で利用する新規カード箱・4図鑑とは区別する。
 
-ゲーム保存とui-settings.jsの端末設定を分離。設定はミニマップ・映像スキップ・準備スキン・BGM・画面別案内閲覧フラグ。案内やスクロールのためゲーム保存版を上げない。視覚時計、ドラッグ・選択、スクロール、ダメージ演出は一時状態。
+ゲーム保存とui-settings.jsの端末設定を分離。設定はミニマップ・映像スキップ・準備スキン・BGM・効果音・画面揺れ・画面別案内閲覧フラグ。案内やスクロールのためゲーム保存版を上げない。視覚時計、ドラッグ・選択、スクロール、ダメージ演出は一時状態。
 
 ## 4. 乱数・地形・到達性
 
@@ -57,11 +57,11 @@ routeは既知床を使う幅優先探索で、敵側の経路だけ未知床も
 
 ワールドは1マス64px。UI設計座標は1280×720で等倍率拡縮、Canvas描画面は1920×1080。cameraForが通常時の固定倍率と主人公位置から追従カメラを計算し、視覚上の移動補間を使う。身体64px、保存セル128px、ワールド64px、画面倍率を混同しない。
 
-主人公はdata-heroからmukuro-march64-v1/sprites.jsonを読込。character-minimal-4dir/v1は3列互換を保ち、4列ではanimation.cycleDurationsMsの4要素を検証する。4列の接地A／足上げA／接地B／足上げB、行は下・左・右・上。128pxセル・足元原点[64,96]・displayScale1.71875。appのheroClockをsample.cycleElapsedへ渡し、characterActionFrameで120/280/120/280msの連続周期を選ぶ。攻撃・死亡・reduced-motionは接地0。攻撃の踏み込み・斬撃は表示だけで、判定やグリッド座標を変えない。旧3列屈伸・character-4dir/v1は互換維持。[足踏み版採用](docs/characters/MARCH64_INTEGRATION.md)。
+主人公はdata-heroからmukuro-march64-v1/sprites.jsonを読込。character-minimal-4dir/v1は3列互換を保ち、4列ではanimation.cycleDurationsMsの4要素を検証する。4列の接地A／足上げA／接地B／足上げB、行は下・左・右・上。128pxセル・足元原点[64,96]・displayScale1.71875。appの独立したidleClockをsample.cycleElapsedへ渡し、characterActionFrameで120/280/120/280msの連続周期を選ぶ。攻撃・死亡・reduced-motionは接地0。攻撃の踏み込み・斬撃は表示だけで、判定やグリッド座標を変えない。旧3列屈伸・character-4dir/v1は互換維持。[足踏み版採用](docs/characters/MARCH64_INTEGRATION.md)。
 
 床はシームレスfloor-texture/v2、壁はwall-material/v1入力・wall-autotile/v2配信。北1・東2・南4・西8で接続番号を求め、入口と角も同じ壁PNG・光源・riseで描く。15は埋め壁で外枠なし。旧entrance-parts/v1を別材質として重ねない。前景壁は通行床からはみ出さず、足元深度で描画順を決定する。明暗は実視界に合わせ、既知地形を薄暗く残す。
 
-敵の攻撃はcontrolledHitHeroがdamageEventsへsource座標を付加し、enemy-attack-animation.jsが対象個体の参照を解決する。app.jsのenemyAttacksは描画専用で、heroClockを共用して停止・倍速・動きを減らす設定へ対応。身体・影を同じoffsetで動かし、攻撃マークはラベルより後ろへ描く。種IDではなくオブジェクト参照で複数個体を区別。damageEventsは保存・予測署名から除外、読込時に消去。フロア／旅の切替と個体消滅で演出を破棄する。
+敵の攻撃はcontrolledHitHeroがdamageEventsへsource座標を付加し、enemy-attack-animation.jsが対象個体の参照を解決する。app.jsのenemyAttacksは描画専用で、combat.actorTimeを共用して停止・倍速・動きを減らす設定へ対応。身体・影を同じoffsetで動かし、攻撃マークはラベルより後ろへ描く。種IDではなくオブジェクト参照で複数個体を区別。damageEventsは保存・予測署名から除外、読込時に消去。フロア／旅の切替と個体消滅で演出を破棄する。
 
 ## 6. 準備UI・スクロール
 
@@ -144,3 +144,11 @@ damageEventsへ表示用source／impact（melee・skill・splash・trap）とス
 敵の純白画像は既存アトラスを起動後のcanvasへ描き、source-inで白くしたものをメモリ内に作る。PNG追加・形状変更・マス矩形のフラッシュは不要。身体描画へ反動を加え、同じ変換をスキル中心へ渡す。背景と世界FXの後で揺れを打ち消してラベル・数字を描き、HUDとミニマップへ伝播させない。damage-view.jsは接触で発行された数字の跳ね・フェード・末尾点滅を管理。新設定screenShakeはui-settings.jsで初期trueを補い、BGM等を維持して保存する。
 
 攻撃用skillIdはtheme-runtimeのhitからattackEnemyまたは敵操作経由のcontrolledHitHeroへ渡し、表示イベントにのみ記録する。combat-feedbackのBLADE_SKILLSで6種の追加軌跡を分類。start（姿勢開始）とcontact（接触）を別に保持し、即時接触のスキルでも軌跡を姿勢へ合わせる。heroAttackAimは実被弾または専用FXの攻撃分類から姿勢方向を返す。外れ時は直前の向きへ姿勢だけを出し、命中キューを増やさない。
+
+## 入場通知と表示座標
+
+field-messages.jsのhouseEntryReadyは移動補間のtime+durationで入場表示の完了を判断。通知はpush時点でactiveとなって次tickを抑止するが、render({ready:false})ではshowModalしない。appの描画時計はその間も進み、完了フレームでrenderしてBGMを同期する。musicSceneのhouseEnteredは既定でgimmick.triggered、UIではtriggeredかつ!fieldMessages.waitingを渡し、論理座標だけ先に入った間の曲変更を抑える。読込時は補間がないため保存されたtriggeredのまま専用曲を使い、過去の通知を再生しない。
+
+idleClockは探索表示中に進む足踏み専用時計。動作中はactorTimeの差分を加算しヒットストップを維持、休止・モーダル中はフレーム経過時間を加算する。idleFootstepSampleは休止中の姿勢だけ待機へ置換し、位置・向きと移動／攻撃状態本体は変更しない。非表示・タイトル・死亡はこの継続対象外。reduced-motionの固定コマも維持する。
+
+fieldMessageLayoutはhostとHUDのgetBoundingClientRectから実画面の幅・高さ・位置・文字サイズ・paddingを一度計算。ダイアログとbody直下へ移したスキル通知へ同じborder-box寸法を適用し、拡縮されたmainの祖先でviewport座標が二重変換されることを避ける。host/HUDのResizeObserver、resize、visualViewport.resize、fullscreenchangeで追従する。

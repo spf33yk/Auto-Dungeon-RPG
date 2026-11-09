@@ -1,8 +1,9 @@
-export function musicScene(state,{title=false,teaser=false,endingPreview=false}={}){
+export function musicScene(state,{title=false,teaser=false,endingPreview=false,houseEntered=Boolean(state.gimmick?.triggered)}={}){
  if(endingPreview)return 'ending';if(title||teaser||state.phase==='awakening')return 'opening';
  if(state.phase==='ending')return 'ending';if(state.phase==='dead')return null;
  if(state.bossFloor)return 'boss';
- return ['traps','monsters','fog'].includes(state.gimmick?.id)?state.gimmick.id:'dungeon';
+ if(['traps','monsters'].includes(state.gimmick?.id))return houseEntered?state.gimmick.id:'dungeon';
+ return state.gimmick?.id==='fog'?'fog':'dungeon';
 }
 export class SceneMusic{
  constructor(audio,tracks){this.audio=audio;this.tracks=tracks;this.scene=null;this.unlocked=false;this.enabled=true;this.volume=35;this.hidden=false;this.playing=false;this.request=0;audio.loop=true;audio.preload='none';}
