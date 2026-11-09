@@ -1,0 +1,5 @@
+// Two-pixel common idle pose. Feet and sprite proportions remain unchanged.
+export const ENEMY_IDLE={periodMs:1400,amplitudePx:2,footRows:10};
+export function enemyIdlePose(time,phase=0,{reducedMotion=false,attacking=false,hurt=false,defeated=false}={}){return reducedMotion||attacking||hurt||defeated?0:Math.round(ENEMY_IDLE.amplitudePx*(.5-.5*Math.cos(2*Math.PI*(Math.max(0,time)+phase)/ENEMY_IDLE.periodMs)));}
+export function createEnemyIdleSampler(){const phases=new WeakMap();return (enemy,time,options)=>{if(!phases.has(enemy)){let n=0;for(const c of String(enemy.baseId||enemy.id||'enemy')+':'+enemy.x+':'+enemy.y)n=(Math.imul(n,31)+c.charCodeAt(0))>>>0;phases.set(enemy,n%ENEMY_IDLE.periodMs);}return enemyIdlePose(time,phases.get(enemy),options);};}
+export function enemyIdleCuts(data,width=320,height=320){if(width!==320||height!==320||data.length!==width*height*4)throw Error('Enemy idle atlas must be 320x320 RGBA');return Array.from({length:25},(_,i)=>{let bottom=0;const ox=i%5*64,oy=Math.floor(i/5)*64;for(let y=0;y<64;y++)for(let x=0;x<64;x++)if(data[((oy+y)*width+ox+x)*4+3])bottom=y+1;return Math.max(1,(bottom||64)-ENEMY_IDLE.footRows);});}
