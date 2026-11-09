@@ -1,13 +1,15 @@
 // Presentation state only. This module never changes game state, cells, HP or RNG.
 export const COMBAT_FEEDBACK={flashMs:1000/30,knockPx:6,knockMs:8000/60,returnMs:200,shakePx:1.5,shakeMs:10000/60,particles:6,particleMs:360,sparkMs:4000/60};
+export const BLADE_SKILLS=new Set(['frenzy','blood-cut','sweep','life-burn','life-bet','all-in']);
+export function heroAttackAim(events,casts,player,format,direction=0){const hit=events?.find(e=>!e.hero&&['melee','skill'].includes(e.impact));if(hit)return point(hit);const cast=casts?.find(e=>e.side==='hero'&&format.skills[e.id]?.placement==='hit');if(!cast)return null;if(cast.targets.length)return point(cast.targets[0]);const [dx,dy]=[[0,1],[-1,0],[1,0],[0,-1]][direction]||[0,1];return {x:player.x+dx,y:player.y+dy};}
 export const hitStopMs=speed=>speed>=4?0:speed>=2?1000/60:50;
 export const createCombatFeedback=(time=0)=>({time,actorTime:time,holdUntil:time,events:[],sequence:0});
 const point=p=>({x:p.x,y:p.y});
 export function queueCombatFeedback(f,events,roster,s,{speed=1,heroDuration=300,enemyDuration=300}={}){
  let stopAssigned=false;const seen=new Set();
- for(const e of events||[]){if(!(e.damage>0))continue;const from=e.source,physical=e.impact==='melee'&&!e.skill,trap=e.impact==='trap'||!from,delay=trap?0:physical?(e.hero?enemyDuration*.45:heroDuration*.35):0,target=e.hero?null:roster.find(r=>r.x===e.x&&r.y===e.y)?.actor||s.enemies.find(r=>r.x===e.x&&r.y===e.y),key=[e.hero,e.x,e.y,from?.x,from?.y].join(':'),primary=!seen.has(key);seen.add(key);
+ for(const e of events||[]){if(!(e.damage>0))continue;const from=e.source,physical=e.impact==='melee'&&!e.skill||e.impact==='skill'&&BLADE_SKILLS.has(e.skillId),trap=e.impact==='trap'||!from,delay=trap?0:e.impact==='melee'?(e.hero?enemyDuration*.45:heroDuration*.35):0,target=e.hero?null:roster.find(r=>r.x===e.x&&r.y===e.y)?.actor||s.enemies.find(r=>r.x===e.x&&r.y===e.y),key=[e.hero,e.x,e.y,from?.x,from?.y].join(':'),primary=!seen.has(key);seen.add(key);
  const stop=!trap&&!stopAssigned?hitStopMs(speed):0;if(!trap)stopAssigned=true;
- f.events.push({...e,heroDuration,enemyDuration,at:point(e),from:from?point(from):null,target,physical,trap,primary,stop,contact:f.actorTime+delay,time:null,id:++f.sequence});}
+ f.events.push({...e,heroDuration,enemyDuration,at:point(e),from:from?point(from):null,target,physical,trap,primary,stop,start:f.actorTime,contact:f.actorTime+delay,time:null,id:++f.sequence});}
  f.events=f.events.slice(-64);return f;
 }
 export function advanceCombatFeedback(f,time,{reducedMotion=false}={}){
@@ -46,5 +48,5 @@ export function drawCombatFeedback(ctx,f,resolve,{size=64,reducedMotion=false}={
  }
 }
 export function drawCombatTrails(ctx,f,resolve,{size=64,reducedMotion=false}={}){
- if(reducedMotion)return;for(const e of f.events){if(!e.physical||e.trap||!e.primary||!e.from)continue;const progress=(f.actorTime-(e.contact-(e.hero?.45:.35)*(e.hero?e.enemyDuration||300:e.heroDuration||300)))/(e.hero?e.enemyDuration||300:e.heroDuration||300);if(progress<=.22||progress>=.73)continue;const source=resolve(e,true);if(!source)continue;const a=Math.atan2(e.at.y-e.from.y,e.at.x-e.from.x),q=(progress-.22)/.51,end=-1.3+2.45*q,start=Math.max(-1.3,end-.72),scale=size/64;ctx.save();ctx.translate(source.x,source.y);ctx.rotate(a);ctx.globalAlpha=.7*(1-q*.7);ctx.strokeStyle='#f8efd2';ctx.lineWidth=2*scale;ctx.beginPath();ctx.arc(0,0,32*scale,start,end);ctx.stroke();ctx.restore();}
+ if(reducedMotion)return;for(const e of f.events){if(!e.physical||e.trap||!e.primary||!e.from)continue;const progress=(f.actorTime-e.start)/(e.hero?e.enemyDuration||300:e.heroDuration||300);if(progress<=.22||progress>=.73)continue;const source=resolve(e,true);if(!source)continue;const a=Math.atan2(e.at.y-e.from.y,e.at.x-e.from.x),q=(progress-.22)/.51,end=-1.3+2.45*q,start=Math.max(-1.3,end-.72),scale=size/64;ctx.save();ctx.translate(source.x,source.y);ctx.rotate(a);ctx.globalAlpha=.7*(1-q*.7);ctx.strokeStyle='#f8efd2';ctx.lineWidth=2*scale;ctx.beginPath();ctx.arc(0,0,32*scale,start,end);ctx.stroke();ctx.restore();}
 }
