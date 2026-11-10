@@ -165,4 +165,4 @@ enemy-idle.jsのENEMY_IDLEはperiodMs=1400／amplitudePx=2／footRows=10。敵�
 
 オーグメント確認はpendingAugmentで候補IDだけ保持し、confirm-augmentで既存chooseAugmentを呼ぶ。確認を閉じても元の候補ダイアログを維持する。
 
-ui-settings.jsのscreenBrightnessが設定値を正規化しread/saveで保持する。scene-lighting.jsのlightingShadeColorsが標準の暗転各段階のアルファを補正する。app.jsはdrawExplorationLightへuiSettings.brightnessを渡し、スライダーinputと標準復帰で保存・表示更新・drawを行う。
+ui-settings.jsのscreenBrightnessが設定値を正規化しread/saveで保持する。scene-lighting.jsのlightingShadeColorsが標準の暗転各段階のアルファを補正する。app.jsはdrawExplorationLightへuiSettings.brightnessを渡し、スライダーinputと標準復帰で保存・表示更新・drawを行う。スライダーは表示0〜100、保存は表示＋50。読込時の表示は保存−50とし、標準は表示50／保存100。既存保存の移行書換えは不要。
