@@ -166,3 +166,5 @@ enemy-idle.jsのENEMY_IDLEはperiodMs=1400／amplitudePx=2／footRows=10。敵�
 オーグメント確認はpendingAugmentで候補IDだけ保持し、confirm-augmentで既存chooseAugmentを呼ぶ。確認を閉じても元の候補ダイアログを維持する。
 
 ui-settings.jsのscreenBrightnessが設定値を正規化しread/saveで保持する。scene-lighting.jsのlightingShadeColorsが標準の暗転各段階のアルファを補正する。app.jsはdrawExplorationLightへuiSettings.brightnessを渡し、スライダーinputと標準復帰で保存・表示更新・drawを行う。スライダーは表示0〜100、保存は表示＋50。読込時の表示は保存−50とし、標準は表示50／保存100。既存保存の移行書換えは不要。
+
+extensions.jsは解放・支払い・再抽選・装備強化・休止回復・交換・任意保存項目の検証を担当する。game-engine.jsのvalidateSaveからvalidExtensionsを呼ぶ。extension-view.jsは既存3強化＋新5機能を3枝と詳細欄へ描画。app.jsはツリー操作・オーグメント再抽選・休止回復、tactics-ui.jsは宝箱再抽選を接続する。各操作は状態／前提／残高を再検証してから支払い、再描画と保存を行う。回復はappの明示pausedとイベント・モーダル不在を併せて判定する。候補乱数はnextRandomで進め、未確定交換を保存する。

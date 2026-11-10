@@ -1,3 +1,5 @@
+import{extensionTree}from'./extension-view.js';
+import{extensionOwned,unlockExtension,rerollAugment,forgeGear,startExchange,chooseExchange,canUsePotion,usePotion}from'./extensions.js';
 import{createOrderHistory}from'./order-history.js';
 import{createFogEffect}from'./fog-effect.js';
 import{createEnemyIdleSampler,enemyIdleCuts}from'./enemy-idle.js';
@@ -223,7 +225,9 @@ function renderThoughtSubtitle(){
 function categoryTabs(type,selected,common=false){return `<div class="subtabs" role="group" aria-label="${type==='skill'?'スキル系統':'装備の種類'}">${(common?[['common','共通'],['weapon','武器'],['armor','防具']]:[['weapon','武器'],['armor','防具']]).map(([id,label])=>`<button data-category="${type}" data-value="${id}" aria-pressed="${selected===id}" class="${selected===id?'active':''}">${label}</button>`).join('')}</div>`;}
 function sortButtons(type,selected){return `<div class="sort-controls" role="group" aria-label="装備の並べ替え">${[['acquired','入手順'],['attack','攻撃力順'],['defense','防御力順']].map(([id,label])=>`<button data-sort="${type}" data-value="${id}" class="${selected===id?'active':''}" aria-pressed="${selected===id}">${label} ${id==='acquired'?'↑':'↓'}</button>`).join('')}</div>`;}
 const orderHistory=createOrderHistory();
-function renderExpansionShop(){const shop=$('order-expansion-content');shop.innerHTML='<b>記憶の欠片 '+state.shards+'個</b>'+skills.filter(k=>['commandSlots','cardSlots','scout'].includes(k.id)).map(k=>'<button data-upgrade="'+k.id+'" '+(state.phase!=='prepare'||state.floor===1||state.levels[k.id]>=k.max||state.shards<price(state,k)?'disabled':'')+' title="'+esc(k.detail)+'">'+k.name+' '+state.levels[k.id]+'/'+k.max+(state.levels[k.id]>=k.max?'（最大）':' · 記憶の欠片 '+price(state,k)+'個')+'</button>').join('');}
+let selectedExtension='chest';
+function renderExpansionShop(){const upgrades=skills.filter(k=>['commandSlots','cardSlots','scout'].includes(k.id)).map(k=>'<button data-upgrade="'+k.id+'" '+(state.phase!=='prepare'||state.floor===1||state.levels[k.id]>=k.max||state.shards<price(state,k)?'disabled':'')+' title="'+esc(k.detail)+'">'+k.name+' '+state.levels[k.id]+'/'+k.max+(state.levels[k.id]>=k.max?'（最大）':' · 記憶の欠片 '+price(state,k)+'個')+'</button>').join('');$('order-expansion-content').innerHTML='<b>記憶の欠片 '+state.shards+'個</b>'+extensionTree(state,upgrades,selectedExtension);}
+
 function renderOrderEditor(host){if(state.phase==='prepare')orderHistory.observe(state);renderCardEditor(host,state,orderCapacity(state));for(const b of host.querySelectorAll('[data-order-history]'))b.disabled=!orderHistory[b.dataset.orderHistory];if($('order-expansion-dialog').open)renderExpansionShop();}
 
 function handleOrderClick(e,host){const result=handleCardClick(e,state);if(result!==null){if(result!=='selected'){delete host.dataset.orderSignature;render();}return true;}const b=e.target.closest('button');if(!b||b.disabled)return false;if(b.hasAttribute('data-rule-add')){const choice=host.querySelector('[data-order-choice]');if(choice&&addOrder(state,choice.value)){delete host.dataset.orderSignature;render();}return true;}if(b.dataset.ruleOp){editOrder(state,Number(b.dataset.index),b.dataset.ruleOp);delete host.dataset.orderSignature;render();return true;}return false;}
@@ -231,19 +235,21 @@ function handleOrderChange(e){const result=handleCardChange(e,state);if(result!=
 const displayAttack=()=>state.gear.weapon.identified?stats(state).attack:'？';
 const displayDefense=()=>state.gear.armor.identified?stats(state).defense:'？';
 function renderAugments(){
- const offer=state.augmentOffer,dialog=$('augment-dialog');$('augment-tutorial').hidden=!offer||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
+ const offer=state.augmentOffer,dialog=$('augment-dialog');$('augment-reroll').hidden=!extensionOwned(state,'augment');$('augment-reroll').disabled=!offer||offer.rerolled||state.shards<20;$('augment-reroll').textContent=offer?.rerolled?'再抽選済み':'再抽選 · 記憶の欠片20個（所持 '+state.shards+'個）';$('augment-tutorial').hidden=!offer||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
  if(state.phase==='prepare'){const hint=nextStageHint({...state,floor:state.floor-1});$('prep-hint').textContent=hint.title.replace('次は','')+' · '+hint.text;$('prep-augments').innerHTML='<div class="prep-augment-list"><b>オーグメント</b>'+((state.augments||[]).map(id=>augmentChip(augmentById[id],state)).join('')||'<span>なし</span>')+'</div>'+setRibbon(state);}
 }
 $('debug-augment').innerHTML=augments.map(a=>'<option value="'+a.id+'">'+a.rarity+' · '+a.theme+' · '+a.name+'</option>').join('');
 $('augment-dialog').addEventListener('cancel',e=>e.preventDefault());
+$('augment-reroll').onclick=()=>{if(rerollAugment(state)){$('augment-dialog').close();pendingAugment=null;render();}};
 let pendingAugment=null;
 $('augment-choices').onclick=e=>{const b=e.target.closest('[data-augment]');if(!b||!state.augmentOffer?.choices.includes(b.dataset.augment))return;pendingAugment=b.dataset.augment;$('augment-confirm-name').textContent=augmentById[pendingAugment].name;$('augment-confirm-dialog').showModal();};
 $('confirm-augment').onclick=()=>{if(!pendingAugment||!chooseAugment(state,pendingAugment))return;pendingAugment=null;$('augment-confirm-dialog').close();uiSettings=saveUiSettings(uiStorage,{...uiSettings,tutorials:{...uiSettings.tutorials,explore:true}});$('tutorial-explore').textContent='オーグメントの案内を再表示';$('augment-dialog').close();if(state.phase==='awakening'){beginExploration(state);paused=false;last=performance.now();}render();};
 installHoverHelp();
 const renderTactics=installTacticsUi({getState:()=>state,onChange:()=>{delete $('tab-content').dataset.orderSignature;render();},storage:uiStorage,onResume:()=>{paused=false;dialogWasPaused=false;last=performance.now();}});
 const fieldMessages=installFieldMessages({dialog:$('field-event-dialog'),button:$('field-event-advance'),text:$('field-event-text'),skillBox:$('field-skill-message'),skillText:$('field-skill-text'),host:$('map-wrap'),hud:$('hud-bottom'),onIdle:()=>{last=performance.now();render();}});
+$('rest-potion').onclick=()=>{if(usePotion(state,stats(state).maxHp,paused&&!fieldMessages.active&&!document.querySelector('dialog[open]')))render();};
 function render(){
- const st=stats(state),prep=state.phase==='prepare',theme=zoneFor(state);fieldMessages.sync(state);renderScreens();if(!showingTitle&&!fieldMessages.active)renderTactics();
+ const st=stats(state),prep=state.phase==='prepare',theme=zoneFor(state);$('rest-potion').hidden=state.phase!=='explore'||!paused||fieldMessages.active||!extensionOwned(state,'potion');$('rest-potion').disabled=!canUsePotion(state,st.maxHp,paused&&!fieldMessages.active&&!document.querySelector('dialog[open]'));$('rest-potion').textContent='回復ポーション · 記憶の欠片10個（所持 '+state.shards+'個）';fieldMessages.sync(state);renderScreens();if(!showingTitle&&!fieldMessages.active)renderTactics();
  const runClears=Math.max(0,state.profile.normalClears-(state.phase==='ending'?1:0));
  $('floor-title').textContent=`${theme.name} · ${floorLabel(state)}`;
  $('phase-label').textContent=({awakening:'目覚め',prepare:'準備中',explore:paused?'一時停止':'探索中',cleared:'Clear',dead:'記憶喪失',ending:'通常エンド'})[state.phase];
@@ -410,7 +416,8 @@ $('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettin
  $('sound').onclick=()=>{sound=!sound;uiSettings=saveUiSettings(uiStorage,{...uiSettings,soundEnabled:sound});$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');$('sound').textContent='効果音：'+(sound?'ON':'OFF');tone(440);};
 $('augment-book').onclick=()=>showCodex('augments');$('skill-book').onclick=()=>showCodex('cards');$('monster-book').onclick=()=>showCodex('monsters');$('equipment-book').onclick=()=>showCodex('equipment');
 $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dialog').close();$('guide-start').onclick=()=>$('dialog').close();
-$('order-expansion-dialog').onclick=e=>{const b=e.target.closest('[data-upgrade]');if(b&&!b.disabled&&upgrade(state,b.dataset.upgrade)){tone(550);renderExpansionShop();render();}};
+$('order-expansion-dialog').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled||state.phase!=='prepare')return;if(b.dataset.extensionSelect){selectedExtension=b.dataset.extensionSelect;renderExpansionShop();return;}let changed=false;if(b.dataset.upgrade)changed=upgrade(state,b.dataset.upgrade);if(b.dataset.extensionUnlock)changed=unlockExtension(state,b.dataset.extensionUnlock);if(b.dataset.extensionForge)changed=forgeGear(state,b.dataset.extensionForge);if(b.hasAttribute('data-extension-exchange'))changed=startExchange(state,$('exchange-source')?.value);if(b.dataset.extensionChoice)changed=chooseExchange(state,b.dataset.extensionChoice);if(changed){tone(550);renderExpansionShop();render();}};
+
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());document.querySelectorAll('dialog').forEach(d=>{if(d.id!=='field-event-dialog')d.addEventListener('close',finishDialog);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.phase==='explore'){paused=true;dialogWasPaused=true;render();}});
 function debugStatus(message=''){ $('debug-status').textContent=`${floorLabel(state)} · Lv.${state.level} · EXP ${state.experience} · HP ${state.hp}/${stats(state).maxHp} · 記憶の欠片 ${state.shards}個${state.debugUsed?' · DEBUG操作済み':''}${message?' — '+message:''}`;}

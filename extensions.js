@@ -1,0 +1,28 @@
+import{INITIAL_CARDS}from'./card-access.js';
+import{cardByKey,cardCatalog}from'./card-catalog.js';
+import{grantCard,chestCategoryChoices,cardChestChoices}from'./card-inventory.js';
+import{offerAugments}from'./augments.js';
+import{nextRandom}from'./drop-system.js';
+export const EXTENSIONS=[
+{id:'chest',name:'宝箱の候補を再抽選',cost:10,branch:'ビルドの選別',detail:'種類を選んだ後、記憶の欠片10個で候補を再抽選。宝箱ごとに1回。'},
+{id:'augment',name:'オーグメント再抽選',cost:20,requires:'chest',branch:'ビルドの選別',detail:'記憶の欠片20個で候補を再抽選。選択機会ごとに1回。'},
+{id:'exchange',name:'カードを交換',cost:25,requires:'augment',branch:'ビルドの選別',detail:'未配置のカード1枚と記憶の欠片10個で、同じ種類の候補から交換。各階1回。'},
+{id:'forge',name:'装備を鍛える',cost:20,branch:'旅の支度',detail:'準備中、装備中の武器・防具を＋1。費用は10＋現在の強化値×5個、上限＋20。'},
+{id:'potion',name:'回復ポーションを使う',cost:10,branch:'旅の支度',detail:'探索のひとやすみ中、記憶の欠片10個でHPを10回復。各階1回。'}];
+export const extensionOwned=(s,id)=>s.extensions?.unlocked?.includes(id)===true;
+const preparing=s=>s.phase==='prepare'&&s.floor!==1;
+const data=s=>s.extensions??={unlocked:[],uses:{}};
+const used=(s,id)=>s.extensions?.uses?.[id+':'+s.floor]===true;
+const use=(s,id)=>data(s).uses[id+':'+s.floor]=true;
+const log=(s,text)=>s.logs.unshift({text,type:'good',turn:s.turn});
+export function unlockExtension(s,id){const e=EXTENSIONS.find(e=>e.id===id);if(!e||!preparing(s)||extensionOwned(s,id)||e.requires&&!extensionOwned(s,e.requires)||s.shards<e.cost)return false;s.shards-=e.cost;data(s).unlocked.push(id);log(s,'「'+e.name+'」を解放した。');return true;}
+export function rerollChest(s){const o=s.cardOffer;if(s.phase!=='explore'||!extensionOwned(s,'chest')||!o||o.rerolled||o.lost||s.shards<10||o.categories&&!o.selectedKind)return false;const kind=o.selectedKind||cardByKey[o.choices[0]]?.kind;if(!kind)return false;const categories=chestCategoryChoices(s,o.choices[0],()=>nextRandom(s));if(!categories[kind]?.length)return false;s.shards-=10;o.choices=categories[kind];if(o.categories)o.categories[kind]=[...o.choices];o.rerolled=true;log(s,'記憶の欠片10個で宝箱の候補を再抽選した。');return true;}
+export function rerollAugment(s){const o=s.augmentOffer;if(!['awakening','explore','prepare','cleared'].includes(s.phase)||!extensionOwned(s,'augment')||!o||o.rerolled||s.shards<20)return false;s.augmentOffer=null;offerAugments(s,()=>nextRandom(s),o.source);s.augmentOffer.rerolled=true;s.shards-=20;log(s,'記憶の欠片20個でオーグメントの候補を再抽選した。');return true;}
+export function forgeCost(s,slot){const g=s.gear?.[slot];return g&&Number.isInteger(g.plus)&&g.plus>=0&&g.plus<=20?10+g.plus*5:Infinity;}
+export function forgeGear(s,slot){const g=s.gear?.[slot],cost=forgeCost(s,slot);if(!preparing(s)||!extensionOwned(s,'forge')||!['weapon','armor'].includes(slot)||!g||g.plus>=20||s.shards<cost)return false;s.shards-=cost;g.plus++;log(s,(slot==='weapon'?'武器':'防具')+'を＋'+g.plus+'に強化した。');return true;}
+export function canUsePotion(s,maxHp,paused){return s.phase==='explore'&&paused===true&&!s.cardOffer&&!s.augmentOffer&&extensionOwned(s,'potion')&&!used(s,'potion')&&s.hp<maxHp&&s.hp>0&&s.shards>=10;}
+export function usePotion(s,maxHp,paused){if(!canUsePotion(s,maxHp,paused))return false;const amount=Math.min(10,maxHp-s.hp);s.hp+=amount;s.shards-=10;use(s,'potion');log(s,'回復ポーションでHPを'+amount+'回復した。記憶の欠片10個を使った。');return true;}
+export function exchangeSources(s){const placed=new Set(s.orders.flatMap(r=>r.cards?[r.effect.kind+':'+r.effect.id,...r.conditions.map(c=>'condition:'+c.id),'target:'+r.target]:[]));return(s.ownedCards||[]).filter(k=>!INITIAL_CARDS.includes(k)&&k!=='action:letter'&&['action','condition','skill'].includes(cardByKey[k]?.kind)&&!placed.has(k));}
+export function startExchange(s,key){if(!preparing(s)||!extensionOwned(s,'exchange')||used(s,'exchange')||s.exchangeOffer||s.shards<10||!exchangeSources(s).includes(key))return false;const candidates=cardCatalog.filter(c=>c.kind===cardByKey[key].kind&&c.key!==key&&!INITIAL_CARDS.includes(c.key)&&c.key!=='action:letter');if(!candidates.length)return false;const anchor=candidates[Math.floor(nextRandom(s)*candidates.length)].key,choices=cardChestChoices(s,anchor,()=>nextRandom(s)).filter(k=>k!==key);s.exchangeOffer={source:key,choices};s.shards-=10;use(s,'exchange');return true;}
+export function chooseExchange(s,key){const o=s.exchangeOffer;if(!preparing(s)||!o?.choices.includes(key)||!exchangeSources(s).includes(o.source))return false;const c=cardByKey[o.source];s.ownedCards=s.ownedCards.filter(k=>k!==o.source);s.newCards=(s.newCards||[]).filter(k=>k!==o.source);if(c.kind==='skill')s.abilities=s.abilities.filter(id=>id!==c.id);if(c.kind==='action')s.unlockedOrders=s.unlockedOrders.filter(id=>id!==c.id);grantCard(s,key);s.exchangeOffer=null;log(s,'「'+c.name+'」を「'+cardByKey[key].name+'」に交換した。');return true;}
+export function validExtensions(s){if(!s||typeof s!=='object')return false;const d=s.extensions;if(d!==undefined&&(!d||!Array.isArray(d.unlocked)||new Set(d.unlocked).size!==d.unlocked.length||d.unlocked.some(id=>!EXTENSIONS.some(e=>e.id===id))||!d.uses||Array.isArray(d.uses)||typeof d.uses!=='object'||Object.entries(d.uses).some(([k,v])=>! /^(potion|exchange):([1-9]|[12][0-9]|30)$/.test(k)||v!==true)))return false;for(const o of[s.cardOffer,s.augmentOffer])if(o?.rerolled!==undefined&&typeof o.rerolled!=='boolean')return false;const o=s.exchangeOffer;return !o||extensionOwned(s,'exchange')&&typeof o.source==='string'&&s.ownedCards?.includes(o.source)&&!INITIAL_CARDS.includes(o.source)&&o.source!=='action:letter'&&Array.isArray(o.choices)&&o.choices.length>0&&o.choices.length<=8&&new Set(o.choices).size===o.choices.length&&o.choices.every(k=>cardByKey[k]?.kind===cardByKey[o.source]?.kind&&k!==o.source&&!INITIAL_CARDS.includes(k)&&k!=='action:letter');}
