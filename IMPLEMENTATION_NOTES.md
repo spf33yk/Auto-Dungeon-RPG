@@ -2,6 +2,21 @@
 
 更新日：2026-11-10。攻撃スキルの戦闘接触演出は0f53bc5を基準に検証。現行仕様と未確認事項を分けて記録する。
 
+## 公開処理の復旧検証
+
+98ae7cd基準。同期完了後もsucceedへ進まないため既定600000msでキャンセルされる直接原因を確認。GitHub内部の根本原因は未確定。legacy自動配信から公式ActionsのPublish gameへ移行し、deploy待ち1200000ms・ジョブ25分・直列化・テスト／配信URL検査・公開コミット識別JSONを追加。git archiveでコミット済みファイルのみを配信する。ゲーム内容・保存形式は変更なし。ワークフローのインデント・依存関係を目視確認し、ローカルのアセット版チェックは成功。YAMLパーサはローカル未導入のため、Actions実行時の構文検証も確認する。配信結果と公開照合は実行後に記録する。
+## Pagesデプロイの原因調査
+
+98ae7cdを調査。通常テスト・build・artifact uploadは成功、デプロイ作成も成功。初回はsyncing_filesで10分タイムアウト。再実行は状態が空の期間を経て12:17 UTCにfinished_file_syncへ進むが、12:19 UTCまで成功状態へ移らず600000msでキャンセル。再実行もfailureで終了。デプロイ履歴はfailureで閉じており、承認待ちや他デプロイとの競合エラーはない。Pages設定はlegacy、main /、HTTPS有効、.nojekyllあり。
+
+Gitツリーは成功版94fc487が505ファイル・105767577bytes、98ae7cdが508ファイル・105783564bytes。増加15987bytes、素材変更なし、symlink/submoduleなし。アップロード済みartifactは103788124bytes。公開1GB上限に届かず、容量急増を根拠にした不具合は否定的。ログに認証・権限・429・ビルドエラーなし。現時点の有力な推定はPages内部の同期／公開確定処理の停滞。GitHub内部の根本原因はAPIから特定不能。公式Statusは確認時operationalで、全体障害の断定はしない。同時期の外部報告にも同様のsyncing_filesタイムアウトがあるが、同一原因とは未確定。
+
+根拠：output/pages-failed-deploy.txt、output/pages-retry-deploy.txt、output/deploy-*.json。公式制限 https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits 、公式Status https://www.githubstatus.com/ 、同様の一次報告 https://github.com/orgs/community/discussions/212555 。再試行の重複投入、Pages／environment削除、ゲームコードの推測修正は行っていない。配信方式変更やタイムアウト延長は未実施で、復旧効果も未確認。
+## 公開配信の確認
+
+2026-11-10、mainは98ae7cdだが公開HTMLは94fc487相当のscreens.css?v=8aa9dd92dd0a・app.js?v=8ba16a548936を参照。最新ローカルの参照はscreens.css?v=79adbe0f1532・app.js?v=38e1904e4890。公開CSSにはタブ統一の末尾指定と装備画面の新規スタイルがなく、ユーザー添付の金色拡張タブと一致する。mainへのpush成功と公開配信成功は区別する。
+
+Game testsは6f0421f・98ae7cdとも成功。Pagesの両デプロイは失敗。98ae7cdのrun 42810388238はbuild成功後、deployがsyncing_filesで10分を超えてTimeout reachedとなった。失敗ジョブを再実行（attempt 2、12:09 UTC開始）。attempt 2も12:19 UTCにfailureで終了。公開アセットは旧版のまま。最新公開版の画面・操作確認は未完了。ゲームソースの追加変更は行っていない。追加監査では公開ルートのJS・CSS・HTML計165ファイル（テストファイルを含む）をHEADと94fc487へ照合し、既存ファイルは全て94fc487に一致、新規3ファイルは404で、予期しない部分更新はなかった。未反映は6f0421fのタブ統一・有効行数基準・装備画面整理と98ae7cdの外套DEF1。直近40件のActionsはGame testsが全件成功。以前の206337bの公開失敗は後続成功版に含まれ、現在の未反映範囲を増やさない。素材ファイル全量のバイナリ照合・全機能の実操作確認は未実施。監査結果はoutput/public-runtime-audit.json。
 ## ほころびた外套の防御力
 
 6f0421f基準。armor-0の基礎DEFを1とする。初期総DEFは基礎1＋装備1＝2。既存保存の所持品・装備品も共通定義を参照し、個体強化値と保存v16を維持する。新規状態とnormalizeSave後の装備DEF1・総DEF2を確認。

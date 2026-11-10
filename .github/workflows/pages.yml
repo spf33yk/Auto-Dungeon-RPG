@@ -1,0 +1,57 @@
+name: Publish game
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/configure-pages@v6
+      - name: Check browser asset versions
+        run: node scripts/update-assets.js --check
+      - name: Run game tests
+        run: node --test
+      - name: Package committed files
+        run: |
+          mkdir _site
+          git archive HEAD | tar -x -C _site
+          node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("_site/deploy-version.json", JSON.stringify({commit:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID})+"\n")'
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+          include-hidden-files: true
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy game
+        id: deployment
+        uses: actions/deploy-pages@v5
+        with:
+          timeout: 1200000

@@ -180,3 +180,5 @@ EXTENSIONSは取得前提を持たず、unlockExtensionも前提検査を行わ�
 order-capacity.jsのactiveOrderCountを行追加・再有効化・保存検証・プリセット保存読込・行数表示で共用する。無効行を保ったまま有効上限を検査。equipment-panel.jsはgearDeltaとequipmentPanelで装備種別に対応する比較値と原inventory添字の操作ボタンを描画する。app.renderTabは種類別一覧のscrollTopと詳細のopenを維持する。主要ステータスはstatsを使用し、比較は装備個体のgearStats差。元のステータスHTMLは詳細内へ保持する。
 
 data.equipmentのarmor-0は基礎DEF1。他防具は従来どおりrank×2。gearStatsとstatsが所持・装備・表示に共通適用するため、既存保存の個体書換えは不要。
+
+公開処理は.github/workflows/pages.ymlのbuild→deployで管理する。git archive HEADで未コミット・未追跡ファイルを除外し、_siteへ展開して版識別JSONを追加。configure-pages v6・upload-pages-artifact v5・deploy-pages v5を使用する。pages concurrencyで多重配信を防ぎ、失敗時も旧公開版を維持する。
