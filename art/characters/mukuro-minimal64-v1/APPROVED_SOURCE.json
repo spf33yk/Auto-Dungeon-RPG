@@ -1,5 +1,5 @@
 {
-  "approved_source": "output/minimal-motion-64px-20261102-r1/approved-v1",
+  "approved_source": "art/characters/mukuro-minimal64-v1/source",
   "sprites_sha256": "d7944b448ba0418940b46fc98032709225cd340f1c174391f8d1c51501f71592",
   "approved_sprites_sha256": "d7944b448ba0418940b46fc98032709225cd340f1c174391f8d1c51501f71592",
   "pose_rgba_sha256": {
@@ -17,5 +17,5 @@
     "up-bob2": "6011cf959ef0612aac295e54cfd7e8f0a562e4286d4f5410b29f7e922fb54934"
   },
   "character_pixels_modified": false,
-  "effect_source": "approved-v1/slash-source.png"
+  "effect_source": "art/characters/mukuro-minimal64-v1/source/slash-source.png"
 }

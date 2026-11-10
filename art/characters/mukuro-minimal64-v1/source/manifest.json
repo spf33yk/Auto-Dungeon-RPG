@@ -1,60 +1,18 @@
 {
-  "status": "accepted_as_complete_for_now",
-  "accepted_date_jst": "2026-11-02",
-  "user_decision": "一旦これで完成にしよう",
+  "format": "approved-character-source/v1",
   "body_px": 64,
   "cell": [
     128,
     128
   ],
-  "anchor": [
-    64,
-    96
-  ],
-  "directions": [
-    "down",
-    "left",
-    "right",
-    "up"
-  ],
-  "game_integration_status": "not_applied",
-  "approval_snapshot": "approved-v1",
   "files": [
     {
       "file": "poses-64px.png",
       "sha256": "d7944b448ba0418940b46fc98032709225cd340f1c174391f8d1c51501f71592"
     },
     {
-      "file": "right-base-64px.png",
-      "sha256": "07595e06843b5e7c1a2d2dbe6d55c6e694950c96b56bc6e10695e3a357c9177f"
-    },
-    {
-      "file": "right-equipment-layer.png",
-      "sha256": "d2cdc6208849340da38d1607583d6c87e3f30a213a1bd866e1b8c131c014bf8f"
-    },
-    {
-      "file": "palette-reference.png",
-      "sha256": "fe7de12fbcd24c54421439ef07170121f9e015a3cb1437f54228d882665f09dc"
-    },
-    {
-      "file": "grip-only-native-patch.png",
-      "sha256": "6a3e27c320b28fb9da7d295e8942347279ca4a6f1c49fc85de9bd2c608c4a1e9"
-    },
-    {
       "file": "slash-source.png",
       "sha256": "029e7e7d20392c4fb73e8fa6599fc12ef3cd1b52d0bac1749dc9b3dc2f7419bd"
-    },
-    {
-      "file": "four-directions-64px.gif",
-      "sha256": "32b77ec69ef666550c104a28055e4f7f85131cdab72d6d00b7f3c9f282611e60"
-    },
-    {
-      "file": "up-down-left-right-comparison.gif",
-      "sha256": "2b5de8d644f1beb047b55db95d5efed2b53022c455972ce468b3d9f35e4d774f"
-    },
-    {
-      "file": "sample-64px-assets.zip",
-      "sha256": "86394b76654509e4bb626f27652260644204242966f97c79c8fe517e4343f539"
     },
     {
       "file": "down-stand.png",

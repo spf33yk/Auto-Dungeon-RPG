@@ -3,8 +3,19 @@ node_modules/
 Thumbs.db
 *.log
 test-results/
+tools/python312/
+tools/python-3.12.10-embed-amd64.zip
+tools/get-pip.py
 
 # Large drafts and comparison screenshots stay local; production atlases are tracked.
 art/samples/
 art/local-originals/
 *.mov
+
+# Local production exports and verification evidence are not repository inputs.
+output/
+_site/
+art/title-video-base/
+art/hero-v1-concept.png
+art/hero-v1-prompt.md
+art/hero-v2-16bit-concept.png

@@ -184,3 +184,5 @@ data.equipmentのarmor-0は基礎DEF1。他防具は従来どおりrank×2。gea
 公開処理は.github/workflows/pages.ymlのbuild→deployで管理する。git archive HEADでゲーム用ルートJS・CSS・HTML・favicon・.nojekyll・artを抽出し、テスト・サーバー・scripts・test-supportは除外。制作資料とoutputも公開しない。_siteのimportmap参照先が全て存在することを検査して版識別JSONを追加。configure-pages v6・upload-pages-artifact v5・deploy-pages v5を使用する。pages concurrencyで多重配信を防ぎ、失敗時も旧公開版を維持する。
 
 Pagesの診断入力content_refはcheckoutのrefへ渡す。シェルには環境変数として渡し、非空時はdeploy-version.jsonを付加しない。OIDCの配信版はワークフローのコミット、配信内容はcheckoutしたコミットとして比較する。
+
+Git登録と公開配信は別管理する。Git登録ではdocs・story・テスト・制作スクリプト・再生成入力を保持し、公開配信はゲーム用ファイルのみ。互換主人公のbuild-mukuro-minimal.pyはart/characters/mukuro-minimal64-v1/source/manifest.jsonと原画14枚を参照し、outputへ依存しない。output等のローカル生成物は.gitignoreで除外する。
