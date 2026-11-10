@@ -167,8 +167,10 @@ enemy-idle.jsのENEMY_IDLEはperiodMs=1400／amplitudePx=2／footRows=10。敵�
 
 ui-settings.jsのscreenBrightnessが設定値を正規化しread/saveで保持する。scene-lighting.jsのlightingShadeColorsが標準の暗転各段階のアルファを補正する。app.jsはdrawExplorationLightへuiSettings.brightnessを渡し、スライダーinputと標準復帰で保存・表示更新・drawを行う。スライダーは表示0〜100、保存は表示＋50。読込時の表示は保存−50とし、標準は表示50／保存100。既存保存の移行書換えは不要。
 
-extensions.jsは解放・支払い・再抽選・装備強化・休止回復・交換・任意保存項目の検証を担当する。game-engine.jsのvalidateSaveからvalidExtensionsを呼ぶ。extension-view.jsは既存3強化＋新5機能を3枝と詳細欄へ描画。app.jsはツリー操作・オーグメント再抽選・休止回復、tactics-ui.jsは宝箱再抽選を接続する。各操作は状態／前提／残高・権・ストックを再検証してから対応資源を消費し、再描画と保存を行う。回復はappの明示pausedとイベント・モーダル不在を併せて判定する。候補乱数はnextRandomで進め、未確定交換を保存する。
+extensions.jsは解放・支払い・再抽選・休止回復・交換・任意保存項目の検証を担当する。game-engine.jsのvalidateSaveからvalidExtensionsを呼ぶ。extension-view.jsは既存3強化＋新4機能を3枝と詳細欄へ描画。app.jsはツリー操作・オーグメント再抽選・休止回復、tactics-ui.jsは宝箱再抽選を接続する。各操作は状態／残高・権・ストックを再検証してから対応資源を消費し、再描画と保存を行う。回復はappの明示pausedとイベント・モーダル不在を併せて判定する。候補乱数はnextRandomで進め、未確定交換を保存する。
 
 extensions.jsのnormalizeExtensionsが旧解放をserviceRevision=1の残数へ一度だけ変換する。cardRerolls／augmentRerollsは購入時増加・リロール時減少。potionStockは購入／満タン拾得で増加し、休止使用で減少。game-engine.newGameはfirst-aidとarmor-1・potionStock=1を付与。screen-tutorial.jsのtutorialKey／tutorialStepsで階別手順を選び、app側は同じ選択済み手順配列で描画・操作完了を判定する。guideは旅のtutorialFloorsへ各階完了を保存し、旧UI設定とは独立する。
 
 augment-rerollはaugment-choices後の兄弟要素。tactics-uiのrb.hiddenは未決定categoriesの有無で切り替え、selectedKindまたはcategoryLockedで種類確定を判定する。
+
+EXTENSIONSは取得前提を持たず、unlockExtensionも前提検査を行わない。forgeの実行関数とUIハンドラは削除し、旧保存のunlocked内forgeだけ許容する。指示拡張は他の項目と同じノード書式とselectedクラスを使う。
