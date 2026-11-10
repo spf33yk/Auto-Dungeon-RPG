@@ -2,6 +2,11 @@
 
 更新日：2026-11-10。攻撃スキルの戦闘接触演出は0f53bc5を基準に検証。現行仕様と未確認事項を分けて記録する。
 
+## 公開復旧の確認
+
+883d6dcのPublish game run 42822092183でbuild・deployともsuccess。通常テストrun 42822092272もsuccess（全828件）。ゲーム用配信物340ファイル・92723701bytesへ絞った構成で成功した。全体配信時の正常アーカイブは繰り返し同期タイムアウト、旧版内容の新規配信は成功しており、配信対象の構成に依存する問題の可能性が高まった。ただし除外した具体的なファイル・サーバー内部原因は未特定。GitHub側だけが原因でサポート以外に対処不能との以前の見立ては修正する。
+
+公開deploy-version.jsonのcommitは883d6dcf16698885313c6926c1ec94aff7abc0d2、runは42822092183。公開importmapの86モジュールとCSS2本を全件取得し、ローカル最新版と改行正規化後に一致。output/public-runtime-restored.jsonに結果。新旧キャッシュの混在はこの88ファイルではなし。無音verify=1の公開版で新規開始・字幕・オーグメント選択から探索へ到達し、総DEF2を確認。検証用デバッグでB29準備へ移動し、無効化で指示1/2→0/2、拡張タブの金色指定除去、ほころびた外套DEF1、旅人の外套とのDEF+1比較、装備で総DEF2→3、詳細ステータスの展開を確認。画像はoutput/pages-restored-equipment.png。スマホ実機・全素材バイナリ照合・長時間走行は今回未実施。ゲーム内容・保存形式は変更していない。最終結果の記録コミットは[skip ci]で再配信を起動せず、公開ゲームのコミットは883d6dcとして識別する。
 ## 公開アーカイブの実データ検査
 
 b37c1caの実アップロードartifact 13763209776を取得。ZIP SHA-256 cce8fa1b60c088e1f3eecd76d20597681b44b172aca331d5900649117c20cfbaはGitHub APIのdigestと一致。ZIP CRC成功、単一artifact.tar、508ファイル・105788325bytes。symlink/hardlink/特殊ファイル・危険パス・読み取り／ディレクトリ走査権限の不備・大文字小文字衝突なし。全ファイルがb37c1caとバイト一致し、追加は意図したdeploy-version.jsonのみ。output/pages-artifact-audit.jsonに結果、output/audit-pages-artifact.pyに検査手順を保存。大型ZIPはローカル出力のみでコミットしない。
