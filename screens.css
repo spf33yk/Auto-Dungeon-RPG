@@ -752,3 +752,8 @@ body.preparing #prepare-scene #abandon-run{margin-left:auto}body.preparing #prep
 #field-event-advance{box-sizing:border-box;position:relative;height:100%;min-height:0;padding:var(--field-message-padding,12px) 18px;font-size:var(--field-message-font,26px);overflow-wrap:anywhere}
 #field-skill-message{padding:var(--field-message-padding,12px) 18px;overflow-wrap:anywhere}
 #field-event-advance .field-event-caret{position:absolute;right:12px;bottom:7px}
+
+/* Preparation toolbar: compact controls, upgrades in a dedicated modal. */
+.fitted-card-editor .card-rules-heading{flex-wrap:wrap}.fitted-card-editor .card-rules-heading>.instruction-controls{flex-wrap:wrap;align-items:center;justify-content:flex-end;flex:1;min-width:0}
+body.preparing #prepare-scene .card-rules-heading .order-expansion-button{background:linear-gradient(#c7ad65,#917238)!important;border-color:#e0c884!important;color:#17140c!important}
+#order-expansion-dialog{width:min(560px,90vw)}#order-expansion-content{display:grid;gap:12px}#order-expansion-content button{min-height:42px;font-size:14px!important}#augment-confirm-dialog{width:min(460px,88vw)}#augment-confirm-name{font-size:20px;color:#e4cd8c}

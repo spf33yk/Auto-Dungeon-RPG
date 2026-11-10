@@ -65,7 +65,7 @@ routeは既知床を使う幅優先探索で、敵側の経路だけ未知床も
 
 ## 6. 準備UI・スクロール
 
-renderOrderEditorがinstruction-upgradesをcard-rules-heading内のプリセット直前へ配置する。ツールバーは折返し可能にし、指示のスクロール領域とは分離する。
+renderOrderEditorは折返し可能な操作欄とorder-history.jsの準備内履歴を同期する。instruction-upgradesはorder-expansion-dialogへ配置し、購入後に残高と非活性状態を更新する。履歴は指示とfixedOrderExpandedだけをJSONスナップショット化し、購入やゲーム乱数を含めない。
 
 HUDは探索・準備で共用。ResizeObserverがHUD下端＋余白を--shared-hud-spaceへ設定。#workspace:beforeの上端をこの値、左右・下端を0にして準備枠を描画する。主枠20px・パネル16px、48pxスライスの9分割、辺repeat、pointer-events:none。画像比率保持・内容の安全余白を設ける。
 
@@ -162,3 +162,5 @@ scene-music.jsはgimmick.idがfogの場合もphaseを参照し、prepareはdunge
 fog-effect.jsのFOG_EFFECTを描画設定として、fogPixelsで160×90のRGBAを作りcreateFogEffectが1枚のcanvasへキャッシュする。50msの時刻区間と主人公中心で更新を判定し、静止モードでは同じ画像を再利用。固定ハッシュの滑らかなノイズ・正弦帯・密度マスクを使い、ゲーム乱数を呼ばない。描画時だけtransformを単位行列へ戻し1920×1080のマップ空間へ重ね、元の世界変換へ戻ってFX・ラベル・数字を描く。背景の明暗・視界判定は参照・変更しない。
 
 enemy-idle.jsのENEMY_IDLEはperiodMs=1400／amplitudePx=2／footRows=10。敵アトラス読込時のアルファから各64pxセルの足元分割位置を一度計算。drawEnemySpriteの任意crouch／cut引数で足元側と上半身を別々の等倍率矩形として描き、上半身だけ最大2px下げる。createEnemyIdleSamplerのWeakMapへ初期位置とID由来の位相を保持し、敵本体・保存へ追加しない。既存の攻撃・反動を先に評価して屈伸を抑止。スキル中心は有効な屈伸量だけYへ加算し、影とHPは足元座標のまま。未読込・未知画像は従来の描画へフォールバックする。
+
+オーグメント確認はpendingAugmentで候補IDだけ保持し、confirm-augmentで既存chooseAugmentを呼ぶ。確認を閉じても元の候補ダイアログを維持する。
