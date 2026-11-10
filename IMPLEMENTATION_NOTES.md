@@ -4,7 +4,7 @@
 
 ## 公開処理の復旧検証
 
-98ae7cd基準。同期完了後もsucceedへ進まないため既定600000msでキャンセルされる直接原因を確認。GitHub内部の根本原因は未確定。legacy自動配信から公式ActionsのPublish gameへ移行し、deploy待ち1200000ms・ジョブ25分・直列化・テスト／配信URL検査・公開コミット識別JSONを追加。git archiveでコミット済みファイルのみを配信する。ゲーム内容・保存形式は変更なし。ワークフローのインデント・依存関係を目視確認し、ローカルのアセット版チェックは成功。YAMLパーサはローカル未導入のため、Actions実行時の構文検証も確認する。配信結果と公開照合は実行後に記録する。
+98ae7cd基準。同期完了後もsucceedへ進まないため既定600000msでキャンセルされる直接原因を確認。GitHub内部の根本原因は未確定。legacy自動配信から公式ActionsのPublish gameへ移行し、deploy待ち600000ms・ジョブ15分・直列化・テスト／配信URL検査・公開コミット識別JSONを追加。git archiveでコミット済みファイルのみを配信する。ゲーム内容・保存形式は変更なし。ワークフローのインデント・依存関係を目視確認し、ローカルのアセット版チェックは成功。YAMLパーサはローカル未導入のため、Actions実行時の構文検証も確認する。公式deploy-pages v5のソースで600000msの上限を確認。1200000ms指定は内部で600000msへ丸められるため、待ち時間を延長できるとの説明を訂正し、設定・資料を10分へ揃える。復旧の検証対象はlegacyから明示的workflowへの移行。b37c1caのPublish game（run 42815430115）でActions構文受理、全828テスト・版チェック・git archive・artifact upload・Pages設定取得は成功。deployは12:24 UTC開始後syncing_filesに留まり、12:35 UTCにタイムアウトしてfailure。独立Game tests（42815430353）も成功。新方式でも同じ同期段階で再現するため、問題箇所はPages側同期に絞られるが内部原因は未特定。公開HTMLのscreens.css?v=8aa9dd92dd0a・app.js?v=8ba16a548936は旧版のまま、deploy-version.jsonは404。画面・操作の最新版公開検証は未実施。証跡はoutput/pages-workflow-deploy.txt。設定の実効上限10分への訂正と結果記録は[skip ci]コミットで反映し、原因不明の連続再デプロイを避ける。Pages／environment削除は行っていない。
 ## Pagesデプロイの原因調査
 
 98ae7cdを調査。通常テスト・build・artifact uploadは成功、デプロイ作成も成功。初回はsyncing_filesで10分タイムアウト。再実行は状態が空の期間を経て12:17 UTCにfinished_file_syncへ進むが、12:19 UTCまで成功状態へ移らず600000msでキャンセル。再実行もfailureで終了。デプロイ履歴はfailureで閉じており、承認待ちや他デプロイとの競合エラーはない。Pages設定はlegacy、main /、HTTPS有効、.nojekyllあり。

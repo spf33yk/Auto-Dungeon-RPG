@@ -330,4 +330,4 @@ TRUE本編・TRUE後の遊びは未実装。物語の未決定事項は[物語�
 
 ## 公開配信
 
-mainのPublish gameでアセット版チェックと全自動テスト後、同じコミットのファイルを公開する。GitHub PagesはGitHub Actions方式を使用し、配信を直列化する。配信待ちは最大20分（ジョブ25分）。deploy-version.jsonにコミットSHAと実行IDを記録する。ゲーム仕様・保存v16に変更はない。
+mainのPublish gameでアセット版チェックと全自動テスト後、同じコミットのファイルを公開する。GitHub PagesはGitHub Actions方式を使用し、配信を直列化する。配信待ちは最大10分（ジョブ15分）。deploy-version.jsonにコミットSHAと実行IDを記録する。ゲーム仕様・保存v16に変更はない。
