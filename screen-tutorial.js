@@ -1,12 +1,10 @@
-// Each step names a real control; the guide never purchases upgrades automatically.
-export const screenTutorials={
- prepare:[
-  {title:'条件を選ぶ',text:'カードリストの「条件」を押してください。上の指示から優先します。',selector:'#tab-content [data-palette-tab="condition"]'},
-  {title:'ターン条件を選ぶ',text:'「指定ターン経過」を押してください。',selector:'#tab-content [data-drag-source="palette|condition|turns"]'},
-  {title:'条件を置く',text:'光る「＋条件」を押してください。ドラッグでも置けます。',selector:'#tab-content .insert-condition.valid-drop',placement:true},
-  {title:'数値を変える',text:'カード内の数字を変更し、Enterか別の場所を押して確定してください。',selector:'#tab-content [data-inline-condition][data-condition-id="turns"]',event:'change'},
-  {title:'装備を見る',text:'「装備/ステータス」を押してください。能力の確認と装備変更ができます。',selector:'[data-tab="gear"]'},
-  {title:'指示へ戻る',text:'「探索指示」を押してください。強化は記憶の欠片で購入できます。',selector:'[data-tab="orders"]'},
-  {title:'出発する',text:'「探索を始める」を押してください。最後の階段指示は自動で実行されます。',selector:'#primary',lastAction:true}
- ]
-};
+const step=(title,text,selector,extra={})=>({title,text,selector,...extra});
+export function tutorialKey(s){return s.phase==='explore'&&s.floor===1?'explore:1':s.phase==='prepare'&&s.floor>=2&&s.floor<=5?'prepare:'+s.floor:null;}
+export function tutorialSteps(s){switch(tutorialKey(s)){
+case'explore:1':return [step('自動で探索','骸は探索指示に従って自動で進みます。操作したいときは「ひとやすみ」で止められます。'),step('回復ポーション','ひとやすみ中にストックを1個使うとHPが10回復します。最初から1個持っています。'),step('拾ったポーション','HP満タンで拾った回復ポーションはストックされます。所持数は装備/ステータスでも確認できます。')];
+case'prepare:2':return [step('宝箱を探す','「アクション」を押してください。','#tab-content [data-palette-tab="action"]'),step('宝箱のカード','「宝箱を取得」を選んでください。','#tab-content [data-drag-source="palette|action|chests"]'),step('指示へセット','行動カードの位置へ置いてください。ドラッグでも置けます。','#tab-content [data-drop-slot]',{complete:s=>s.orders.some(r=>r.effect?.id==='chests')})];
+case'prepare:3':return [step('装備を変更','「装備/ステータス」を押してください。','[data-tab="gear"]'),step('防具を選ぶ','「防具」を押してください。','[data-category="gear"][data-value="armor"]'),step('外套を装備','旅人の外套の「装備」を押してください。','[data-gear-id="armor-1"] [data-action="equip"]',{complete:s=>s.gear.armor.baseId==='armor-1'}),step('探索の予測','「探索の予測」を押してください。','#prepare-forecast'),step('予測を見る','到達見込み・想定ターン・終了時HPを確認しましょう。指示や装備を変えると予測も変わります。')];
+case'prepare:4':return [step('条件を選ぶ','カードリストの「条件」を押してください。','#tab-content [data-palette-tab="condition"]'),step('ターン条件','「指定ターン経過」を選んでください。','#tab-content [data-drag-source="palette|condition|turns"]'),step('条件をセット','光る「＋条件」へ置いてください。','#tab-content .insert-condition.valid-drop',{complete:s=>s.orders.some(r=>r.conditions?.some(c=>c.id==='turns'))}),step('スキルを選ぶ','カードリストの「スキル」を押してください。','#tab-content [data-palette-tab="skill"]'),step('応急手当','「応急手当」を選んでください。','#tab-content [data-drag-source="palette|skill|first-aid"]'),step('同じ行へセット','ターン条件と同じ行の実行カードへ置いてください。','#tab-content [data-drop-slot]',{complete:s=>s.orders.some(r=>r.effect?.id==='first-aid'&&r.conditions?.some(c=>c.id==='turns'))}),step('セット効果','同テーマのスキルを有効な行に配置すると、所持オーグメントが強化されます。1・3・6種類で星が増えます。'),step('優先度を入れ替え','番号や土台をドラッグすると行を入れ替えられます。折りたたんだ行は全体を掴めます。')];
+case'prepare:5':return [step('拡張機能','金色の「拡張機能」を押してください。','[data-order-expansions]'),step('記憶の欠片を使う','左で指示枠などを拡張できます。中央でリロール権、右で装備強化や回復ポーションを購入できます。項目を選んで右の説明を確認しましょう。')];
+default:return [];}}
+export const screenTutorials={prepare:tutorialSteps({phase:'prepare',floor:2})};

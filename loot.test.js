@@ -33,7 +33,7 @@ test('ground gear is acquired and registered, herbs heal and fragments are commo
 });
 
 test('duplicates give five fragments without stacking; new journeys keep only codex records',()=>{
- const s=arena();for(const r of rewardDefinitions){assert.equal(grantReward(s,r.id),true);const shards=s.shards;assert.equal(grantReward(s,r.id),false);assert.equal(s.shards,shards+5);}assert.equal(codexRows(s,'skills').filter(r=>r.known).length,30);const fresh=newGame(2,s.profile);assert.deepEqual(fresh.abilities,[]);assert.deepEqual(fresh.unlockedOrders,[]);assert.equal(Object.hasOwn(fresh,'keys'),false);assert.equal(codexRows(fresh,'skills').filter(r=>r.known).length,30);assert.ok(codexRows(fresh,'skills').every(r=>!r.owned));
+ const s=arena();for(const r of rewardDefinitions){assert.equal(grantReward(s,r.id),true);const shards=s.shards;assert.equal(grantReward(s,r.id),false);assert.equal(s.shards,shards+5);}assert.equal(codexRows(s,'skills').filter(r=>r.known).length,30);const fresh=newGame(2,s.profile);assert.deepEqual(fresh.abilities,['first-aid']);assert.deepEqual(fresh.unlockedOrders,[]);assert.equal(Object.hasOwn(fresh,'keys'),false);assert.equal(codexRows(fresh,'skills').filter(r=>r.known).length,30);assert.ok(codexRows(fresh,'skills').every(r=>!r.owned||r.id==='first-aid'));
 });
 
 test('special orders must be obtained and configured in an available slot',()=>{
