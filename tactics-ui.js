@@ -1,3 +1,4 @@
+import{activeOrderCount}from'./order-capacity.js';
 import{extensionOwned,rerollCount,rerollChest}from'./extensions.js';
 import{augmentChip}from'./augment-view.js';
 import{augmentById}from'./augments.js';
@@ -9,7 +10,7 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 export function installTacticsUi({getState,onChange,storage,onResume=()=>{}}){
  document.body.insertAdjacentHTML('beforeend',`<dialog id="card-choice-dialog" class="tactics-dialog"><h2>持ち帰る記憶を選ぶ</h2><p>1枚を取得します。新しいカードは次の準備で配置できます。</p><div id="chest-card-categories" role="group" aria-label="取得カードの種類"></div><section id="chest-owned-augments" aria-label="所持オーグメント"></section><button id="chest-reroll" type="button" hidden>再抽選 · 記憶の欠片10個</button><div id="card-choice-list"></div></dialog><dialog id="order-preset-dialog" class="tactics-dialog"><button type="button" class="preset-close" aria-label="プリセットを閉じる">×</button><h2>探索指示のプリセット</h2><p>この端末に最大10件。所持カードと指示枠が揃う場合だけ読み込めます。</p><form id="preset-save-form"><input id="preset-name" aria-label="プリセット名" maxlength="32" placeholder="プリセット名" required><button>現在の指示を保存</button></form><p id="preset-status" role="status"></p><div id="preset-list"></div></dialog>`);
  const chest=document.getElementById('card-choice-dialog'),preset=document.getElementById('order-preset-dialog'),status=document.getElementById('preset-status');let signature='';
- const renderPresets=()=>{document.getElementById('preset-list').innerHTML=readPresets(storage).map((p,i)=>`<article class="preset-entry"><span>${esc(p.name)} · ${p.orders.length}行</span><button data-preset-load="${i}">読み込む</button><button data-preset-delete="${i}">削除</button></article>`).join('')||'<p>登録したプリセットはありません。</p>';};
+ const renderPresets=()=>{document.getElementById('preset-list').innerHTML=readPresets(storage).map((p,i)=>`<article class="preset-entry"><span>${esc(p.name)} · ${activeOrderCount(p.orders)}行</span><button data-preset-load="${i}">読み込む</button><button data-preset-delete="${i}">削除</button></article>`).join('')||'<p>登録したプリセットはありません。</p>';};
  document.addEventListener('click',e=>{if(e.target.closest('[data-order-presets]')&&getState().phase==='prepare'){status.textContent='';renderPresets();preset.showModal();}});
  preset.querySelector('.preset-close').onclick=()=>preset.close();
  document.getElementById('preset-save-form').onsubmit=e=>{e.preventDefault();if(getState().phase!=='prepare')return;const result=savePreset(storage,document.getElementById('preset-name').value,getState().orders);status.textContent=result.error||'保存しました。同じ名前は上書きされます。';renderPresets();};

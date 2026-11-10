@@ -1,3 +1,4 @@
+import{activeOrderCount}from'./order-capacity.js';
 import{DIRECTIVE_LIMITS}from'./directive-safety.js';
 import{actorCanUse,roomContains,enemySkillReasons}from'./actor-rules.js';
 import{themedSkills}from'./build-themes.js';
@@ -70,8 +71,8 @@ export function validCardRule(s,input,{requireOwned=true}={}){
  if(!Array.isArray(r.conditions)||r.conditions.some(c=>!c||typeof c.id!=='string')||r.conditions.length+2>cardCapacity(s)||new Set(r.conditions.map(c=>c.id)).size!==r.conditions.length)return false;
  return r.conditions.every(c=>{const d=conditionById[c.id];return d&&(!d.param||(Number.isFinite(c.value)&&c.value>=d.min&&c.value<=d.max&&(c.value-d.min)%d.step===0));});
 }
-export function addCardRule(s){if(s.phase!=='prepare'||s.orders.length>=2+s.levels.commandSlots)return false;s.orders.push(createCardRule());s.mode='custom';return true;}
-export function replaceCardRule(s,index,rule){if(s.phase!=='prepare'||!s.orders[index]||!validCardRule(s,rule))return false;s.orders[index]=legacyToCards(rule);s.mode='custom';return true;}
+export function addCardRule(s){if(s.phase!=='prepare'||activeOrderCount(s.orders)>=2+s.levels.commandSlots)return false;s.orders.push(createCardRule());s.mode='custom';return true;}
+export function replaceCardRule(s,index,rule){if(s.phase!=='prepare'||!s.orders[index]||!validCardRule(s,rule)||s.orders[index].disabled===true&&rule.disabled!==true&&activeOrderCount(s.orders)>=2+s.levels.commandSlots)return false;s.orders[index]=legacyToCards(rule);s.mode='custom';return true;}
 
 const dist=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y),key=p=>`${p.x},${p.y}`,dirs=[[0,-1],[1,0],[0,1],[-1,0]];
 function subjects(s,r,ctx){
