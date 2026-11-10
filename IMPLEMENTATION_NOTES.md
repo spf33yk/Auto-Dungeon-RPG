@@ -2,6 +2,11 @@
 
 更新日：2026-11-10。攻撃スキルの戦闘接触演出は0f53bc5を基準に検証。現行仕様と未確認事項を分けて記録する。
 
+## 公開アーカイブの実データ検査
+
+b37c1caの実アップロードartifact 13763209776を取得。ZIP SHA-256 cce8fa1b60c088e1f3eecd76d20597681b44b172aca331d5900649117c20cfbaはGitHub APIのdigestと一致。ZIP CRC成功、単一artifact.tar、508ファイル・105788325bytes。symlink/hardlink/特殊ファイル・危険パス・読み取り／ディレクトリ走査権限の不備・大文字小文字衝突なし。全ファイルがb37c1caとバイト一致し、追加は意図したdeploy-version.jsonのみ。output/pages-artifact-audit.jsonに結果、output/audit-pages-artifact.pyに検査手順を保存。大型ZIPはローカル出力のみでコミットしない。
+
+直近200 Actions実行と100デプロイ記録に未終了状態なし。APIは直近失敗をdeployment_cancelledと返し、外部から見えるデプロイロックは確認できない。GitHubへの問い合わせ用未送信ドラフトをoutput/github-pages-support-draft.txtに作成。共有・送信は行っていない。比較検証では現在公開中94fc487の成功済みrun 42775883303のdeployだけを再実行。attempt 2は12:54:56 UTCに配信作成、12:55:01 UTCにsucceed、artifact 13744111123を再利用して成功した。既存リリースの再利用の可能性があるため、これだけで最新版の内容不備とは断定しない。続いて検査済みb37c1caのrun 42815430115/deployを再実行（attempt 2、job 129842429182）し、内容依存か一時的停滞かを比較中。
 ## 公開処理の復旧検証
 
 98ae7cd基準。同期完了後もsucceedへ進まないため既定600000msでキャンセルされる直接原因を確認。GitHub内部の根本原因は未確定。legacy自動配信から公式ActionsのPublish gameへ移行し、deploy待ち600000ms・ジョブ15分・直列化・テスト／配信URL検査・公開コミット識別JSONを追加。git archiveでコミット済みファイルのみを配信する。ゲーム内容・保存形式は変更なし。ワークフローのインデント・依存関係を目視確認し、ローカルのアセット版チェックは成功。YAMLパーサはローカル未導入のため、Actions実行時の構文検証も確認する。公式deploy-pages v5のソースで600000msの上限を確認。1200000ms指定は内部で600000msへ丸められるため、待ち時間を延長できるとの説明を訂正し、設定・資料を10分へ揃える。復旧の検証対象はlegacyから明示的workflowへの移行。b37c1caのPublish game（run 42815430115）でActions構文受理、全828テスト・版チェック・git archive・artifact upload・Pages設定取得は成功。deployは12:24 UTC開始後syncing_filesに留まり、12:35 UTCにタイムアウトしてfailure。独立Game tests（42815430353）も成功。新方式でも同じ同期段階で再現するため、問題箇所はPages側同期に絞られるが内部原因は未特定。公開HTMLのscreens.css?v=8aa9dd92dd0a・app.js?v=8ba16a548936は旧版のまま、deploy-version.jsonは404。画面・操作の最新版公開検証は未実施。証跡はoutput/pages-workflow-deploy.txt。設定の実効上限10分への訂正と結果記録は[skip ci]コミットで反映し、原因不明の連続再デプロイを避ける。Pages／environment削除は行っていない。
@@ -260,3 +265,5 @@ ATK／DEF補正を小数のまま計算し、能力式で小数6桁へ整理、�
 2. 各テーマ・各レア度の強さと取得難度の最終調整。候補のプールが少ない場合は宝探しの候補上限まで増えない。率・整数の最終丸めにより、個々の状況で同じ結果になる場合はある。
 3. 敵操作の機会費用、冗長条件、全構成・全マップの進行保証。1000ターン介入は専用テストを通過したが、今回の通し検証では未到達。
 4. TRUE本編・TRUE後の遊び、追加攻撃／被弾／崩壊モーション、実機スマホと実プレイ時間の確認。
+
+比較診断用にPublish gameの手動入力content_refを追加。空欄は通常の最新版、指定時は当該ソースのテスト・版チェック・archiveのみを使い、識別JSONを付けない。既存成功版94fc487を新しいワークフローコミットの配信版として公開し、既存版再利用だけ成功するのかを切り分ける。入力はcheckout引数とenvへ渡し、シェルコードへ展開しない。
