@@ -36,10 +36,11 @@ jobs:
         run: node scripts/update-assets.js --check
       - name: Run game tests
         run: node --test
-      - name: Package committed files
+      - name: Package committed game files
         run: |
           mkdir _site
-          git archive HEAD | tar -x -C _site
+          git archive HEAD -- .nojekyll index.html favicon.svg '*.js' '*.css' art | tar -xf - -C _site --exclude='*.test.js' --exclude='server.js' --exclude='scripts' --exclude='test-support'
+          node --input-type=module -e 'import {readFileSync,existsSync} from "node:fs"; const html=readFileSync("_site/index.html","utf8"); const imports=JSON.parse(html.match(/<script type="importmap" id="asset-imports">([\s\S]*?)<\/script>/)[1]).imports; for(const path of Object.values(imports)){if(!existsSync("_site/"+path.split("?")[0])) throw Error("Missing browser module: "+path)}'
           if [ -z "$CONTENT_REF" ]; then
             node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("_site/deploy-version.json", JSON.stringify({commit:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID})+"\n")'
           fi

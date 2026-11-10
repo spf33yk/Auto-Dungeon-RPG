@@ -107,6 +107,6 @@ node scripts/update-assets.js --check
 
 ほころびた外套の基礎防御力は1です。
 
-公開はPublish gameワークフローで行います。テスト・アセット版チェック後、コミット済みファイルをGitHub Pagesへ配信します。deploy-version.jsonで公開中のコミットを確認できます。push成功と公開完了は区別し、配信の待ち時間は最大10分です。
+公開はPublish gameワークフローで行います。テスト・アセット版チェック後、コミット済みのゲーム用JS・CSS・HTML・素材をGitHub Pagesへ配信します。制作資料・テスト・検証出力は配信に含めません。deploy-version.jsonで公開中のコミットを確認できます。push成功と公開完了は区別し、配信の待ち時間は最大10分です。
 
 Publish gameの手動実行にあるcontent_refは過去版との比較診断用です。通常の最新版公開では空欄にしてください。

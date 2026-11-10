@@ -181,6 +181,6 @@ order-capacity.jsのactiveOrderCountを行追加・再有効化・保存検証�
 
 data.equipmentのarmor-0は基礎DEF1。他防具は従来どおりrank×2。gearStatsとstatsが所持・装備・表示に共通適用するため、既存保存の個体書換えは不要。
 
-公開処理は.github/workflows/pages.ymlのbuild→deployで管理する。git archive HEADで未コミット・未追跡ファイルを除外し、_siteへ展開して版識別JSONを追加。configure-pages v6・upload-pages-artifact v5・deploy-pages v5を使用する。pages concurrencyで多重配信を防ぎ、失敗時も旧公開版を維持する。
+公開処理は.github/workflows/pages.ymlのbuild→deployで管理する。git archive HEADでゲーム用ルートJS・CSS・HTML・favicon・.nojekyll・artを抽出し、テスト・サーバー・scripts・test-supportは除外。制作資料とoutputも公開しない。_siteのimportmap参照先が全て存在することを検査して版識別JSONを追加。configure-pages v6・upload-pages-artifact v5・deploy-pages v5を使用する。pages concurrencyで多重配信を防ぎ、失敗時も旧公開版を維持する。
 
 Pagesの診断入力content_refはcheckoutのrefへ渡す。シェルには環境変数として渡し、非空時はdeploy-version.jsonを付加しない。OIDCの配信版はワークフローのコミット、配信内容はcheckoutしたコミットとして比較する。
