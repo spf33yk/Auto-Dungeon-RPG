@@ -21,7 +21,7 @@ export const minibosses=[
 export const monsters = species.flatMap((names,z)=>names.map((name,k)=>({id:`enemy-${z}-${k}`,name,zone:z,type:k?'brute':'slime',experience:3+z*2+(k?2:0),hp:(k?19:11)+z*4,attack:(k?8:5)+Math.floor(z*2.75),defense:Math.floor(z*.8)+(k?1:0),period:k?2:1,color:k?['#966e68','#c7aba0']:['#507f69','#a2c6a5']}))).concat(minibosses);
 const weapons=['錆びた剣','銅の剣','鉄の剣','炉鍛の剣','氷晶の剣','魔導の剣','茨の剣','騎士の剣','月影の剣','黎明の剣'];
 const armors=['ほころびた外套','旅人の外套','鉄の胸当て','炉鍛の鎧','氷晶の鎧','魔導の外套','樹皮の鎧','騎士の鎧','月影の鎧','黎明の鎧'];
-export const equipment = [...weapons.map((name,rank)=>({id:`weapon-${rank}`,name,slot:'weapon',rank,attack:2+rank*2,defense:0})),...armors.map((name,rank)=>({id:`armor-${rank}`,name,slot:'armor',rank,attack:0,defense:rank*2}))];
+export const equipment = [...weapons.map((name,rank)=>({id:`weapon-${rank}`,name,slot:'weapon',rank,attack:2+rank*2,defense:0})),...armors.map((name,rank)=>({id:`armor-${rank}`,name,slot:'armor',rank,attack:0,defense:rank===0?1:rank*2}))];
 export const monsterById=Object.fromEntries(monsters.map(m=>[m.id,m]));
 export const gearById=Object.fromEntries(equipment.map(g=>[g.id,g]));
 export const skills = [
