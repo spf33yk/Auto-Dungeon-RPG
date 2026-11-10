@@ -8,7 +8,7 @@ f2d93c8基準。ユーザー指定によりGitHub登録をゲーム・採用／�
 
 outputに含まれていた互換素材再生成用の承認原画14枚はart/characters/mukuro-minimal64-v1/sourceへコピーし、原ハッシュを検証してmanifest.jsonを作成。再生成スクリプトとAPPROVED_SOURCEの入力先を更新。本編主人公・互換素材・テスト参照素材・地形再生成入力は保持する。変更前Gitツリー105798105bytes、整理したインデックス約83248298bytes（記録追記前）。移設判定を除いた追跡解除は21ファイル。過去履歴に含まれる容量はこの整理で削減しない。
 
-全828テスト成功（output/repository-scope-tests.txt）。隔離した作業フォルダで互換素材を再生成し、sprites.png／slash.png／sprites.json／APPROVED_SOURCE.jsonが現在の採用ファイルと全てバイト一致。outputに入力依存しないことを確認。配信URL --check、ignore判定、差分チェック成功。ゲームの見た目・操作・難易度・保存形式は変更なしのため画面走行は再実施しない。公開版の更新結果は配信完了後に確認する。
+全828テスト成功（output/repository-scope-tests.txt）。隔離した作業フォルダで互換素材を再生成し、sprites.png／slash.png／sprites.json／APPROVED_SOURCE.jsonが現在の採用ファイルと全てバイト一致。outputに入力依存しないことを確認。配信URL --check、ignore判定、差分チェック成功。ゲームの見た目・操作・難易度・保存形式は変更なしのため画面走行は再実施しない。1be41a7のGame tests（42823793442）とPublish game（42823793691）はともにsuccess。公開deploy-version.jsonのcommitが1be41a7a1a926e6b2838d88846ebf766413821afと一致し公開更新を確認。git ls-filesでoutput・title-video-base・未使用heroの追跡がないことも確認。最終記録のみ[skip ci]でコミットする。
 ## 公開復旧の確認
 
 883d6dcのPublish game run 42822092183でbuild・deployともsuccess。通常テストrun 42822092272もsuccess（全828件）。ゲーム用配信物340ファイル・92723701bytesへ絞った構成で成功した。全体配信時の正常アーカイブは繰り返し同期タイムアウト、旧版内容の新規配信は成功しており、配信対象の構成に依存する問題の可能性が高まった。ただし除外した具体的なファイル・サーバー内部原因は未特定。GitHub側だけが原因でサポート以外に対処不能との以前の見立ては修正する。
