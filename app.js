@@ -57,6 +57,7 @@ const bgm=new SceneMusic($('scene-bgm'),$('scene-bgm').dataset);
 let endingPreview=false,endingPlayback=null,subtitlePreviewKind='first-end',musicAudition=null;
 function syncSceneMusic(){bgm.configure({enabled:!verificationMode&&uiSettings.bgmEnabled,volume:uiSettings.bgmVolume,hidden:document.hidden});bgm.select(musicAudition||(endingPreview?(subtitlePreviewKind.endsWith('intro')?'opening':'ending'):musicScene(state,{title:showingTitle,teaser:Boolean(pendingJourney),houseEntered:Boolean(state.gimmick?.triggered)&&!fieldMessages.waiting}))); }
 function paintMusicOptions(){$('bgm-toggle').textContent='BGM：'+(uiSettings.bgmEnabled?'ON':'OFF');$('bgm-toggle').setAttribute('aria-pressed',String(uiSettings.bgmEnabled));$('bgm-volume').value=uiSettings.bgmVolume;$('bgm-volume-value').textContent=uiSettings.bgmVolume+'%';}
+function paintBrightness(){$('screen-brightness').value=uiSettings.brightness;$('screen-brightness-value').textContent=uiSettings.brightness+'%'+(uiSettings.brightness===100?'（標準）':'');}paintBrightness();$('screen-brightness').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,brightness:Number($('screen-brightness').value)});paintBrightness();draw();};$('reset-brightness').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,brightness:100});paintBrightness();draw();};
 $('screen-shake').checked=uiSettings.screenShake;$('screen-shake').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,screenShake:$('screen-shake').checked});};
 paintMusicOptions();document.addEventListener('pointerdown',()=>bgm.unlock(),{capture:true});document.addEventListener('keydown',()=>bgm.unlock(),{capture:true});document.addEventListener('visibilitychange',()=>syncSceneMusic());
 function renderNormalEnding(){
@@ -195,7 +196,7 @@ function draw(){
  for(const e of [...state.enemies,...feedbackGhosts(combat,state.enemies)])if(visible(e.x,e.y))entity(e,e.type,{standing:true,layer:2,enemy:true});
  entity(state.player,'skeleton',{standing:true,layer:3,hero:true});
  for(const object of sceneDrawOrder(queue))object.draw();
- drawExplorationLight(ctx,{position,visible,camera,width:map.width,height:map.height,size:CELL,appearance});
+ drawExplorationLight(ctx,{position,visible,camera,width:map.width,height:map.height,size:CELL,appearance,brightness:uiSettings.brightness});
  if(state.gimmick?.id==='fog'&&['explore','dead','cleared'].includes(state.phase)){ctx.save();ctx.setTransform(1,0,0,1,0,0);fogEffect.draw(ctx,{width:map.width,height:map.height,time:idleClock,center:{x:(heroEffectCenter.x-camera.left)*camera.scale,y:(heroEffectCenter.y-camera.top)*camera.scale},reducedMotion:reducedMotion.matches});ctx.restore();}
  drawSkillEffects(ctx,skillEffects,heroClock,SKILL_EFFECT_FORMAT,skillEffectAtlases,target=>{if(target.kind==='hero')return heroEffectCenter;const living=state.enemies.includes(target.actor),at=living?target.actor:target.at;if(!visible(at.x,at.y))return null;return actorEffectCenters.get(target.actor)||enemySkillCenter(standingBox(at.x,at.y,CELL,1),enemyFrame(target.actor||{}),SKILL_EFFECT_FORMAT);},{size:CELL,reducedMotion:reducedMotion.matches});
  for(const attack of enemyAttacks)if(visible(attack.actor.x,attack.actor.y))drawEnemyAttackEffect(ctx,attack,enemyAttackFrame(attack,combat.actorTime,{size:CELL,reducedMotion:reducedMotion.matches}),CELL);

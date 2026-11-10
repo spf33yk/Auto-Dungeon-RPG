@@ -1,11 +1,13 @@
+import{screenBrightness}from'./ui-settings.js';
 export const MEMORY_SHADE='#071111a8';
 // Approved warm B lighting: the radius follows the logical sight, without changing it.
 export const EXPLORATION_LIGHT=Object.freeze({radiusPadding:1.3,warm:['#f6ce7959','#d8ac5b35','#b28b4310','#00000000'],dark:['#00000000','#00000005','#00000035','#000000a3','#000000d2']});
 export function explorationLightGeometry(position,sight=3,size=64){return {x:(position.x+.5)*size,y:(position.y+.3)*size,radius:(Math.max(0,sight)+EXPLORATION_LIGHT.radiusPadding)*size};}
-export function drawExplorationLight(ctx,{position,camera,width,height,size=64,appearance=null}){
+export function lightingShadeColors(brightness=100){const factor=1-(screenBrightness(brightness)-100)/200;return EXPLORATION_LIGHT.dark.map(color=>'#000000'+Math.min(250,Math.round(parseInt(color.slice(-2),16)*factor)).toString(16).padStart(2,'0'));}
+export function drawExplorationLight(ctx,{position,camera,width,height,size=64,appearance=null,brightness=100}){
  const {x,y,radius:r}=explorationLightGeometry(position,appearance?.radius??3,size),rect=[camera.left,camera.top,width/camera.scale,height/camera.scale];
  ctx.save();ctx.globalAlpha=1;ctx.globalCompositeOperation='screen';const warm=ctx.createRadialGradient(x,y,0,x,y,r);[0,.3,.7,1].forEach((at,i)=>warm.addColorStop(at,EXPLORATION_LIGHT.warm[i]));ctx.fillStyle=warm;ctx.fillRect(...rect);ctx.restore();
- ctx.save();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';const shade=ctx.createRadialGradient(x,y,0,x,y,r);[0,.28,.52,.77,1].forEach((at,i)=>shade.addColorStop(at,EXPLORATION_LIGHT.dark[i]));ctx.fillStyle=shade;ctx.fillRect(...rect);ctx.restore();
+ ctx.save();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';const shade=ctx.createRadialGradient(x,y,0,x,y,r);[0,.28,.52,.77,1].forEach((at,i)=>shade.addColorStop(at,lightingShadeColors(brightness)[i]));ctx.fillStyle=shade;ctx.fillRect(...rect);ctx.restore();
 }
 // Tint the sprite's own alpha, including raised faces, rather than a flat ground rectangle.
 export function dimmedWallTileset(tileset,makeCanvas=()=>document.createElement('canvas')){
