@@ -95,7 +95,7 @@ card-inventory.jsで宝箱の種類別候補を生成・保存、selectChestCate
 
 ## 9. 描画・配信・検証
 
-scene-lighting.jsの円マスクは地形の明暗専用。敵・品物・AI・発見・MAPは四角いcanSeeを参照する。通常カメラ倍率は視界強化に依存せず、霧だけ近づける。準備の外側遮蔽・内側透過・土台の等倍率・レアリティの前景描画はscreens.cssで管理する。
+scene-lighting.jsのexplorationLightGeometryがradius(state)+1.3マスの光半径を生成する。暖色screen＋黒source-overの2グラデーションをカメラのワールド領域全体へ描き、Canvas状態を復元する。app.jsはマス別の床暗転を重ねず、drawSightWallのsmooth経路で原壁を描いて共通照明へ渡す。位置は移動補間へ追従する。照明は表示専用。敵・品物・AI・発見・MAPは四角いcanSeeを参照する。通常カメラ倍率は視界強化に依存せず、霧だけ近づける。準備の外側遮蔽・内側透過・土台の等倍率・レアリティの前景描画はscreens.cssで管理する。
 
 scripts/update-assets.jsがブラウザJS・CSS・対象素材の内容ハッシュを配信URLへ反映。変更時に更新して--checkを通す。Node自動テストとローカル画面確認を基本とし、配信固有の障害がある場合だけ公開走行を追加する。
 

@@ -154,7 +154,7 @@ function draw(){
  ctx.fillStyle='#0c1416';ctx.fillRect(0,0,map.width,map.height);const theme=zoneFor(state);
  const progress=motion&&state.phase==='explore'?Math.min(1,(combat.actorTime-motion.time)/motion.duration):1,eased=1-Math.pow(1-progress,3);
  const position=motion?{x:motion.from.x+(state.player.x-motion.from.x)*eased,y:motion.from.y+(state.player.y-motion.from.y)*eased}:state.player;
- const appearance={position:state.player,radius:radius(state),size:CELL};
+ const appearance={position:state.player,radius:radius(state),size:CELL,smooth:true};
  const sightState=renderSightState(state,position),visible=(x,y)=>canSee(sightState,x,y);
  const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y),hop=moving?Math.sin(progress*Math.PI)*CELL/12:0;
  const camera=cameraFor(position,cameraSight(state),map.width,map.height);ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);const shake=combatShake(combat,{enabled:uiSettings.screenShake,reducedMotion:reducedMotion.matches,size:CELL});ctx.translate(shake.x,shake.y);
@@ -167,8 +167,7 @@ function draw(){
    ctx.fillStyle=floor?theme.floorColor:'#0c1416';ctx.fillRect(px,py,CELL,CELL);
    if(floor&&n<4){ctx.fillStyle='#435044';ctx.fillRect(px+13+n*2,py+21,5,5);}
   }
-  if(floor&&light==='memory'){ctx.fillStyle=MEMORY_SHADE;ctx.fillRect(px,py,CELL,CELL);}
-  if(floor&&light==='visible')shadeSightFloor(ctx,x,y,CELL,appearance);
+  // Continuous world lighting below shades floors and raised walls together.
   if(!floor)queue.push({footY:(y+1)*CELL,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=wallSets.get(theme.id)||wallSets.get('*');drawSightWall(ctx,walls,wallDrawBox(surface,x,y,walls?.definition.rise??.75,CELL),CELL,visible,lit=>drawRaisedWall(ctx,lit,surface,x,y,state.seed,theme,CELL,entranceFrames.get(x+','+y)),appearance);ctx.restore();}});
  }
  const stair=state.stairs;
