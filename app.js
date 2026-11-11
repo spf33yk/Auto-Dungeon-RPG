@@ -22,7 +22,7 @@ import{skillSetActive}from'./set-bonuses.js';
 import{setRibbon,themeIcon,skillTitle}from'./theme-view.js';
 import{installTacticsUi}from'./tactics-ui.js';
 import{compareForecast,createPreparationBaseline}from'./forecast-comparison.js';
-import {screenTutorials,tutorialSteps as floorTutorialSteps,tutorialKey} from './screen-tutorial.js';
+import {screenTutorials,tutorialSteps as floorTutorialSteps,tutorialKey,isTutorialJourney} from './screen-tutorial.js';
 import{augmentCard,augmentChip}from'./augment-view.js';
 import{augments,augmentById,chooseAugment}from'./augments.js';
 import {SubtitlePlayer} from './subtitle-player.js';
@@ -244,7 +244,7 @@ function handleOrderChange(e){const result=handleCardChange(e,state);if(result!=
 const displayAttack=()=>state.gear.weapon.identified?stats(state).attack:'？';
 const displayDefense=()=>state.gear.armor.identified?stats(state).defense:'？';
 function renderAugments(){
- const offer=state.augmentOffer,dialog=$('augment-dialog');$('augment-reroll').hidden=false;$('augment-reroll').disabled=!offer||rerollCount(state,'augment')<1;$('augment-reroll').textContent='リロール（残り '+rerollCount(state,'augment')+'回）';$('augment-tutorial').hidden=!offer||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
+ const offer=state.augmentOffer,dialog=$('augment-dialog');$('augment-reroll').hidden=false;$('augment-reroll').disabled=!offer||rerollCount(state,'augment')<1;$('augment-reroll').textContent='リロール（残り '+rerollCount(state,'augment')+'回）';$('augment-tutorial').hidden=!offer||!isTutorialJourney(state)||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
  if(state.phase==='prepare'){const hint=nextStageHint({...state,floor:state.floor-1});$('prep-hint').textContent=hint.title.replace('次は','')+' · '+hint.text;$('prep-augments').innerHTML='<div class="prep-augment-list"><b>オーグメント</b>'+((state.augments||[]).map(id=>augmentChip(augmentById[id],state)).join('')||'<span>なし</span>')+'</div>'+setRibbon(state);}
 }
 $('debug-augment').innerHTML=augments.map(a=>'<option value="'+a.id+'">'+a.rarity+' · '+a.theme+' · '+a.name+'</option>').join('');
@@ -367,8 +367,8 @@ $('tutorial-next').onclick=actTutorial;
 $('tutorial-back').onclick=()=>{if(tutorialStep>0){tutorialStep--;paintTutorial();}};
 $('tutorial-task-skip').onclick=()=>advanceTutorial();
 $('tutorial-dialog').addEventListener('cancel',e=>{e.preventDefault();finishTutorial();});
-$('tutorial-prepare').onclick=()=>{if(floorTutorialSteps(state).length)startTutorial(state.phase);else displayMessage('階層別の案内はB30〜B26で表示します。');};
-$('tutorial-explore').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,tutorials:{...uiSettings.tutorials,explore:false}});$('tutorial-explore').textContent='次のオーグメント取得時に案内します';};
+$('tutorial-prepare').onclick=()=>{if(!isTutorialJourney(state)){displayMessage('チュートリアルは初回クリアまで表示します。');return;}if(floorTutorialSteps(state).length)startTutorial(state.phase);else displayMessage('階層別の案内はB30〜B26で表示します。');};
+$('tutorial-explore').onclick=()=>{if(!isTutorialJourney(state)){displayMessage('チュートリアルは初回クリアまで表示します。');return;}uiSettings=saveUiSettings(uiStorage,{...uiSettings,tutorials:{...uiSettings.tutorials,explore:false}});$('tutorial-explore').textContent='次のオーグメント取得時に案内します';};
 function tutorialOperation(e){if(!tutorialKind||!tutorialActing)return;const kind=tutorialKind,index=tutorialStep,step=tutorialSteps[index],hit=e.type===(step.event||'click')&&e.target.closest(step.selector)&&(e.type!=='change'||e.target.checkValidity());if(!hit&&!step.placement&&!step.complete)return;setTimeout(()=>{if(tutorialKind!==kind||tutorialStep!==index||!tutorialActing)return;const placed=state.orders.reduce((n,r)=>n+(r.conditions?.length||0),0)>tutorialPlacementCount;if(step.complete?!step.complete(state):step.placement?!placed:!hit)return;advanceTutorial(true);},0);}
 document.addEventListener('click',tutorialOperation,true);
 document.addEventListener('pointerup',tutorialOperation,true);

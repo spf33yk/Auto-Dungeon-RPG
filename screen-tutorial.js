@@ -1,5 +1,6 @@
 const step=(text,selector,extra={})=>({text,selector,...extra});
-export function tutorialKey(s){return s.phase==='explore'&&s.floor===1?'explore:1':s.phase==='prepare'&&s.floor>=2&&s.floor<=5?'prepare:'+s.floor:null;}
+export const isTutorialJourney=s=>!(s.profile?.normalClears>0);
+export function tutorialKey(s){if(!isTutorialJourney(s))return null;return s.phase==='explore'&&s.floor===1?'explore:1':s.phase==='prepare'&&s.floor>=2&&s.floor<=5?'prepare:'+s.floor:null;}
 export function tutorialSteps(s){switch(tutorialKey(s)){
 case'explore:1':return [step('骸は探索指示に従って自動で進みます。操作したいときは「ひとやすみ」で止められます。'),step('ひとやすみ中に回復ポーションストックを1個使うとHPが10回復します。最初から1個持っています。'),step('HP満タンで拾った回復ポーションはストックされます。所持数は装備/ステータスでも確認できます。')];
 case'prepare:2':return [step('宝箱を探す指示を作ります。カードリストの「アクション」を押してください。','#tab-content [data-palette-tab="action"]'),step('「宝箱を取得」を選んでください。','#tab-content [data-drag-source="palette|action|chests"]'),step('「宝箱を取得」を行動カードの位置へ置いてください。ドラッグでも置けます。','#tab-content [data-drop-slot]',{complete:s=>s.orders.some(r=>r.effect?.id==='chests')})];

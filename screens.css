@@ -731,6 +731,12 @@ body.preparing #prepare-scene .card-rules-heading>.instruction-controls{flex:1;m
 .will-paper{width:100%;padding:clamp(16px,3.6vw,40px);border:1px solid #7b694c;background:linear-gradient(145deg,#e5d8b6,#cab58b);box-shadow:0 12px 30px #000a;color:#302519;font-family:serif;font-size:clamp(14px,1.7vw,18px);line-height:1.7}
 .will-paper p{margin:0 0 .8em}
 .will-paper .will-signature{margin:0;text-align:right}
+#field-event-dialog[open][data-kind=will] .will-paper{animation:will-paper-reveal .65s cubic-bezier(.2,.7,.2,1) both}
+@keyframes will-paper-reveal{
+ from{opacity:0;transform:perspective(650px) translateY(24px) rotate(-15deg) rotateY(-30deg) scale(.78)}
+ to{opacity:1;transform:none}
+}
+@media(prefers-reduced-motion:reduce){#field-event-dialog[open][data-kind=will] .will-paper{animation:none}}
 #will-close{justify-self:end}
 #hud-top .player-vitals:has(.potion-stock:not([hidden])){display:grid;grid-template-columns:minmax(0,1fr) max-content;column-gap:6px}
 #hud-top .player-vitals .hp-track{grid-column:1}
