@@ -654,8 +654,6 @@ body.preparing #prepare-scene{clip-path:inset(5px)}
 #prep-augments{display:block;max-height:none}.prep-augment-list{display:flex;align-items:center;gap:10px;overflow-x:auto;max-height:90px}.prep-augment-list>b{flex:none;white-space:nowrap}.set-bonus-ribbon{margin-top:4px;min-height:24px}.augment-codex-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.augment-card-content{overflow:auto;scrollbar-width:thin}#augment-dialog{max-height:88dvh;overflow:auto}.active-set-note{color:#f2d78d}
 
 /* Active directive stays above the memory subtitle, independently of chat visibility. */
-.executing-order{display:none}body.exploring .thought-stack>.executing-order{display:block;min-height:18px;margin:0 0 2px;padding:0;border:0;background:transparent;color:#e4d3a5;font-size:13px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px #000;pointer-events:none}body.exploring .thought-stack>.executing-order[hidden]{visibility:hidden}
-@media(max-height:500px){body.exploring .thought-stack>.executing-order{min-height:14px;line-height:14px;font-size:11px}}
 
 /* Keep full augment borders visible; only the card strip scrolls horizontally. */
 .prep-augment-list{max-height:none;align-items:stretch;padding:3px 2px 10px;overflow-y:hidden;scrollbar-width:thin}.prep-augment-list>b{align-self:center;position:static;background:transparent;padding-right:8px}.prep-augment-list .illustrated-chip{box-sizing:border-box;min-width:325px;max-width:370px}.set-bonus-ribbon{flex-wrap:wrap;overflow:visible}.set-bonus-chip{white-space:normal;flex-wrap:wrap;line-height:1.6;overflow-wrap:anywhere}
@@ -723,21 +721,17 @@ body.preparing #prepare-scene .card-rules-heading>.instruction-controls{flex:1;m
 #field-event-dialog::backdrop{background:transparent;backdrop-filter:none}
 #field-event-dialog[data-kind=memory]{border-color:#e8d4a4;color:#fff3d5;background:#171419}
 #field-event-dialog[data-kind=memory]::backdrop{background:#171118b8;animation:memory-fade-in .5s ease-out}
-#field-event-dialog[data-kind=will]{inset:0!important;margin:auto;width:min(600px,88vw)!important;height:fit-content!important;max-height:90dvh;padding:clamp(12px,2vw,24px)!important;border:0;outline:0;background:transparent;box-shadow:none;color:#f5e9cb;overflow:auto}
+#field-event-dialog[data-kind=will]{inset:0!important;margin:auto;width:min(860px,94vw)!important;height:fit-content!important;max-height:90dvh;padding:clamp(12px,2vw,24px)!important;border:0;outline:0;background:transparent;box-shadow:none;color:#f5e9cb;overflow:auto}
 #field-event-dialog[data-kind=will]::backdrop{background:transparent;backdrop-filter:none}
 #field-event-advance[hidden],#will-document[hidden],.potion-stock[hidden]{display:none}
 #will-document{display:grid;justify-items:center;gap:12px}
 #will-document h2{margin:0;color:inherit;font-size:clamp(17px,2.4vw,27px)}
-@font-face{font-family:'Will Handwriting';src:url('./art/ui/will-document-v1/KleeOne-letter.woff2') format('woff2');font-display:swap}
-.will-paper{position:relative;isolation:isolate;width:min(100%,460px,max(250px,calc(60dvh - 112px)));margin-inline:auto;aspect-ratio:2/3;padding:clamp(22px,4.5dvh,56px) clamp(22px,4.5dvh,62px);color:#302519;font-family:'Will Handwriting','Yu Kyokasho',serif;font-size:clamp(12px,min(1.75vw,2.15dvh),19px);line-height:1.55}
+.will-paper{position:relative;isolation:isolate;width:min(70vw,380px,max(130px,calc(40dvh - 34px)));aspect-ratio:2/3}
 .will-paper::before{
  content:'';position:absolute;inset:0 0 auto;z-index:-1;aspect-ratio:2/3;
  background:url('./art/ui/will-document-v1/parchment.png') center/contain no-repeat;
  clip-path:polygon(2% 7%,5% 4%,10% 2%,15% 1%,25% 1.5%,28% 2.6%,34% 3%,36% 5%,38% 2.7%,42% 2.8%,44% 3.6%,50% 2.4%,58% 2.2%,67% 2.8%,70% 3.3%,78% 2.6%,81% 3.3%,86% 1.8%,91% 2.8%,94% 2.6%,96.5% 5%,98% 8%,97.8% 12%,98.2% 14%,97.4% 16%,97.5% 20%,96.8% 24%,94.5% 26%,96.5% 26%,96.4% 29%,97.6% 33%,98% 35%,96.6% 37%,97.8% 39%,96.7% 42%,97% 46%,96.4% 49%,98% 51%,97% 55%,96.8% 59%,97.7% 62%,96.8% 66%,95% 67%,97% 66.5%,98% 69%,97.5% 74%,96.6% 79%,97.5% 83%,98.3% 87%,97.5% 90%,96.8% 94%,94% 96%,92% 98.2%,89% 97.7%,82% 98.4%,74% 97.7%,67% 98%,63% 97.4%,56% 98.5%,49% 98%,43% 98.5%,37% 97.9%,33% 98.2%,27% 97.7%,23% 98%,20.5% 96.7%,20.8% 98.4%,15% 98.1%,10% 97%,6% 98%,4% 95%,2% 94%,1.5% 90%,2.3% 86%,1.8% 82%,2.2% 77%,1.6% 74%,2.2% 70%,2% 67%,1.3% 65%,2.3% 61%,2% 56%,2.3% 53%,4.5% 52%,2.1% 51%,1.6% 48%,2.6% 44%,2.2% 41%,3.2% 37%,3% 35%,1.7% 33%,1.8% 29%,2.5% 24%,2.2% 22.5%,5% 21.6%,2% 20.7%,2.7% 17%,1.9% 15%,2% 12%,2.7% 9%);
 }
-.will-ink-pending{color:transparent}
-.will-paper p{margin:0 0 .8em}
-.will-paper .will-signature{margin:0;text-align:right}
 #field-event-dialog[open][data-kind=will] .will-paper{animation:will-paper-reveal .65s cubic-bezier(.2,.7,.2,1) both}
 @keyframes will-paper-reveal{
  from{opacity:0;transform:perspective(650px) translateY(24px) rotate(-15deg) rotateY(-30deg) scale(.78)}
@@ -745,6 +739,9 @@ body.preparing #prepare-scene .card-rules-heading>.instruction-controls{flex:1;m
 }
 @media(prefers-reduced-motion:reduce){#field-event-dialog[open][data-kind=will] .will-paper{animation:none}}
 #will-close{justify-self:end}
+.will-subtitle-panel{display:grid;justify-items:end;gap:8px;width:100%;padding:10px 14px;background:#0b1014e6;border:1px solid #b9a980}
+#will-subtitle{justify-self:stretch;min-height:3.2em;margin:0;color:#fff5dd;font:clamp(14px,2.2vw,21px)/1.6 serif;text-align:center;overflow-wrap:anywhere}
+@media(max-height:500px){.will-subtitle-panel{padding:6px 10px}#will-subtitle{font-size:14px}}
 #hud-top .player-vitals:has(.potion-stock:not([hidden])){display:grid;grid-template-columns:minmax(0,1fr) max-content;column-gap:6px}
 #hud-top .player-vitals .hp-track{grid-column:1}
 .potion-stock{display:inline-flex;grid-column:2;grid-row:1 / span 2;align-items:center;align-self:center;gap:2px;color:#fff3dc;font-size:clamp(10px,1.15vw,18px);white-space:nowrap}
@@ -810,12 +807,11 @@ html[data-touch-controls=true] .gear-item-actions button,html[data-touch-control
  --option-ink:#f0e8d7; --option-muted:#c6c0b0; --option-gold:#ddc38d; --option-line:#8b7652;
  width:min(1100px,calc(100% - 28px)); max-width:none; height:min(560px,calc(100dvh - 24px)); max-height:none;
  overflow:auto; padding:clamp(12px,2.1vw,26px); border:1px solid var(--option-line);
- color:var(--option-ink); background:linear-gradient(#121a17e8,#111714fa),
- url('./art/opening-awakening.png') center / cover; box-shadow:0 18px 70px #000a;
+ color:var(--option-ink); background:#111916c7; box-shadow:0 18px 70px #000a;
 }
 :is(#options-dialog,.record-window)[open] {display:grid;grid-template-rows:auto minmax(0,1fr) auto}
-:is(#options-dialog,.record-window)::backdrop {background:#090d0cb0}
-.high-contrast-menus :is(#options-dialog,.record-window) {--option-ink:#fff;--option-muted:#f3ebda;--option-gold:#ffe0a0;--option-line:#d2b882;background:#101411}
+:is(#options-dialog,.record-window)::backdrop {background:#090d0c48;backdrop-filter:none}
+.high-contrast-menus :is(#options-dialog,.record-window) {--option-ink:#fff;--option-muted:#f3ebda;--option-gold:#ffe0a0;--option-line:#d2b882;background:#101411e8}
 #options-dialog [hidden] {display:none!important}
 .settings-heading {display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
 .settings-heading h2 {margin:0;color:var(--option-ink);font:600 clamp(22px,3vw,34px)/1.2 serif;letter-spacing:.09em}
@@ -861,7 +857,7 @@ html[data-touch-controls=true] #options-dialog :is(.option-menu-button,select,in
 
 .record-window .record-content{padding:14px;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--option-line) transparent}
 .record-window .section-caption,.record-window #full-logs time{color:var(--option-muted)}
-.record-window .codex-table th{background:#202820;color:var(--option-gold);position:sticky;top:0}
+.record-window .codex-table th{background:#202820;color:var(--option-gold)}
 .record-window .codex-table :is(th,td){border-bottom-color:#a58f6640}
 .record-window .codex-table tr:nth-child(even){background:#ffffff06}
 .record-window .card-codex-item{background:#1b231e}
@@ -879,3 +875,9 @@ html[data-touch-controls=true] #options-dialog :is(.option-menu-button,select,in
  .record-window .record-content{padding:9px}
  .record-window #full-logs .log-row{grid-template-columns:64px minmax(0,1fr);gap:6px;font-size:13px}
 }
+
+.augment-codex-group h3{margin:16px 0 8px;color:var(--option-gold);font:600 16px serif}
+#codex-body .augment-codex-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,215px),1fr))}
+#codex-body .illustrated-augment{display:grid;align-items:center;padding:13% 10%}
+#codex-body .augment-card-content{position:relative;inset:auto;overflow:visible}
+#codex-body .augment-card-content>.augment-illustration{height:clamp(55px,8vw,94px)}

@@ -14,8 +14,7 @@ import{houseEntryReady,captureFieldMessages,collectFieldMessages,installFieldMes
 import{drawReadableProp}from'./readable-props.js';
 import{TRAPS,trapType}from'./traps.js';
 import{queueEnemyAttacks,enemyAttackDuration,enemyAttackPresentation,enemyAttackFrame,drawEnemyAttackEffect}from'./enemy-attack-animation.js';
-import{activeDirectiveText}from'./active-directive.js';
-import{themedSkillById}from'./build-themes.js';
+import{buildThemes,themedSkillById}from'./build-themes.js';
 import{installHoverHelp}from'./hover-help.js';
 import{THEME_IMAGES}from'./augment-art.js';
 import{skillSetActive}from'./set-bonuses.js';
@@ -229,7 +228,6 @@ function drawAutoMap(){
 }
 function renderThoughtSubtitle(){
  const text='▶ '+thoughtText(state.intent),subtitle=$('thought-subtitle');
- const active=$('executing-order'),label=activeDirectiveText(state);active.hidden=!label;if(active.textContent!==label)active.textContent=label;
  if(subtitle.textContent!==text)subtitle.textContent=text;
 }
 function categoryTabs(type,selected,common=false){return `<div class="subtabs" role="group" aria-label="${type==='skill'?'スキル系統':'装備の種類'}">${(common?[['common','共通'],['weapon','武器'],['armor','防具']]:[['weapon','武器'],['armor','防具']]).map(([id,label])=>`<button data-category="${type}" data-value="${id}" aria-pressed="${selected===id}" class="${selected===id?'active':''}">${label}</button>`).join('')}</div>`;}
@@ -383,7 +381,27 @@ function finishDialog(){if(tutorialKind)return;if(!document.querySelector('dialo
 let cardBookKind='all';
 function renderCardBook(){const names={all:'すべて',target:'ターゲット',condition:'条件',action:'アクション',skill:'スキル'};const all=cardCodexRows(state),rows=all.filter(c=>cardBookKind==='all'||c.kind===cardBookKind);$('codex-title').textContent='カード図鑑';$('codex-note').textContent='未所持カードもすべて公開。取得記録は周回後も保持し、所持と効果はその旅だけ。全スキルは取得後、探索指示への配置が必要です。';$('codex-body').innerHTML='<div class="subtabs">'+Object.entries(names).map(([id,name])=>'<button data-card-book-kind="'+id+'" aria-pressed="'+(cardBookKind===id)+'">'+name+'</button>').join('')+'</div><p class="section-caption">この旅の所持 '+all.filter(c=>c.owned).length+' / '+all.length+' · 取得記録 '+all.filter(c=>c.discovered).length+'</p><div class="card-codex-grid">'+rows.map(c=>'<article class="item-card card-codex-item '+c.rarity+'" tabindex="0" title="'+esc(skillTitle(c,state))+'"><div><span class="rarity-badge '+c.rarity+'">'+c.rarity+'</span><strong>'+esc(c.name)+'</strong><small>'+esc(c.group)+' · '+(c.owned?'所持中':c.discovered?'過去に取得／現在未所持':'未取得')+'</small><p>'+esc(c.detail)+'</p>'+(skillSetActive(state,c.id)?'<small class="active-set-note">同テーマのオーグメント強化に寄与</small>':'')+'<small>入手：'+(c.id==='letter'?'旧セーブから引き継ぎ':c.initial?'旅の開始時':'宝箱')+(c.modifier&&c.kind==='skill'?' · 配置した条件の成立中に有効':'')+'</small></div></article>').join('')+'</div>';}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-card-book-kind]');if(b){cardBookKind=b.dataset.cardBookKind;renderCodex();}});
-function renderCodex(){if(codexKind==='augments'){$('codex-title').textContent='オーグメント図鑑';$('codex-note').textContent='開始時・ボス撃破時に3択から選択。効果は旅ごとにリセット、取得記録は引き継ぎます。数値は仮バランス。';$('codex-body').innerHTML='<div class="augment-codex-grid">'+augments.map(a=>augmentCard(a,{state,status:(state.augments||[]).includes(a.id)?'所持中':state.profile.augments?.includes(a.id)?'過去に取得':'未取得'})).join('')+'</div>';return;}if(codexKind==='cards'){renderCardBook();return;}if(codexKind==='skills'){codexKind='cards';renderCardBook();return;}let rows=codexRows(state,codexKind);if(codexKind==='equipment')rows=rows.filter(r=>r.slot===codexSlot).sort((a,b)=>Number(b.known)-Number(a.known)||(a.known&&b.known?(codexSorts[codexSlot]==='acquired'?a.acquiredOrder-b.acquiredOrder:b[codexSorts[codexSlot]]-a[codexSorts[codexSlot]]):0));$('codex-title').textContent=codexKind==='monsters'?'モンスター図鑑':'装備図鑑';$('codex-note').textContent=codexKind==='monsters'?'視認した種類を登録。図鑑は基礎能力です。増援は長期滞在で強化されます。記録は周回でも引き継ぎます。':'入手した種類の名前と能力を登録。記録は周回でも引き継ぎます。';$('codex-body').innerHTML=(codexKind==='equipment'?categoryTabs('codex',codexSlot)+sortButtons('codex',codexSorts[codexSlot]):'')+`<p class="section-caption">公開済み ${rows.filter(r=>r.known).length} / ${rows.length}</p><table class="codex-table"><thead><tr><th>名前</th><th>攻撃</th><th>防御</th></tr></thead><tbody>${rows.map(r=>r.known?`<tr><td>${codexKind==='equipment'?'<span class="equipment-icon '+r.slot+'" aria-hidden="true"></span>':''}${esc(r.name)}${r.zone?`<small>${esc(r.zone)}</small>`:''}</td><td>${r.attack}</td><td>${r.defense}</td></tr>`:'<tr><td><span aria-label="未登録">？</span></td><td>―</td><td>―</td></tr>').join('')}</tbody></table>`;}
+let augmentBookOrder='theme';
+function renderAugmentBook(){
+ $('codex-title').textContent='オーグメント図鑑';
+ $('codex-note').textContent='開始時とB20・B10のボス撃破時に選択。効果は旅ごとにリセットし、取得記録は引き継ぎます。数値は仮バランス。';
+ const groups=augmentBookOrder==='theme'
+  ?buildThemes.map(theme=>({name:theme.name,cards:augments.filter(a=>a.themeId===theme.id)}))
+  :['NORMAL','EPIC','LEGENDARY'].map(rarity=>({name:rarity,cards:augments.filter(a=>a.rarity===rarity)}));
+ const card=a=>augmentCard(a,{state,showSetHint:false,status:state.augments.includes(a.id)?'所持中':state.profile.augments?.includes(a.id)?'過去に取得':'未取得'});
+ $('codex-body').innerHTML='<div class="sort-controls" role="group" aria-label="オーグメントの並べ替え">'+
+  [['theme','テーマ順'],['rarity','レアリティ順']].map(([order,label])=>'<button type="button" data-augment-order="'+order+'" aria-pressed="'+(augmentBookOrder===order)+'">'+label+'</button>').join('')+
+  '</div>'+groups.map(group=>'<section class="augment-codex-group"><h3>'+esc(group.name)+'</h3><div class="augment-codex-grid">'+group.cards.map(card).join('')+'</div></section>').join('');
+}
+$('codex-body').addEventListener('click',event=>{
+ const button=event.target.closest('[data-augment-order]');
+ if(!button||button.dataset.augmentOrder===augmentBookOrder)return;
+ augmentBookOrder=button.dataset.augmentOrder;
+ renderAugmentBook();
+ $('codex-body').scrollTop=0;
+ $('codex-body').querySelector('[data-augment-order="'+augmentBookOrder+'"]').focus();
+});
+function renderCodex(){if(codexKind==='augments'){renderAugmentBook();return;}if(codexKind==='cards'){renderCardBook();return;}if(codexKind==='skills'){codexKind='cards';renderCardBook();return;}let rows=codexRows(state,codexKind);if(codexKind==='equipment')rows=rows.filter(r=>r.slot===codexSlot).sort((a,b)=>Number(b.known)-Number(a.known)||(a.known&&b.known?(codexSorts[codexSlot]==='acquired'?a.acquiredOrder-b.acquiredOrder:b[codexSorts[codexSlot]]-a[codexSorts[codexSlot]]):0));$('codex-title').textContent=codexKind==='monsters'?'モンスター図鑑':'装備図鑑';$('codex-note').textContent=codexKind==='monsters'?'視認した種類を登録。図鑑は基礎能力です。増援は長期滞在で強化されます。記録は周回でも引き継ぎます。':'入手した種類の名前と能力を登録。記録は周回でも引き継ぎます。';$('codex-body').innerHTML=(codexKind==='equipment'?categoryTabs('codex',codexSlot)+sortButtons('codex',codexSorts[codexSlot]):'')+`<p class="section-caption">公開済み ${rows.filter(r=>r.known).length} / ${rows.length}</p><table class="codex-table"><thead><tr><th>名前</th><th>攻撃</th><th>防御</th></tr></thead><tbody>${rows.map(r=>r.known?`<tr><td>${codexKind==='equipment'?'<span class="equipment-icon '+r.slot+'" aria-hidden="true"></span>':''}${esc(r.name)}${r.zone?`<small>${esc(r.zone)}</small>`:''}</td><td>${r.attack}</td><td>${r.defense}</td></tr>`:'<tr><td><span aria-label="未登録">？</span></td><td>―</td><td>―</td></tr>').join('')}</tbody></table>`;}
 const codexNavigation=$('codex-dialog').querySelector('nav');
 function selectCodex(kind){
  codexKind=kind;
@@ -497,7 +515,7 @@ function showOptionTab(index,focus=false){
  }
  const panel=$(optionTabs[index].getAttribute('aria-controls'));
  $('options-reset').hidden=!optionResetKeys[panel.id];
- describeSetting(panel.querySelector('.settings-row:not([hidden])'));
+ describeSetting(null);
  if(focus)optionTabs[index].focus();
 }
 function openOptions(){
@@ -539,7 +557,9 @@ optionsDialog.querySelector('[role="tablist"]').addEventListener('keydown',event
  showOptionTab(next,true);
 });
 for(const row of optionsDialog.querySelectorAll('.settings-row')){
- row.addEventListener('pointerenter',()=>describeSetting(row));
+ row.addEventListener('pointermove',()=>{
+  if(!row.hasAttribute('data-current'))describeSetting(row);
+ });
  row.addEventListener('focusin',()=>describeSetting(row));
 }
 $('options-save').onclick=()=>{

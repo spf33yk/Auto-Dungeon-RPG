@@ -1,3 +1,4 @@
+import {SubtitlePlayer} from './subtitle-player.js';
 import{themedSkillById}from'./build-themes.js';
 import {bossMemory} from './story-text.js';
 export const willFoundMessage={kind:'will',text:'遺書を手に入れた'};
@@ -31,7 +32,6 @@ export class FieldMessageQueue{
 }
 // UI-only queue: no engine, save, RNG or pause-flag mutations.
 export const SKILL_MESSAGE_MS=2000;
-export const WILL_CHARACTER_MS=42;
 export const houseEntryReady=(motion,time)=>!motion||time>=motion.time+motion.duration;
 export function fieldMessageLayout(r,hud){
  const top=Number.isFinite(r.top)?r.top:r.bottom-r.height,inset=Math.min(8,r.width*.02),width=Math.max(1,r.width*.76),bottom=Math.max(r.height*.115,hud.height+12),height=Math.max(1,Math.min(Math.max(72,r.height*.14),r.height-bottom-inset)),left=Math.round((r.left+(r.width-width)/2)*1000)/1000,y=Math.max(top+inset,r.bottom-bottom-height);
@@ -57,25 +57,19 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
   element.style.setProperty('--field-message-padding',box.padding+'px');
  };
  const willPage=dialog.querySelector('#will-document'),willClose=dialog.querySelector('#will-close');
- let willMessage=null,ink=[],inkShown=0,inkElapsed=0;
- const showInk=count=>{
-  while(inkShown<Math.min(count,ink.length))ink[inkShown++].classList.remove('will-ink-pending');
-  willClose.textContent=inkShown<ink.length?'全文を表示':'閉じる';
+ let willSubtitle,willLines,willMessage=null,willPlayer=null;
+ const reducedMotion=()=>willPage.ownerDocument.defaultView.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const paintWill=()=>{
+  if(willSubtitle.textContent!==willPlayer.text)willSubtitle.textContent=willPlayer.text;
+  willClose.textContent=!willPlayer.full?'字幕をすぐ表示':willPlayer.index===willLines.length-1?'閉じる':'次へ';
  };
  const startWill=message=>{
-  willMessage=message;ink=[];inkShown=0;inkElapsed=0;
-  const document=willPage.ownerDocument;
-  for(const paragraph of willPage.querySelectorAll('.will-paper p')){
-   const letters=Array.from(paragraph.textContent,char=>{
-    const span=document.createElement('span');
-    span.textContent=char;
-    span.className='will-ink-pending';
-    return span;
-   });
-   paragraph.replaceChildren(...letters);
-   ink.push(...letters);
-  }
-  showInk(document.defaultView.matchMedia('(prefers-reduced-motion: reduce)').matches?ink.length:1);
+  willSubtitle??=willPage.querySelector('#will-subtitle');
+  willLines??=[...willPage.querySelector('#will-lines').content.querySelectorAll('p')].map(line=>line.textContent);
+  willMessage=message;
+  willPlayer=new SubtitlePlayer(willLines);
+  if(reducedMotion())willPlayer.update(Infinity);
+  paintWill();
  };
  const place=()=>{if(dialog.open&&dialog.dataset.kind!=='will')position(dialog);if(!skillBox.hidden)position(skillBox);visibility();};
  const render=({ready=true}={})=>{
@@ -92,15 +86,20 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
  };
  const advance=()=>{if(!queue.active)return;willMessage=null;queue.advance();if(queue.active)render();else{dialog.close();onIdle();}};
  button.addEventListener('click',advance);
- willClose.addEventListener('click',()=>{if(inkShown<ink.length)showInk(ink.length);else advance();});
+ willClose.addEventListener('click',()=>{
+  if(!willPlayer.full)willPlayer.update(Infinity);
+  else willPlayer.advance();
+  if(willPlayer.done){advance();return;}
+  if(reducedMotion())willPlayer.update(Infinity);
+  paintWill();
+ });
  dialog.addEventListener('cancel',e=>{e.preventDefault();advance();});
  dialog.addEventListener('close',()=>{willMessage=null;if(queue.active){queue.clear();onIdle();}});
  const animate=(time,blocked=false)=>{
   const elapsed=lastTime===null?0:Math.max(0,Math.min(100,time-lastTime));lastTime=time;
-  if(dialog.open&&dialog.dataset.kind==='will'&&inkShown<ink.length&&!willPage.ownerDocument.hidden){
-   inkElapsed+=elapsed;
-   const count=1+Math.floor(inkElapsed/WILL_CHARACTER_MS);
-   if(count>inkShown)showInk(count);
+  if(dialog.open&&dialog.dataset.kind==='will'&&!willPlayer.full&&!willPage.ownerDocument.hidden){
+   willPlayer.update(reducedMotion()?Infinity:elapsed);
+   paintWill();
   }
   if(blocked||queue.active||!skills.active){skillBox.hidden=true;visibility();return;}
   if(displayed!==skills.current){displayed=skills.current;remaining=SKILL_MESSAGE_MS;}else remaining-=elapsed;
