@@ -54,6 +54,7 @@ test('boss defeats trigger the correct story beat on both journeys', () => {
       state.turn++;
       attackEnemy(state, boss, {power: 100});
       const text = bossMemory(floor, normalClears);
+      assert.equal(state.augmentOffer?.source, floor === 30 ? undefined : 'boss:' + floor);
       assert.ok(state.memories.includes(text));
       assert.deepEqual(collectFieldMessages(before, state)[0], {kind: normalClears ? 'memory' : 'story', text});
     }
