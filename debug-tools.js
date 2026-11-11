@@ -1,6 +1,19 @@
 import{cardCatalog}from'./card-catalog.js';import{grantCard}from'./card-inventory.js';
 import {makeFloor,stats,skills,log,createGear,acquire,gearById,gearName,LAST_FLOOR,LETTER_FLOOR,rewardDefinitions,grantReward} from './engine.js';
 export function debugJump(s,floor){if(!Number.isInteger(floor)||floor<1||floor>LAST_FLOOR)return false;s.floor=floor;s.phase=floor===1?'awakening':'prepare';if(floor===LETTER_FLOOR)s.b15HintShown=false;makeFloor(s);s.hp=Math.max(1,Math.min(s.hp,stats(s).maxHp));s.debugUsed=true;log(s,`DEBUG：B${LAST_FLOOR+1-floor}へ移動。地形を再生成。`,'story');return true;}
+export function debugBeforeWillChest(current){
+ const state=structuredClone(current);
+ state.letter=false;
+ debugJump(state,LETTER_FLOOR);
+ if(!state.items.some(item=>item.type==='letter'&&Math.abs(item.x-state.player.x)+Math.abs(item.y-state.player.y)===1))return null;
+ state.phase='explore';
+ state.augmentStarted=true;
+ state.augmentOffer=null;
+ state.guidedJourney=false;
+ state.debugWillChest=true;
+ log(state,'DEBUG：遺書の宝箱の手前。探索を再開すると取得します。','story');
+ return state;
+}
 export function debugHeal(s){s.hp=stats(s).maxHp;s.debugUsed=true;log(s,'DEBUG：HPを全回復。','good');}
 export function debugTitleEnding(s,enabled){if(typeof enabled!=='boolean')return false;s.profile.trueEnding=enabled;s.debugUsed=true;log(s,'DEBUG：タイトルのTRUE END達成記録を'+(enabled?'ON':'OFF')+'。本編のエンディングは変更しない。','story');return true;}
 export function debugShards(s,amount=100){if(!Number.isInteger(amount)||amount<1||amount>10000)return false;s.shards+=amount;s.debugUsed=true;log(s,`DEBUG：記憶の欠片 +${amount}`,'good');return true;}

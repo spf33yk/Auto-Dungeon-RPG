@@ -10,7 +10,7 @@ import{idleFootstepSample}from'./character-animation.js';
 import{heroAttackAim,createCombatFeedback,queueCombatFeedback,advanceCombatFeedback,hitPresentation,combatShake,feedbackGhosts,ghostOpacity,drawCombatFeedback,drawCombatTrails}from'./combat-feedback.js';
 import{SKILL_EFFECT_FORMAT,SKILL_EFFECT_IMAGES}from'./skill-effect-art.js';
 import{captureEffectActors,enqueueSkillEffects,skillEffectFrame,heroSkillCenter,enemySkillCenter,drawSkillEffects}from'./skill-effects.js';
-import{houseEntryReady,captureFieldMessages,collectFieldMessages,installFieldMessages,bossMemoryMessage,willFoundMessage}from'./field-messages.js';
+import{houseEntryReady,captureFieldMessages,collectFieldMessages,installFieldMessages,bossMemoryMessage}from'./field-messages.js';
 import{drawReadableProp}from'./readable-props.js';
 import{TRAPS,trapType}from'./traps.js';
 import{queueEnemyAttacks,enemyAttackDuration,enemyAttackPresentation,enemyAttackFrame,drawEnemyAttackEffect}from'./enemy-attack-animation.js';
@@ -51,7 +51,7 @@ import {renderCardEditor,handleCardClick,handleCardChange,installCardDragging} f
 import {autoMapModel,cameraFor,cameraSight,miniMapGeometry,drawMiniMap} from './map-view.js';
 import {thoughtText} from './thought-view.js';
 import {displayStoryText,openingThought,letterFloorThought,WILL_UNLOCK_LINE} from './story-text.js';
-import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment,debugTitleEnding} from './debug-tools.js';
+import {debugBeforeWillChest,debugJump,debugHeal,debugShards,debugSkills,debugEquipment,debugTitleEnding} from './debug-tools.js';
 import {W,H,skills,newGame,abandonRun,stats,price,upgrade,equip,equipBest,tick,ascend,zoneFor,floorLabel,radius,canSee,gearById,gearStats,gearName,discard,locked,codexRows,sortedInventory,normalizeSave,orderDefinitions,orderById,orderCapacity,cardCapacity,orderUnlocked,addOrder,editOrder,beginExploration,equipment,LAST_FLOOR,LETTER_FLOOR,nextStageHint,rewardDefinitions,grantReward,experienceToNext,MAX_LEVEL,HP_PER_LEVEL,gainExperience} from './engine.js';
 const launchParams=new URLSearchParams(location.search);
 const verificationMode=launchParams.get('verify')==='1';if(verificationMode)document.querySelectorAll('video,audio').forEach(el=>{el.muted=true;});
@@ -559,10 +559,17 @@ function paintSoundOptions(){$('sound').setAttribute('aria-pressed',String(sound
 paintSoundOptions();
 $('options-open').onclick=()=>openOptions();
 $('debug-open').onclick=()=>{$('debug-floor').innerHTML=Array.from({length:LAST_FLOOR},(_,i)=>`<option value="${i+1}" ${state.floor===i+1?'selected':''}>B${LAST_FLOOR-i}</option>`).join('');$('debug-gear').innerHTML=equipment.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');$('debug-reward').innerHTML=rewardDefinitions.filter(r=>!r.legacy).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');debugStatus();openDialog('debug-dialog');};
-$('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-debug]');if(!b)return;let message='';switch(b.dataset.debug){case'music-preview':musicAudition=$('debug-music-scene').value;$('debug-music-status').textContent='試聴中：'+bgm.tracks[musicAudition].split('/').at(-1).split('?')[0];syncSceneMusic();return;case'music-stop':musicAudition=null;$('debug-music-status').textContent='元の場面のBGMへ戻しました。';syncSceneMusic();return;case'ending-preview':subtitlePreviewKind=$('debug-subtitle-kind').value;endingPreview=true;endingPlayback=null;musicAudition=null;for(const d of document.querySelectorAll('dialog[open]'))d.close();render();return;case'memory-preview':{
+$('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-debug]');if(!b)return;let message='';switch(b.dataset.debug){case'music-preview':musicAudition=$('debug-music-scene').value;$('debug-music-status').textContent='試聴中：'+bgm.tracks[musicAudition].split('/').at(-1).split('?')[0];syncSceneMusic();return;case'music-stop':musicAudition=null;$('debug-music-status').textContent='元の場面のBGMへ戻しました。';syncSceneMusic();return;case'ending-preview':subtitlePreviewKind=$('debug-subtitle-kind').value;endingPreview=true;endingPlayback=null;musicAudition=null;for(const d of document.querySelectorAll('dialog[open]'))d.close();render();return;case'will-jump':{
+ const next=debugBeforeWillChest(state);
+ if(!next){debugStatus('遺書の宝箱の隣に移動できませんでした。');return;}
+ state=next;showingTitle=false;endingPreview=false;endingPlayback=null;
+ paused=true;dialogWasPaused=true;motion=null;resetHeroVisual();
+ for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
+ render();return;
+}case'memory-preview':{
  const kind=$('debug-memory-kind').value;
  const [floor,clears]=kind.split(':').map(Number);
- const message=kind==='will'?willFoundMessage:bossMemoryMessage(floor,clears);
+ const message=bossMemoryMessage(floor,clears);
  if(!message)return;
  for(const d of document.querySelectorAll('dialog[open]'))d.close();
  paused=dialogWasPaused;fieldMessages.sync(state);fieldMessages.push([message]);fieldMessages.render();return;

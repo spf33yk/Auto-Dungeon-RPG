@@ -6,7 +6,7 @@ import{themeBuff,themeState,executeThemedSkill,skillCanRun,mitigateThemeDamage,u
 import{skillSetActive,setBonusRows,themeStars,augmentStars,augmentStats,starText}from'./set-bonuses.js';
 import{AUGMENT_IMAGES,THEME_IMAGES}from'./augment-art.js';
 import{skillThemeBadge,setRibbon,augmentSetHint}from'./theme-view.js';
-import{cardChestChoices,chestPicksRemaining,chooseChestCard,selectChestCategory}from'./card-inventory.js';
+import{cardChestChoices,chestCategoryChoices,chestPicksRemaining,chooseChestCard,selectChestCategory}from'./card-inventory.js';
 const enemy=(x=6,y=5)=>({...monsters[0],baseId:monsters[0].id,x,y,hp:10000,maxHp:10000,attack:1,defense:0,aggro:false,period:1000});
 function arena(){const s=newGame(71);s.floor=2;makeFloor(s);s.phase='explore';s.augmentOffer=null;s.enemies=[enemy()];s.items=[];s.obstacles=[];s.traps=[];s.gimmick={id:'none'};s.grid=Array.from({length:H},(_,y)=>Array.from({length:W},(_,x)=>x>0&&y>0&&x<W-1&&y<H-1?1:0));s.seen=s.grid.map(r=>r.map(Boolean));s.visited=s.grid.map(r=>r.map(()=>false));s.player={x:5,y:5};s.stairs={x:7,y:5};s.rooms=[{x:4,y:4,w:3,h:3},{x:10,y:4,w:3,h:3}];s.orders=[];s.debugUsed=true;s.debugNoReinforcements=true;s.hp=25;s.steps=120;return s;}
 function setup(id,set=false){const s=arena();grantCard(s,'skill:'+id);s.orders=[createCardRule('self',[],'skill',id)];if(set)s.augments=[themedAugments.find(a=>a.themeId===themedSkills.find(k=>k.id===id).themeId).id];return s;}
@@ -55,3 +55,46 @@ test('restful, breath, reserve and floor shield use their bounded event conditio
 test('timed buffs include the casting turn and expire exactly after their duration',()=>{const s=setup('scout');executeThemedSkill(s,'scout',context(s));const until=s.themeState.buffs.sight.until;assert.equal(until,s.steps+9);s.steps=until;assert.equal(themeBuff(s,'sight'),2);s.steps++;assert.equal(themeBuff(s,'sight'),0);});
 
 test('all thirty augments have live strength descriptions and every star level survives saving',async()=>{const {augmentStrength,augmentName}=await import('./augment-strength.js');for(const a of themedAugments){const s=arena();s.levels.commandSlots=8;s.augments=[a.id];const list=themedSkills.filter(k=>k.themeId===a.themeId);for(const k of list){grantCard(s,'skill:'+k.id);s.orders.push(createCardRule('self',[],'skill',k.id));}assert.equal(augmentStars(s,a.id),3,a.id);assert.ok(augmentStrength(a,s).length>4,a.id);assert.match(augmentName(a,s),/★★★/);assert.ok(normalizeSave(s),a.id);}});
+
+import {nextRandom} from './drop-system.js';
+import {debugBeforeWillChest} from './debug-tools.js';
+test('chest consumes the destiny roll only for its first eligible opening',()=>{
+ const results=new Set();
+ for(const seed of [0,1,2,3,4,5,6,7]){
+  for(const [owned,used] of [[false,false],[true,false],[true,true]]){
+   const s=arena();
+   s.enemies=[];
+   s.items=[{x:6,y:5,type:'chest',cardId:'skill:focus'}];
+   s.augments=owned?['destiny']:[];
+   s.themeState.destinyUsed=used;
+   s.rngState=seed;
+   const expected=structuredClone(s);
+   const eligible=owned&&!used;
+   const lost=eligible?nextRandom(expected)>=.5:undefined;
+   const categories=chestCategoryChoices(expected,'skill:focus',()=>nextRandom(expected));
+   tick(s);
+   assert.equal(s.rngState,expected.rngState);
+   assert.equal(s.cardOffer.gamble,eligible?true:undefined);
+   assert.equal(s.cardOffer.lost,lost);
+   assert.equal(s.themeState.destinyUsed,owned);
+   assert.deepEqual(s.cardOffer.categories,categories);
+   if(eligible)results.add(lost);
+  }
+ }
+ assert.deepEqual(results,new Set([true,false]));
+});
+test('debug will jump waits one turn before the real chest pickup without adding a clear',()=>{
+ const current=newGame(71);
+ const s=debugBeforeWillChest(current);
+ assert.ok(s);
+ assert.equal(s.letter,false);
+ assert.equal(s.profile.normalClears,current.profile.normalClears);
+ assert.equal(current.debugWillChest,undefined);
+ assert.ok(s.items.some(i=>i.type==='letter'&&Math.abs(i.x-s.player.x)+Math.abs(i.y-s.player.y)===1));
+ const loaded=normalizeSave(s);
+ assert.ok(loaded);
+ tick(loaded);
+ assert.equal(loaded.letter,true);
+ assert.equal(loaded.debugWillChest,undefined);
+ assert.equal(loaded.profile.normalClears,current.profile.normalClears);
+});

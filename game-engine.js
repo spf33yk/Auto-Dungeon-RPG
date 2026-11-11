@@ -106,6 +106,7 @@ export function makeBossFloor(s,boss){
  Object.assign(s,{rooms:arena.rooms,grid,player:arena.player,stairs:arena.stairs,seen:grid.map(r=>r.map(()=>false)),visited:grid.map(r=>r.map(()=>false)),enemies:[{...boss,baseId:boss.id,...arena.boss,maxHp:boss.hp,aggro:true,boss:true}],items:arena.items,traps:[],obstacles:[],bossFloor:true,gimmick:{...fieldPlan(s.seed,s.floor),triggered:false,room:null},nextHint:null,warped:false,mended:false,floorKills:0,steps:0,flash:null,intent:'階段を封じる門番の気配',retreatTurns:0,retreatCooldown:0,activeOrder:null});reveal(s);
 }
 export function makeFloor(s){
+ delete s.debugWillChest;
  s.trapStatus={};s.trapContact=null;
  resetThemeFloor(s);
  s.buildReport=emptyBuildReport(s.floor);
@@ -149,14 +150,14 @@ function placeWillChest(s){
  if(position)s.items.push({...position,type:'letter'});
 }
 
-export function obtainable(s,i){return i.type==='letter'?fixedChestUnlocked(s)&&!s.letter:true;}
+export function obtainable(s,i){return i.type==='letter'?(fixedChestUnlocked(s)||s.debugUsed===true&&s.debugWillChest===true&&s.floor===LETTER_FLOOR)&&!s.letter:true;}
 function receiveReward(s,id){const fresh=grantReward(s,id);log(s,fresh?'「'+rewardById[id].name+'」を手に入れた。'+(rewardById[id].kind==='order'?'次の準備で探索指示に設定できる。':'この旅で使用できる。'):'「'+rewardById[id].name+'」は取得済み。記憶の欠片 +5','good');}
 function pickup(s){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);
  if(isHealingItem(item)){if(s.hp>=stats(s).maxHp){s.potionStock=(s.potionStock||0)+1;log(s,'回復ポーションをストックした。','good');}else{const heal=Math.min(stats(s).maxHp-s.hp,BALANCE.heartHeal);s.hp+=heal;log(s,'回復ポーション。HP +'+heal,'good');}}
  else if(item.type==='fragment'){const amount=3+(hasAugment(s,'scavenger')?ap(s,'scavenger').extra:0)+(hasAugment(s,'lucky-find')&&nextRandom(s)<Math.min(1,ap(s,'lucky-find').chance)?4:0);s.shards+=amount;log(s,'床の記憶の欠片を拾った。＋'+amount,'good');}
  else if(item.type==='gear'){acquire(s,item.gear);log(s,gearName(item.gear)+'を拾った。','good');}
  else if(item.type==='reward')receiveReward(s,item.rewardId);
- else if(item.type==='letter'){s.letter=true;log(s,WILL_PICKUP_LINE,'story');}
+ else if(item.type==='letter'){delete s.debugWillChest;s.letter=true;log(s,WILL_PICKUP_LINE,'story');}
  else if(item.type==='chest'){log(s,'宝箱を開けた。','good');if(item.cardId){const t=themeState(s),gamble=hasAugment(s,'destiny')&&!t.destinyUsed;if(gamble)t.destinyUsed=true;const win=gamble?nextRandom(s)<Math.min(1,ap(s,'destiny').chance):false,categories=chestCategoryChoices(s,item.cardId,()=>nextRandom(s)),choices=categories[cardByKey[item.cardId].kind]||Object.values(categories)[0];s.cardOffer={choices,categories,remaining:gamble&&win?2:1,...(gamble?{gamble:true,lost:!win,consolation:ap(s,'destiny').consolation}:{})};log(s,'箱の中で、いくつもの記憶が揺れている。ひとつ選ぼう。','good');}else if(item.gear){acquire(s,item.gear);s.shards+=2;log(s,'旧宝箱から'+gearName(item.gear)+'を入手。記憶の欠片 +2','good');}else receiveReward(s,item.rewardId);}
 }
 export function dropFromEnemy(s,e){if(e.reinforcement)return null;const rng=()=>nextRandom(s),drop=rollEnemyDrop(e.baseId,rng);if(!drop)return null;
@@ -179,7 +180,7 @@ function warpDestination(s){if(trapActive(s,null,'snare'))return null;const cell
 export function planHeroTurn(s){
  const ctx={canSee,stats,obtainable,enemyPlan:(state,r,e)=>planEnemyCommand(state,r,e,{canSee,stats,route,lineOfSight})},avoid=modifierActive(s,'avoid-traps');
  const heroRoute=(state,test,options={})=>{const blocked=new Set(options.blocked||[]);if(avoid)for(const t of state.traps||[])if(t.revealed&&!t.spent&&(state.gimmick?.id==='traps'||state.seen[t.y]?.[t.x]))blocked.add(key(t));return route(state,test,{...options,blocked})||(avoid?route(state,test,options):null);};ctx.route=heroRoute;
- const will=fixedChestUnlocked(s)&&s.items.find(i=>i.type==='letter'&&obtainable(s,i));
+ const will=s.items.find(i=>i.type==='letter'&&obtainable(s,i));
  const willStep=will&&heroRoute(s,p=>key(p)===key(will),{blocked:new Set(s.enemies.map(key))});
  const forceBasic=bypassDirectives(s),cardPlan=willStep?{id:'cards',fixed:'chests',next:willStep,intent:'固定指示：遺書の宝箱を取得'}:forceBasic?chooseCardOrder(s,{...ctx,ignoreDirectives:true}):(!s.orders.length||s.orders.some(o=>o.cards))?chooseCardOrder(s,ctx):null,adjacentEnemy=targetEnemy(s);
  const emergency=!forceBasic&&!s.orders.some(o=>o.cards)&&adjacentEnemy?chooseOrder(s,ctx,true):null;
