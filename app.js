@@ -342,9 +342,9 @@ function renderScreens(){
 function openDialog(id){if(!document.querySelector('dialog[open]'))dialogWasPaused=paused;paused=true;$(id).showModal();if(state.phase==='explore')render();}
 let tutorialSteps=[],activeTutorialKey=null;
 let tutorialKind=null,tutorialStep=0,tutorialActing=false,tutorialWasPaused=true,tutorialPlacementCount=0;
-document.body.insertAdjacentHTML('beforeend','<aside id="tutorial-task" hidden role="status"><span></span><button type="button" id="tutorial-task-skip">この操作を省略</button><button type="button" id="tutorial-task-close">案内を終了</button></aside>');
+document.body.insertAdjacentHTML('beforeend','<aside id="tutorial-task" hidden role="status"><span></span><button type="button" id="tutorial-task-skip">この操作を省略</button></aside>');
 function clearTutorialTargets(){document.querySelectorAll('.tutorial-target').forEach(el=>el.classList.remove('tutorial-target'));$('tutorial-task').hidden=true;}
-function paintTutorial(){clearTutorialTargets();tutorialActing=false;const steps=tutorialSteps,step=steps[tutorialStep];$('tutorial-progress').textContent=(tutorialKind==='explore'?'探索':'準備')+' · '+(tutorialStep+1)+' / '+steps.length;$('tutorial-title').textContent=step.title;$('tutorial-copy').textContent=step.text;$('tutorial-back').disabled=tutorialStep===0;$('tutorial-next').textContent=step.selector?'操作する':'次へ';if(!$('tutorial-dialog').open)$('tutorial-dialog').showModal();}
+function paintTutorial(){clearTutorialTargets();tutorialActing=false;const steps=tutorialSteps,step=steps[tutorialStep];$('tutorial-progress').textContent=(tutorialKind==='explore'?'探索':'準備')+' · '+(tutorialStep+1)+' / '+steps.length;$('tutorial-copy').textContent=step.text;$('tutorial-back').disabled=tutorialStep===0;$('tutorial-next').textContent=step.selector?'操作する':tutorialStep===steps.length-1?'完了':'次へ';if(!$('tutorial-dialog').open)$('tutorial-dialog').showModal();}
 function startTutorial(kind){const steps=floorTutorialSteps(state);if(!steps.length)return;activeTutorialKey=tutorialKey(state);tutorialSteps=steps;tutorialWasPaused=document.querySelector('dialog[open]')?dialogWasPaused:paused;tutorialKind=kind;tutorialStep=0;paused=true;for(const d of document.querySelectorAll('dialog[open]'))d.close();if(kind==='prepare'){tab='orders';document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));renderTab();}paintTutorial();}
 function maybeTutorial(){const key=tutorialKey(state);if(!tutorialKind&&!showingTitle&&!pendingJourney&&!endingPreview&&!document.querySelector('dialog[open]')&&state.guidedJourney===true&&key&&!(state.tutorialFloors||[]).includes(key))startTutorial(state.phase);}
 
@@ -353,8 +353,6 @@ function advanceTutorial(performed=false){const step=tutorialSteps[tutorialStep]
 function actTutorial(){const step=tutorialSteps[tutorialStep];if(!step.selector){advanceTutorial();return;}if(step.complete?.(state)){advanceTutorial(true);return;}tutorialActing=true;tutorialPlacementCount=state.orders.reduce((n,r)=>n+(r.conditions?.length||0),0);$('tutorial-dialog').close();$('tutorial-task').querySelector('span').textContent=step.text;$('tutorial-task').hidden=false;const targets=[...document.querySelectorAll(step.selector)].filter(el=>!el.disabled&&el.getClientRects().length);for(const el of targets)el.classList.add('tutorial-target');if(targets.length){targets[0].scrollIntoView({block:'nearest',inline:'nearest'});$('tutorial-task').classList.toggle('at-bottom',targets[0].getBoundingClientRect().top<innerHeight/2);}else $('tutorial-task').querySelector('span').textContent='この操作は今の構成では行えません。「この操作を省略」で進めます。';}
 $('tutorial-next').onclick=actTutorial;
 $('tutorial-back').onclick=()=>{if(tutorialStep>0){tutorialStep--;paintTutorial();}};
-$('tutorial-skip').onclick=()=>finishTutorial();
-$('tutorial-task-close').onclick=()=>finishTutorial();
 $('tutorial-task-skip').onclick=()=>advanceTutorial();
 $('tutorial-dialog').addEventListener('cancel',e=>{e.preventDefault();finishTutorial();});
 $('tutorial-prepare').onclick=()=>{if(floorTutorialSteps(state).length)startTutorial(state.phase);else displayMessage('階層別の案内はB30〜B26で表示します。');};
