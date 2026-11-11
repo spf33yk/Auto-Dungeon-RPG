@@ -22,7 +22,6 @@ export function prepareAuditRun(s,policy){
  if(policy==='control'&&owns(s,'condition:adjacent'))add('action','wait',[{id:'adjacent'}],'enemy');
  const skills=themedSkills.filter(k=>owns(s,'skill:'+k.id)).sort((a,b)=>(skillScore[b.id]||0)-(skillScore[a.id]||0)||a.id.localeCompare(b.id));
  for(const k of skills){const heal=['mend','small-prayer','first-aid','breathe','fortress','gamble-heal'].includes(k.id);if(!heal||!owns(s,'condition:hp-below'))continue;add('skill',k.id,hp(k.id==='fortress'?40:65));}
- if(s.profile.normalClears&&s.floor===16)add('action','letter');
  for(const k of skills)if(!['mend','small-prayer','first-aid','breathe','fortress','gamble-heal','scout','waymark','treasure-bet','fortune','homeward','trap-step','blood-offering'].includes(k.id))add('skill',k.id,k.id==='warp'?hp(25):[]);
  if(policy!=='direct'){add('action','collect-herbs',hp(65));add('action','chests');add('action','collect-armor');add('action','collect-weapons');add('action','collect-fragments');}else add('action','chests',[{id:'turns',value:1000}]);
  if(policy==='build'||policy==='control'){

@@ -1,3 +1,4 @@
+import {fixedChestUnlocked} from './story-text.js';
 import{activeOrderCount}from'./order-capacity.js';
 import{DIRECTIVE_LIMITS}from'./directive-safety.js';
 import{actorCanUse,roomContains,enemySkillReasons}from'./actor-rules.js';
@@ -19,12 +20,12 @@ export const conditionCards=[
 ];
 export const actionCards=[
  {id:'stairs',name:'階段を上る',detail:'他の目的より階段を優先。固定指示にも変更できない階段への行動を常設。'},
- {id:'chests',name:'宝箱を取得',detail:'開封可能な通常宝箱へ向かう。'},
+ {id:'chests',name:'宝箱を取得',detail:'開封可能な宝箱へ向かう。'},
  {id:'collect-weapons',name:'武器を取得',detail:'発見済みの武器へ向かう。'},
  {id:'collect-armor',name:'防具を取得',detail:'発見済みの防具へ向かう。'},
  {id:'collect-fragments',name:'記憶の欠片を取得',detail:'床の記憶の欠片へ向かう。'},
  {id:'collect-herbs',name:'回復ポーションを取得',detail:'床の回復ポーションへ向かう。'},
- {id:'letter',name:'手紙の箱を開ける',detail:'物語条件を満たす手紙の箱へ向かう。'},
+ {id:'letter',name:'遺書の箱を開ける',detail:'旧セーブの互換用。開封できる遺書の箱へ向かう。'},
  {id:'frontier',name:'全ての部屋を探索する',detail:'まだ入っていない部屋を優先し、全ての部屋へ入ったら完了。'},
  {id:'explore-all',name:'全てのマスを探索する',detail:'到達できる未踏の床を順に歩く。'},
  {id:'wait',name:'1ターン待機',detail:`移動・通常攻撃をせず1ターン待つ。連続${DIRECTIVE_LIMITS.wait}ターンまで。その後${DIRECTIVE_LIMITS.waitCooldown}ターンは待機指示を飛ばす。`},
@@ -83,7 +84,7 @@ function subjects(s,r,ctx){
 function destinations(s,r,ctx){
  const id=r.effect.id;
  if(id==='stairs')return [s.stairs].filter(p=>s.seen[p.y][p.x]&&!s.enemies.some(e=>e.boss));
- const types={chests:['chest'],'collect-weapons':['gear'],'collect-armor':['gear'],'collect-fragments':['fragment'],'collect-herbs':['heart','herb','potion'],letter:['letter']};
+ const types={chests:['chest','letter'],'collect-weapons':['gear'],'collect-armor':['gear'],'collect-fragments':['fragment'],'collect-herbs':['heart','herb','potion'],letter:['letter']};
  if(types[id])return s.items.filter(i=>s.seen[i.y][i.x]&&ctx.obtainable(s,i)&&types[id].includes(i.type)&&(id!=='collect-weapons'||gearById[i.gear?.baseId]?.slot==='weapon')&&(id!=='collect-armor'||gearById[i.gear?.baseId]?.slot==='armor'));
  if(id==='avoid-traps')return (s.traps||[]).filter(t=>t.revealed&&!t.spent&&(s.gimmick?.id==='traps'||s.seen[t.y][t.x]));
  if(['retreat','warp'].includes(id))return s.enemies.filter(e=>ctx.canSee(s,e.x,e.y));
@@ -118,6 +119,10 @@ export function chooseCardOrder(s,ctx){
  const seek=test=>ctx.route(s,test,{blocked})||ctx.route(s,test,{blocked:new Set(visible.map(key))});
  const rules=effectiveCardOrders(s);for(let index=0;index<rules.length;index++){
   const fixed=index===s.orders.length;if(ctx.ignoreDirectives&&!fixed)continue;const r=legacyToCards(rules[index]),effect=effectDefinition(r),targets=fixed?([s.stairs].filter(p=>s.seen[p.y]?.[p.x]&&!s.enemies.some(e=>e.boss))):matchingCardTargets(s,r,ctx);
+  if(fixed&&fixedChestUnlocked(s)&&!ctx.ignoreDirectives){
+   const next=seek(p=>s.items.some(i=>i.type==='chest'&&s.seen[i.y]?.[i.x]&&key(i)===key(p)));
+   if(next)return {id:'cards',ruleIndex:null,fixed:'chests',next,intent:'固定指示：宝箱を取得'};
+  }
   if(!targets.length||effect?.modifier||effect?.id==='wait'&&s.steps<(s.directiveSafety?.waitUntil||0))continue;
   const base={id:'cards',ruleIndex:fixed?null:index,fixed,intent:`カード指示：${effect.name}`};
   if(r.target==='enemy'){const command=ctx.enemyPlan?.(s,r,targets[0]);if(command)return {...base,control:command};continue;}

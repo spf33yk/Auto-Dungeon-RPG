@@ -1,9 +1,15 @@
 import{themedSkillById}from'./build-themes.js';
+import {bossMemory, WILL_PICKUP_LINE} from './story-text.js';
 const sceneKey=s=>[s.seed,s.profile?.runs,s.floor].join(':');
-export function captureFieldMessages(s){return {scene:sceneKey(s),turn:s.turn,house:s.gimmick?.id,triggered:Boolean(s.gimmick?.triggered),used:[...(s.themeState?.used||[])]};}
+export function captureFieldMessages(s){return {scene:sceneKey(s),turn:s.turn,house:s.gimmick?.id,triggered:Boolean(s.gimmick?.triggered),used:[...(s.themeState?.used||[])],boss:s.enemies?.some(e=>e.boss),letter:s.letter};}
 export function collectFieldMessages(before,s){
  if(before.scene!==sceneKey(s)||before.turn===s.turn)return [];
  const messages=[];
+ if(!before.letter&&s.letter)messages.push({kind:'memory',text:WILL_PICKUP_LINE});
+ if(before.boss&&!s.enemies?.some(e=>e.boss)){
+  const text=bossMemory(s.floor,s.profile?.normalClears);
+  if(text)messages.push({kind:s.profile?.normalClears>0?'memory':'story',text});
+ }
  if(!before.triggered&&before.house===s.gimmick?.id&&s.gimmick?.triggered&&['monsters','traps'].includes(s.gimmick.id))messages.push({kind:'house',text:s.gimmick.id==='monsters'?'モンスターハウスだ！！':'トラップハウスだ！！'});
  const used=new Set(before.used);
  for(const id of s.themeState?.used||[])if(!used.has(id)&&themedSkillById[id]){messages.push({kind:'skill',skill:id,text:'「'+themedSkillById[id].name+'」を発動！'});used.add(id);}
