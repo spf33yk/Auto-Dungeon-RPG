@@ -29,7 +29,7 @@ test('B30 will chest is adjacent, sealed on the first journey, and collected bef
   assert.deepEqual(second.player, {x: will.x, y: will.y});
   assert.equal(second.letter, true);
   assert.equal(second.cardOffer, null);
-  assert.equal(collectFieldMessages(before, second)[0].kind, 'memory');
+  assert.equal(collectFieldMessages(before, second)[0].kind, 'will');
 
   second.floor = LAST_FLOOR;
   makeFloor(second);

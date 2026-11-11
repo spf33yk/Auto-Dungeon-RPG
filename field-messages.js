@@ -1,14 +1,19 @@
 import{themedSkillById}from'./build-themes.js';
-import {bossMemory, WILL_PICKUP_LINE} from './story-text.js';
+import {bossMemory} from './story-text.js';
+export const willFoundMessage={kind:'will',text:'遺書を手に入れた'};
+export function bossMemoryMessage(floor,normalClears){
+ const text=bossMemory(floor,normalClears);
+ return text?{kind:normalClears>0?'memory':'story',text}:null;
+}
 const sceneKey=s=>[s.seed,s.profile?.runs,s.floor].join(':');
 export function captureFieldMessages(s){return {scene:sceneKey(s),turn:s.turn,house:s.gimmick?.id,triggered:Boolean(s.gimmick?.triggered),used:[...(s.themeState?.used||[])],boss:s.enemies?.some(e=>e.boss),letter:s.letter};}
 export function collectFieldMessages(before,s){
  if(before.scene!==sceneKey(s)||before.turn===s.turn)return [];
  const messages=[];
- if(!before.letter&&s.letter)messages.push({kind:'memory',text:WILL_PICKUP_LINE});
+ if(!before.letter&&s.letter)messages.push(willFoundMessage);
  if(before.boss&&!s.enemies?.some(e=>e.boss)){
-  const text=bossMemory(s.floor,s.profile?.normalClears);
-  if(text)messages.push({kind:s.profile?.normalClears>0?'memory':'story',text});
+  const memory=bossMemoryMessage(s.floor,s.profile?.normalClears);
+  if(memory)messages.push(memory);
  }
  if(!before.triggered&&before.house===s.gimmick?.id&&s.gimmick?.triggered&&['monsters','traps'].includes(s.gimmick.id))messages.push({kind:'house',text:s.gimmick.id==='monsters'?'モンスターハウスだ！！':'トラップハウスだ！！'});
  const used=new Set(before.used);
@@ -34,14 +39,38 @@ export function fieldMessageLayout(r,hud){
 
 export function installFieldMessages({dialog,button,text,skillBox,skillText,host,hud,onIdle}){
  // A body-level fixed layer avoids a transformed ancestor applying coordinates twice.
- if(host.ownerDocument?.body&&skillBox.parentElement!==host.ownerDocument.body)host.ownerDocument.body.appendChild(skillBox);
+ const body=host.ownerDocument?.body;
+ if(body){
+  if(dialog.parentElement!==body)body.appendChild(dialog);
+  if(skillBox.parentElement!==body)body.appendChild(skillBox);
+ }
  const queue=new FieldMessageQueue(),skills=new FieldMessageQueue();let displayed=null,remaining=0,lastTime=null;
  const visibility=()=>host.classList?.toggle('has-field-message',dialog.open||!skillBox.hidden);
- const position=element=>{const box=fieldMessageLayout(host.getBoundingClientRect(),hud.getBoundingClientRect());Object.assign(element.style,{left:box.left+'px',top:box.top+'px',width:box.width+'px',height:box.height+'px',minHeight:'0',boxSizing:'border-box'});element.style.setProperty('--field-message-font',box.font+'px');element.style.setProperty('--field-message-padding',box.padding+'px');};
- const place=()=>{if(dialog.open)position(dialog);if(!skillBox.hidden)position(skillBox);visibility();};
- const render=({ready=true}={})=>{if(!ready)return;if(!queue.active){visibility();return;}if(!dialog.open)dialog.showModal();text.textContent=queue.current.text;dialog.dataset.kind=queue.current.kind;button.setAttribute('aria-label',queue.current.text+' クリック、タップ、Enterで続ける');place();button.focus({preventScroll:true});};
+ const position=element=>{
+  const map=host.getBoundingClientRect();
+  const viewport=host.ownerDocument?.documentElement;
+  const bounds=(map.width&&map.height)||!viewport?map:{top:0,left:0,bottom:viewport.clientHeight,width:viewport.clientWidth,height:viewport.clientHeight};
+  const box=fieldMessageLayout(bounds,hud.getBoundingClientRect());
+  Object.assign(element.style,{left:box.left+'px',top:box.top+'px',width:box.width+'px',height:box.height+'px',minHeight:'0',boxSizing:'border-box'});
+  element.style.setProperty('--field-message-font',box.font+'px');
+  element.style.setProperty('--field-message-padding',box.padding+'px');
+ };
+ const willPage=dialog.querySelector('#will-document'),willClose=dialog.querySelector('#will-close');
+ const place=()=>{if(dialog.open&&dialog.dataset.kind!=='will')position(dialog);if(!skillBox.hidden)position(skillBox);visibility();};
+ const render=({ready=true}={})=>{
+  if(!ready)return;
+  if(!queue.active){visibility();return;}
+  const {kind,text:message}=queue.current,reading=kind==='will';
+  dialog.dataset.kind=kind;
+  dialog.setAttribute('aria-label',reading?'取得した遺書':'探索イベント');
+  button.hidden=reading;willPage.hidden=!reading;
+  text.textContent=message;button.setAttribute('aria-label',message+' クリック、タップ、Enterで続ける');
+  if(!dialog.open)dialog.showModal();
+  place();(reading?willClose:button).focus({preventScroll:true});
+ };
  const advance=()=>{if(!queue.active)return;queue.advance();if(queue.active)render();else{dialog.close();onIdle();}};
  button.addEventListener('click',advance);
+ willClose.addEventListener('click',advance);
  dialog.addEventListener('cancel',e=>{e.preventDefault();advance();});
  dialog.addEventListener('close',()=>{if(queue.active){queue.clear();onIdle();}});
  const animate=(time,blocked=false)=>{

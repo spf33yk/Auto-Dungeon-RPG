@@ -33,7 +33,7 @@ newGameはversion16・floor1（B30）・phase awakening。初期所持6種類と
 
 app.jsのshowingTitleはエンジンphaseと別。タイトル中はtick・自動保存を止め、hasSaveでLoadGame可否を管理。開始前映像・開始字幕も一時UI状態。開始3択の候補と未選択状態はエンジン状態として保存する。
 
-awakening → 字幕・開始選択 → explore → cleared → prepare → explore。B1 clearedからascendするとending。初回・遺書なしはnormalClearsを増やし、周回後の遺書所持はprofile.trueEndingを設定する。runEndingにfirst／will／missedを保存して再読込時に同じ字幕を表示。遺書は既存のletter項目を使用し、旧セーブの未取得箱はB15から外す。旧B30で未取得ならwillChestRevisionで一度だけ箱を補う。取得済みフラグは引き継ぐ。dead／あきらめる／次の旅ではprofileを引き継いでnewGame。field-messages.jsはボス生存から撃破への変化と遺書取得を検知し、既存キューで回想を報酬選択に先行させる。
+awakening → 字幕・開始選択 → explore → cleared → prepare → explore。B1 clearedからascendするとending。初回・遺書なしはnormalClearsを増やし、周回後の遺書所持はprofile.trueEndingを設定する。runEndingにfirst／will／missedを保存して再読込時に同じ字幕を表示。遺書は既存のletter項目を使用し、旧セーブの未取得箱はB15から外す。旧B30で未取得ならwillChestRevisionで一度だけ箱を補う。取得済みフラグは引き継ぐ。dead／あきらめる／次の旅ではprofileを引き継いでnewGame。field-messages.jsはボス生存から撃破への変化と遺書取得を検知し、既存キューで回想を報酬選択に先行させる。遺書は同じキューから中央の文書ダイアログへ分岐する。デバッグも同じメッセージ生成処理を使用する。
 
 tickはexploreかつaugmentOffer・cardOfferなしでのみ実行。turnは旅の累計、stepsは階ごとの経過。カード行を判定し、隣接戦闘またはスキル・退避・移動を実行、拾得・罠・敵行動・Clear・増援の順に処理する。ボス撃破の3択発生時はその先の処理を停止する。
 
@@ -67,7 +67,7 @@ routeは既知床を使う幅優先探索で、敵側の経路だけ未知床も
 
 renderOrderEditorは折返し可能な操作欄とorder-history.jsの準備内履歴を同期する。instruction-upgradesはorder-expansion-dialogへ配置し、購入後に残高と非活性状態を更新する。履歴は指示とfixedOrderExpandedだけをJSONスナップショット化し、購入やゲーム乱数を含めない。
 
-HUDは探索・準備で共用。ResizeObserverがHUD下端＋余白を--shared-hud-spaceへ設定。#workspace:beforeの上端をこの値、左右・下端を0にして準備枠を描画する。主枠20px・パネル16px、48pxスライスの9分割、辺repeat、pointer-events:none。画像比率保持・内容の安全余白を設ける。
+HUDは探索・準備で共用。回復ポーションの残数は探索時だけpotionStockから描画し、アイコンはマップと同じアトラスを使用する。ResizeObserverがHUD下端＋余白を--shared-hud-spaceへ設定。#workspace:beforeの上端をこの値、左右・下端を0にして準備枠を描画する。主枠20px・パネル16px、48pxスライスの9分割、辺repeat、pointer-events:none。画像比率保持・内容の安全余白を設ける。
 
 renderCardEditorは指示・能力・所持・phase等の署名で不要なDOM置換を避ける。変更がある場合だけeditor-scroll.jsがホスト・パネル・一覧の縦横位置を採取し復元。WeakMapで前回の指示オブジェクトと行の対応を保持し、移動後の横位置をその指示へ追従する。保存へDOM情報を含めない。
 
