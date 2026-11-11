@@ -329,5 +329,8 @@ export function normalizeSave(input){
   if(s.floor!==LETTER_FLOOR)s.items=s.items.filter(i=>i.type!=='letter');
   else placeWillChest(s);
  }
+ // Legacy winning skill offers with one pick left already granted their first card.
+ const offer=s.cardOffer;
+ if(offer?.gamble&&!offer.lost&&offer.remaining===1&&(!offer.categories||offer.categoryLocked)&&cardByKey[offer.choices[0]]?.kind==='skill')s.cardOffer=null;
  if(s.phase==='ending'&&!s.runEnding)s.runEnding=s.profile.normalClears<=1?'first':'missed';const t=themeState(s);for(const id of [...(s.skillUses||[]),...(s.mended?['mend']:[]),...(s.warped?['warp']:[])])if(!t.used.includes(id))t.used.push(id);reveal(s);return s;
 }

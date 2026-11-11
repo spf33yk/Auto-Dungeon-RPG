@@ -29,6 +29,6 @@ export function augmentStrength(a,s){const p=augmentStats(s,a.id),pct=key=>f(p[k
  'lucky-find':()=>`床の記憶の欠片を拾うたび、${pct('chance')}の確率で記憶の欠片を通常の取得量に加えて4個獲得。`,
  'double-strike':()=>`通常攻撃の後、${pct('chance')}の確率で追加の通常攻撃を1回行う。攻撃スキルでは発動せず、追加攻撃から再発動しない。`,
  pity:()=>`会心でない打撃ごとに会心率＋${pct('step')}、最大＋${pct('cap')}。会心が出るか、次の階へ進むとリセット。`,
- destiny:()=>`各階で最初に開けるカード宝箱のみ、${p.chance===1?'必ず':pct('chance')+'の確率で'}カードを2枚取得。${p.chance<1?'外れた場合はカードの代わりに記憶の欠片を'+p.consolation+'個獲得。':''}抽選結果は保存される。`
+ destiny:()=>`各階で最初に開けるカード宝箱のみ、${p.chance===1?'必ず':pct('chance')+'の確率で'}当たり。アクション・条件は2枚、スキルは1枚取得。${p.chance<1?'外れた場合はカードの代わりに記憶の欠片を'+p.consolation+'個獲得。':''}抽選結果は保存される。`
 };return r[a.id]?.()||a.detail;}
 export function augmentName(a,s){const stars=s?starText(s,a.id):'';return a.name+(stars?' '+stars:'');}

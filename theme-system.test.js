@@ -6,7 +6,7 @@ import{themeBuff,themeState,executeThemedSkill,skillCanRun,mitigateThemeDamage,u
 import{skillSetActive,setBonusRows,themeStars,augmentStars,augmentStats,starText}from'./set-bonuses.js';
 import{AUGMENT_IMAGES,THEME_IMAGES}from'./augment-art.js';
 import{skillThemeBadge,setRibbon,augmentSetHint}from'./theme-view.js';
-import{cardChestChoices,chooseChestCard}from'./card-inventory.js';
+import{cardChestChoices,chestPicksRemaining,chooseChestCard,selectChestCategory}from'./card-inventory.js';
 const enemy=(x=6,y=5)=>({...monsters[0],baseId:monsters[0].id,x,y,hp:10000,maxHp:10000,attack:1,defense:0,aggro:false,period:1000});
 function arena(){const s=newGame(71);s.floor=2;makeFloor(s);s.phase='explore';s.augmentOffer=null;s.enemies=[enemy()];s.items=[];s.obstacles=[];s.traps=[];s.gimmick={id:'none'};s.grid=Array.from({length:H},(_,y)=>Array.from({length:W},(_,x)=>x>0&&y>0&&x<W-1&&y<H-1?1:0));s.seen=s.grid.map(r=>r.map(Boolean));s.visited=s.grid.map(r=>r.map(()=>false));s.player={x:5,y:5};s.stairs={x:7,y:5};s.rooms=[{x:4,y:4,w:3,h:3},{x:10,y:4,w:3,h:3}];s.orders=[];s.debugUsed=true;s.debugNoReinforcements=true;s.hp=25;s.steps=120;return s;}
 function setup(id,set=false){const s=arena();grantCard(s,'skill:'+id);s.orders=[createCardRule('self',[],'skill',id)];if(set)s.augments=[themedAugments.find(a=>a.themeId===themedSkills.find(k=>k.id===id).themeId).id];return s;}
@@ -20,7 +20,30 @@ test('set no longer changes skill costs, charges, duration or success chance',()
 test('distinct enabled skills grant stars at 1, 3, 6 and duplicates do not stack; disabling drops tier',()=>{const s=arena();s.augments=['critical'];const keys=themedSkills.filter(k=>k.themeId==='gambler');assert.equal(starText(s,'critical'),'☆☆☆');for(let i=0;i<6;i++){grantCard(s,'skill:'+keys[i].id);s.orders.push(createCardRule('self',[],'skill',keys[i].id));assert.equal(themeStars(s,'gambler'),i>=5?3:i>=2?2:1);}assert.equal(augmentStars(s,'critical'),3);assert.equal(starText(s,'critical'),'★★★');s.orders.push({...s.orders[0]});assert.equal(themeStars(s,'gambler'),3);s.orders[5].disabled=true;assert.equal(themeStars(s,'gambler'),2);assert.equal(augmentStars(s,'critical'),2);assert.ok(normalizeSave({...s,orders:s.orders.slice(0,6),levels:{...s.levels,commandSlots:8}}));});
 test('stars strengthen augment critical chance and displayed descriptions',()=>{const s=setup('coin-strike');s.augments=['critical'];assert.equal(augmentBonus(s,54).critical,.12);assert.equal(augmentStats(s,'critical').chance,.12);s.orders[0].disabled=true;assert.equal(augmentBonus(s,54).critical,.1);});
 test('immunity and strongest mitigation consume only one defensive charge',()=>{const s=arena(),t=themeState(s);t.immunity=1;t.shieldHits=1;t.shieldRate=.7;s.guardHits=3;assert.equal(mitigateThemeDamage(s,10,{has:hasAugment,stats}),0);assert.equal(t.shieldHits,1);assert.equal(s.guardHits,3);assert.equal(mitigateThemeDamage(s,10,{has:hasAugment,stats}),4);assert.equal(t.shieldHits,0);assert.equal(s.guardHits,3);});
-test('extra chest candidate and two-card destiny awards survive reload without duplicate grants',()=>{const s=arena();s.augments=['treasure-sense'];const choices=cardChestChoices(s,'skill:focus',()=>0);assert.equal(choices.length,4);const many=cardChestChoices(s,'skill:focus',()=>0);assert.equal(many.length,4);s.cardOffer={choices:many,remaining:2,gamble:true,lost:false};const restored=normalizeSave(s);assert.ok(restored);assert.equal(chooseChestCard(restored,many[0]),true);assert.equal(restored.cardOffer.remaining,1);assert.equal(chooseChestCard(restored,many[0]),false);assert.equal(chooseChestCard(restored,many[1]),true);assert.equal(restored.cardOffer,null);});
+test('destiny awards at most one skill card, including saved offers',()=>{const s=arena();s.augments=['treasure-sense'];const choices=cardChestChoices(s,'skill:focus',()=>0);assert.equal(choices.length,4);const many=cardChestChoices(s,'skill:focus',()=>0);assert.equal(many.length,4);s.cardOffer={choices:many,remaining:2,gamble:true,lost:false};const restored=normalizeSave(s);assert.ok(restored);assert.equal(chestPicksRemaining(restored.cardOffer),1);
+ const before=restored.ownedCards.length;
+ assert.equal(chooseChestCard(restored,many[0]),true);
+ assert.equal(restored.cardOffer,null);
+ assert.equal(chooseChestCard(restored,many[1]),false);
+ assert.equal(restored.ownedCards.length,before+1);
+ const old=structuredClone(restored);
+ old.cardOffer={choices:many.slice(1),categories:{skill:many},remaining:1,gamble:true,lost:false,selectedKind:'skill',categoryLocked:true};
+ const resumed=normalizeSave(old);
+ assert.ok(resumed);
+ assert.equal(resumed.cardOffer,null);
+ assert.deepEqual(resumed.ownedCards,restored.ownedCards);});
+test('winning destiny offer still awards two different action cards',()=>{
+ const s=arena();
+ const choices=cardChestChoices(s,'action:collect-weapons',()=>0);
+ assert.ok(choices.length>=2);
+ s.cardOffer={choices,categories:{action:choices},remaining:2,gamble:true,lost:false};
+ assert.equal(selectChestCategory(s,'action'),true);
+ assert.equal(chestPicksRemaining(s.cardOffer),2);
+ assert.equal(chooseChestCard(s,choices[0]),true);
+ assert.equal(chooseChestCard(s,choices[0]),false);
+ assert.equal(chooseChestCard(s,choices[1]),true);
+ assert.equal(s.cardOffer,null);
+});
 test('destiny loss grants fragments and no card, and malformed runtime state is rejected',()=>{const s=arena();s.cardOffer={choices:['skill:scout'],remaining:1,gamble:true,lost:true};const before=[...s.ownedCards],shards=s.shards;chooseChestCard(s,'skill:scout');assert.deepEqual(s.ownedCards,before);assert.equal(s.shards,shards+10);assert.equal(validateSave({...s,themeState:{}}),false);});
 test('legacy augment ids migrate deterministically while owned skills and rows remain',()=>{const s=setup('mend');s.augments=['haste','rush','thorns','nova'];s.profile.augments=[...s.augments];const loaded=normalizeSave(s);assert.deepEqual(loaded.augments,['trailblazer','critical','desperate','blood-pact']);assert.equal(loaded.orders[0].effect.id,'mend');});
 test('map-only waymark does not reveal objects or mark room discovery for rewards',()=>{const s=setup('waymark');s.seen=s.seen.map(r=>r.map(()=>false));s.seen[5][5]=true;executeThemedSkill(s,'waymark',context(s));assert.ok(s.themeState.mappedRooms.includes(1));assert.equal(s.seen[5][11],false);assert.equal(s.themeState.rooms.includes(1),false);});

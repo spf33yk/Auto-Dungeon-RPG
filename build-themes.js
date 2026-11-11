@@ -209,7 +209,7 @@ export const themedAugments=[
   "name": "運命の賽",
   "themeId": "gambler",
   "rarity": "LEGENDARY",
-  "detail": "各階で最初に開けるカード宝箱のみ、50%の確率でカードを2枚取得。外れた場合はカードの代わりに記憶の欠片を10個獲得。抽選結果は保存される。"
+  "detail": "各階で最初に開けるカード宝箱のみ、50%の確率で当たり。アクション・条件は2枚、スキルは1枚取得。外れた場合はカードの代わりに記憶の欠片を10個獲得。抽選結果は保存される。"
  }
 ];
 export const themedSkills=[
