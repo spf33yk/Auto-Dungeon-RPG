@@ -45,7 +45,7 @@ tickはexploreかつaugmentOffer・cardOfferなしでのみ実行。turnは旅�
 
 旧鍵・廃止カード・常時スキルは互換移行で処理し、新規取得とは分ける。data.jsの旧rewardDefinitions・chestRewards、orders.jsの旧形式、非公開の旧図鑑経路が残っていても、現在の画面で利用する新規カード箱・4図鑑とは区別する。
 
-ゲーム保存とui-settings.jsの端末設定を分離。設定はミニマップ・映像スキップ・準備スキン・BGM・効果音・画面揺れ・画面別案内閲覧フラグ。案内やスクロールのためゲーム保存版を上げない。視覚時計、ドラッグ・選択、スクロール、ダメージ演出は一時状態。
+ゲーム保存とui-settings.jsの端末設定を分離。設定はミニマップ・映像スキップ・準備スキン・BGM・効果音・画面揺れ・明るさ・オプションの高コントラスト・画面別案内閲覧フラグ。optionsContrastが未定義ならOFF。手動保存とタイトルに戻る際の保存は既存saveを共用し、保存形式はv16。案内やスクロールのためゲーム保存版を上げない。視覚時計、ドラッグ・選択、スクロール、ダメージ演出は一時状態。
 
 ## 4. 乱数・地形・到達性
 
@@ -77,7 +77,7 @@ renderCardEditorは指示・能力・所持・phase等の署名で不要なDOM�
 
 forecastExplorationは入力を複製して本編tickを試行し、実状態や乱数を変えない。入力署名は表示専用ログ・intent等を除外。変更時は世代を更新し古い結果を破棄、短い処理区間ごとにUIへ制御を返す。未選択の将来オーグメントは付与しない。
 
-openDialog／finishDialogは元のpausedを保持し、他のダイアログが残る間も停止。screenTutorialsはprepare7手順のみ。探索はaugment-dialog内の短い案内に限定し、取得成功時に端末設定tutorials.exploreをtrueへ保存。NewGameで両フラグをfalseへ戻す。オプションは次のオーグメント選択時の案内を再予約する。ログはlog-visibility.jsが5000ms・ホバー／タップ保持を管理する。
+openDialog／finishDialogは元のpausedを保持し、他のダイアログが残る間も停止。オプションの各カテゴリは同じ設定コントロールを使い、状態表示と探索指示はそれぞれネイティブdialogで開く。設定初期化はui-settings.jsの既定値を使い、対象カテゴリのキーだけを上書きする。screenTutorialsはprepare7手順のみ。探索はaugment-dialog内の短い案内に限定し、取得成功時に端末設定tutorials.exploreをtrueへ保存。NewGameで両フラグをfalseへ戻す。オプションは次のオーグメント選択時の案内を再予約する。ログはlog-visibility.jsが5000ms・ホバー／タップ保持を管理する。
 
 ## 8. 指示とセット・報酬の共通化
 

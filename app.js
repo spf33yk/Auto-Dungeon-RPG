@@ -53,7 +53,9 @@ import {thoughtText} from './thought-view.js';
 import {displayStoryText,openingThought,letterFloorThought,WILL_UNLOCK_LINE} from './story-text.js';
 import {debugJump,debugHeal,debugShards,debugSkills,debugEquipment,debugTitleEnding} from './debug-tools.js';
 import {W,H,skills,newGame,abandonRun,stats,price,upgrade,equip,equipBest,tick,ascend,zoneFor,floorLabel,radius,canSee,gearById,gearStats,gearName,discard,locked,codexRows,sortedInventory,normalizeSave,orderDefinitions,orderById,orderCapacity,cardCapacity,orderUnlocked,addOrder,editOrder,beginExploration,equipment,LAST_FLOOR,LETTER_FLOOR,nextStageHint,rewardDefinitions,grantReward,experienceToNext,MAX_LEVEL,HP_PER_LEVEL,gainExperience} from './engine.js';
-const verificationMode=new URLSearchParams(location.search).get('verify')==='1';if(verificationMode)document.querySelectorAll('video,audio').forEach(el=>{el.muted=true;});
+const launchParams=new URLSearchParams(location.search);
+const developmentOptions=['localhost','127.0.0.1','[::1]'].includes(location.hostname)&&launchParams.get('debug')==='1';
+const verificationMode=launchParams.get('verify')==='1';if(verificationMode)document.querySelectorAll('video,audio').forEach(el=>{el.muted=true;});
 const $=id=>document.getElementById(id), key='abyss-normal-v2';
 let uiStorage;try{uiStorage=localStorage;}catch{}let uiSettings=readUiSettings(uiStorage);document.documentElement.dataset.minimapSize=uiSettings.minimap;$('minimap-size').value=uiSettings.minimap;$('skip-opening').checked=uiSettings.skipOpening;
 function applyPreparationSkin(){const skin=skinById(uiSettings.preparationSkin);document.documentElement.dataset.preparationSkin=skin.id;for(const [key,value]of Object.entries(skin))if(['accent','edge','panel','text'].includes(key))document.documentElement.style.setProperty('--prep-theme-'+key,value);$('preparation-skin').textContent='スキン：'+skin.name;$('preparation-skin').title='次のスキン：'+nextPreparationSkin(skin.id).name;}
@@ -62,7 +64,7 @@ const bgm=new SceneMusic($('scene-bgm'),$('scene-bgm').dataset);
 let endingPreview=false,endingPlayback=null,subtitlePreviewKind='first-end',musicAudition=null;
 function syncSceneMusic(){bgm.configure({enabled:!verificationMode&&uiSettings.bgmEnabled,volume:uiSettings.bgmVolume,hidden:document.hidden});bgm.select(musicAudition||(endingPreview?(subtitlePreviewKind.endsWith('intro')?'opening':'ending'):musicScene(state,{title:showingTitle,teaser:Boolean(pendingJourney),houseEntered:Boolean(state.gimmick?.triggered)&&!fieldMessages.waiting}))); }
 function paintMusicOptions(){$('bgm-toggle').textContent='BGM：'+(uiSettings.bgmEnabled?'ON':'OFF');$('bgm-toggle').setAttribute('aria-pressed',String(uiSettings.bgmEnabled));$('bgm-volume').value=uiSettings.bgmVolume;$('bgm-volume-value').textContent=uiSettings.bgmVolume+'%';}
-function paintBrightness(){$('screen-brightness').value=uiSettings.brightness-50;$('screen-brightness-value').textContent=(uiSettings.brightness-50)+'%'+(uiSettings.brightness===100?'（標準）':'');}paintBrightness();$('screen-brightness').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,brightness:Number($('screen-brightness').value)+50});paintBrightness();draw();};$('reset-brightness').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,brightness:100});paintBrightness();draw();};
+function paintBrightness(){$('screen-brightness').value=uiSettings.brightness-50;$('screen-brightness-value').textContent=(uiSettings.brightness-50)+'%'+(uiSettings.brightness===100?'（標準）':'');}paintBrightness();$('screen-brightness').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,brightness:Number($('screen-brightness').value)+50});paintBrightness();draw();};
 $('screen-shake').checked=uiSettings.screenShake;$('screen-shake').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,screenShake:$('screen-shake').checked});};
 paintMusicOptions();document.addEventListener('pointerdown',()=>bgm.unlock(),{capture:true});document.addEventListener('keydown',()=>bgm.unlock(),{capture:true});document.addEventListener('visibilitychange',()=>syncSceneMusic());
 function renderNormalEnding(){
@@ -82,7 +84,7 @@ $('ending-skip').onclick=()=>{endingPlayback?.player.finish();renderNormalEnding
 $('ending-next').onclick=()=>{if(endingPreview){endingPreview=false;endingPlayback=null;render();}else if(state.runEnding==='will'){showingTitle=true;render();}else reset();};
 $('awakening-advance').onclick=()=>{if(!memoryReveal)return;memoryReveal.player.advance();if(memoryReveal.player.done){memoryReveal=null;beginExploration(state);paused=false;last=performance.now();render();tryMobileDisplay();}else{$('awakening-text').textContent=memoryReveal.player.text;}};
 $('debug-dialog').addEventListener('close',()=>{musicAudition=null;syncSceneMusic();});
-$('ending-options').onclick=()=>openDialog('options-dialog');
+$('ending-options').onclick=()=>openOptions();
 $('bgm-toggle').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,bgmEnabled:!uiSettings.bgmEnabled});paintMusicOptions();syncSceneMusic();};
 $('bgm-volume').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,bgmVolume:Number($('bgm-volume').value)});paintMusicOptions();syncSceneMusic();};
 const preparationBaseline=createPreparationBaseline();let forecastBefore=null,forecastBeforeSamples=null,forecastBeforeError=false;
@@ -112,7 +114,7 @@ let state,tab='orders',speed=1,paused=false,last=0,sound=uiSettings.soundEnabled
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 try{const data=JSON.parse(localStorage.getItem(key));state=normalizeSave(data);if(state){hasSave=true;paused=state.phase==='explore';if(data.version!==state.version){try{const backup=key+'-v'+data.version+'-before-ui';if(!localStorage.getItem(backup))localStorage.setItem(backup,JSON.stringify(data));}catch{}}}}catch{}
 state ||= newGame();
-function save(){try{localStorage.setItem(key,JSON.stringify(state,(name,value)=>['damageEvents','actorSkillEvent'].includes(name)?undefined:value));hasSave=true;$('save-status').textContent='端末に保存済み';}catch{$('save-status').textContent='保存できません（空き容量・設定）';}}
+function save(){try{localStorage.setItem(key,JSON.stringify(state,(name,value)=>['damageEvents','actorSkillEvent'].includes(name)?undefined:value));hasSave=true;$('save-status').textContent='端末に保存済み';return true;}catch{$('save-status').textContent='保存できません（空き容量・設定）';return false;}}
 function tone(freq=330){if(verificationMode||!sound||volume===0)return;try{audio ||= new AudioContext();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(volume/100*.1,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.15);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+.15);}catch{}}
 // Every sprite is an original pixel matrix. No external game assets are used.
 const sprites={
@@ -261,7 +263,6 @@ function render(){
  const st=stats(state),prep=state.phase==='prepare',theme=zoneFor(state);$('rest-potion').hidden=state.phase!=='explore'||!paused||fieldMessages.active||!(state.potionStock>0);$('rest-potion').disabled=!canUsePotion(state,st.maxHp,paused&&!fieldMessages.active&&!document.querySelector('dialog[open]'));$('rest-potion').textContent='回復ポーションを使う（残り '+(state.potionStock||0)+'個）';fieldMessages.sync(state);renderScreens();if(!showingTitle&&!fieldMessages.active)renderTactics();
  const runClears=Math.max(0,state.profile.normalClears-(state.phase==='ending'?1:0));
  $('floor-title').textContent=`${theme.name} · ${floorLabel(state)}`;
- $('phase-label').textContent=({awakening:'目覚め',prepare:'準備中',explore:paused?'一時停止':'探索中',cleared:'Clear',dead:'記憶喪失',ending:'通常エンド'})[state.phase];
  $('floor-message').hidden=state.floor!==LETTER_FLOOR||state.letter;$('floor-message').textContent='B30 ― '+letterFloorThought(state.profile.normalClears);
  $('turn').textContent=`TURN ${String(state.turn).padStart(3,'0')}`;
  $('hud-shards').textContent=state.shards;$('hud-sight').textContent=radius(state)+'マス';
@@ -283,7 +284,6 @@ function render(){
  $('primary').innerHTML=({awakening:'思い出す',prepare:'探索を始める',cleared:state.floor===LAST_FLOOR?'地上1Fへ':'準備画面へ',dead:'B30で再び目覚める',ending:'次の旅をはじめる'})[state.phase]||'';
  $('primary').hidden=state.phase==='explore';$('pause-toggle').hidden=state.phase!=='explore';$('explore-abandon').hidden=state.phase!=='explore';$('pause-toggle').textContent=paused?'探索を再開':'ひとやすみ';
  renderJourneyLog();
- $('memory-count').textContent=`記憶の断片 ${state.memories.length} / 4 · 通常エンド ${state.profile.normalClears}回`;
  $('memory-quote').textContent=displayStoryText(state.memories.at(-1)||openingThought(runClears),runClears);
 
  renderTab();renderThoughtSubtitle();draw();renderTitle();renderNormalEnding();renderAugments();if(!showingTitle)fieldMessages.render({ready:houseEntryReady(motion,combat.actorTime)});syncSceneMusic();if(!showingTitle)save();maybeTutorial();
@@ -340,7 +340,7 @@ function renderTab(){
 }
 function renderScreens(){
  const prep=state.phase==='prepare',awake=state.phase==='awakening',st=stats(state);document.body.classList.toggle('awakening',!showingTitle&&awake);$('awakening-start').hidden=Boolean(memoryReveal);$('awakening-copy').hidden=!memoryReveal;$('awakening-advance').hidden=!memoryReveal;$('awakening-hint').hidden=!memoryReveal;$('workspace').dataset.screen=awake?'awakening':prep?'prepare':'explore';document.body.classList.toggle('opening',showingTitle);$('title-scene').hidden=!showingTitle;document.body.classList.toggle('exploring',!showingTitle&&!prep&&!awake);document.body.classList.toggle('preparing',!showingTitle&&prep);$('awakening-scene').hidden=!awake;$('game-icons').hidden=awake;const journal=document.querySelector('.journal');journal.hidden=awake;const journalHost=awake?$('workspace'):prep?$('prep-journal-content'):$('field-log-host');if(journal.parentElement!==journalHost)journalHost.appendChild(journal);const toolsHost=awake?$('header-tools'):$('hud-tools');if($('utility-controls').parentElement!==toolsHost)toolsHost.appendChild($('utility-controls'));
- $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=awake;$('expedition').hidden=awake;const statusHost=awake?$('workspace'):$('status-dialog-content');if($('expedition').parentElement!==statusHost)statusHost.appendChild($('expedition'));$('status-open').hidden=awake;$('fullscreen-open').hidden=false;$('mobile-display').hidden=true;$('live-order-panel').hidden=prep;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
+ $('prepare-scene').hidden=!prep;document.querySelector('.adventure').hidden=awake;$('expedition').hidden=awake;const statusHost=awake?$('workspace'):$('status-dialog-content');if($('expedition').parentElement!==statusHost)statusHost.appendChild($('expedition'));$('status-open').hidden=awake;$('fullscreen-open').hidden=false;$('mobile-display').hidden=true;$('status-phase').textContent=prep?'PREPARATION':'EXPEDITION';
  $('prepare-floor').textContent=`${floorLabel(state)}への支度`;
  const host=awake?$('awakening-start'):prep?$('launch-area'):$('notice-actions');if($('primary').parentElement!==host)host.prepend($('primary'));
  const visited=state.visited.flat().filter(Boolean).length;
@@ -348,7 +348,13 @@ function renderScreens(){
 
  $('expedition-summary').innerHTML=summary+`<div class="current-action"><small>今の判断</small><p>${esc(prep?'出発の準備をしています':state.intent)}</p></div><dl class="stat-list"><div><dt>探索済みの床 / この階の撃破</dt><dd>${visited}マス / ${state.floorKills}体</dd></div><div><dt>所持品 / 遺書</dt><dd>${state.inventory.length}個 / ${state.letter?'入手済':'未入手'}</dd></div></dl><h3>習得した記憶</h3><p class="section-caption">${skills.filter(k=>state.levels[k.id]).map(k=>k.name+(k.max>1?' Lv.'+state.levels[k.id]:'')).join(' / ')||'未習得'}</p><h3>この旅で得たスキル・特殊指示</h3><p class="section-caption">${[...state.abilities,...state.unlockedOrders].map(id=>esc(rewardDefinitions.find(r=>r.id===id).name)).join(' / ')||'未取得'}<br>特殊指示は準備中に探索指示へ設定して使います。</p>`;
  renderOrderEditor($('live-orders'));
- $('status-open').hidden=showingTitle||awake;$('fullscreen-open').hidden=false;$('mobile-display').hidden=true;$('return-title').hidden=showingTitle;
+ const inJourney=!showingTitle&&!awake;
+ $('status-open').closest('.settings-row').hidden=!inJourney;
+ $('live-orders-open').closest('.settings-row').hidden=!inJourney;
+ for(const [action,category] of [['options-save','save'],['return-title','exit']]){
+  $(action).closest('.settings-row').hidden=!inJourney;
+  $('settings-'+category+'-empty').hidden=inJourney;
+ }
 }
 function openDialog(id){if(!document.querySelector('dialog[open]'))dialogWasPaused=paused;paused=true;$(id).showModal();if(state.phase==='explore')render();}
 let tutorialSteps=[],activeTutorialKey=null;
@@ -418,8 +424,11 @@ $('title-new').onclick=()=>{if(hasSave)openDialog('new-game-dialog');else startN
 $('confirm-new-game').onclick=()=>{$('new-game-dialog').close();startNewJourney();};
 $('title-load').onclick=()=>{if(hasSave)openDialog('load-game-dialog');};
 $('confirm-load-game').onclick=()=>{if(!hasSave)return;tryMobileDisplay();$('load-game-dialog').close();playJourneyTeaser(()=>{showingTitle=false;resetHeroVisual();paused=state.phase==='explore';dialogWasPaused=paused;last=performance.now();render();});};
-$('title-option').onclick=()=>openDialog('options-dialog');
-$('return-title').onclick=()=>{paused=true;dialogWasPaused=true;save();showingTitle=true;motion=null;$('options-dialog').close();render();};
+$('title-option').onclick=()=>openOptions();
+$('return-title').onclick=()=>confirmOption('タイトルへ戻りますか？','現在の旅を端末に保存してからタイトルに戻ります。','戻る',()=>{
+ if(!save()){ $('settings-help').textContent=$('save-status').textContent;return; }
+ paused=true;dialogWasPaused=true;showingTitle=true;motion=null;$('options-dialog').close();render();
+});
 $('primary').onclick=()=>{if(state.phase==='explore')return;if(state.phase==='awakening'){if(!memoryReveal){memoryReveal={player:new SubtitlePlayer(awakeningLines(state.profile.normalClears)),last:performance.now()};$('awakening-text').textContent='';$('awakening-caret').hidden=true;render();}return;}if(state.phase==='prepare'){beginExploration(state);paused=false;last=performance.now();tone();}else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();if(state.phase==='explore')tryMobileDisplay();};
 const askAbandon=()=>{if(['prepare','explore'].includes(state.phase))openDialog('abandon-dialog');};$('abandon-run').onclick=askAbandon;$('explore-abandon').onclick=askAbandon;
 $('confirm-abandon').onclick=()=>{const next=abandonRun(state);if(!next)return;$('abandon-dialog').close();reset(next);};
@@ -428,7 +437,7 @@ $('skip-opening').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettin
 $('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,minimap:$('minimap-size').value});document.documentElement.dataset.minimapSize=uiSettings.minimap;drawAutoMap();};
  document.addEventListener('click',e=>{const history=e.target.closest('[data-order-history]');if(history&&!history.disabled&&orderHistory.move(state,history.dataset.orderHistory)){render();return;}if(e.target.closest('[data-order-expansions]')&&state.phase==='prepare'){renderExpansionShop();$('order-expansion-dialog').showModal();return;}if(e.target.closest('[data-forecast-run]'))refreshForecast(true);if(e.target.closest('[data-orders-undo]')&&state.phase==='prepare'&&forecastContext){state.orders=structuredClone(initialOrders);render();}});
  document.addEventListener('change',e=>{if(e.target.id==='forecast-samples'){forecastSamples=Number(e.target.value);refreshForecast(true);}});
- $('sound').onclick=()=>{sound=!sound;uiSettings=saveUiSettings(uiStorage,{...uiSettings,soundEnabled:sound});$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');$('sound').textContent='効果音：'+(sound?'ON':'OFF');tone(440);};
+ $('sound').onclick=()=>{sound=!sound;uiSettings=saveUiSettings(uiStorage,{...uiSettings,soundEnabled:sound});paintSoundOptions();tone(440);};
 $('augment-book').onclick=()=>showCodex('augments');$('skill-book').onclick=()=>showCodex('cards');$('monster-book').onclick=()=>showCodex('monsters');$('equipment-book').onclick=()=>showCodex('equipment');
 $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dialog').close();$('guide-start').onclick=()=>$('dialog').close();
 $('order-expansion-dialog').onchange=e=>{if(e.target.id!=='exchange-source-a')return;const first=e.target.value,second=$('exchange-source-b');for(const o of second.options)o.hidden=o.disabled=o.value===first||o.value.split(':')[0]!==first.split(':')[0];second.value=[...second.options].find(o=>!o.disabled)?.value||'';};
@@ -454,12 +463,103 @@ function syncSceneViewport(){
 }
 addEventListener('resize',()=>{syncSceneViewport();fieldMessages.place();});window.visualViewport?.addEventListener('resize',()=>{syncSceneViewport();fieldMessages.place();});document.addEventListener('fullscreenchange',()=>{syncSceneViewport();fieldMessages.place();});syncSceneViewport();
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){if(lockedOrientation)screen.orientation?.unlock?.();lockedOrientation=false;ownsFullscreen=false;$('fullscreen-open').textContent='横向きで全画面表示';displayMessage('横向きで全画面表示');}});
+const optionsDialog=$('options-dialog');
+const optionTabs=[...optionsDialog.querySelectorAll('[role="tab"]')];
+const optionResetKeys={
+ 'settings-display':['brightness','minimap','screenShake','optionsContrast','skipOpening'],
+ 'settings-audio':['bgmEnabled','bgmVolume','soundEnabled','soundVolume']
+};
+let activeOptionTab=0,confirmedOptionAction;
+function describeSetting(row){
+ optionsDialog.querySelector('.settings-row[data-current]')?.removeAttribute('data-current');
+ if(row)row.dataset.current='';
+ $('settings-help-title').textContent=row?.querySelector('.settings-name').textContent??'';
+ $('settings-help').textContent=row?.dataset.settingHelp??'';
+}
+function showOptionTab(index,focus=false){
+ activeOptionTab=index;
+ for(const [i,tab] of optionTabs.entries()){
+  tab.setAttribute('aria-selected',String(i===index));
+  tab.tabIndex=i===index?0:-1;
+  $(tab.getAttribute('aria-controls')).hidden=i!==index;
+ }
+ const panel=$(optionTabs[index].getAttribute('aria-controls'));
+ $('options-reset').hidden=!optionResetKeys[panel.id];
+ describeSetting(panel.querySelector('.settings-row:not([hidden])'));
+ if(focus)optionTabs[index].focus();
+}
+function openOptions(){
+ openDialog('options-dialog');
+ $('options-save-result').textContent='';
+ showOptionTab(0,true);
+}
+function confirmOption(title,description,label,action){
+ const dialog=$('options-confirm-dialog');
+ $('options-confirm-title').textContent=title;
+ $('options-confirm-description').textContent=description;
+ $('options-confirm-ok').textContent=label;
+ confirmedOptionAction=action;
+ dialog.returnValue='cancel';
+ openDialog(dialog.id);
+}
+$('options-confirm-dialog').addEventListener('close',e=>{
+ const action=confirmedOptionAction;
+ confirmedOptionAction=undefined;
+ if(e.currentTarget.returnValue==='confirm')action?.();
+});
+function paintOptionsContrast(){
+ $('options-contrast').checked=uiSettings.optionsContrast;
+ optionsDialog.classList.toggle('high-contrast',uiSettings.optionsContrast);
+}
+paintOptionsContrast();
+$('options-contrast').onchange=()=>{
+ uiSettings=saveUiSettings(uiStorage,{...uiSettings,optionsContrast:$('options-contrast').checked});
+ paintOptionsContrast();
+};
+optionTabs.forEach((tab,index)=>tab.onclick=()=>showOptionTab(index));
+optionsDialog.querySelector('[role="tablist"]').addEventListener('keydown',event=>{
+ const step={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[event.key];
+ if(!step&&event.key!=='Home'&&event.key!=='End')return;
+ event.preventDefault();
+ const last=optionTabs.length-1;
+ const next=event.key==='Home'?0:event.key==='End'?last:(activeOptionTab+step+optionTabs.length)%optionTabs.length;
+ showOptionTab(next,true);
+});
+for(const row of optionsDialog.querySelectorAll('.settings-row')){
+ row.addEventListener('pointerenter',()=>describeSetting(row));
+ row.addEventListener('focusin',()=>describeSetting(row));
+}
+$('options-save').onclick=()=>{
+ if(!showingTitle&&state.phase!=='awakening'){
+  save();
+  $('options-save-result').textContent=$('save-status').textContent;
+ }
+};
+$('options-reset').onclick=()=>{
+ const panel=optionTabs[activeOptionTab].getAttribute('aria-controls');
+ confirmOption('設定を初期化しますか？','選択中のカテゴリを標準設定に戻します。','初期化',()=>{
+  const defaults=readUiSettings(null);
+  const reset=Object.fromEntries(optionResetKeys[panel].map(key=>[key,defaults[key]]));
+  uiSettings=saveUiSettings(uiStorage,{...uiSettings,...reset});
+  paintOptionsContrast();paintBrightness();paintMusicOptions();
+  $('skip-opening').checked=uiSettings.skipOpening;
+  $('screen-shake').checked=uiSettings.screenShake;
+  $('minimap-size').value=document.documentElement.dataset.minimapSize=uiSettings.minimap;
+  sound=uiSettings.soundEnabled;volume=uiSettings.soundVolume;paintSoundOptions();
+  syncSceneMusic();draw();
+  $('settings-help').textContent='標準設定に戻しました。';
+ });
+};
 $('status-open').onclick=()=>openDialog('status-dialog');
+$('live-orders-open').onclick=()=>openDialog('live-orders-dialog');
 $('prepare-forecast').onclick=()=>{if(state.phase==='prepare'){openDialog('forecast-dialog');refreshForecast();}};
 $('sound-volume').oninput=e=>{volume=Number(e.target.value);uiSettings=saveUiSettings(uiStorage,{...uiSettings,soundVolume:volume});$('volume-value').textContent=volume+'%';};
 $('sound-volume').onchange=()=>tone(440);
-$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');$('sound').textContent='効果音：'+(sound?'ON':'OFF');$('sound-volume').value=volume;$('volume-value').textContent=volume+'%';
-$('options-open').onclick=()=>openDialog('options-dialog');
+function paintSoundOptions(){$('sound').setAttribute('aria-pressed',String(sound));$('sound').setAttribute('aria-label',sound?'効果音を無効にする':'効果音を有効にする');$('sound').textContent='効果音：'+(sound?'ON':'OFF');$('sound-volume').value=volume;$('volume-value').textContent=volume+'%';}
+paintSoundOptions();
+$('options-open').onclick=()=>openOptions();
+$('debug-open').hidden=!developmentOptions;
+if(developmentOptions){
 $('debug-open').onclick=()=>{$('debug-floor').innerHTML=Array.from({length:LAST_FLOOR},(_,i)=>`<option value="${i+1}" ${state.floor===i+1?'selected':''}>B${LAST_FLOOR-i}</option>`).join('');$('debug-gear').innerHTML=equipment.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');$('debug-reward').innerHTML=rewardDefinitions.filter(r=>!r.legacy).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');debugStatus();openDialog('debug-dialog');};
 $('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-debug]');if(!b)return;let message='';switch(b.dataset.debug){case'music-preview':musicAudition=$('debug-music-scene').value;$('debug-music-status').textContent='試聴中：'+bgm.tracks[musicAudition].split('/').at(-1).split('?')[0];syncSceneMusic();return;case'music-stop':musicAudition=null;$('debug-music-status').textContent='元の場面のBGMへ戻しました。';syncSceneMusic();return;case'ending-preview':subtitlePreviewKind=$('debug-subtitle-kind').value;endingPreview=true;endingPlayback=null;musicAudition=null;for(const d of document.querySelectorAll('dialog[open]'))d.close();render();return;case'memory-preview':{
  const kind=$('debug-memory-kind').value;
@@ -471,12 +571,15 @@ $('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-d
 }case'title-ending':debugTitleEnding(state,!state.profile.trueEnding);message=state.profile.trueEnding?'倅の旅路タイトル：'+TRUE_END_UNIMPLEMENTED_NOTICE:'骸の旅路タイトル';break;case'jump':debugJump(state,Number($('debug-floor').value));break;case'next':debugJump(state,Math.min(LAST_FLOOR,state.floor+1));break;case'previous':debugJump(state,Math.max(1,state.floor-1));break;case'reinforcements':state.debugUsed=true;state.debugNoReinforcements=!state.debugNoReinforcements;message='増援を'+(state.debugNoReinforcements?'停止':'再開')+'しました';break;case'experience':{const gained=gainExperience(state,10);state.debugUsed=true;message=state.level===MAX_LEVEL&&!gained?'最大レベル':`経験値+10 / Lv.${state.level}${gained?' / HP +'+gained*HP_PER_LEVEL:''}`;break;}case'augment':grantReward(state,$('debug-augment').value);state.debugUsed=true;message='オーグメントを取得しました';break;case'heal':debugHeal(state);break;case'shards':debugShards(state);break;case'skills':debugSkills(state);break;case'reward':{const id=$('debug-reward').value;grantReward(state,id);state.debugUsed=true;message='報酬を取得';break;}case'equipment':if(!debugEquipment(state,$('debug-gear').value,{plus:Number($('debug-plus').value),identified:true}))message='強化値は0〜20の整数にしてください';break;case'export':{const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`abyss-save-${floorLabel(state).replace(/ /g,'-')}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);message='セーブを書き出しました';break;}case'reset-run':if(confirm('現在の旅を初期化しますか？ 図鑑と通常エンド達成は残します。'))reset();break;case'reset-all':if(confirm('このゲームの全セーブ・図鑑・通常エンド達成・旧版・バックアップを削除します。元に戻せません。初期化しますか？')){try{for(const k of Object.keys(localStorage))if(k===key||k.startsWith(key+'-')||k==='abyss-prototype-v1'||k==='abyss-order-presets-v1')localStorage.removeItem(k);state=newGame();resetHeroVisual();motion=null;paused=true;message='全データを初期化しました';}catch{message='保存領域にアクセスできず初期化できませんでした';}}break;}
  motion=null;save();render();debugStatus(message);});
 $('debug-import').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const loaded=normalizeSave(JSON.parse(await file.text()));if(!loaded)throw Error('このゲームの有効なセーブではありません');if(confirm('選択したセーブで現在の進行と図鑑・達成記録を置き換えますか？')){try{localStorage.setItem(key+'-before-import',JSON.stringify(state));}catch{}state=loaded;resetHeroVisual();motion=null;paused=true;dialogWasPaused=true;save();render();debugStatus('セーブを読み込みました');}}catch(err){debugStatus('読み込み失敗：'+err.message);}e.target.value='';};
+}
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 function flushCombatFeedback(){const hits=advanceCombatFeedback(combat,heroClock,{reducedMotion:reducedMotion.matches});for(const hit of hits)damagePopups=queueDamage(damagePopups,[hit],hit.time);if(hits.some(hit=>!hit.hero&&!hit.trap))tone(180);}
 function loop(t){fieldMessages.animate(t,showingTitle||endingPreview||document.hidden||Boolean(document.querySelector('dialog[open]')));if(endingPlayback){if(!document.hidden&&!document.querySelector('dialog[open]'))endingPlayback.player.update(Math.max(0,Math.min(100,t-endingPlayback.last)));endingPlayback.last=t;renderNormalEnding();}if(memoryReveal){if(state.phase!=='awakening'||showingTitle)memoryReveal=null;else{if(!document.hidden&&!document.querySelector('dialog[open]'))memoryReveal.player.update(Math.max(0,Math.min(100,t-memoryReveal.last)));memoryReveal.last=t;$('awakening-text').textContent=memoryReveal.player.text;$('awakening-hint').textContent='';$('awakening-caret').hidden=!memoryReveal.player.full;}} const visualActive=!showingTitle&&!endingPreview&&!document.hidden&&!document.querySelector('dialog[open]')&&(state.phase==='dead'||state.phase==='cleared'&&(skillEffects.length||combat.events.length)&&!paused&&!document.querySelector('dialog[open]')||state.phase==='explore'&&!tutorialKind&&!paused&&!document.querySelector('dialog[open]'));const visualDelta=lastVisualTime===null?0:Math.max(0,Math.min(100,t-lastVisualTime)),idleActive=!showingTitle&&!endingPreview&&!pendingJourney&&!document.hidden&&state.phase==='explore';if(visualActive)heroClock+=visualDelta;lastVisualTime=t;const beforeActorTime=combat.actorTime;flushCombatFeedback();if(idleActive)idleClock+=visualActive?Math.max(0,combat.actorTime-beforeActorTime):visualDelta;if(fieldMessages.waiting&&houseEntryReady(motion,combat.actorTime)){fieldMessages.render();syncSceneMusic();}if(!showingTitle&&!endingPreview&&state.phase==='explore'&&!tutorialKind&&!paused&&!fieldMessages.active&&!document.querySelector('dialog[open]')&&t-last>420/speed){last=t;const old=state.phase;motion={from:{...state.player},time:combat.actorTime,duration:reducedMotion.matches?1:Math.min(190,340/speed)/Math.min(1,speed)};const eventBefore=captureFieldMessages(state),usedBefore=new Set(state.themeState?.used||[]),effectActors=captureEffectActors(state),castEffects=[];tick(state,{onSkillEffect:event=>castEffects.push(event)});skillEffects=enqueueSkillEffects(skillEffects,castEffects,effectActors,state,heroClock,SKILL_EFFECT_FORMAT);fieldMessages.push(collectFieldMessages(eventBefore,state));const usedSkill=state.themeState?.used?.find(id=>!usedBefore.has(id));if(usedSkill){skillPopup={name:themedSkillById[usedSkill]?.name||usedSkill,time:t,position:state.actorSkillEvent?{x:state.actorSkillEvent.x,y:state.actorSkillEvent.y}:null};$('skill-announcement').textContent=skillPopup.name;}if(Math.abs(state.player.x-heroVisual.x)+Math.abs(state.player.y-heroVisual.y)>1)heroVisual.teleport(state.player.x,state.player.y,combat.actorTime);else heroVisual.moveTo(state.player.x,state.player.y,combat.actorTime,motion.duration);const heroHit=heroAttackAim(state.damageEvents,castEffects,state.player,SKILL_EFFECT_FORMAT,heroVisual.direction);if(heroHit)heroVisual.attackTo(heroHit.x,heroHit.y,combat.actorTime,characterAttackDuration(heroSheet?.definition,speed));enemyAttacks=queueEnemyAttacks(enemyAttacks,state.damageEvents,state.enemies,combat.actorTime,enemyAttackDuration(speed));queueCombatFeedback(combat,(state.damageEvents||[]).filter(e=>e.hero||canSee(state,e.x,e.y)),effectActors,state,{speed,heroDuration:characterAttackDuration(heroSheet?.definition,speed),enemyDuration:enemyAttackDuration(speed)});flushCombatFeedback();if(Math.abs(state.player.x-motion.from.x)+Math.abs(state.player.y-motion.from.y)>1)motion=null;if(state.phase!==old){motion=null;if(state.phase==='dead')heroVisual.die(combat.actorTime+Math.max(0,...combat.events.filter(e=>e.hero&&e.time===null).map(e=>e.contact-combat.actorTime)));else heroVisual.teleport(state.player.x,state.player.y,combat.actorTime);tone(state.phase==='dead'?110:660);}render();}if(idleActive||state.phase==='explore'&&(!paused||motion&&combat.actorTime-motion.time<motion.duration+50)||combat.events.length||skillEffects.length||enemyAttacks.length||damagePopups.length||skillPopup||state.phase==='dead'&&combat.actorTime-heroVisual.since<800)draw();requestAnimationFrame(loop);}
 new ResizeObserver(()=>draw()).observe($('map'));
 const hudObserver=new ResizeObserver(()=>{const wrap=$('map-wrap'),gap=wrap.clientWidth<=480?8:20;$('workspace').style.setProperty('--shared-hud-space',($('hud-top').offsetTop+$('hud-top').offsetHeight+gap)+'px');wrap.style.setProperty('--hud-top-space',($('hud-top').offsetHeight+gap)+'px');wrap.style.setProperty('--hud-bottom-space',($('hud-bottom').offsetHeight+gap)+'px');const available=wrap.clientHeight-$('hud-top').offsetHeight-$('hud-bottom').offsetHeight-$('field-log-host').offsetHeight-52;wrap.style.setProperty('--minimap-limit',Math.max(64,(available-22)*31/23)+'px');});hudObserver.observe($('hud-top'));hudObserver.observe($('hud-bottom'));hudObserver.observe($('field-log-host'));
-installCardDragging($('tab-content'),()=>state,()=>{delete $('tab-content').dataset.orderSignature;render();});
+for(const host of [$('tab-content'),$('live-orders')]){
+ installCardDragging(host,()=>state,()=>{delete host.dataset.orderSignature;render();});
+}
 drawHeroPortraits();render();requestAnimationFrame(loop);
 
 // Only title artwork gates startup. Gameplay images load concurrently and gate journey entry.
