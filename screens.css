@@ -806,25 +806,25 @@ html[data-touch-controls=true] .gear-item-actions button,html[data-touch-control
 .gear-overview>div{padding:8px 12px}.gear-overview small{line-height:1.4}.gear-overview strong{font-size:21px;line-height:1.3}.gear-inventory-panel>.gear-section-heading{flex-wrap:wrap;flex:none;margin-bottom:4px}.gear-inventory-panel>.gear-section-heading h3{white-space:nowrap}.gear-inventory-panel .gear-inventory-controls{flex:1;justify-content:flex-end}.gear-equipped{padding:10px}.gear-equipped .gear-item-values{margin-top:6px}.gear-workbench{gap:10px}
 
 /* Options use the same frame and controls from title, exploration and ending. */
-#options-dialog {
+:is(#options-dialog,.record-window) {
  --option-ink:#f0e8d7; --option-muted:#c6c0b0; --option-gold:#ddc38d; --option-line:#8b7652;
  width:min(1100px,calc(100% - 28px)); max-width:none; height:min(560px,calc(100dvh - 24px)); max-height:none;
  overflow:auto; padding:clamp(12px,2.1vw,26px); border:1px solid var(--option-line);
  color:var(--option-ink); background:linear-gradient(#121a17e8,#111714fa),
  url('./art/opening-awakening.png') center / cover; box-shadow:0 18px 70px #000a;
 }
-#options-dialog[open] {display:grid;grid-template-rows:auto minmax(0,1fr) auto}
-#options-dialog::backdrop {background:#090d0cb0}
-#options-dialog.high-contrast {--option-ink:#fff;--option-muted:#f3ebda;--option-gold:#ffe0a0;--option-line:#d2b882;background:#101411}
+:is(#options-dialog,.record-window)[open] {display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+:is(#options-dialog,.record-window)::backdrop {background:#090d0cb0}
+.high-contrast-menus :is(#options-dialog,.record-window) {--option-ink:#fff;--option-muted:#f3ebda;--option-gold:#ffe0a0;--option-line:#d2b882;background:#101411}
 #options-dialog [hidden] {display:none!important}
 .settings-heading {display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
 .settings-heading h2 {margin:0;color:var(--option-ink);font:600 clamp(22px,3vw,34px)/1.2 serif;letter-spacing:.09em}
-#options-dialog .dialog-close {position:static;width:44px;height:44px;flex:none}
+:is(#options-dialog,.record-window) .dialog-close {position:static;width:44px;height:44px;flex:none}
 .settings-layout {display:grid;grid-template-columns:minmax(124px,19%) minmax(0,1fr);gap:14px;min-height:0}
 .settings-layout nav {display:grid;align-content:start;gap:6px;overflow:auto}
 .settings-layout nav button {display:flex;align-items:center;justify-content:flex-start;gap:8px;min-height:44px;padding:8px 11px;text-align:left;color:var(--option-muted);background:#1b221e;border:1px solid var(--option-line)}
 
-.settings-layout [role=tab][aria-selected=true] {color:var(--option-ink);background:linear-gradient(90deg,#59472f,#332a1f);box-shadow:inset 3px 0 var(--option-gold)}
+.settings-layout nav :is([aria-selected=true],[aria-pressed=true]) {color:var(--option-ink);background:linear-gradient(90deg,#59472f,#332a1f);box-shadow:inset 3px 0 var(--option-gold)}
 .settings-panels {min-width:0;min-height:0;overflow:auto;background:#101614e8;border:1px solid var(--option-line)}
 .settings-panels h3 {margin:0;padding:10px 14px;border-bottom:1px solid var(--option-line);font:600 17px serif;color:var(--option-ink)}
 .settings-row {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,46%);align-items:center;gap:12px;min-height:44px;margin:0 7px;padding:4px 9px;border-bottom:1px solid #a58f6640}
@@ -837,15 +837,15 @@ html[data-touch-controls=true] .gear-item-actions button,html[data-touch-control
 #options-dialog .settings-control input[type=range] {width:min(100%,190px);min-width:0;accent-color:var(--option-gold)}
 #options-dialog .settings-control input[type=checkbox] {width:20px;height:20px;accent-color:var(--option-gold)}
 #options-dialog .settings-control select {max-width:100%;padding:5px;background:#202823;color:var(--option-ink);border:1px solid var(--option-line)}
-#options-dialog .option-menu-button,#options-confirm-dialog .option-menu-button {width:auto;max-width:100%;margin:0;min-height:34px;text-align:center}
-#options-dialog .option-menu-button {background:#21271f;color:var(--option-ink);border-color:var(--option-line)}
-#options-dialog :is(button,input,select):focus-visible {outline:2px solid var(--option-gold);outline-offset:2px}
+:is(#options-dialog,.record-window,#options-confirm-dialog) .option-menu-button {width:auto;max-width:100%;margin:0;min-height:34px;text-align:center}
+:is(#options-dialog,.record-window) .option-menu-button {background:#21271f;color:var(--option-ink);border-color:var(--option-line)}
+:is(#options-dialog,.record-window) :is(button,input,select,[tabindex]):focus-visible {outline:2px solid var(--option-gold);outline-offset:2px}
 .settings-control p,.settings-empty {margin:0;color:var(--option-muted);font-size:12px}
 .settings-control p:empty {display:none}
 .settings-empty {padding:12px 14px}
 .settings-footer {display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:12px;padding:10px 12px;min-height:62px;background:#111915f0;border:1px solid var(--option-line)}
 .settings-footer strong {color:var(--option-gold);font-size:13px}
-.settings-footer p {margin:3px 0 0;font-size:12px;color:var(--option-muted)}
+.settings-footer p {flex:1 1 220px;margin:3px 0 0;font-size:12px;color:var(--option-muted)}
 .settings-actions {display:flex;gap:8px;flex-wrap:wrap}
 #options-confirm-dialog {width:min(430px,calc(100% - 24px))}
 #live-orders-dialog .live-orders {max-height:none}
@@ -858,3 +858,24 @@ html[data-touch-controls=true] .gear-item-actions button,html[data-touch-control
  #options-dialog .settings-control label {gap:3px}
 }
 html[data-touch-controls=true] #options-dialog :is(.option-menu-button,select,input) {min-height:44px}
+
+.record-window .record-content{padding:14px;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--option-line) transparent}
+.record-window .section-caption,.record-window #full-logs time{color:var(--option-muted)}
+.record-window .codex-table th{background:#202820;color:var(--option-gold);position:sticky;top:0}
+.record-window .codex-table :is(th,td){border-bottom-color:#a58f6640}
+.record-window .codex-table tr:nth-child(even){background:#ffffff06}
+.record-window .card-codex-item{background:#1b231e}
+.record-window .card-codex-item small{color:var(--option-muted)}
+.record-window .subtabs button,.record-window .sort-controls button{background:#21271f;color:var(--option-ink);border-color:var(--option-line)}
+.record-window :is(.subtabs,.sort-controls) :is(.active,[aria-pressed=true]){background:#59472f;color:var(--option-ink);border-color:var(--option-gold)}
+.record-window #full-logs .log-row{display:grid;grid-template-columns:76px minmax(0,1fr);align-items:baseline;gap:10px;border-bottom-color:#a58f6640}
+.record-window #full-logs .log-row:last-child{border-bottom:0}
+.record-window #full-logs time{margin:0;white-space:nowrap}
+#prep-journal-dialog .journal{background:transparent;border:0}
+#prep-journal-dialog .journal .panel-heading strong,#prep-journal-dialog .journal .muted{display:none}
+#prep-journal-dialog #logs{height:auto;max-height:none;overflow:visible}
+@media(max-width:620px){
+ #codex-dialog .settings-layout nav{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .record-window .record-content{padding:9px}
+ .record-window #full-logs .log-row{grid-template-columns:64px minmax(0,1fr);gap:6px;font-size:13px}
+}
