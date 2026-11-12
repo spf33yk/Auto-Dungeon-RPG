@@ -1,8 +1,8 @@
 const BURN_START_MS=9200;
-const BURN_DURATION_MS=3100;
+const TITLE_REVEALED_MS=11550;
+const BURN_CLEANUP_MS=12800;
 const TITLE_HOLD_MS=2400;
 const MENU_FADE_MS=1000;
-const BURN_PLAYBACK_RATE=2350/BURN_DURATION_MS;
 
 export function playEndingTitleTransition(title){
  const overlay=document.createElement('div');
@@ -34,7 +34,6 @@ export function playEndingTitleTransition(title){
  flame.src=title.dataset.endingFlame;
  flame.muted=flame.playsInline=true;
  flame.preload='auto';
- flame.playbackRate=BURN_PLAYBACK_RATE;
  const surface=document.createElement('canvas');
  surface.className='ending-title-flame';
  surface.width=960;
@@ -52,10 +51,11 @@ export function playEndingTitleTransition(title){
  const burned=mask.createImageData(reveal.width,reveal.height);
  const smoothed=mask.createImageData(reveal.width,reveal.height);
  const ignition = new Float64Array(reveal.width * reveal.height);
- let flameFrame;
- function drawFlame(){
+ let flameFrame,burnStartedAt;
+ function drawFlame(now){
+  const elapsed=now-burnStartedAt;
+  surface.style.opacity=String(Math.max(0,Math.min(1,1-(elapsed-1850)/1000)));
   if(flame.readyState>=2){
-   const flameTime=flame.currentTime*1000;
    pixels.drawImage(flame,0,0,surface.width,surface.height);
    const frame=pixels.getImageData(0,0,surface.width,surface.height);
    const rgba=frame.data;
@@ -71,7 +71,6 @@ export function playEndingTitleTransition(title){
     rgba[i+2]=blue-Math.max(0,blue-neutral)*coverage;
    }
    pixels.putImageData(frame,0,0);
-   surface.style.opacity=String(Math.max(0,Math.min(1,1-(flameTime-1850)/500)));
    if(overlay.dataset.step==='burn'){
     for(let y=0;y<reveal.height;y++){
      for(let x=0;x<reveal.width;x++){
@@ -79,13 +78,13 @@ export function playEndingTitleTransition(title){
       const heat=rgba[sample]-rgba[sample+2];
       const cell=y*reveal.width+x;
       if(!ignition[cell]&&heat>24&&rgba[sample]>100&&rgba[sample+3]>100){
-       ignition[cell]=Math.max(1,flameTime);
+       ignition[cell]=Math.max(1,elapsed);
       }
-      if(ignition[cell])burned.data[cell*4+3]=255*Math.min(1,Math.max(0,flameTime-ignition[cell])/1000);
+      if(ignition[cell])burned.data[cell*4+3]=255*Math.min(1,Math.max(0,elapsed-ignition[cell])/1000);
      }
     }
     // Expand the revealed area slightly to close isolated holes between flame pixels.
-    const finish=Math.min(1,Math.max(0,(flameTime-1350)/1000));
+    const finish=Math.min(1,Math.max(0,(elapsed-1350)/1000));
     for(let y=0;y<reveal.height;y++){
      for(let x=0;x<reveal.width;x++){
       let alpha=0;
@@ -106,6 +105,7 @@ export function playEndingTitleTransition(title){
   flameFrame=requestAnimationFrame(drawFlame);
  }
  function burn(){
+  burnStartedAt=performance.now();
   if(flame.readyState)flame.currentTime=0;
   playVideo(flame);
   cancelAnimationFrame(flameFrame);
@@ -125,12 +125,16 @@ export function playEndingTitleTransition(title){
   burn();
  },BURN_START_MS);
  setTimeout(()=>{
+  outgoing.hidden=true;
+  effect.pause();
+ },TITLE_REVEALED_MS);
+ setTimeout(()=>{
   cancelAnimationFrame(flameFrame);
   flame.pause();
   effect.pause();
   overlay.remove();
- },BURN_START_MS+BURN_DURATION_MS);
- const menuStart=BURN_START_MS+BURN_DURATION_MS+TITLE_HOLD_MS;
+ },BURN_CLEANUP_MS);
+ const menuStart=TITLE_REVEALED_MS+TITLE_HOLD_MS;
  setTimeout(()=>title.dataset.endingTransition='menu',menuStart);
  setTimeout(()=>delete title.dataset.endingTransition,menuStart+MENU_FADE_MS);
 }
