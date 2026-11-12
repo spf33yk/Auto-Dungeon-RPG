@@ -81,7 +81,13 @@ function renderNormalEnding(){
   render();
   return;
  }
- $('normal-ending').classList.toggle('is-memory',intro||ending==='will'||player.index>=3&&!done);$('normal-ending').classList.toggle('is-intro',intro);$('ending-image').hidden=intro||ending==='will';$('ending-text').textContent=player.text;$('ending-caret').hidden=!player.full||done;$('ending-subtitle').hidden=done;$('ending-result').hidden=!done;$('ending-skip').hidden=done;$('ending-advance').hidden=done;$('ending-hint').hidden=done;$('ending-hint').textContent='';
+ $('normal-ending').classList.toggle('is-memory',intro||ending!=='will'&&player.index>=3&&!done);$('normal-ending').classList.toggle('is-intro',intro);$('ending-image').hidden=intro||ending==='will';
+ const willScene=!intro&&ending==='will';
+ const collapse=$('will-ending-collapse'),reading=$('will-ending-reading');
+ collapse.hidden=!willScene||player.index>=3||done;
+ reading.hidden=!willScene||player.index<3&&!done;
+ if(willScene)reading.loading='eager';
+ $('ending-text').textContent=player.text;$('ending-caret').hidden=!player.full||done;$('ending-subtitle').hidden=done;$('ending-result').hidden=!done;$('ending-skip').hidden=done;$('ending-advance').hidden=done;$('ending-hint').hidden=done;$('ending-hint').textContent='';
  $('ending-heading').textContent=intro?'字幕の確認':ending==='will'?'残された遺書':'届かなかった声';
  $('ending-label').textContent=endingPreview?'PREVIEW':ending==='will'?'TRUE END':'NORMAL END';
  $('ending-next').textContent=endingPreview?'確認を終える':ending==='will'?'タイトルへ':'次の旅へ';
