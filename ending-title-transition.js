@@ -40,7 +40,10 @@ export function playEndingTitleTransition(title){
  surface.height=540;
  overlay.append(outgoing,still,surface);
  title.dataset.endingTransition='playing';
+ const incomingLogo=title.querySelector('#title-logo');
+ incomingLogo.style.visibility='hidden';
  title.append(overlay);
+ setTimeout(()=>incomingLogo.style.removeProperty('visibility'),TITLE_REVEALED_MS+500);
 
  const playVideo=video=>video.play().catch(()=>{});
  const pixels=surface.getContext('2d',{willReadFrequently:true});
