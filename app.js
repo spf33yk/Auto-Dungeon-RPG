@@ -1,3 +1,4 @@
+import {playEndingTitleTransition} from './ending-title-transition.js';
 import {drawTrapEffects,trapEffectAlive} from './trap-effects.js';
 import{createTutorialSpotlight}from'./tutorial-spotlight.js';
 import{equipmentPanel}from'./equipment-panel.js';
@@ -80,7 +81,7 @@ function renderNormalEnding(){
 }
 $('ending-advance').onclick=()=>{endingPlayback?.player.advance();renderNormalEnding();};
 $('ending-skip').onclick=()=>{endingPlayback?.player.finish();renderNormalEnding();};
-$('ending-next').onclick=()=>{if(endingPreview){endingPreview=false;endingPlayback=null;render();}else if(state.runEnding==='will'){showingTitle=true;render();}else reset();};
+$('ending-next').onclick=()=>{if(endingPreview){endingPreview=false;endingPlayback=null;render();}else if(state.runEnding==='will'){playEndingTitleTransition($('title-scene'));showingTitle=true;render();}else reset();};
 $('awakening-advance').onclick=()=>{if(!memoryReveal)return;memoryReveal.player.advance();if(memoryReveal.player.done){memoryReveal=null;beginExploration(state);paused=false;last=performance.now();render();tryMobileDisplay();}else{$('awakening-text').textContent=memoryReveal.player.text;}};
 $('debug-dialog').addEventListener('close',()=>{musicAudition=null;syncSceneMusic();});
 $('ending-options').onclick=()=>openOptions();

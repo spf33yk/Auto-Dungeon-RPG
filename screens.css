@@ -302,7 +302,7 @@ body.opening>header,body.opening>main,body.opening>.mobile-display{display:none!
 .title-shade{position:absolute;inset:0;background:linear-gradient(90deg,#070b0d0a 24%,#070b0d33 55%,#070b0d8c),linear-gradient(0deg,#070b0d66,transparent 50%)}
 .title-content{position:absolute;inset:0;pointer-events:none}
 .title-logo-frame{position:absolute;left:45%;top:17.534722%;width:51%;aspect-ratio:2.5;display:grid;place-items:center}
-.title-logo{display:block;width:100%;height:100%;min-height:0;object-fit:contain;filter:drop-shadow(0 3px 5px #000c)}
+.title-logo{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0;object-fit:contain;filter:drop-shadow(0 3px 5px #000c)}
 .title-menu{position:absolute;left:70.5%;top:55.833333%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:stretch;width:min(310px,42.33%);gap:clamp(2px,1.09375cqw,14px);text-align:center}
 .title-menu button{display:block;width:100%;min-height:clamp(24px,3.4375cqw,44px);padding:clamp(1px,.703125cqw,9px) clamp(4px,1.40625cqw,18px);border:1px solid #cbb88b88;border-radius:2px;background:linear-gradient(90deg,#11161944,#111619bf,#11161944);color:#eee3c6;font:clamp(10px,2.03125cqw,26px)/1.4 Georgia,serif;letter-spacing:clamp(.5px,.15625cqw,2px);text-shadow:0 2px 3px #000}
 .title-menu button:hover:not(:disabled),.title-menu button:focus-visible{border-color:#f0dda7;background:#242820d9;color:#fff6df}
@@ -891,3 +891,17 @@ html[data-touch-controls=true] #options-dialog :is(.option-menu-button,select,in
 #augment-skill-groups h3{display:flex;justify-content:space-between;gap:4px;font-size:13px;margin:0 0 4px}
 #augment-skill-groups h3 b{color:#ead5a4;white-space:nowrap}
 #augment-skill-groups ul{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.65}
+
+/* TRUE END uses the live title underneath the outgoing scene. */
+#title-scene[data-ending-transition] .title-menu{visibility:hidden;opacity:0}
+#title-scene[data-ending-transition="menu"] .title-menu{visibility:visible;opacity:1;transition:opacity 1s ease}
+.ending-title-transition{position:absolute;inset:0;z-index:5;pointer-events:none;background:#000}
+.ending-title-transition[data-step="burn"]{background:transparent}
+.ending-title-transition>.title-scene{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity 2.4s ease}
+.ending-title-transition[data-step="mukuro"]>.title-scene,
+.ending-title-transition[data-step="burn"]>.title-scene{opacity:1}
+.ending-title-transition[data-step="burn"]>.title-scene{mask:var(--outgoing-mask) center / 100% 100% no-repeat}
+.ending-title-still,.ending-title-flame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ending-title-still{transition:opacity 2.4s ease}
+.ending-title-transition:not([data-step="ending"]) .ending-title-still{opacity:0}
+.ending-title-flame{mix-blend-mode:screen}
