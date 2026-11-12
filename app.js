@@ -76,7 +76,7 @@ function renderNormalEnding(){
  const key=endingPreview?'preview:'+subtitlePreviewKind:state.seed+':'+clears+':'+ending;if(endingPlayback?.key!==key)endingPlayback={key,player:new SubtitlePlayer(intro?awakeningLines(clears>1?1:0):normalEndingLines(clears,ending)),last:performance.now()};
  const player=endingPlayback.player,done=player.done;
  if(done&&!endingPreview&&ending==='will'){
-  playEndingTitleTransition($('title-scene'));
+  playEndingTitleTransition($('title-scene'),undefined,{fireSound:!verificationMode&&sound&&volume>0});
   showingTitle=true;
   render();
   return;

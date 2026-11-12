@@ -4,7 +4,8 @@ const BURN_CLEANUP_MS=10600;
 const TITLE_HOLD_MS=2400;
 const MENU_FADE_MS=1000;
 
-export function playEndingTitleTransition(title,onComplete){
+export function playEndingTitleTransition(title,onComplete,{fireSound=false}={}){
+ const fireAudio=fireSound?prepareFireAudio(title.dataset.endingFire):null;
  const overlay=document.createElement('div');
  overlay.className='ending-title-transition';
  overlay.dataset.step='ending';
@@ -106,6 +107,7 @@ export function playEndingTitleTransition(title,onComplete){
  }
  function burn(){
   burnStartedAt=performance.now();
+  fireAudio?.play(burnStartedAt);
   if(flame.readyState)flame.currentTime=0;
   playVideo(flame);
   cancelAnimationFrame(flameFrame);
@@ -133,6 +135,7 @@ export function playEndingTitleTransition(title,onComplete){
   flame.pause();
   effect.pause();
   overlay.remove();
+  fireAudio?.close();
  },BURN_CLEANUP_MS);
  const menuStart=TITLE_REVEALED_MS+TITLE_HOLD_MS;
  setTimeout(()=>title.dataset.endingTransition='menu',menuStart);
@@ -140,4 +143,35 @@ export function playEndingTitleTransition(title,onComplete){
   delete title.dataset.endingTransition;
   onComplete?.();
  },menuStart+MENU_FADE_MS);
+}
+
+function prepareFireAudio(url){
+ if(!globalThis.AudioContext||!url)return null;
+ let context;
+ try{context=new AudioContext();}catch{return null;}
+ context.resume().catch(()=>{});
+ const decoded=fetch(url).then(response=>response.ok?response.arrayBuffer():null)
+  .then(data=>data?context.decodeAudioData(data):null).catch(()=>null);
+ return {
+  async play(startedAt){
+   const buffer=await decoded;
+   const elapsed=(performance.now()-startedAt)/1000,duration=3.35,fadeStart=1.85;
+   if(!buffer||document.hidden||context.state!=='running'||elapsed>=duration-.02)return;
+   const samples=buffer.getChannelData(0),limit=Math.min(samples.length,buffer.sampleRate*.25);
+   let onset=0;
+   while(onset<limit&&Math.abs(samples[onset])<.015)onset++;
+   const trim=Math.max(0,onset/buffer.sampleRate-.012);
+   const source=context.createBufferSource(),gain=context.createGain(),now=context.currentTime;
+   source.buffer=buffer;
+   source.playbackRate.value=(buffer.duration-trim)/duration;
+   source.connect(gain).connect(context.destination);
+   gain.gain.setValueAtTime(0,now);
+   gain.gain.linearRampToValueAtTime(.05*Math.min(1,(duration-elapsed)/(duration-fadeStart)),now+.018);
+   if(elapsed+.018<fadeStart)gain.gain.setValueAtTime(.05,now+fadeStart-elapsed);
+   gain.gain.linearRampToValueAtTime(0,now+duration-elapsed);
+   source.start(now,trim+elapsed*source.playbackRate.value);
+   source.stop(now+duration-elapsed);
+  },
+  close(){context.close().catch(()=>{});}
+ };
 }
