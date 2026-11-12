@@ -152,13 +152,14 @@ function placeWillChest(s){
 
 export function obtainable(s,i){return i.type==='letter'?(fixedChestUnlocked(s)||s.debugUsed===true&&s.debugWillChest===true&&s.floor===LETTER_FLOOR)&&!s.letter:true;}
 function receiveReward(s,id){const fresh=grantReward(s,id);log(s,fresh?'「'+rewardById[id].name+'」を手に入れた。'+(rewardById[id].kind==='order'?'次の準備で探索指示に設定できる。':'この旅で使用できる。'):'「'+rewardById[id].name+'」は取得済み。記憶の欠片 +5','good');}
-function pickup(s){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);
+function pickup(s,onPickup){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);
  if(isHealingItem(item)){if(s.hp>=stats(s).maxHp){s.potionStock=(s.potionStock||0)+1;log(s,'回復ポーションをストックした。','good');}else{const heal=Math.min(stats(s).maxHp-s.hp,BALANCE.heartHeal);s.hp+=heal;log(s,'回復ポーション。HP +'+heal,'good');}}
  else if(item.type==='fragment'){const amount=3+(hasAugment(s,'scavenger')?ap(s,'scavenger').extra:0)+(hasAugment(s,'lucky-find')&&nextRandom(s)<Math.min(1,ap(s,'lucky-find').chance)?4:0);s.shards+=amount;log(s,'床の記憶の欠片を拾った。＋'+amount,'good');}
  else if(item.type==='gear'){acquire(s,item.gear);log(s,gearName(item.gear)+'を拾った。','good');}
  else if(item.type==='reward')receiveReward(s,item.rewardId);
  else if(item.type==='letter'){delete s.debugWillChest;s.letter=true;log(s,WILL_PICKUP_LINE,'story');}
  else if(item.type==='chest'){log(s,'宝箱を開けた。','good');if(item.cardId){const t=themeState(s),gamble=hasAugment(s,'destiny')&&!t.destinyUsed;if(gamble)t.destinyUsed=true;const win=gamble?nextRandom(s)<Math.min(1,ap(s,'destiny').chance):false,categories=chestCategoryChoices(s,item.cardId,()=>nextRandom(s)),choices=categories[cardByKey[item.cardId].kind]||Object.values(categories)[0];s.cardOffer={choices,categories,remaining:gamble&&win?2:1,...(gamble?{gamble:true,lost:!win,consolation:ap(s,'destiny').consolation}:{})};log(s,'箱の中で、いくつもの記憶が揺れている。ひとつ選ぼう。','good');}else if(item.gear){acquire(s,item.gear);s.shards+=2;log(s,'旧宝箱から'+gearName(item.gear)+'を入手。記憶の欠片 +2','good');}else receiveReward(s,item.rewardId);}
+ if(isHealingItem(item)||['fragment','gear','reward'].includes(item.type))onPickup?.(item);
 }
 export function dropFromEnemy(s,e){if(e.reinforcement)return null;const rng=()=>nextRandom(s),drop=rollEnemyDrop(e.baseId,rng);if(!drop)return null;
  const q=[{x:e.x,y:e.y}],seen=new Set([key(e)]);let position=null;
@@ -168,7 +169,7 @@ export function dropFromEnemy(s,e){if(e.reinforcement)return null;const rng=()=>
 }
 export function attackEnemy(s,enemy,{splashDamage=null,power=1,skill=false,skillId=null,leech=0}={}){
  if(!s.enemies.includes(enemy)||enemy.hp<=0)return;
- const strike=()=>{const b=augmentBonus(s,stats(s).maxHp),critical=(hasAugment(s,'moon')&&!s.firstAttackUsed&&s.hp===stats(s).maxHp)||(splashDamage===null&&b.critical>0&&nextRandom(s)<b.critical),base=Math.max(1,stats(s).attack-enemyDefense(s,enemy))*power*(s.heroWeakenedHits>0?.5:1)*(b.charged?ap(s,'charge').damage:1)*(themeBuff(s,'nextPower')|| (s.focusPower?1.25:1))*b.damage*(hasAugment(s,'risky-blade')?(nextRandom(s)<.5?ap(s,'risky-blade').damage:.8):1),rawDamage=splashDamage??(critical?Math.ceil(base*(hasAugment(s,'moon')&&!s.firstAttackUsed&&s.hp===stats(s).maxHp?ap(s,'moon').damage:1.5)):Math.ceil(base)),damage=mitigateControlledDamage(s,enemy,rawDamage),actual=Math.min(enemy.hp,damage);enemy.hp-=damage;if(s.heroWeakenedHits>0)s.heroWeakenedHits--;recordBuild(s,'damageDealt',actual);if(critical)recordBuild(s,'criticalHits');if(b.charged&&splashDamage===null)recordBuild(s,'chargedHits');s.firstAttackUsed=true;s.focusPower=false;delete themeState(s).buffs.nextPower;if(critical)themeState(s).pity=0;else themeState(s).pity++;if(b.charged&&splashDamage===null)s.unharmedTurns=0;(s.damageEvents??=[]).push({x:enemy.x,y:enemy.y,damage,hero:false,source:{...s.player},impact:skill?'skill':splashDamage!==null?'splash':'melee',...(skillId?{skillId}:{})});s.flash={x:enemy.x,y:enemy.y,kind:'hit'};if(critical)log(s,'会心の一撃！ '+damage+'ダメージ。','good');if(b.leech+leech>0){const heal=Math.max(0,Math.min(stats(s).maxHp-s.hp,Math.floor(actual*(b.leech+leech))));s.hp+=heal;recordBuild(s,'leechHealing',heal);if(heal)log(s,'吸命の記憶。HP +'+heal,'good');}};
+ const strike=()=>{const b=augmentBonus(s,stats(s).maxHp),critical=(hasAugment(s,'moon')&&!s.firstAttackUsed&&s.hp===stats(s).maxHp)||(splashDamage===null&&b.critical>0&&nextRandom(s)<b.critical),base=Math.max(1,stats(s).attack-enemyDefense(s,enemy))*power*(s.heroWeakenedHits>0?.5:1)*(b.charged?ap(s,'charge').damage:1)*(themeBuff(s,'nextPower')|| (s.focusPower?1.25:1))*b.damage*(hasAugment(s,'risky-blade')?(nextRandom(s)<.5?ap(s,'risky-blade').damage:.8):1),rawDamage=splashDamage??(critical?Math.ceil(base*(hasAugment(s,'moon')&&!s.firstAttackUsed&&s.hp===stats(s).maxHp?ap(s,'moon').damage:1.5)):Math.ceil(base)),damage=mitigateControlledDamage(s,enemy,rawDamage),actual=Math.min(enemy.hp,damage);enemy.hp-=damage;if(s.heroWeakenedHits>0)s.heroWeakenedHits--;recordBuild(s,'damageDealt',actual);if(critical)recordBuild(s,'criticalHits');if(b.charged&&splashDamage===null)recordBuild(s,'chargedHits');s.firstAttackUsed=true;s.focusPower=false;delete themeState(s).buffs.nextPower;if(critical)themeState(s).pity=0;else themeState(s).pity++;if(b.charged&&splashDamage===null)s.unharmedTurns=0;(s.damageEvents??=[]).push({x:enemy.x,y:enemy.y,damage,hero:false,source:{...s.player},impact:skill?'skill':splashDamage!==null?'splash':'melee',...(skillId?{skillId}:{}),...(critical&&splashDamage===null?{critical:true}:{})});s.flash={x:enemy.x,y:enemy.y,kind:'hit'};if(critical)log(s,'会心の一撃！ '+damage+'ダメージ。','good');if(b.leech+leech>0){const heal=Math.max(0,Math.min(stats(s).maxHp-s.hp,Math.floor(actual*(b.leech+leech))));s.hp+=heal;recordBuild(s,'leechHealing',heal);if(heal)log(s,'吸命の記憶。HP +'+heal,'good');}};
  strike();if(!skill&&splashDamage===null&&enemy.hp>0&&hasAugment(s,'double-strike')&&nextRandom(s)<Math.min(1,ap(s,'double-strike').chance)){recordBuild(s,'doubleStrikes');log(s,'追撃の記憶が発動！','good');strike();}
  if(enemy.hp<=0)defeatEnemy(s,enemy);
  if(splashDamage===null&&hasAugment(s,'nova'))for(const other of [...s.enemies])if(other!==enemy&&canSee(s,other.x,other.y))attackEnemy(s,other,{splashDamage:Math.max(1,Math.floor(Math.max(1,stats(s).attack-other.defense)/(distance(s.player,other)+1)))});
@@ -209,7 +210,7 @@ function applyTrap(s,enemy=null,onEffect){
    log(s,(e?e.name:'骸')+'に'+damage+'ダメージ。',e?'':'bad');
   }});
 }
-export function tick(s,{onSkillEffect,onTrapEffect}={}){
+export function tick(s,{onSkillEffect,onTrapEffect,onPickup}={}){
  if(s.phase!=='explore'||s.augmentOffer||s.cardOffer)return;notifyWillChest(s);s.unharmedTurns=(s.unharmedTurns||0)+1;s.turn++;s.steps++;s.flash=null;s.damageEvents=[];reveal(s);const st=stats(s);const report=buildReport(s),bonus=augmentBonus(s,st.maxHp,s.enemies.filter(e=>canSee(s,e.x,e.y)).length);report.turns++;report.peakAttackBonus=Math.max(report.peakAttackBonus,bonus.attack);report.peakDefenseBonus=Math.max(report.peakDefenseBonus,bonus.defense);
  beginDirectiveSafety(s,log);const progressBefore=progressSnapshot(s);s.actorSkillEvent=null;for(const e of s.enemies)if(e.control)e.control.unharmedTurns++;if(s.retreatCooldown>0)s.retreatCooldown--;
  const sealedStart=s.enemies.some(e=>e.boss)&&key(s.player)===key(s.stairs);
@@ -226,7 +227,7 @@ export function tick(s,{onSkillEffect,onTrapEffect}={}){
  }
  updateThemeExploration(s,{has:hasAugment,stats,log});
  if(s.augmentOffer)return;
- pickup(s);
+ pickup(s,onPickup);
  const house=s.gimmick?.room;
  if(house&&!s.gimmick.triggered&&s.player.x>=house.x&&s.player.x<house.x+house.w&&s.player.y>=house.y&&s.player.y<house.y+house.h){s.gimmick.triggered=true;log(s,s.gimmick.name+'！','bad');if(s.gimmick.id==='monsters')for(const e of s.enemies)if(e.house)e.aggro=true;}
  applyTrap(s,null,onTrapEffect);
