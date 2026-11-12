@@ -115,7 +115,7 @@ app.jsはtick完了後に通知を積み、入場通知中だけ次tickと宝箱
 
 card-editor.jsのfixedInstructionRowsは隣接攻撃・階段探索の読取専用2行を描画する。data-fixed-order領域への配置を拒否し、説明行はs.ordersに格納しない。FIXED_STAIR_RULEとplanHeroTurnの未踏探索で階段探索を構成する。planHeroTurnから非隣接の可視敵への接近フォールバックを削除し、隣接戦闘と能動指示の優先は維持する。
 
-各行はarticle／divの操作欄・要約欄・本文で構成。有効／無効の隣の開閉ボタンはfoldedを行データへ記録し、再描画と保存を行う。固定行はfixedOrderExpandedへ展開中の添字を保存する。旧保存は未記録を許可。編集行のfoldedは複製・編集・並べ替え・プリセットで保持。閉じたarticle全体へrowのドラッグ元を設定し、行全体を掴んで移動する。音量はabyss-ui-settingsのbgmVolume（初期5）、soundEnabled（初期true）、soundVolume（初期30）で管理する。
+各行はarticle／divの操作欄・要約欄・本文で構成。有効／無効の隣の開閉ボタンはfoldedを行データへ記録し、再描画と保存を行う。固定行はfixedOrderExpandedへ展開中の添字を保存する。旧保存は未記録を許可。編集行のfoldedは複製・編集・並べ替え・プリセットで保持。閉じたarticle全体へrowのドラッグ元を設定し、行全体を掴んで移動する。音量はabyss-ui-settingsのbgmVolume（初期5）、soundEnabled（初期true）、soundVolume（初期10）で管理する。
 
 app.jsのsyncSceneViewportはany-pointer:coarseからdata-touch-controlsを設定。screens.cssでHUDの押下領域・アイコン・間隔を--game-scene-scaleの逆数で補正し、ResizeObserverで準備領域の開始位置を追従させる。行の有効／無効と折りたたみは同じ詳細度のCSSで寸法を統一する。
 
