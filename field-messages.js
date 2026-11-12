@@ -58,11 +58,12 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
  };
  const willPage=dialog.querySelector('#will-document'),willClose=dialog.querySelector('#will-close');
  let willAdvance,willSubtitle,willCaret,willLines,willMessage=null,willPlayer=null;
+ let willIntroRemaining=0;
  const reducedMotion=()=>willPage.ownerDocument.defaultView.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const paintWill=()=>{
   if(willSubtitle.textContent!==willPlayer.text)willSubtitle.textContent=willPlayer.text;
   willCaret.hidden=!willPlayer.full;
-  willAdvance.setAttribute('aria-label',!willPlayer.full?'字幕をすぐ表示':willPlayer.index===willLines.length-1?'読み終える':'次のページ');
+  willAdvance.setAttribute('aria-label',willIntroRemaining>0?'遺書を表示中':!willPlayer.full?'字幕をすぐ表示':willPlayer.index===willLines.length-1?'読み終える':'次のページ');
  };
  const startWill=message=>{
   if(!willAdvance){
@@ -74,7 +75,7 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
   willLines??=[...willPage.querySelector('#will-lines').content.querySelectorAll('p')].map(line=>line.textContent);
   willMessage=message;
   willPlayer=new SubtitlePlayer(willLines);
-  if(reducedMotion())willPlayer.update(Infinity);
+  willIntroRemaining=Infinity;
   paintWill();
  };
  const place=()=>{if(dialog.open&&dialog.dataset.kind!=='will')position(dialog);if(!skillBox.hidden)position(skillBox);visibility();};
@@ -85,14 +86,23 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
   dialog.dataset.kind=kind;
   dialog.setAttribute('aria-label',reading?'取得した遺書':'探索イベント');
   button.hidden=reading;willPage.hidden=!reading;
-  if(reading&&willMessage!==queue.current)startWill(queue.current);
+  const startingWill=reading&&willMessage!==queue.current;
+  if(startingWill)startWill(queue.current);
   text.textContent=message;button.setAttribute('aria-label',message+' クリック、タップ、Enterで続ける');
   if(!dialog.open)dialog.showModal();
+  if(startingWill){
+   const player=willPlayer,paper=willPage.querySelector('.will-paper');
+   const reveal=paper.getAnimations().map(animation=>animation.finished);
+   Promise.allSettled([paper.decode(),...reveal]).then(()=>{
+    if(dialog.open&&willMessage&&willPlayer===player)willIntroRemaining=250;
+   });
+  }
   place();(reading?willAdvance:button).focus({preventScroll:true});
  };
  const advance=()=>{if(!queue.active)return;willMessage=null;queue.advance();if(queue.active)render();else{dialog.close();onIdle();}};
  button.addEventListener('click',advance);
  function advanceWill(){
+  if(willIntroRemaining>0)return;
   if(!willPlayer.full)willPlayer.update(Infinity);
   else willPlayer.advance();
   if(willPlayer.done){advance();return;}
@@ -105,8 +115,16 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
  const animate=(time,blocked=false)=>{
   const elapsed=lastTime===null?0:Math.max(0,Math.min(100,time-lastTime));lastTime=time;
   if(dialog.open&&dialog.dataset.kind==='will'&&!willPlayer.full&&!willPage.ownerDocument.hidden){
-   willPlayer.update(reducedMotion()?Infinity:elapsed);
-   paintWill();
+   if(willIntroRemaining>0){
+    willIntroRemaining=Math.max(0,willIntroRemaining-elapsed);
+    if(willIntroRemaining===0){
+     if(reducedMotion())willPlayer.update(Infinity);
+     paintWill();
+    }
+   }else{
+    willPlayer.update(reducedMotion()?Infinity:elapsed);
+    paintWill();
+   }
   }
   if(blocked||queue.active||!skills.active){skillBox.hidden=true;visibility();return;}
   if(displayed!==skills.current){displayed=skills.current;remaining=SKILL_MESSAGE_MS;}else remaining-=elapsed;
