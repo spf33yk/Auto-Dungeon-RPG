@@ -736,7 +736,7 @@ body.preparing #prepare-scene .card-rules-heading>.instruction-controls{flex:1;m
 }
 @media(prefers-reduced-motion:reduce){#field-event-dialog[open][data-kind=will] .will-paper{animation:none}}
 #will-advance{position:absolute;inset:0;display:grid;place-items:center;width:100%;height:100%;padding:0 9vw;border:0;background:transparent;color:#fff8e7;cursor:pointer}
-.will-caption{width:calc(var(--will-paper-width) * .82);text-align:center;color:#342319;font:600 clamp(13px,3.25dvh,26px)/1.65 serif;overflow-wrap:anywhere}
+.will-caption{width:calc(var(--will-paper-width) * .82);text-align:center;color:#342319;font:600 min(26px,calc(var(--will-paper-width) * .043))/1.65 serif;overflow-wrap:anywhere}
 #will-subtitle{white-space:pre-line}
 .will-caret[hidden]{display:none}
 .will-caret{margin-inline-start:.45em;font-size:.72em;white-space:nowrap}

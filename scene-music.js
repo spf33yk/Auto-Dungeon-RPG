@@ -1,6 +1,6 @@
 export function musicScene(state,{title=false,teaser=false,endingPreview=false,houseEntered=Boolean(state.gimmick?.triggered)}={}){
  if(endingPreview)return 'ending';if(title||teaser||state.phase==='awakening')return 'opening';
- if(state.phase==='ending')return 'ending';if(state.phase==='dead')return null;
+ if(state.phase==='ending')return state.runEnding==='will'?'opening':'ending';if(state.phase==='dead')return null;
  if(state.bossFloor)return 'boss';
  if(['traps','monsters'].includes(state.gimmick?.id))return houseEntered?state.gimmick.id:'dungeon';
  return state.gimmick?.id==='fog'&&['explore','cleared'].includes(state.phase)?'fog':'dungeon';

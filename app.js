@@ -74,7 +74,14 @@ function renderNormalEnding(){
  const intro=endingPreview&&subtitlePreviewKind.endsWith('intro'),clears=endingPreview?(subtitlePreviewKind.startsWith('later')?2:1):state.profile.normalClears;
  const ending=endingPreview?(subtitlePreviewKind==='missed-end'?'missed':clears>1?'will':'first'):(state.runEnding||(clears>1?'missed':'first'));
  const key=endingPreview?'preview:'+subtitlePreviewKind:state.seed+':'+clears+':'+ending;if(endingPlayback?.key!==key)endingPlayback={key,player:new SubtitlePlayer(intro?awakeningLines(clears>1?1:0):normalEndingLines(clears,ending)),last:performance.now()};
- const player=endingPlayback.player,done=player.done;$('normal-ending').classList.toggle('is-memory',intro||ending==='will'||player.index>=3&&!done);$('normal-ending').classList.toggle('is-intro',intro);$('ending-image').hidden=intro||ending==='will';$('ending-text').textContent=player.text;$('ending-caret').hidden=!player.full||done;$('ending-subtitle').hidden=done;$('ending-result').hidden=!done;$('ending-skip').hidden=done;$('ending-advance').hidden=done;$('ending-hint').hidden=done;$('ending-hint').textContent='';
+ const player=endingPlayback.player,done=player.done;
+ if(done&&!endingPreview&&ending==='will'){
+  playEndingTitleTransition($('title-scene'));
+  showingTitle=true;
+  render();
+  return;
+ }
+ $('normal-ending').classList.toggle('is-memory',intro||ending==='will'||player.index>=3&&!done);$('normal-ending').classList.toggle('is-intro',intro);$('ending-image').hidden=intro||ending==='will';$('ending-text').textContent=player.text;$('ending-caret').hidden=!player.full||done;$('ending-subtitle').hidden=done;$('ending-result').hidden=!done;$('ending-skip').hidden=done;$('ending-advance').hidden=done;$('ending-hint').hidden=done;$('ending-hint').textContent='';
  $('ending-heading').textContent=intro?'字幕の確認':ending==='will'?'残された遺書':'届かなかった声';
  $('ending-label').textContent=endingPreview?'PREVIEW':ending==='will'?'TRUE END':'NORMAL END';
  $('ending-next').textContent=endingPreview?'確認を終える':ending==='will'?'タイトルへ':'次の旅へ';
@@ -82,7 +89,7 @@ function renderNormalEnding(){
 }
 $('ending-advance').onclick=()=>{endingPlayback?.player.advance();renderNormalEnding();};
 $('ending-skip').onclick=()=>{endingPlayback?.player.finish();renderNormalEnding();};
-$('ending-next').onclick=()=>{if(endingPreview){endingPreview=false;endingPlayback=null;render();}else if(state.runEnding==='will'){playEndingTitleTransition($('title-scene'));showingTitle=true;render();}else reset();};
+$('ending-next').onclick=()=>{if(endingPreview){endingPreview=false;endingPlayback=null;render();}else reset();};
 $('awakening-advance').onclick=()=>{if(!memoryReveal)return;memoryReveal.player.advance();if(memoryReveal.player.done){memoryReveal=null;beginExploration(state);paused=false;last=performance.now();render();tryMobileDisplay();}else{$('awakening-text').textContent=memoryReveal.player.text;}};
 $('debug-dialog').addEventListener('close',()=>{musicAudition=null;syncSceneMusic();});
 $('ending-options').onclick=()=>openOptions();
