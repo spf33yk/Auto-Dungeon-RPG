@@ -134,7 +134,8 @@ const fieldSounds=Object.fromEntries(Object.entries({
  swing:'01-sword-swing',critical:'02-critical-double-swing',skill:'03-skill-cast',
  hurt:'04-hero-hurt',trap:'05-trap-step',pickup:'06-pickup',heal:'07-heal'
 }).map(([cue,name])=>[cue,new Audio('./art/sfx/'+name+'.wav')]));
-const FIELD_SOUND_GAIN=.5;
+// Match the TRUE END fire cue’s 5% playback level at the default 30% setting.
+const FIELD_SOUND_GAIN=1/6;
 function playFieldSound(cue){
  if(verificationMode||!sound||volume===0||document.hidden||$('debug-dialog').open)return;
  const clip=fieldSounds[cue];
