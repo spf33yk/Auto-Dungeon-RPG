@@ -58,7 +58,7 @@ for(const match of html.matchAll(/\.\/art\/characters\/[^"\s?]*sprites\.json(?:\
  updated=updated.replaceAll(match[0],'./'+file+'?v='+version(file));
 }
 for(const file of ['style.css','screens.css'])updated=updated.replace(new RegExp('href="\\./'+file.replace('.', '\\.')+'(?:\\?v=[^"]*)?"'),'href="./'+file+'?v='+version(file)+'"');
-for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','ending/normal-end-son-strike-v6.webp','BGM/星々の眠る地.mp3','BGM/洞窟A.mp3','BGM/絡繰仕掛けの罠を抜けて.mp3','BGM/光差し込む廃墟.mp3','BGM/蒼晶のトレイル.mp3','BGM/密林廃墟群.mp3','BGM/Ruined-Altar.mp3','terrain/floors-v2/atlas-64.png','props/chest-skill-64.png','props/atlas-64.png','props/map-items-64.png','props/traps-v1/atlas-64.png','props/readable-v1/atlas-64.png','enemies/v2/atlas-64.png']){
+for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukuro-journey.png','logo-segare-journey.png','title-mukuro-v3.webm','title-mukuro-v3-screen.mp4','title-segare-v3.webm','title-segare-v3-screen.mp4','journey-teaser.mp4','ending/normal-end-son-strike-v6.webp','BGM/星々の眠る地.mp3','BGM/洞窟A.mp3','BGM/絡繰仕掛けの罠を抜けて.mp3','BGM/光差し込む廃墟.mp3','BGM/蒼晶のトレイル.mp3','BGM/密林廃墟群.mp3','BGM/Ruined-Altar.mp3','terrain/floors-v2/atlas-64.png','props/chest-skill-64.png','props/atlas-64.png','props/map-items-64.png','props/traps-v1/atlas-64.png','effects/traps-v1/atlas.png','props/readable-v1/atlas-64.png','enemies/v2/atlas-64.png']){
  const asset='./art/'+file;
  updated=updated.replace(new RegExp('\\./art/'+file.replaceAll('.','\\.')+'(?:\\?v=[^"\\s>]*)?','g'),asset+'?v='+version('art/'+file));
 }

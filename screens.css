@@ -721,11 +721,11 @@ body.preparing #prepare-scene .card-rules-heading>.instruction-controls{flex:1;m
 #field-event-dialog::backdrop{background:transparent;backdrop-filter:none}
 #field-event-dialog[data-kind=memory]{border-color:#e8d4a4;color:#fff3d5;background:#171419}
 #field-event-dialog[data-kind=memory]::backdrop{background:#171118b8;animation:memory-fade-in .5s ease-out}
-#field-event-dialog[data-kind=will]{inset:0!important;margin:auto;width:min(860px,94vw)!important;height:fit-content!important;max-height:90dvh;padding:clamp(12px,2vw,24px)!important;border:0;outline:0;background:transparent;box-shadow:none;color:#f5e9cb;overflow:auto}
-#field-event-dialog[data-kind=will]::backdrop{background:transparent;backdrop-filter:none}
+#field-event-dialog[data-kind=will]{inset:0!important;margin:0;width:100%!important;height:100dvh!important;max-height:none;padding:0!important;border:0;outline:0;background:transparent;box-shadow:none;color:#f5e9cb;overflow:hidden}
+#field-event-dialog[data-kind=will]::backdrop{background:transparent;backdrop-filter:blur(4px)}
 #field-event-advance[hidden],#will-document[hidden],.potion-stock[hidden]{display:none}
-#will-document{display:grid;justify-items:center;gap:12px}
-#will-document h2{margin:0;color:inherit;font-size:clamp(17px,2.4vw,27px)}
+#will-document{position:relative;height:100%;display:grid;place-items:center}
+#will-document h2{position:absolute;top:clamp(12px,5vh,48px);margin:0;color:inherit;font-size:clamp(17px,2.4vw,27px)}
 .will-paper{position:relative;isolation:isolate;width:min(70vw,380px,max(130px,calc(40dvh - 34px)));aspect-ratio:2/3}
 .will-paper::before{
  content:'';position:absolute;inset:0 0 auto;z-index:-1;aspect-ratio:2/3;
@@ -738,10 +738,15 @@ body.preparing #prepare-scene .card-rules-heading>.instruction-controls{flex:1;m
  to{opacity:1;transform:none}
 }
 @media(prefers-reduced-motion:reduce){#field-event-dialog[open][data-kind=will] .will-paper{animation:none}}
-#will-close{justify-self:end}
-.will-subtitle-panel{display:grid;justify-items:end;gap:8px;width:100%;padding:10px 14px;background:#0b1014e6;border:1px solid #b9a980}
-#will-subtitle{justify-self:stretch;min-height:3.2em;margin:0;color:#fff5dd;font:clamp(14px,2.2vw,21px)/1.6 serif;text-align:center;overflow-wrap:anywhere}
-@media(max-height:500px){.will-subtitle-panel{padding:6px 10px}#will-subtitle{font-size:14px}}
+#will-advance{position:absolute;inset:0;display:grid;place-items:center;width:100%;height:100%;padding:0 9vw;border:0;background:transparent;color:#fff8e7;cursor:pointer}
+.will-caption{max-width:760px;text-align:center;font:600 clamp(17px,2.35vw,26px)/1.65 serif;text-shadow:0 2px 3px #000,0 0 8px #000,0 0 16px #000;-webkit-text-stroke:.4px #251d15;overflow-wrap:anywhere}
+#will-subtitle{white-space:pre-line}
+.will-caret[hidden]{display:none}
+.will-caret{margin-inline-start:.45em;font-size:.72em;white-space:nowrap}
+#will-advance:focus-visible .will-caret{outline:2px solid #fff;outline-offset:4px}
+#will-close{position:absolute;top:12px;right:14px;width:44px;height:44px;padding:0;border:0;background:#1419148c;color:#fff;font:30px/1 sans-serif;cursor:pointer}
+#will-close:is(:hover,:focus-visible){background:#303831}
+
 #hud-top .player-vitals:has(.potion-stock:not([hidden])){display:grid;grid-template-columns:minmax(0,1fr) max-content;column-gap:6px}
 #hud-top .player-vitals .hp-track{grid-column:1}
 .potion-stock{display:inline-flex;grid-column:2;grid-row:1 / span 2;align-items:center;align-self:center;gap:2px;color:#fff3dc;font-size:clamp(10px,1.15vw,18px);white-space:nowrap}
@@ -881,3 +886,11 @@ html[data-touch-controls=true] #options-dialog :is(.option-menu-button,select,in
 #codex-body .illustrated-augment{display:grid;align-items:center;padding:13% 10%}
 #codex-body .augment-card-content{position:relative;inset:auto;overflow:visible}
 #codex-body .augment-card-content>.augment-illustration{height:clamp(55px,8vw,94px)}
+
+#augment-owned-skills{margin:8px auto 0;text-align:left;max-width:900px;border:1px solid #8d7954;background:#171e19}
+#augment-owned-skills summary{padding:9px 12px;cursor:pointer;color:#f2dcb2;text-align:center}
+#augment-skill-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;padding:0 10px 10px}
+#augment-skill-groups section{padding:7px 9px;background:#202821}
+#augment-skill-groups h3{display:flex;justify-content:space-between;gap:4px;font-size:13px;margin:0 0 4px}
+#augment-skill-groups h3 b{color:#ead5a4;white-space:nowrap}
+#augment-skill-groups ul{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.65}

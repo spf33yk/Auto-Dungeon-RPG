@@ -199,8 +199,8 @@ export function planHeroTurn(s){
  return {enemy,action,ruleIndex:enemy?(cardPlan?.enemy?cardPlan.ruleIndex:null):action?.ruleIndex??null};
 }
 function skillDamage(s,damage){return mitigateThemeDamage(s,damage,{has:hasAugment,stats});}
-function applyTrap(s,enemy=null){
- return triggerTrap(s,enemy,{rng:()=>nextRandom(s),log,maxHp:()=>stats(s).maxHp,
+function applyTrap(s,enemy=null,onEffect){
+ return triggerTrap(s,enemy,{onEffect,rng:()=>nextRandom(s),log,maxHp:()=>stats(s).maxHp,
   protected:()=>{const t=themeState(s);if(t.trapPass>0){t.trapPass--;return true;}return false;},
   damage:(e,n)=>{
    const damage=e?mitigateControlledDamage(s,e,n):skillDamage(s,n);
@@ -209,7 +209,7 @@ function applyTrap(s,enemy=null){
    log(s,(e?e.name:'骸')+'に'+damage+'ダメージ。',e?'':'bad');
   }});
 }
-export function tick(s,{onSkillEffect}={}){
+export function tick(s,{onSkillEffect,onTrapEffect}={}){
  if(s.phase!=='explore'||s.augmentOffer||s.cardOffer)return;notifyWillChest(s);s.unharmedTurns=(s.unharmedTurns||0)+1;s.turn++;s.steps++;s.flash=null;s.damageEvents=[];reveal(s);const st=stats(s);const report=buildReport(s),bonus=augmentBonus(s,st.maxHp,s.enemies.filter(e=>canSee(s,e.x,e.y)).length);report.turns++;report.peakAttackBonus=Math.max(report.peakAttackBonus,bonus.attack);report.peakDefenseBonus=Math.max(report.peakDefenseBonus,bonus.defense);
  beginDirectiveSafety(s,log);const progressBefore=progressSnapshot(s);s.actorSkillEvent=null;for(const e of s.enemies)if(e.control)e.control.unharmedTurns++;if(s.retreatCooldown>0)s.retreatCooldown--;
  const sealedStart=s.enemies.some(e=>e.boss)&&key(s.player)===key(s.stairs);
@@ -229,7 +229,7 @@ export function tick(s,{onSkillEffect}={}){
  pickup(s);
  const house=s.gimmick?.room;
  if(house&&!s.gimmick.triggered&&s.player.x>=house.x&&s.player.x<house.x+house.w&&s.player.y>=house.y&&s.player.y<house.y+house.h){s.gimmick.triggered=true;log(s,s.gimmick.name+'！','bad');if(s.gimmick.id==='monsters')for(const e of s.enemies)if(e.house)e.aggro=true;}
- applyTrap(s);
+ applyTrap(s,null,onTrapEffect);
  if(s.hp<=0)return;
  for(const e of [...s.enemies]){
   if(!s.enemies.includes(e))continue;
@@ -243,7 +243,7 @@ export function tick(s,{onSkillEffect}={}){
     else if(!trapActive(s,e,'snare')){const next=route(s,p=>alarm?key(p)===key(alarm):distance(p,s.player)===1,{start:e,known:false,blocked:new Set(s.enemies.filter(o=>o!==e).map(key))});if(next&&key(next)!==key(s.player)){e.x=next.x;e.y=next.y;}}
    }
   }
-  applyTrap(s,e);
+  applyTrap(s,e,onTrapEffect);
   if(s.augmentOffer)return;
  }
  reveal(s);

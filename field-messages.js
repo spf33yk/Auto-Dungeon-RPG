@@ -57,14 +57,20 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
   element.style.setProperty('--field-message-padding',box.padding+'px');
  };
  const willPage=dialog.querySelector('#will-document'),willClose=dialog.querySelector('#will-close');
- let willSubtitle,willLines,willMessage=null,willPlayer=null;
+ let willAdvance,willSubtitle,willCaret,willLines,willMessage=null,willPlayer=null;
  const reducedMotion=()=>willPage.ownerDocument.defaultView.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const paintWill=()=>{
   if(willSubtitle.textContent!==willPlayer.text)willSubtitle.textContent=willPlayer.text;
-  willClose.textContent=!willPlayer.full?'字幕をすぐ表示':willPlayer.index===willLines.length-1?'閉じる':'次へ';
+  willCaret.hidden=!willPlayer.full;
+  willAdvance.setAttribute('aria-label',!willPlayer.full?'字幕をすぐ表示':willPlayer.index===willLines.length-1?'読み終える':'次のページ');
  };
  const startWill=message=>{
+  if(!willAdvance){
+   willAdvance=willPage.querySelector('#will-advance');
+   willAdvance.addEventListener('click',advanceWill);
+  }
   willSubtitle??=willPage.querySelector('#will-subtitle');
+  willCaret??=willPage.querySelector('.will-caret');
   willLines??=[...willPage.querySelector('#will-lines').content.querySelectorAll('p')].map(line=>line.textContent);
   willMessage=message;
   willPlayer=new SubtitlePlayer(willLines);
@@ -82,17 +88,18 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
   if(reading&&willMessage!==queue.current)startWill(queue.current);
   text.textContent=message;button.setAttribute('aria-label',message+' クリック、タップ、Enterで続ける');
   if(!dialog.open)dialog.showModal();
-  place();(reading?willClose:button).focus({preventScroll:true});
+  place();(reading?willAdvance:button).focus({preventScroll:true});
  };
  const advance=()=>{if(!queue.active)return;willMessage=null;queue.advance();if(queue.active)render();else{dialog.close();onIdle();}};
  button.addEventListener('click',advance);
- willClose.addEventListener('click',()=>{
+ function advanceWill(){
   if(!willPlayer.full)willPlayer.update(Infinity);
   else willPlayer.advance();
   if(willPlayer.done){advance();return;}
   if(reducedMotion())willPlayer.update(Infinity);
   paintWill();
- });
+ }
+ willClose.addEventListener('click',advance);
  dialog.addEventListener('cancel',e=>{e.preventDefault();advance();});
  dialog.addEventListener('close',()=>{willMessage=null;if(queue.active){queue.clear();onIdle();}});
  const animate=(time,blocked=false)=>{

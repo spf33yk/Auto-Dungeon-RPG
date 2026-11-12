@@ -43,6 +43,10 @@ export function triggerTrap(s,enemy,api){
   for(const e of s.enemies)if(e!==enemy&&!e.boss&&Math.abs(e.x-actor.x)+Math.abs(e.y-actor.y)<=8){e.aggro=true;e.trapAlarm={x:actor.x,y:actor.y,until:s.steps+5};}
   effect='周囲8マスの通常敵を、音の位置へ引き寄せた。';
  }
+ api.onEffect?.({
+  type,hero:!enemy,at:{x:trap.x,y:trap.y},
+  destination:actor.x!==trap.x||actor.y!==trap.y?{x:actor.x,y:actor.y}:null
+ });
  api.log(s,label+'が'+name+'を踏んだ。'+effect+(trap.spent?' 罠は壊れた。':''),enemy?'':'bad');
  return true;
 }

@@ -50,3 +50,19 @@ test('new and legacy saves preserve trap state; invalid timers/types rejected; f
  const bad=structuredClone(s);bad.traps[0].type='unknown';assert.equal(validTraps(bad),false);bad.traps[0].type='spike';bad.trapStatus.snare=-1;assert.equal(validateSave(bad),false);
  const before=JSON.stringify(s),sig=forecastSignature(s,1);await forecastExploration(s,{samples:1,maxTurns:10,yieldTask:async()=>{}});assert.equal(JSON.stringify(s),before);s.trapStatus.mist=s.steps+5;assert.notEqual(forecastSignature(s,1),sig);
 });
+
+test('real trap turn emits one presentation event without changing the simulation',()=>{
+ for(const type of TRAPS.map(trap=>trap.id)){
+  const s=arena();
+  const at={...s.player};
+  place(s,type);
+  const withoutCallback=structuredClone(s),events=[];
+  tick(s,{onTrapEffect:event=>events.push(event)});
+  tick(withoutCallback);
+  assert.deepEqual(s,withoutCallback);
+  assert.deepEqual(events,[{type,hero:true,at,destination:type==='teleport'?s.player:null}]);
+  const first=events[0];
+  s.player.x++;
+  assert.deepEqual(first.at,at);
+ }
+});

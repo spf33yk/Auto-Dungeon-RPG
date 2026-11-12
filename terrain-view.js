@@ -25,3 +25,22 @@ export function drawRaisedWall(ctx,tileset,grid,x,y,seed,theme,size=24,entrance)
  // Missing/invalid assets remain readable; never sample floor or old wall art.
  const box=wallDrawBox(grid,x,y,tileset?.definition?.rise??.75,size);ctx.fillStyle=theme.wallColor;ctx.fillRect(box.x,box.y,box.width,box.height);return false;
 }
+
+const tintedWalls=new WeakMap();
+export function tintedWallTileset(tileset,color){
+ if(!tileset||!color)return tileset;
+ let variants=tintedWalls.get(tileset);
+ if(!variants){variants=new Map();tintedWalls.set(tileset,variants);}
+ if(variants.has(color))return variants.get(color);
+ const {image,definition}=tileset,canvas=document.createElement('canvas');
+ canvas.width=definition.width;canvas.height=definition.height;
+ const ctx=canvas.getContext('2d');
+ ctx.drawImage(image,0,0);
+ ctx.globalCompositeOperation='source-atop';
+ ctx.globalAlpha=.27;
+ ctx.fillStyle=color;
+ ctx.fillRect(0,0,canvas.width,canvas.height);
+ const variant={definition,image:canvas};
+ variants.set(color,variant);
+ return variant;
+}

@@ -1,0 +1,102 @@
+{
+  "tilePx": 64,
+  "cellPx": 128,
+  "anchor": [
+    64,
+    105
+  ],
+  "columns": 3,
+  "source": "local:codex-cli / codex-image_gen",
+  "effects": [
+    {
+      "id": "spike",
+      "column": 0,
+      "row": 0,
+      "pixels": [
+        88,
+        88
+      ],
+      "sourceCrop": [
+        0,
+        0,
+        392,
+        617
+      ]
+    },
+    {
+      "id": "teleport",
+      "column": 1,
+      "row": 0,
+      "pixels": [
+        94,
+        94
+      ],
+      "sourceCrop": [
+        392,
+        0,
+        810,
+        617
+      ]
+    },
+    {
+      "id": "snare",
+      "column": 2,
+      "row": 0,
+      "pixels": [
+        92,
+        84
+      ],
+      "sourceCrop": [
+        810,
+        0,
+        1254,
+        617
+      ]
+    },
+    {
+      "id": "weaken",
+      "column": 0,
+      "row": 1,
+      "pixels": [
+        83,
+        91
+      ],
+      "sourceCrop": [
+        0,
+        617,
+        385,
+        1254
+      ]
+    },
+    {
+      "id": "alarm",
+      "column": 1,
+      "row": 1,
+      "pixels": [
+        103,
+        80
+      ],
+      "sourceCrop": [
+        385,
+        617,
+        827,
+        1254
+      ]
+    },
+    {
+      "id": "mist",
+      "column": 2,
+      "row": 1,
+      "pixels": [
+        98,
+        79
+      ],
+      "sourceCrop": [
+        827,
+        617,
+        1254,
+        1254
+      ]
+    }
+  ]
+}
