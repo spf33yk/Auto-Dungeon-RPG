@@ -54,7 +54,7 @@ export function playEndingTitleTransition(title){
  let flameFrame,burnStartedAt;
  function drawFlame(now){
   const elapsed=now-burnStartedAt;
-  surface.style.opacity=String(Math.max(0,Math.min(1,1-(elapsed-1850)/1000)));
+  surface.style.opacity=String(Math.max(0,Math.min(1,1-(elapsed-1850)/1500)));
   if(flame.readyState>=2){
    pixels.drawImage(flame,0,0,surface.width,surface.height);
    const frame=pixels.getImageData(0,0,surface.width,surface.height);
