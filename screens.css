@@ -724,9 +724,9 @@ body.preparing #prepare-scene .card-rules-heading>.instruction-controls{flex:1;m
 #field-event-dialog[data-kind=will]{inset:0!important;margin:0;width:100%!important;height:100dvh!important;max-height:none;padding:0!important;border:0;outline:0;background:transparent;box-shadow:none;color:#f5e9cb;overflow:hidden}
 #field-event-dialog[data-kind=will]::backdrop{background:transparent;backdrop-filter:blur(4px)}
 #field-event-advance[hidden],#will-document[hidden],.potion-stock[hidden]{display:none}
-#will-document{position:relative;height:100%;display:grid;place-items:center}
+#will-document{--will-paper-width:min(86vw,560px,54dvh);position:relative;height:100%;display:grid;place-items:center}
 #will-document h2{position:absolute;top:clamp(12px,5vh,48px);margin:0;color:inherit;font-size:clamp(17px,2.4vw,27px)}
-.will-paper{display:block;width:min(70vw,380px,max(130px,calc(40dvh - 34px)));aspect-ratio:2/3;object-fit:contain;
+.will-paper{display:block;width:var(--will-paper-width);aspect-ratio:2/3;object-fit:contain;
  clip-path:polygon(2% 7%,5% 4%,10% 2%,15% 1%,25% 1.5%,28% 2.6%,34% 3%,36% 5%,38% 2.7%,42% 2.8%,44% 3.6%,50% 2.4%,58% 2.2%,67% 2.8%,70% 3.3%,78% 2.6%,81% 3.3%,86% 1.8%,91% 2.8%,94% 2.6%,96.5% 5%,98% 8%,97.8% 12%,98.2% 14%,97.4% 16%,97.5% 20%,96.8% 24%,94.5% 26%,96.5% 26%,96.4% 29%,97.6% 33%,98% 35%,96.6% 37%,97.8% 39%,96.7% 42%,97% 46%,96.4% 49%,98% 51%,97% 55%,96.8% 59%,97.7% 62%,96.8% 66%,95% 67%,97% 66.5%,98% 69%,97.5% 74%,96.6% 79%,97.5% 83%,98.3% 87%,97.5% 90%,96.8% 94%,94% 96%,92% 98.2%,89% 97.7%,82% 98.4%,74% 97.7%,67% 98%,63% 97.4%,56% 98.5%,49% 98%,43% 98.5%,37% 97.9%,33% 98.2%,27% 97.7%,23% 98%,20.5% 96.7%,20.8% 98.4%,15% 98.1%,10% 97%,6% 98%,4% 95%,2% 94%,1.5% 90%,2.3% 86%,1.8% 82%,2.2% 77%,1.6% 74%,2.2% 70%,2% 67%,1.3% 65%,2.3% 61%,2% 56%,2.3% 53%,4.5% 52%,2.1% 51%,1.6% 48%,2.6% 44%,2.2% 41%,3.2% 37%,3% 35%,1.7% 33%,1.8% 29%,2.5% 24%,2.2% 22.5%,5% 21.6%,2% 20.7%,2.7% 17%,1.9% 15%,2% 12%,2.7% 9%);
 }
 #field-event-dialog[open][data-kind=will] .will-paper{animation:will-paper-reveal .65s cubic-bezier(.2,.7,.2,1) both}
@@ -736,7 +736,7 @@ body.preparing #prepare-scene .card-rules-heading>.instruction-controls{flex:1;m
 }
 @media(prefers-reduced-motion:reduce){#field-event-dialog[open][data-kind=will] .will-paper{animation:none}}
 #will-advance{position:absolute;inset:0;display:grid;place-items:center;width:100%;height:100%;padding:0 9vw;border:0;background:transparent;color:#fff8e7;cursor:pointer}
-.will-caption{max-width:760px;text-align:center;font:600 clamp(17px,2.35vw,26px)/1.65 serif;text-shadow:0 2px 3px #000,0 0 8px #000,0 0 16px #000;-webkit-text-stroke:.4px #251d15;overflow-wrap:anywhere}
+.will-caption{width:calc(var(--will-paper-width) * .82);text-align:center;color:#342319;font:600 clamp(13px,3.25dvh,26px)/1.65 serif;overflow-wrap:anywhere}
 #will-subtitle{white-space:pre-line}
 .will-caret[hidden]{display:none}
 .will-caret{margin-inline-start:.45em;font-size:.72em;white-space:nowrap}
