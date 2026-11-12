@@ -1,6 +1,6 @@
-const BURN_START_MS=9200;
-const TITLE_REVEALED_MS=11550;
-const BURN_CLEANUP_MS=12800;
+const BURN_START_MS=7000;
+const TITLE_REVEALED_MS=9350;
+const BURN_CLEANUP_MS=10600;
 const TITLE_HOLD_MS=2400;
 const MENU_FADE_MS=1000;
 
@@ -112,11 +112,11 @@ export function playEndingTitleTransition(title,onComplete){
   flameFrame=requestAnimationFrame(drawFlame);
  }
 
- setTimeout(()=>overlay.dataset.step='black',3000);
+ setTimeout(()=>overlay.dataset.step='black',800);
  setTimeout(()=>{
   playVideo(effect);
   overlay.dataset.step='mukuro';
- },5400);
+ },3200);
  setTimeout(()=>{
   mask.fillStyle='black';
   mask.fillRect(0,0,reveal.width,reveal.height);

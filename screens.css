@@ -905,3 +905,7 @@ html[data-touch-controls=true] #options-dialog :is(.option-menu-button,select,in
 .ending-title-still{transition:opacity 2.4s ease}
 .ending-title-transition:not([data-step="ending"]) .ending-title-still{opacity:0}
 .ending-title-flame{mix-blend-mode:screen}
+
+#will-ending-reading{position:absolute;inset:0;opacity:0;transition:opacity .6s ease-in-out}
+#will-ending-reading.is-visible{opacity:1}
+@media(prefers-reduced-motion:reduce){#will-ending-reading{transition:none}}
