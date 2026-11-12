@@ -152,14 +152,14 @@ function placeWillChest(s){
 
 export function obtainable(s,i){return i.type==='letter'?(fixedChestUnlocked(s)||s.debugUsed===true&&s.debugWillChest===true&&s.floor===LETTER_FLOOR)&&!s.letter:true;}
 function receiveReward(s,id){const fresh=grantReward(s,id);log(s,fresh?'「'+rewardById[id].name+'」を手に入れた。'+(rewardById[id].kind==='order'?'次の準備で探索指示に設定できる。':'この旅で使用できる。'):'「'+rewardById[id].name+'」は取得済み。記憶の欠片 +5','good');}
-function pickup(s,onPickup){const item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);
+function pickup(s,onPickup){const hpBefore=s.hp,item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);
  if(isHealingItem(item)){if(s.hp>=stats(s).maxHp){s.potionStock=(s.potionStock||0)+1;log(s,'回復ポーションをストックした。','good');}else{const heal=Math.min(stats(s).maxHp-s.hp,BALANCE.heartHeal);s.hp+=heal;log(s,'回復ポーション。HP +'+heal,'good');}}
  else if(item.type==='fragment'){const amount=3+(hasAugment(s,'scavenger')?ap(s,'scavenger').extra:0)+(hasAugment(s,'lucky-find')&&nextRandom(s)<Math.min(1,ap(s,'lucky-find').chance)?4:0);s.shards+=amount;log(s,'床の記憶の欠片を拾った。＋'+amount,'good');}
  else if(item.type==='gear'){acquire(s,item.gear);log(s,gearName(item.gear)+'を拾った。','good');}
  else if(item.type==='reward')receiveReward(s,item.rewardId);
  else if(item.type==='letter'){delete s.debugWillChest;s.letter=true;log(s,WILL_PICKUP_LINE,'story');}
  else if(item.type==='chest'){log(s,'宝箱を開けた。','good');if(item.cardId){const t=themeState(s),gamble=hasAugment(s,'destiny')&&!t.destinyUsed;if(gamble)t.destinyUsed=true;const win=gamble?nextRandom(s)<Math.min(1,ap(s,'destiny').chance):false,categories=chestCategoryChoices(s,item.cardId,()=>nextRandom(s)),choices=categories[cardByKey[item.cardId].kind]||Object.values(categories)[0];s.cardOffer={choices,categories,remaining:gamble&&win?2:1,...(gamble?{gamble:true,lost:!win,consolation:ap(s,'destiny').consolation}:{})};log(s,'箱の中で、いくつもの記憶が揺れている。ひとつ選ぼう。','good');}else if(item.gear){acquire(s,item.gear);s.shards+=2;log(s,'旧宝箱から'+gearName(item.gear)+'を入手。記憶の欠片 +2','good');}else receiveReward(s,item.rewardId);}
- if(isHealingItem(item)||['fragment','gear','reward'].includes(item.type))onPickup?.(item);
+ if(isHealingItem(item)||['fragment','gear','reward'].includes(item.type))onPickup?.(item,s.hp>hpBefore);
 }
 export function dropFromEnemy(s,e){if(e.reinforcement)return null;const rng=()=>nextRandom(s),drop=rollEnemyDrop(e.baseId,rng);if(!drop)return null;
  const q=[{x:e.x,y:e.y}],seen=new Set([key(e)]);let position=null;
