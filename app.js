@@ -61,8 +61,9 @@ let uiStorage;try{uiStorage=localStorage;}catch{}let uiSettings=readUiSettings(u
 function applyPreparationSkin(){const skin=skinById(uiSettings.preparationSkin);document.documentElement.dataset.preparationSkin=skin.id;for(const [key,value]of Object.entries(skin))if(['accent','edge','panel','text'].includes(key))document.documentElement.style.setProperty('--prep-theme-'+key,value);$('preparation-skin').textContent='スキン：'+skin.name;$('preparation-skin').title='次のスキン：'+nextPreparationSkin(skin.id).name;}
 applyPreparationSkin();$('preparation-skin').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,preparationSkin:nextPreparationSkin(uiSettings.preparationSkin).id});applyPreparationSkin();};
 const bgm=new SceneMusic($('scene-bgm'),$('scene-bgm').dataset);
+let titleTransitionPreview=false;
 let endingPreview=false,endingPlayback=null,subtitlePreviewKind='first-end',musicAudition=null;
-function syncSceneMusic(){bgm.configure({enabled:!verificationMode&&uiSettings.bgmEnabled,volume:uiSettings.bgmVolume,hidden:document.hidden});bgm.select(musicAudition||(endingPreview?(subtitlePreviewKind.endsWith('intro')?'opening':'ending'):musicScene(state,{title:showingTitle,teaser:Boolean(pendingJourney),houseEntered:Boolean(state.gimmick?.triggered)&&!fieldMessages.waiting}))); }
+function syncSceneMusic(){bgm.configure({enabled:!verificationMode&&!titleTransitionPreview&&uiSettings.bgmEnabled,volume:uiSettings.bgmVolume,hidden:document.hidden});bgm.select(musicAudition||(endingPreview?(subtitlePreviewKind.endsWith('intro')?'opening':'ending'):musicScene(state,{title:showingTitle,teaser:Boolean(pendingJourney),houseEntered:Boolean(state.gimmick?.triggered)&&!fieldMessages.waiting}))); }
 function paintMusicOptions(){$('bgm-toggle').textContent='BGM：'+(uiSettings.bgmEnabled?'ON':'OFF');$('bgm-toggle').setAttribute('aria-pressed',String(uiSettings.bgmEnabled));$('bgm-volume').value=uiSettings.bgmVolume;$('bgm-volume-value').textContent=uiSettings.bgmVolume+'%';}
 function paintBrightness(){$('screen-brightness').value=uiSettings.brightness-50;$('screen-brightness-value').textContent=(uiSettings.brightness-50)+'%'+(uiSettings.brightness===100?'（標準）':'');}paintBrightness();$('screen-brightness').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,brightness:Number($('screen-brightness').value)+50});paintBrightness();draw();};
 $('screen-shake').checked=uiSettings.screenShake;$('screen-shake').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,screenShake:$('screen-shake').checked});};
@@ -300,7 +301,7 @@ function render(){
  renderTab();renderThoughtSubtitle();draw();renderTitle();renderNormalEnding();renderAugments();if(!showingTitle)fieldMessages.render({ready:houseEntryReady(motion,combat.actorTime)});syncSceneMusic();if(!showingTitle)save();maybeTutorial();
 }
 function syncTitleEffect(){
- const video=$('title-fx'),variant=openingVariant(state.profile);
+ const video=$('title-fx'),variant=(titleTransitionPreview?'segare':openingVariant(state.profile));
  if(video.dataset.variant!==variant){video.pause();video.dataset.variant=variant;delete video.dataset.fallbackActive;video.classList.remove('is-screen-fallback');video.dataset.fallback=video.dataset[variant+'Fallback'];video.src=video.dataset[variant];video.load();}
  if(showingTitle&&!pendingJourney&&!endingPreview&&!document.hidden){if(video.paused)video.play().catch(()=>{});}else video.pause();
 }
@@ -314,7 +315,7 @@ document.addEventListener('visibilitychange',syncTitleEffect);
 $('title-scene').addEventListener('pointerdown',syncTitleEffect);
 function renderTitle(){
  syncTitleEffect();
- const variant=openingVariant(state.profile),name=variant==='segare'?'倅の旅路':'骸の旅路';
+ const variant=(titleTransitionPreview?'segare':openingVariant(state.profile)),name=variant==='segare'?'倅の旅路':'骸の旅路';
  $('title-unimplemented').hidden=variant!=='segare';$('title-unimplemented').textContent=TRUE_END_UNIMPLEMENTED_NOTICE;$('title-scene').dataset.variant=variant;$('title-name').textContent=name;document.title=name+' — 記憶の迷宮';
  for(const id of ['title-background','title-logo']){const el=$(id),src=el.dataset[variant];if(el.getAttribute('src')!==src)el.src=src;}
  $('title-logo').alt=name;$('title-load').disabled=!hasSave;
@@ -606,7 +607,22 @@ function paintSoundOptions(){$('sound').setAttribute('aria-pressed',String(sound
 paintSoundOptions();
 $('options-open').onclick=()=>openOptions();
 $('debug-open').onclick=()=>{$('debug-floor').innerHTML=Array.from({length:LAST_FLOOR},(_,i)=>`<option value="${i+1}" ${state.floor===i+1?'selected':''}>B${LAST_FLOOR-i}</option>`).join('');$('debug-gear').innerHTML=equipment.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');$('debug-reward').innerHTML=rewardDefinitions.filter(r=>!r.legacy).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');debugStatus();openDialog('debug-dialog');};
-$('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-debug]');if(!b)return;let message='';switch(b.dataset.debug){case'music-preview':musicAudition=$('debug-music-scene').value;$('debug-music-status').textContent='試聴中：'+bgm.tracks[musicAudition].split('/').at(-1).split('?')[0];syncSceneMusic();return;case'music-stop':musicAudition=null;$('debug-music-status').textContent='元の場面のBGMへ戻しました。';syncSceneMusic();return;case'ending-preview':subtitlePreviewKind=$('debug-subtitle-kind').value;endingPreview=true;endingPlayback=null;musicAudition=null;for(const d of document.querySelectorAll('dialog[open]'))d.close();render();return;case'will-jump':{
+$('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-debug]');if(!b)return;let message='';switch(b.dataset.debug){case'music-preview':musicAudition=$('debug-music-scene').value;$('debug-music-status').textContent='試聴中：'+bgm.tracks[musicAudition].split('/').at(-1).split('?')[0];syncSceneMusic();return;case'music-stop':musicAudition=null;$('debug-music-status').textContent='元の場面のBGMへ戻しました。';syncSceneMusic();return;case'title-transition-preview':{
+ const title=$('title-scene'),menu=title.querySelector('.title-menu'),previousTitle=showingTitle;
+ titleTransitionPreview=true;
+ showingTitle=true;
+ menu.inert=true;
+ $('debug-dialog').close();
+ playEndingTitleTransition(title,()=>setTimeout(()=>{
+  titleTransitionPreview=false;
+  showingTitle=previousTitle;
+  menu.inert=false;
+  $('debug-dialog').showModal();
+  render();
+ },2000));
+ render();
+ return;
+}case'ending-preview':subtitlePreviewKind=$('debug-subtitle-kind').value;endingPreview=true;endingPlayback=null;musicAudition=null;for(const d of document.querySelectorAll('dialog[open]'))d.close();render();return;case'will-jump':{
  const next=debugBeforeWillChest(state);
  if(!next){debugStatus('遺書の宝箱の隣に移動できませんでした。');return;}
  state=next;showingTitle=false;endingPreview=false;endingPlayback=null;

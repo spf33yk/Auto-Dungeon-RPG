@@ -4,7 +4,7 @@ const BURN_CLEANUP_MS=12800;
 const TITLE_HOLD_MS=2400;
 const MENU_FADE_MS=1000;
 
-export function playEndingTitleTransition(title){
+export function playEndingTitleTransition(title,onComplete){
  const overlay=document.createElement('div');
  overlay.className='ending-title-transition';
  overlay.dataset.step='ending';
@@ -40,10 +40,7 @@ export function playEndingTitleTransition(title){
  surface.height=540;
  overlay.append(outgoing,still,surface);
  title.dataset.endingTransition='playing';
- const incomingLogo=title.querySelector('#title-logo');
- incomingLogo.style.visibility='hidden';
  title.append(overlay);
- setTimeout(()=>incomingLogo.style.removeProperty('visibility'),TITLE_REVEALED_MS+500);
 
  const playVideo=video=>video.play().catch(()=>{});
  const pixels=surface.getContext('2d',{willReadFrequently:true});
@@ -139,5 +136,8 @@ export function playEndingTitleTransition(title){
  },BURN_CLEANUP_MS);
  const menuStart=TITLE_REVEALED_MS+TITLE_HOLD_MS;
  setTimeout(()=>title.dataset.endingTransition='menu',menuStart);
- setTimeout(()=>delete title.dataset.endingTransition,menuStart+MENU_FADE_MS);
+ setTimeout(()=>{
+  delete title.dataset.endingTransition;
+  onComplete?.();
+ },menuStart+MENU_FADE_MS);
 }
