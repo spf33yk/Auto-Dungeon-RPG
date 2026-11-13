@@ -19,12 +19,13 @@ import{queueEnemyAttacks,enemyAttackDuration,enemyAttackPresentation,enemyAttack
 import{buildThemes,themedSkillById}from'./build-themes.js';
 import{installHoverHelp}from'./hover-help.js';
 import{THEME_IMAGES}from'./augment-art.js';
-import{skillSetActive}from'./set-bonuses.js';
-import{setRibbon,themeIcon,skillTitle}from'./theme-view.js';
+import{skillSetActive,starText}from'./set-bonuses.js';
+import{themeIcon,skillTitle}from'./theme-view.js';
 import{installTacticsUi}from'./tactics-ui.js';
 import{compareForecast,createPreparationBaseline}from'./forecast-comparison.js';
 import {screenTutorials,tutorialSteps as floorTutorialSteps,tutorialKey,isTutorialJourney} from './screen-tutorial.js';
-import{augmentCard,augmentChip}from'./augment-view.js';
+import{augmentCard,augmentIllustration}from'./augment-view.js';
+import{augmentStrength}from'./augment-strength.js';
 import{augments,augmentById,chooseAugment}from'./augments.js';
 import {SubtitlePlayer} from './subtitle-player.js';
 import {SceneMusic,musicScene} from './scene-music.js';
@@ -286,7 +287,7 @@ function renderAugmentOwnedSkills(){
 }
 function renderAugments(){
  const offer=state.augmentOffer,dialog=$('augment-dialog');$('augment-reroll').hidden=false;$('augment-reroll').disabled=!offer||rerollCount(state,'augment')<1;$('augment-reroll').textContent='リロール（残り '+rerollCount(state,'augment')+'回）';$('augment-tutorial').hidden=!offer||!isTutorialJourney(state)||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){renderAugmentOwnedSkills();$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
- if(state.phase==='prepare'){const hint=nextStageHint({...state,floor:state.floor-1});$('prep-hint').textContent=hint.title.replace('次は','')+' · '+hint.text;$('prep-augments').innerHTML='<div class="prep-augment-list"><b>オーグメント</b>'+((state.augments||[]).map(id=>augmentChip(augmentById[id],state)).join('')||'<span>なし</span>')+'</div>'+setRibbon(state);}
+ if(state.phase==='prepare'){const hint=nextStageHint({...state,floor:state.floor-1});$('prep-hint').textContent=hint.title.replace('次は','')+' · '+hint.text;}
 }
 $('debug-augment').innerHTML=augments.map(a=>'<option value="'+a.id+'">'+a.rarity+' · '+a.theme+' · '+a.name+'</option>').join('');
 $('augment-dialog').addEventListener('cancel',e=>e.preventDefault());
@@ -298,6 +299,48 @@ installHoverHelp();
 const renderTactics=installTacticsUi({getState:()=>state,onChange:()=>{delete $('tab-content').dataset.orderSignature;render();},storage:uiStorage,onResume:()=>{paused=false;dialogWasPaused=false;last=performance.now();}});
 const fieldMessages=installFieldMessages({dialog:$('field-event-dialog'),button:$('field-event-advance'),text:$('field-event-text'),skillBox:$('field-skill-message'),skillText:$('field-skill-text'),host:$('map-wrap'),hud:$('hud-bottom'),onIdle:()=>{last=performance.now();render();}});
 $('rest-potion').onclick=()=>{if(usePotion(state,stats(state).maxHp,paused&&!fieldMessages.active&&!document.querySelector('dialog[open]'))){playFieldSound('heal');render();}};
+let hudAugmentSignature='';
+function renderHudAugments(){
+ const strip=$('hud-augments'),tip=$('hud-augment-tip');
+ const entries=(!showingTitle&&['prepare','explore'].includes(state.phase)?state.augments||[]:[])
+  .map(id=>augmentById[id]).filter(Boolean)
+  .map(a=>({a,stars:starText(state,a.id),effect:augmentStrength(a,state)}));
+ const signature=JSON.stringify(entries);
+ if(signature===hudAugmentSignature)return;
+ hudAugmentSignature=signature;
+ tip.hidePopover();
+ strip.hidden=!entries.length;
+ $('workspace').classList.toggle('has-hud-augments',entries.length>0);
+ strip.replaceChildren(...entries.map(({a,stars,effect})=>{
+  const button=document.createElement('button');
+  button.type='button';
+  button.innerHTML=augmentIllustration(a)+'<small>'+stars+'</small>';
+  button.setAttribute('aria-label',a.name+' '+a.theme+' '+stars);
+  button.setAttribute('aria-describedby',tip.id);
+  const show=()=>{
+   const name=document.createElement('strong'),theme=document.createElement('div'),copy=document.createElement('div');
+   name.textContent=a.name;
+   theme.innerHTML=themeIcon(a.themeId);
+   theme.append(' '+a.theme);
+   copy.textContent=effect;
+   tip.replaceChildren(name,theme,copy);
+   tip.showPopover();
+   const bounds=button.getBoundingClientRect();
+   tip.style.left=Math.max(8,Math.min(bounds.left,innerWidth-tip.offsetWidth-8))+'px';
+   tip.style.top=(bounds.bottom+4)+'px';
+  };
+  button.addEventListener('pointerenter',show);
+  button.addEventListener('pointerleave',()=>{if(!button.matches(':focus-visible'))tip.hidePopover();});
+  button.addEventListener('focus',show);
+  button.addEventListener('blur',()=>tip.hidePopover());
+  button.addEventListener('click',show);
+  return button;
+ }));
+}
+for(const event of ['resize','pointerdown','keydown'])window.addEventListener(event,e=>{
+ if(e.type==='resize'||e.key==='Escape'||e.type==='pointerdown'&&!e.target.closest('#hud-augments'))$('hud-augment-tip').hidePopover();
+});
+
 function render(){
  const st=stats(state),prep=state.phase==='prepare',theme=zoneFor(state);$('rest-potion').hidden=state.phase!=='explore'||!paused||fieldMessages.active||!(state.potionStock>0);$('rest-potion').disabled=!canUsePotion(state,st.maxHp,paused&&!fieldMessages.active&&!document.querySelector('dialog[open]'));$('rest-potion').textContent='回復ポーションを使う（残り '+(state.potionStock||0)+'個）';fieldMessages.sync(state);renderScreens();if(!showingTitle&&!fieldMessages.active)renderTactics();
  const runClears=Math.max(0,state.profile.normalClears-(state.phase==='ending'?1:0));
@@ -314,6 +357,7 @@ function render(){
  $('atk').textContent=displayAttack();$('def').textContent=displayDefense();$('shards').innerHTML=`${state.shards}個`;$('intent').textContent=prep?'出発の準備をしています':state.intent;
  const notices={cleared:[`${floorLabel(state)} Clear`,state.floor===LAST_FLOOR?'階段の先に、地上の光が見える。':'記憶の欠片を手に入れた。次の階の準備へ。'],dead:['途切れた旅','骸は崩れ、再び最深部へ。図鑑の記録は残ります。'],ending:['地上','旅の記憶をたどる。']};
  const hint=['cleared','dead','ending'].includes(state.phase)?nextStageHint(state):null;
+ renderHudAugments();
  $('field-gimmick').hidden=!state.gimmick||state.gimmick.id==='none';$('field-gimmick').textContent=state.gimmick&&state.gimmick.id!=='none'?'異変：'+state.gimmick.name+(state.gimmick.id==='fog'?' · 視界−2':''):'';
  const resting=state.phase==='explore'&&paused&&!fieldMessages.active&&!document.querySelector('dialog[open]');
  $('map-notice').dataset.kind=resting?'rest':state.phase;
