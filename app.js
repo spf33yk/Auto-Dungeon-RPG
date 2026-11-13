@@ -504,6 +504,14 @@ $('return-title').onclick=()=>confirmOption('タイトルへ戻りますか？',
 $('primary').onclick=()=>{if(state.phase==='explore')return;if(state.phase==='awakening'){if(!memoryReveal){memoryReveal={player:new SubtitlePlayer(awakeningLines(state.profile.normalClears)),last:performance.now()};$('awakening-text').textContent='';$('awakening-caret').hidden=true;render();}return;}if(state.phase==='prepare'){beginExploration(state);paused=false;last=performance.now();tone();}else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();if(state.phase==='explore')tryMobileDisplay();};
 const askAbandon=()=>{if(['prepare','explore'].includes(state.phase))openDialog('abandon-dialog');};$('abandon-run').onclick=askAbandon;$('explore-abandon').onclick=askAbandon;
 $('confirm-abandon').onclick=()=>{const next=abandonRun(state);if(!next)return;$('abandon-dialog').close();reset(next);};
+document.addEventListener('keydown',event=>{
+ if(event.code!=='Space'||event.defaultPrevented||event.isComposing||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
+ if(state.phase!=='explore'||showingTitle||pendingJourney||endingPreview||tutorialKind||fieldMessages.active||document.querySelector('dialog[open]'))return;
+ const pauseButton=$('pause-toggle');
+ if(event.target!==pauseButton&&(event.target.isContentEditable||event.target.closest?.('input,select,textarea,button,a[href],summary,[role="button"]')))return;
+ event.preventDefault();
+ if(!event.repeat)pauseButton.click();
+});
 $('pause-toggle').onclick=()=>{if(state.phase!=='explore')return;paused=!paused;last=performance.now();render();if(!paused)tryMobileDisplay();};
 $('skip-opening').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,skipOpening:$('skip-opening').checked});};
 $('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,minimap:$('minimap-size').value});document.documentElement.dataset.minimapSize=uiSettings.minimap;drawAutoMap();};
