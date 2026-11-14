@@ -12,7 +12,7 @@ import{planEnemyCommand,executeEnemyCommand,enemyDefense,enemyAttack,mitigateCon
 import{chestCategoryChoices,validChestCategories}from'./card-inventory.js';
 import{withinSightShape}from'./sight-shape.js';
 import{augmentStats as ap}from'./set-bonuses.js';
-import{themeState,themeBuff,resetThemeFloor,normalizeThemes,validThemeState,updateThemeExploration,mitigateThemeDamage,executeThemedSkill}from'./theme-runtime.js';
+import{themeState,themeBuff,skillLocked,resetThemeFloor,normalizeThemes,validThemeState,updateThemeExploration,mitigateThemeDamage,executeThemedSkill}from'./theme-runtime.js';
 import{themedSkillById}from'./build-themes.js';
 import{emptyBuildReport,buildReport,recordBuild,recordRule,validBuildReport}from'./build-performance.js';
 import{spawnReinforcement}from'./reinforcements.js';
@@ -49,7 +49,7 @@ export function random(seed){let a=seed>>>0;return()=>{a+=0x6D2B79F5;let t=Math.
 export function profileDefault(){return {normalClears:0,trueEnding:false,augments:[],cards:[],runs:0,monsters:[],equipment:[],knownEquipment:[],skills:[]};}
 export function zoneFor(s){return zones[Math.min(9,zoneIndexForFloor(s.floor))];}
 export function floorLabel(s){return s.phase==='ending'?'地上 1F':`B${LAST_FLOOR+1-s.floor}`;}
-export function radius(s){return Math.max(2,3+s.levels.scout+themeBuff(s,'sight')-(s.gimmick?.id==='fog'?2:0)-trapSightPenalty(s));}
+export function radius(s){return Math.max(2,3+s.levels.scout+themeBuff(s,'sight')-themeBuff(s,'sightFatigue')-(s.gimmick?.id==='fog'?2:0)-trapSightPenalty(s));}
 export function log(s,text,type=''){s.logs.unshift({text,type,turn:s.turn});}
 function register(list,id){if(!list.includes(id))list.push(id);}
 export function createGear(baseId,{plus=0,cursed=false,identified=true}={}){if(!gearById[baseId])throw Error('Unknown equipment');return {baseId,plus,cursed,identified,boundKnown:false};}
@@ -169,23 +169,24 @@ export function dropFromEnemy(s,e){if(e.reinforcement)return null;const rng=()=>
 }
 export function attackEnemy(s,enemy,{splashDamage=null,power=1,skill=false,skillId=null,leech=0}={}){
  if(!s.enemies.includes(enemy)||enemy.hp<=0)return;
- const strike=()=>{const b=augmentBonus(s,stats(s).maxHp),critical=(hasAugment(s,'moon')&&!s.firstAttackUsed&&s.hp===stats(s).maxHp)||(splashDamage===null&&b.critical>0&&nextRandom(s)<b.critical),base=Math.max(1,stats(s).attack-enemyDefense(s,enemy))*power*(s.heroWeakenedHits>0?.5:1)*(b.charged?ap(s,'charge').damage:1)*(themeBuff(s,'nextPower')|| (s.focusPower?1.25:1))*b.damage*(hasAugment(s,'risky-blade')?(nextRandom(s)<.5?ap(s,'risky-blade').damage:.8):1),rawDamage=splashDamage??(critical?Math.ceil(base*(hasAugment(s,'moon')&&!s.firstAttackUsed&&s.hp===stats(s).maxHp?ap(s,'moon').damage:1.5)):Math.ceil(base)),damage=mitigateControlledDamage(s,enemy,rawDamage),actual=Math.min(enemy.hp,damage);enemy.hp-=damage;if(s.heroWeakenedHits>0)s.heroWeakenedHits--;recordBuild(s,'damageDealt',actual);if(critical)recordBuild(s,'criticalHits');if(b.charged&&splashDamage===null)recordBuild(s,'chargedHits');s.firstAttackUsed=true;s.focusPower=false;delete themeState(s).buffs.nextPower;if(critical)themeState(s).pity=0;else themeState(s).pity++;if(b.charged&&splashDamage===null)s.unharmedTurns=0;(s.damageEvents??=[]).push({x:enemy.x,y:enemy.y,damage,hero:false,source:{...s.player},impact:skill?'skill':splashDamage!==null?'splash':'melee',...(skillId?{skillId}:{}),...(critical&&splashDamage===null?{critical:true}:{})});s.flash={x:enemy.x,y:enemy.y,kind:'hit'};if(critical)log(s,'会心の一撃！ '+damage+'ダメージ。','good');if(b.leech+leech>0){const heal=Math.max(0,Math.min(stats(s).maxHp-s.hp,Math.floor(actual*(b.leech+leech))));s.hp+=heal;recordBuild(s,'leechHealing',heal);if(heal)log(s,'吸命の記憶。HP +'+heal,'good');}};
+ const strike=()=>{const b=augmentBonus(s,stats(s).maxHp),critical=(hasAugment(s,'moon')&&!s.firstAttackUsed&&s.hp===stats(s).maxHp)||(splashDamage===null&&b.critical>0&&nextRandom(s)<b.critical),base=Math.max(1,stats(s).attack-enemyDefense(s,enemy))*power*(s.heroWeakenedHits>0?.5:1)*(b.charged?ap(s,'charge').damage:1)*(themeBuff(s,'nextPower')|| (s.focusPower?1.25:1))*(themeBuff(s,'weakStrike')?.8:1)*(skillLocked(s,'weakAttack')?.5:1)*b.damage*(hasAugment(s,'risky-blade')?(nextRandom(s)<.5?ap(s,'risky-blade').damage:.8):1),rawDamage=splashDamage??(critical?Math.ceil(base*(hasAugment(s,'moon')&&!s.firstAttackUsed&&s.hp===stats(s).maxHp?ap(s,'moon').damage:1.5)):Math.ceil(base)),damage=mitigateControlledDamage(s,enemy,rawDamage),actual=Math.min(enemy.hp,damage);enemy.hp-=damage;if(s.heroWeakenedHits>0)s.heroWeakenedHits--;recordBuild(s,'damageDealt',actual);if(critical)recordBuild(s,'criticalHits');if(b.charged&&splashDamage===null)recordBuild(s,'chargedHits');s.firstAttackUsed=true;s.focusPower=false;delete themeState(s).buffs.nextPower;delete themeState(s).buffs.weakStrike;if(critical)themeState(s).pity=0;else themeState(s).pity++;if(b.charged&&splashDamage===null)s.unharmedTurns=0;(s.damageEvents??=[]).push({x:enemy.x,y:enemy.y,damage,hero:false,source:{...s.player},impact:skill?'skill':splashDamage!==null?'splash':'melee',...(skillId?{skillId}:{}),...(critical&&splashDamage===null?{critical:true}:{})});s.flash={x:enemy.x,y:enemy.y,kind:'hit'};if(critical)log(s,'会心の一撃！ '+damage+'ダメージ。','good');if(b.leech+leech>0){const heal=Math.max(0,Math.min(stats(s).maxHp-s.hp,Math.floor(actual*(b.leech+leech))));s.hp+=heal;recordBuild(s,'leechHealing',heal);if(heal)log(s,'吸命の記憶。HP +'+heal,'good');}};
  strike();if(!skill&&splashDamage===null&&enemy.hp>0&&hasAugment(s,'double-strike')&&nextRandom(s)<Math.min(1,ap(s,'double-strike').chance)){recordBuild(s,'doubleStrikes');log(s,'追撃の記憶が発動！','good');strike();}
  if(enemy.hp<=0)defeatEnemy(s,enemy);
  if(splashDamage===null&&hasAugment(s,'nova'))for(const other of [...s.enemies])if(other!==enemy&&canSee(s,other.x,other.y))attackEnemy(s,other,{splashDamage:Math.max(1,Math.floor(Math.max(1,stats(s).attack-other.defense)/(distance(s.player,other)+1)))});
 }
 function defeatEnemy(s,enemy){s.enemies=s.enemies.filter(e=>e!==enemy);s.kills++;s.floorKills++;if(!enemy.reinforcement&&!enemy.boss)themeState(s).normalKills++;const exp=!enemy.reinforcement&&s.level<MAX_LEVEL?(monsterById[enemy.baseId||enemy.id]?.experience??3):0;const gained=gainExperience(s,exp);if(exp)log(s,`経験値 +${exp}`,'good');if(gained)log(s,`レベルアップ！ Lv.${s.level}。HP +${gained*HP_PER_LEVEL}`,'good');const fragments=enemy.reinforcement?0:enemy.boss?8:1;s.shards+=fragments;log(s,enemy.name+'を倒した。'+(fragments?'記憶の欠片 +'+fragments:'増援からの報酬はない。'),'good');if(!enemy.reinforcement)dropFromEnemy(s,enemy);if(enemy.boss){log(s,'門番の封印が解けた。階段を上れる。','story');const memory=bossMemory(s.floor,s.profile.normalClears);if(memory){s.memories.push(memory);log(s,memory,'story');}if(s.floor<LAST_FLOOR)offerAugments(s,()=>nextRandom(s),'boss:'+s.floor);}}
-function controlledHitHero(s,e,{power=1,leech=0,controlled=true,skill=false,skillId=null}={}){const b=themeBuff({steps:s.steps,themeState:e.control?.state},'nextPower')||1,weak=e.weakenedHits>0;if(weak)e.weakenedHits--;const damage=skillDamage(s,Math.ceil(incomingDamage(enemyAttack(s,e),stats(s).defense)*power*b*(weak?.5:1))),before=s.hp;if(takeHeroDamage(s,damage))log(s,'骨の執念で踏みとどまった。','good');const actual=before-s.hp;if(e.control?.state)delete e.control.state.buffs.nextPower;if(leech)e.hp=Math.min(e.maxHp,e.hp+Math.floor(actual*leech));s.damageEvents.push({...s.player,damage,hero:true,source:{x:e.x,y:e.y},impact:skill?'skill':'melee',...(skillId?{skillId}:{})});s.flash={...s.player,kind:'hurt'};log(s,e.name+(controlled?'が指示に従って攻撃。':'の攻撃。')+damage+'ダメージ。','bad');if(s.hp<=0){s.hp=0;s.phase='dead';s.cardOffer=null;s.nextHint=nextStageHint(s);log(s,'骨が崩れた。再び最深部へ。','story');}}
+function controlledHitHero(s,e,{power=1,leech=0,controlled=true,skill=false,skillId=null}={}){const b=themeBuff({steps:s.steps,themeState:e.control?.state},'nextPower')||1,weak=e.weakenedHits>0;if(weak)e.weakenedHits--;const damage=skillDamage(s,Math.ceil(incomingDamage(enemyAttack(s,e),stats(s).defense)*power*b*(skillLocked(s,'weakAttack',e)?.5:1)*(skillLocked(s,'weakStrike',e)?.8:1)*(weak?.5:1))),before=s.hp;if(takeHeroDamage(s,damage))log(s,'骨の執念で踏みとどまった。','good');const actual=before-s.hp;if(e.control?.state){delete e.control.state.buffs.nextPower;delete e.control.state.buffs.weakStrike;}if(leech)e.hp=Math.min(e.maxHp,e.hp+Math.floor(actual*leech));s.damageEvents.push({...s.player,damage,hero:true,source:{x:e.x,y:e.y},impact:skill?'skill':'melee',...(skillId?{skillId}:{})});s.flash={...s.player,kind:'hurt'};log(s,e.name+(controlled?'が指示に従って攻撃。':'の攻撃。')+damage+'ダメージ。','bad');if(s.hp<=0){s.hp=0;s.phase='dead';s.cardOffer=null;s.nextHint=nextStageHint(s);log(s,'骨が崩れた。再び最深部へ。','story');}}
 function warpDestination(s){if(trapActive(s,null,'snare'))return null;const cells=[];for(let y=1;y<s.grid.length-1;y++)for(let x=1;x<s.grid[y].length-1;x++)if(s.grid[y][x]&&key({x,y})!==key(s.player)&&key({x,y})!==key(s.stairs)&&!s.enemies.some(e=>e.x===x&&e.y===y))cells.push({x,y});return cells.length?cells[Math.floor(nextRandom(s)*cells.length)]:null;}
 // Shared by real turns and the preparation decision tester. No mutations or RNG.
 export function planHeroTurn(s,onRuleCheck){
+ if(skillLocked(s,'sleep'))return {enemy:null,action:{wait:true,intent:'深い眠りで行動できない'},ruleIndex:null};
  const ctx={canSee,stats,obtainable,onRuleCheck,enemyPlan:(state,r,e)=>planEnemyCommand(state,r,e,{canSee,stats,route,lineOfSight})},avoid=modifierActive(s,'avoid-traps');
  const heroRoute=(state,test,options={})=>{const blocked=new Set(options.blocked||[]);if(avoid)for(const t of state.traps||[])if(t.revealed&&!t.spent&&(state.gimmick?.id==='traps'||state.seen[t.y]?.[t.x]))blocked.add(key(t));return route(state,test,{...options,blocked})||(avoid?route(state,test,options):null);};ctx.route=heroRoute;
  const will=s.items.find(i=>i.type==='letter'&&obtainable(s,i));
- const willStep=will&&heroRoute(s,p=>key(p)===key(will),{blocked:new Set(s.enemies.map(key))});
- const forceBasic=bypassDirectives(s),cardPlan=willStep?{id:'cards',fixed:'chests',next:willStep,intent:'固定指示：遺書の宝箱を取得'}:forceBasic?chooseCardOrder(s,{...ctx,ignoreDirectives:true}):(!s.orders.length||s.orders.some(o=>o.cards))?chooseCardOrder(s,ctx):null,adjacentEnemy=targetEnemy(s);
+ const willStep=will&&!skillLocked(s,'root')&&heroRoute(s,p=>key(p)===key(will),{blocked:new Set(s.enemies.map(key))});
+ const forceBasic=bypassDirectives(s),cardPlan=willStep?{id:'cards',fixed:'chests',next:willStep,intent:'固定指示：遺書の宝箱を取得'}:forceBasic?chooseCardOrder(s,{...ctx,ignoreDirectives:true}):(!s.orders.length||s.orders.some(o=>o.cards))?chooseCardOrder(s,ctx):null,adjacentEnemy=skillLocked(s,'attackLock')?null:targetEnemy(s);
  const emergency=!forceBasic&&!s.orders.some(o=>o.cards)&&adjacentEnemy?chooseOrder(s,ctx,true):null;
- const escapePlan=cardPlan&&(cardPlan.skill||cardPlan.warp||cardPlan.flee||cardPlan.wait||cardPlan.control),enemy=cardPlan?.enemy||(escapePlan||emergency?null:adjacentEnemy);
+ const escapePlan=cardPlan&&(cardPlan.skill||cardPlan.warp||cardPlan.flee||cardPlan.wait||cardPlan.control),enemy=(skillLocked(s,'attackLock')?null:cardPlan?.enemy)||(escapePlan||emergency?null:adjacentEnemy);
  let action=cardPlan||emergency;
  if(!enemy){
   if(!forceBasic)action ||= chooseOrder(s,ctx);
@@ -215,7 +216,7 @@ export function tick(s,{onSkillEffect,onTrapEffect,onPickup,onRuleCheck,onRuleAc
  beginDirectiveSafety(s,log);const progressBefore=progressSnapshot(s);s.actorSkillEvent=null;for(const e of s.enemies)if(e.control)e.control.unharmedTurns++;if(s.retreatCooldown>0)s.retreatCooldown--;
  const sealedStart=s.enemies.some(e=>e.boss)&&key(s.player)===key(s.stairs);
  const {enemy,action:plannedAction,ruleIndex}=planHeroTurn(s,onRuleCheck);let action=plannedAction;s.activeOrder=null;s.executingRule=ruleIndex===null?(!enemy&&action?.fixed?action.fixed==='chests'?'fixed-chests':'fixed':null):ruleIndex;recordRule(s,ruleIndex);
- if(ruleIndex!==null&&(action?.control||enemy||action?.wait||action?.skill||action?.warp||action?.next&&!trapActive(s,null,'snare')))onRuleAction?.(ruleIndex);
+ if(ruleIndex!==null&&(action?.control||enemy||action?.wait||action?.skill||action?.warp||action?.next&&!trapActive(s,null,'snare')&&!skillLocked(s,'root')))onRuleAction?.(ruleIndex);
  let controlledActor=null;
  if(action?.control){controlledActor=action.control.actor;const cast=onSkillEffect&&action.control.skill?captureSkillCast(s,controlledActor):null;executeEnemyCommand(s,action.control,{stats,route,lineOfSight,rng:()=>nextRandom(s),log,hitHero:controlledHitHero});if(cast){const event=collectSkillCast(s,cast,action.control.skill,controlledActor);if(event)onSkillEffect(event);}s.intent='敵への指示：'+action.intent.replace('カード指示：','');if(s.hp<=0)return;}
  else if(enemy){s.intent=`隣接する${enemy.name}と交戦`;attackEnemy(s,enemy);}
@@ -223,7 +224,7 @@ export function tick(s,{onSkillEffect,onTrapEffect,onPickup,onRuleCheck,onRuleAc
   if(action.wait)s.intent=action.intent;
   if(action.warp&&!action.skill)action.skill='warp';
   if(action.skill){s.intent=action.intent;s.activeOrder='cards';const cast=onSkillEffect?captureSkillCast(s):null;executeThemedSkill(s,action.skill,{stats,canSee,route,reveal,attackEnemy,warpDestination,has:hasAugment,rng:()=>nextRandom(s),log,recordMend:n=>{recordBuild(s,'mendUses');recordBuild(s,'mendHealing',n);}});if(cast){const event=collectSkillCast(s,cast,action.skill);if(event)onSkillEffect(event);}}
-  if(action.next&&!trapActive(s,null,'snare')){s.player={...action.next};s.intent=action.intent;s.activeOrder=action.id||null;reveal(s);}
+  if(action.next&&!trapActive(s,null,'snare')&&!skillLocked(s,'root')){s.player={...action.next};s.intent=action.intent;s.activeOrder=action.id||null;reveal(s);}
   if(action.flee){s.retreatTurns++;if(s.retreatTurns>=4){s.retreatTurns=0;s.retreatCooldown=6;}}else s.retreatTurns=0;
  }
  updateThemeExploration(s,{has:hasAugment,stats,log});
@@ -235,21 +236,21 @@ export function tick(s,{onSkillEffect,onTrapEffect,onPickup,onRuleCheck,onRuleAc
  if(s.hp<=0)return;
  for(const e of [...s.enemies]){
   if(!s.enemies.includes(e))continue;
-  if(e!==controlledActor){
-   const sight=Math.max(2,6+themeBuff({steps:s.steps,themeState:e.control?.state},'sight')-trapSightPenalty(s,e));
+  if(e!==controlledActor&&!skillLocked(s,'sleep',e)){
+   const sight=Math.max(2,6+themeBuff({steps:s.steps,themeState:e.control?.state},'sight')-themeBuff({steps:s.steps,themeState:e.control?.state},'sightFatigue')-trapSightPenalty(s,e));
    if(distance(e,s.player)<=sight&&lineOfSight(s,e,s.player))e.aggro=true;
    const alarm=e.trapAlarm?.until>=s.steps?e.trapAlarm:null;
-   const obscured=trapSightPenalty(s,e)>0&&(distance(e,s.player)>sight||!lineOfSight(s,e,s.player));
+   const obscured=(trapSightPenalty(s,e)>0||skillLocked(s,'sightFatigue',e))&&(distance(e,s.player)>sight||!lineOfSight(s,e,s.player));
    if((!e.house||s.gimmick?.triggered||alarm)&&(!obscured||alarm)&&e.aggro&&s.turn%e.period===0){
-    if(distance(e,s.player)===1){controlledHitHero(s,e,{controlled:false});if(s.hp<=0)return;}
-    else if(!trapActive(s,e,'snare')){const next=route(s,p=>alarm?key(p)===key(alarm):distance(p,s.player)===1,{start:e,known:false,blocked:new Set(s.enemies.filter(o=>o!==e).map(key))});if(next&&key(next)!==key(s.player)){e.x=next.x;e.y=next.y;}}
+    if(distance(e,s.player)===1){if(!skillLocked(s,'attackLock',e))controlledHitHero(s,e,{controlled:false});if(s.hp<=0)return;}
+    else if(!trapActive(s,e,'snare')&&!skillLocked(s,'root',e)){const next=route(s,p=>alarm?key(p)===key(alarm):distance(p,s.player)===1,{start:e,known:false,blocked:new Set(s.enemies.filter(o=>o!==e).map(key))});if(next&&key(next)!==key(s.player)){e.x=next.x;e.y=next.y;}}
    }
   }
   applyTrap(s,e,onTrapEffect);
   if(s.augmentOffer)return;
  }
  reveal(s);
- updateDirectiveSafety(s,progressBefore,!enemy&&Boolean(action?.wait||action?.control?.wait),log);
+ updateDirectiveSafety(s,progressBefore,!enemy&&!skillLocked(s,'sleep')&&Boolean(action?.wait||action?.control?.wait),log);
  const bossAlive=s.enemies.some(e=>e.boss);
  if(bossAlive&&(sealedStart||key(s.player)===key(s.stairs)))s.intent='階段は封印中。中ボスを倒す必要がある';
  const done=Boolean(action?.exit)&&!bossAlive;

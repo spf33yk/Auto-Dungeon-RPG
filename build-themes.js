@@ -218,7 +218,7 @@ export const themedSkills=[
   "name": "周辺偵察",
   "themeId": "explorer",
   "rarity": "NORMAL",
-  "detail": "10ターン、視界半径＋2。壁越しには見えない。"
+  "detail": "発動を含む10ターン、視界半径＋2。その後の3ターンは視界半径−2。壁越しには見えない。"
  },
  {
   "id": "trap-step",
@@ -243,10 +243,10 @@ export const themedSkills=[
  },
  {
   "id": "waymark",
-  "name": "道標",
+  "name": "駆け足",
   "themeId": "explorer",
   "rarity": "EPIC",
-  "detail": "現在の部屋に接続する通路と隣の部屋の地形をMAPへ記録。敵や品物は公開しない。"
+  "detail": "視界内で最も近い相手から離れる方向へ最大2マス進む。相手がいなければ空いている方向へ進む。"
  },
  {
   "id": "homeward",
@@ -274,21 +274,21 @@ export const themedSkills=[
   "name": "金剛の構え",
   "themeId": "monk",
   "rarity": "NORMAL",
-  "detail": "5ターン、DEF＋3。"
+  "detail": "このターンを含む5ターン、DEF＋3。その間の最初の打撃は0.8倍。"
  },
  {
   "id": "palm",
   "name": "練気掌",
   "themeId": "monk",
   "rarity": "EPIC",
-  "detail": "隣接敵へ1.5倍攻撃。この階で100ターン経過後は2.5倍。"
+  "detail": "隣接敵へ1.5倍攻撃。この階で100ターン経過後は2.5倍。次の2ターンは攻撃の威力が半減。"
  },
  {
   "id": "clear-mind",
-  "name": "明鏡止水",
+  "name": "深い眠り",
   "themeId": "monk",
   "rarity": "EPIC",
-  "detail": "次の打撃を2倍にし、無被弾の蓄積を5ターン進める。"
+  "detail": "HPを全回復し、次の10ターンは行動不能。HP満タンでも使用可能。"
  },
  {
   "id": "one-thought",
@@ -299,10 +299,10 @@ export const themedSkills=[
  },
  {
   "id": "blood-offering",
-  "name": "血の供物",
+  "name": "捨て身の構え",
   "themeId": "berserker",
   "rarity": "NORMAL",
-  "detail": "最大HPの10%を消費し、8ターン、ATK＋4。HP1は残る。"
+  "detail": "次の打撃が1.5倍。このターンを含む5ターン、DEF−3。"
  },
  {
   "id": "frenzy",
@@ -330,7 +330,7 @@ export const themedSkills=[
   "name": "円環の斬撃",
   "themeId": "berserker",
   "rarity": "EPIC",
-  "detail": "隣接する全敵へ通常の120%で攻撃。"
+  "detail": "隣接する全敵へ通常の120%で攻撃。次の1ターンは攻撃不能。移動は可能。"
  },
  {
   "id": "life-burn",
@@ -341,10 +341,10 @@ export const themedSkills=[
  },
  {
   "id": "small-prayer",
-  "name": "小さな祈り",
+  "name": "不動の盾",
   "themeId": "guardian",
   "rarity": "NORMAL",
-  "detail": "最大HPの20%を回復。"
+  "detail": "このターンを含む5ターン、DEF＋4。次の4ターンは移動不能。攻撃は可能。"
  },
  {
   "id": "shield-stance",
@@ -372,7 +372,7 @@ export const themedSkills=[
   "name": "骨の守り",
   "themeId": "guardian",
   "rarity": "EPIC",
-  "detail": "次の3回の被ダメージを半減。"
+  "detail": "次の3回の被ダメージを半減。次の3ターンはATK−3。"
  },
  {
   "id": "fortress",
@@ -393,14 +393,14 @@ export const themedSkills=[
   "name": "賭けの手当",
   "themeId": "gambler",
   "rarity": "NORMAL",
-  "detail": "50%で最大HPの30%を回復、50%で最大HPの5%を失う。HP1は残る。"
+  "detail": "50%で最大HPの30%を回復。外れると最大HPの5%を失い、次の3ターンは受けるダメージが25%増加。HP1は残る。HP満タンでも使用可能。"
  },
  {
   "id": "fortune",
-  "name": "運試し",
+  "name": "賽の一歩",
   "themeId": "gambler",
   "rarity": "NORMAL",
-  "detail": "記憶の欠片3を消費。50%で記憶の欠片8を得る。失敗すると追加獲得なし。"
+  "detail": "隣接する空き床へランダムに1マス移動。"
  },
  {
   "id": "life-bet",

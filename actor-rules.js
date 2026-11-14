@@ -4,8 +4,6 @@ export const retiredTargets=['target:weak-enemy','target:danger-enemy'];
 const knownTargets=['target:self','target:enemy',...retiredTargets];
 export const enemySkillReasons={
  'trap-step':'敵は罠を作動させないため',
- waymark:'骸の地図を公開する技のため',
- fortune:'骸の記憶の欠片を使う技のため',
  'treasure-bet':'骸の回収品を扱う技のため',
  homeward:'骸のフロア帰還用の技のため'
 };
