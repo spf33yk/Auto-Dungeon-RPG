@@ -930,3 +930,14 @@ body.exploring :is(#field-gimmick,#floor-message){background:transparent;text-sh
 .forecast-rows{display:grid;gap:8px}
 .forecast-rows article{padding:10px 12px;border:1px solid #786746;border-radius:5px}
 .forecast-rows p{margin:4px 0 8px}
+
+.extension-shop{height:100%;min-height:0;padding:10px 16px;display:flex;flex-direction:column;gap:8px;color:var(--prep-theme-text)}
+.extension-balance{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;padding:4px 14px;border:1px solid var(--prep-theme-edge);background:#171b19;color:#efd798}
+.extension-balance strong{font-size:1.6em;font-variant-numeric:tabular-nums}
+.extension-balance small{font-size:.55em}
+.extension-shop .extension-tree-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;flex:1;margin:0}
+.extension-shop .extension-branches{display:flex;flex-direction:column;gap:8px}
+.extension-shop .extension-branches section{display:grid;grid-template-columns:1fr;gap:4px}
+.extension-shop .extension-node{width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:0;padding:5px 8px;text-align:left}
+.extension-shop .extension-node small{flex:none}
+.extension-shop .extension-detail{border:1px solid var(--prep-theme-edge);padding:10px 12px;background:#111817;overflow:auto}

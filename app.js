@@ -283,10 +283,25 @@ function renderThoughtSubtitle(){
 function categoryTabs(type,selected,common=false){return `<div class="subtabs" role="group" aria-label="${type==='skill'?'スキル系統':'装備の種類'}">${(common?[['common','共通'],['weapon','武器'],['armor','防具']]:[['weapon','武器'],['armor','防具']]).map(([id,label])=>`<button data-category="${type}" data-value="${id}" aria-pressed="${selected===id}" class="${selected===id?'active':''}">${label}</button>`).join('')}</div>`;}
 function sortButtons(type,selected){return `<div class="sort-controls" role="group" aria-label="装備の並べ替え">${[['acquired','入手順'],['attack','攻撃力順'],['defense','防御力順']].map(([id,label])=>`<button data-sort="${type}" data-value="${id}" class="${selected===id?'active':''}" aria-pressed="${selected===id}">${label} ${id==='acquired'?'↑':'↓'}</button>`).join('')}</div>`;}
 const orderHistory=createOrderHistory();
-let selectedExtension='chest';
-function renderExpansionShop(){const list=skills.filter(k=>['commandSlots','cardSlots','scout'].includes(k.id)),upgrades=list.map(k=>'<button class="extension-node '+(selectedExtension===k.id?'selected':'')+'" data-extension-upgrade-select="'+k.id+'"><strong>'+k.name+'</strong><small>'+(state.levels[k.id]>=k.max?'最大まで取得済み':'記憶の欠片 '+price(state,k)+'個')+' · '+state.levels[k.id]+'/'+k.max+'段階</small></button>').join('');$('order-expansion-content').innerHTML='<b>記憶の欠片 '+state.shards+'個</b>'+extensionTree(state,upgrades,selectedExtension);const k=list.find(k=>k.id===selectedExtension);if(k)$('order-expansion-content').querySelector('.extension-detail').innerHTML='<small>指示の拡張</small><h3>'+k.name+'</h3><p>'+k.detail+'</p><p>現在 '+state.levels[k.id]+'/'+k.max+' · 記憶の欠片 '+price(state,k)+'個</p><button data-upgrade="'+k.id+'" '+(state.phase!=='prepare'||state.floor===1||state.levels[k.id]>=k.max||state.shards<price(state,k)?'disabled':'')+'>購入する</button>';}
+let selectedExtension='scout';
+function renderExpansionShop(){
+ const host=$('tab-content');
+ const list=skills.filter(k=>['commandSlots','cardSlots','scout'].includes(k.id));
+ const upgrades=list.map(k=>{
+  const full=state.levels[k.id]>=k.max;
+  return '<button class="extension-node '+(selectedExtension===k.id?'selected':'')+'" data-extension-upgrade-select="'+k.id+'" aria-pressed="'+(selectedExtension===k.id)+'"><strong>'+esc(k.name)+'</strong><small>'+(full?'上限':price(state,k)+'個')+'</small></button>';
+ }).join('');
+ const k=list.find(k=>k.id===selectedExtension);
+ host.innerHTML='<div class="extension-shop"><div class="extension-balance"><span>記憶の欠片 所持数</span><strong>'+state.shards.toLocaleString('ja-JP')+' <small>個</small></strong></div>'+extensionTree(state,upgrades,selectedExtension)+'</div>';
+ if(k){
+  const level=state.levels[k.id],full=level>=k.max,cost=price(state,k);
+  const [base,unit]={scout:[3,'マス'],cardSlots:[4,'枚'],commandSlots:[2,'行']}[k.id];
+  host.querySelector('.extension-detail').innerHTML='<h3>'+esc(k.name)+'</h3><p>'+esc(k.detail)+'</p><strong>'+(base+level)+unit+(full?'（上限）':' → '+(base+level+1)+unit)+'</strong>'+ (full?'':'<p>'+(state.shards>=cost?'購入後の残高 '+(state.shards-cost)+'個':'あと '+(cost-state.shards)+'個必要')+'</p>')+'<button data-upgrade="'+k.id+'" '+(state.phase!=='prepare'||state.floor===1||full||state.shards<cost?'disabled':'')+'>'+(full?'最大まで取得済み':cost+'個で購入')+'</button>';
+ }
+}
 
-function renderOrderEditor(host){if(state.phase==='prepare')orderHistory.observe(state);renderCardEditor(host,state,orderCapacity(state));for(const b of host.querySelectorAll('[data-order-history]'))b.disabled=!orderHistory[b.dataset.orderHistory];if($('order-expansion-dialog').open)renderExpansionShop();}
+
+function renderOrderEditor(host){if(state.phase==='prepare')orderHistory.observe(state);renderCardEditor(host,state,orderCapacity(state));for(const b of host.querySelectorAll('[data-order-history]'))b.disabled=!orderHistory[b.dataset.orderHistory];}
 
 function handleOrderClick(e,host){const result=handleCardClick(e,state);if(result!==null){if(result!=='selected'){delete host.dataset.orderSignature;render();}return true;}const b=e.target.closest('button');if(!b||b.disabled)return false;if(b.hasAttribute('data-rule-add')){const choice=host.querySelector('[data-order-choice]');if(choice&&addOrder(state,choice.value)){delete host.dataset.orderSignature;render();}return true;}if(b.dataset.ruleOp){editOrder(state,Number(b.dataset.index),b.dataset.ruleOp);delete host.dataset.orderSignature;render();return true;}return false;}
 function handleOrderChange(e){const result=handleCardChange(e,state);if(result!==null){if(result==='selected')return;delete $('live-orders').dataset.orderSignature;delete $('tab-content').dataset.orderSignature;render();return;}if(e.target.dataset.ruleValue!==undefined){editOrder(state,Number(e.target.dataset.ruleValue),e.target.value);delete $('live-orders').dataset.orderSignature;delete $('tab-content').dataset.orderSignature;render();}}
@@ -433,6 +448,7 @@ function renderTab(){
  if(tab==='status')tab='gear';
  if(tab==='gear'){const host=$('tab-content'),scroll=host.querySelector('.gear-inventory-scroll'),top=host.dataset.gearSlot===gearSlot?scroll?.scrollTop||0:0,expanded=host.querySelector('.gear-details')?.open;host.dataset.gearSlot=gearSlot;host.innerHTML=equipmentPanel(state,{slot:gearSlot,sort:gearSorts[gearSlot],tabs:categoryTabs('gear',gearSlot),sorts:sortButtons('gear',gearSorts[gearSlot]),details:$('expedition-summary').innerHTML.replace(/\sid="[^"]*"/g,''),sight:radius(state)});host.querySelector('.gear-inventory-scroll').scrollTop=top;host.querySelector('.gear-details').open=Boolean(expanded);}
 
+ if(tab==='extensions')renderExpansionShop();
  if(tab==='orders'){if(!$('tab-content').querySelector('.card-board'))delete $('tab-content').dataset.orderSignature;renderOrderEditor($('tab-content'));}
  refreshForecast();
 
@@ -519,10 +535,10 @@ codexNavigation.addEventListener('click',event=>{
 });
 function showCodex(kind){selectCodex(kind);openDialog('codex-dialog');}
 const getRef=r=>r.startsWith('i')?Number(r.slice(1)):r;
-$('tab-content').onclick=e=>{if(e.target.closest('[data-drop-return],[data-drag-source],[data-inline-condition]')&&handleOrderClick(e,$('tab-content')))return;const b=e.target.closest('button');if(!b||b.disabled)return;if(b.hasAttribute('data-best-equipment')){equipBest(state);render();return;}if(b.dataset.category){const type=b.dataset.category;if(type==='gear')gearSlot=b.dataset.value;}else if(b.dataset.sort){gearSorts[gearSlot]=b.dataset.value;}else if(handleOrderClick(e,$('tab-content')))return;else if(b.dataset.upgrade){if(upgrade(state,b.dataset.upgrade))tone(550);}else if(b.dataset.action){const ref=getRef(b.dataset.ref);switch(b.dataset.action){case'equip':equip(state,ref);break;case'discard':discard(state,ref);break;}}render();};
+$('tab-content').onclick=e=>{if(tab==='extensions')return;if(e.target.closest('[data-drop-return],[data-drag-source],[data-inline-condition]')&&handleOrderClick(e,$('tab-content')))return;const b=e.target.closest('button');if(!b||b.disabled)return;if(b.hasAttribute('data-best-equipment')){equipBest(state);render();return;}if(b.dataset.category){const type=b.dataset.category;if(type==='gear')gearSlot=b.dataset.value;}else if(b.dataset.sort){gearSorts[gearSlot]=b.dataset.value;}else if(handleOrderClick(e,$('tab-content')))return;else if(b.dataset.upgrade){if(upgrade(state,b.dataset.upgrade))tone(550);}else if(b.dataset.action){const ref=getRef(b.dataset.ref);switch(b.dataset.action){case'equip':equip(state,ref);break;case'discard':discard(state,ref);break;}}render();};
 $('live-orders').onclick=e=>handleOrderClick(e,$('live-orders'));
-$('live-orders').onchange=handleOrderChange;
-$('tab-content').onchange=handleOrderChange;
+$('live-orders').onchange=e=>{if(tab!=='extensions')handleOrderChange(e);};;
+$('tab-content').onchange=e=>{if(tab!=='extensions')handleOrderChange(e);};;
 $('codex-body').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.category)codexSlot=b.dataset.value;else if(b.dataset.sort)codexSorts[codexSlot]=b.dataset.value;renderCodex();};
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));renderTab();});
 document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{speed=Number(b.dataset.speed);document.querySelectorAll('[data-speed]').forEach(x=>x.classList.toggle('active',x===b));});
@@ -589,13 +605,13 @@ $('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettin
   });
   return;
  }
- const history=e.target.closest('[data-order-history]');if(history&&!history.disabled&&orderHistory.move(state,history.dataset.orderHistory)){render();return;}if(e.target.closest('[data-order-expansions]')&&state.phase==='prepare'){renderExpansionShop();$('order-expansion-dialog').showModal();return;}if(e.target.closest('[data-forecast-run]'))refreshForecast(true);});
+ const history=e.target.closest('[data-order-history]');if(history&&!history.disabled&&orderHistory.move(state,history.dataset.orderHistory)){render();return;}if(e.target.closest('[data-forecast-run]'))refreshForecast(true);});
  document.addEventListener('change',e=>{if(e.target.id==='forecast-samples'){forecastSamples=Number(e.target.value);refreshForecast(true);}});
  $('sound').onclick=()=>{sound=!sound;uiSettings=saveUiSettings(uiStorage,{...uiSettings,soundEnabled:sound});paintSoundOptions();tone(440);};
 $('codex-open').onclick=()=>showCodex(codexKind);
 $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dialog').close();$('guide-start').onclick=()=>$('dialog').close();
-$('order-expansion-dialog').onchange=e=>{if(e.target.id!=='exchange-source-a')return;const first=e.target.value,second=$('exchange-source-b');for(const o of second.options)o.hidden=o.disabled=o.value===first||o.value.split(':')[0]!==first.split(':')[0];second.value=[...second.options].find(o=>!o.disabled)?.value||'';};
-$('order-expansion-dialog').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled||state.phase!=='prepare')return;if(b.dataset.extensionUpgradeSelect){selectedExtension=b.dataset.extensionUpgradeSelect;renderExpansionShop();return;}if(b.dataset.extensionSelect){selectedExtension=b.dataset.extensionSelect;renderExpansionShop();return;}let changed=false;if(b.dataset.upgrade)changed=upgrade(state,b.dataset.upgrade);if(b.dataset.extensionUnlock)changed=unlockExtension(state,b.dataset.extensionUnlock);if(b.hasAttribute('data-extension-exchange'))changed=startExchange(state,[$('exchange-source-a')?.value,$('exchange-source-b')?.value]);if(b.dataset.extensionChoice)changed=chooseExchange(state,b.dataset.extensionChoice);if(changed){tone(550);renderExpansionShop();render();}};
+$('tab-content').addEventListener('change',e=>{if(e.target.id!=='exchange-source-a')return;const first=e.target.value,second=$('exchange-source-b');for(const o of second.options)o.hidden=o.disabled=o.value===first||o.value.split(':')[0]!==first.split(':')[0];second.value=[...second.options].find(o=>!o.disabled)?.value||'';});
+$('tab-content').addEventListener('click',e=>{const b=e.target.closest('button');if(tab!=='extensions'||!b||b.disabled||state.phase!=='prepare')return;if(b.dataset.extensionUpgradeSelect){selectedExtension=b.dataset.extensionUpgradeSelect;renderExpansionShop();e.currentTarget.querySelector('[aria-pressed=true]')?.focus();return;}if(b.dataset.extensionSelect){selectedExtension=b.dataset.extensionSelect;renderExpansionShop();e.currentTarget.querySelector('[aria-pressed=true]')?.focus();return;}let changed=false;if(b.dataset.upgrade)changed=upgrade(state,b.dataset.upgrade);if(b.dataset.extensionUnlock)changed=unlockExtension(state,b.dataset.extensionUnlock);if(b.hasAttribute('data-extension-exchange'))changed=startExchange(state,[$('exchange-source-a')?.value,$('exchange-source-b')?.value]);if(b.dataset.extensionChoice)changed=chooseExchange(state,b.dataset.extensionChoice);if(changed){tone(550);render();}});
 
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());document.querySelectorAll('dialog').forEach(d=>{if(d.id!=='field-event-dialog')d.addEventListener('close',finishDialog);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.phase==='explore'){paused=true;dialogWasPaused=true;render();}});
