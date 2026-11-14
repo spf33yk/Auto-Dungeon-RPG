@@ -923,3 +923,10 @@ body.preparing #workspace.has-hud-augments::before{top:calc(var(--shared-hud-spa
 body.exploring .hud-alerts{left:auto;right:12px;text-align:right}
 body.exploring #map-wrap:has(#field-gimmick:not([hidden])) .automap-overlay{top:calc(var(--hud-top-space,70px) + 31px)}
 body.exploring :is(#field-gimmick,#floor-message){background:transparent;text-shadow:0 1px 4px #000,0 0 3px #000}
+
+.forecast-table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-variant-numeric:tabular-nums}
+.forecast-table :is(th,td){padding:6px 8px;text-align:right;border-bottom:1px solid #78674666}
+.forecast-table th:first-child{text-align:left}
+.forecast-rows{display:grid;gap:8px}
+.forecast-rows article{padding:10px 12px;border:1px solid #786746;border-radius:5px}
+.forecast-rows p{margin:4px 0 8px}

@@ -152,13 +152,13 @@ function placeWillChest(s){
 
 export function obtainable(s,i){return i.type==='letter'?(fixedChestUnlocked(s)||s.debugUsed===true&&s.debugWillChest===true&&s.floor===LETTER_FLOOR)&&!s.letter:true;}
 function receiveReward(s,id){const fresh=grantReward(s,id);log(s,fresh?'「'+rewardById[id].name+'」を手に入れた。'+(rewardById[id].kind==='order'?'次の準備で探索指示に設定できる。':'この旅で使用できる。'):'「'+rewardById[id].name+'」は取得済み。記憶の欠片 +5','good');}
-function pickup(s,onPickup){const hpBefore=s.hp,item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);
+function pickup(s,onPickup,onChestPickup){const hpBefore=s.hp,item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);
  if(isHealingItem(item)){if(s.hp>=stats(s).maxHp){s.potionStock=(s.potionStock||0)+1;log(s,'回復ポーションをストックした。','good');}else{const heal=Math.min(stats(s).maxHp-s.hp,BALANCE.heartHeal);s.hp+=heal;log(s,'回復ポーション。HP +'+heal,'good');}}
  else if(item.type==='fragment'){const amount=3+(hasAugment(s,'scavenger')?ap(s,'scavenger').extra:0)+(hasAugment(s,'lucky-find')&&nextRandom(s)<Math.min(1,ap(s,'lucky-find').chance)?4:0);s.shards+=amount;log(s,'床の記憶の欠片を拾った。＋'+amount,'good');}
  else if(item.type==='gear'){acquire(s,item.gear);log(s,gearName(item.gear)+'を拾った。','good');}
  else if(item.type==='reward')receiveReward(s,item.rewardId);
  else if(item.type==='letter'){delete s.debugWillChest;s.letter=true;log(s,WILL_PICKUP_LINE,'story');}
- else if(item.type==='chest'){log(s,'宝箱を開けた。','good');if(item.cardId){const t=themeState(s),gamble=hasAugment(s,'destiny')&&!t.destinyUsed;if(gamble)t.destinyUsed=true;const win=gamble?nextRandom(s)<Math.min(1,ap(s,'destiny').chance):false,categories=chestCategoryChoices(s,item.cardId,()=>nextRandom(s)),choices=categories[cardByKey[item.cardId].kind]||Object.values(categories)[0];s.cardOffer={choices,categories,remaining:gamble&&win?2:1,...(gamble?{gamble:true,lost:!win,consolation:ap(s,'destiny').consolation}:{})};log(s,'箱の中で、いくつもの記憶が揺れている。ひとつ選ぼう。','good');}else if(item.gear){acquire(s,item.gear);s.shards+=2;log(s,'旧宝箱から'+gearName(item.gear)+'を入手。記憶の欠片 +2','good');}else receiveReward(s,item.rewardId);}
+ else if(item.type==='chest'){onChestPickup?.();log(s,'宝箱を開けた。','good');if(item.cardId){const t=themeState(s),gamble=hasAugment(s,'destiny')&&!t.destinyUsed;if(gamble)t.destinyUsed=true;const win=gamble?nextRandom(s)<Math.min(1,ap(s,'destiny').chance):false,categories=chestCategoryChoices(s,item.cardId,()=>nextRandom(s)),choices=categories[cardByKey[item.cardId].kind]||Object.values(categories)[0];s.cardOffer={choices,categories,remaining:gamble&&win?2:1,...(gamble?{gamble:true,lost:!win,consolation:ap(s,'destiny').consolation}:{})};log(s,'箱の中で、いくつもの記憶が揺れている。ひとつ選ぼう。','good');}else if(item.gear){acquire(s,item.gear);s.shards+=2;log(s,'旧宝箱から'+gearName(item.gear)+'を入手。記憶の欠片 +2','good');}else receiveReward(s,item.rewardId);}
  if(isHealingItem(item)||['fragment','gear','reward'].includes(item.type))onPickup?.(item,s.hp>hpBefore);
 }
 export function dropFromEnemy(s,e){if(e.reinforcement)return null;const rng=()=>nextRandom(s),drop=rollEnemyDrop(e.baseId,rng);if(!drop)return null;
@@ -178,8 +178,8 @@ function defeatEnemy(s,enemy){s.enemies=s.enemies.filter(e=>e!==enemy);s.kills++
 function controlledHitHero(s,e,{power=1,leech=0,controlled=true,skill=false,skillId=null}={}){const b=themeBuff({steps:s.steps,themeState:e.control?.state},'nextPower')||1,weak=e.weakenedHits>0;if(weak)e.weakenedHits--;const damage=skillDamage(s,Math.ceil(incomingDamage(enemyAttack(s,e),stats(s).defense)*power*b*(weak?.5:1))),before=s.hp;if(takeHeroDamage(s,damage))log(s,'骨の執念で踏みとどまった。','good');const actual=before-s.hp;if(e.control?.state)delete e.control.state.buffs.nextPower;if(leech)e.hp=Math.min(e.maxHp,e.hp+Math.floor(actual*leech));s.damageEvents.push({...s.player,damage,hero:true,source:{x:e.x,y:e.y},impact:skill?'skill':'melee',...(skillId?{skillId}:{})});s.flash={...s.player,kind:'hurt'};log(s,e.name+(controlled?'が指示に従って攻撃。':'の攻撃。')+damage+'ダメージ。','bad');if(s.hp<=0){s.hp=0;s.phase='dead';s.cardOffer=null;s.nextHint=nextStageHint(s);log(s,'骨が崩れた。再び最深部へ。','story');}}
 function warpDestination(s){if(trapActive(s,null,'snare'))return null;const cells=[];for(let y=1;y<s.grid.length-1;y++)for(let x=1;x<s.grid[y].length-1;x++)if(s.grid[y][x]&&key({x,y})!==key(s.player)&&key({x,y})!==key(s.stairs)&&!s.enemies.some(e=>e.x===x&&e.y===y))cells.push({x,y});return cells.length?cells[Math.floor(nextRandom(s)*cells.length)]:null;}
 // Shared by real turns and the preparation decision tester. No mutations or RNG.
-export function planHeroTurn(s){
- const ctx={canSee,stats,obtainable,enemyPlan:(state,r,e)=>planEnemyCommand(state,r,e,{canSee,stats,route,lineOfSight})},avoid=modifierActive(s,'avoid-traps');
+export function planHeroTurn(s,onRuleCheck){
+ const ctx={canSee,stats,obtainable,onRuleCheck,enemyPlan:(state,r,e)=>planEnemyCommand(state,r,e,{canSee,stats,route,lineOfSight})},avoid=modifierActive(s,'avoid-traps');
  const heroRoute=(state,test,options={})=>{const blocked=new Set(options.blocked||[]);if(avoid)for(const t of state.traps||[])if(t.revealed&&!t.spent&&(state.gimmick?.id==='traps'||state.seen[t.y]?.[t.x]))blocked.add(key(t));return route(state,test,{...options,blocked})||(avoid?route(state,test,options):null);};ctx.route=heroRoute;
  const will=s.items.find(i=>i.type==='letter'&&obtainable(s,i));
  const willStep=will&&heroRoute(s,p=>key(p)===key(will),{blocked:new Set(s.enemies.map(key))});
@@ -210,11 +210,12 @@ function applyTrap(s,enemy=null,onEffect){
    log(s,(e?e.name:'骸')+'に'+damage+'ダメージ。',e?'':'bad');
   }});
 }
-export function tick(s,{onSkillEffect,onTrapEffect,onPickup}={}){
+export function tick(s,{onSkillEffect,onTrapEffect,onPickup,onRuleCheck,onRuleAction,onChestPickup}={}){
  if(s.phase!=='explore'||s.augmentOffer||s.cardOffer)return;notifyWillChest(s);s.unharmedTurns=(s.unharmedTurns||0)+1;s.turn++;s.steps++;s.flash=null;s.damageEvents=[];reveal(s);const st=stats(s);const report=buildReport(s),bonus=augmentBonus(s,st.maxHp,s.enemies.filter(e=>canSee(s,e.x,e.y)).length);report.turns++;report.peakAttackBonus=Math.max(report.peakAttackBonus,bonus.attack);report.peakDefenseBonus=Math.max(report.peakDefenseBonus,bonus.defense);
  beginDirectiveSafety(s,log);const progressBefore=progressSnapshot(s);s.actorSkillEvent=null;for(const e of s.enemies)if(e.control)e.control.unharmedTurns++;if(s.retreatCooldown>0)s.retreatCooldown--;
  const sealedStart=s.enemies.some(e=>e.boss)&&key(s.player)===key(s.stairs);
- const {enemy,action:plannedAction,ruleIndex}=planHeroTurn(s);let action=plannedAction;s.activeOrder=null;s.executingRule=ruleIndex===null?(!enemy&&action?.fixed?action.fixed==='chests'?'fixed-chests':'fixed':null):ruleIndex;recordRule(s,ruleIndex);
+ const {enemy,action:plannedAction,ruleIndex}=planHeroTurn(s,onRuleCheck);let action=plannedAction;s.activeOrder=null;s.executingRule=ruleIndex===null?(!enemy&&action?.fixed?action.fixed==='chests'?'fixed-chests':'fixed':null):ruleIndex;recordRule(s,ruleIndex);
+ if(ruleIndex!==null&&(action?.control||enemy||action?.wait||action?.skill||action?.warp||action?.next&&!trapActive(s,null,'snare')))onRuleAction?.(ruleIndex);
  let controlledActor=null;
  if(action?.control){controlledActor=action.control.actor;const cast=onSkillEffect&&action.control.skill?captureSkillCast(s,controlledActor):null;executeEnemyCommand(s,action.control,{stats,route,lineOfSight,rng:()=>nextRandom(s),log,hitHero:controlledHitHero});if(cast){const event=collectSkillCast(s,cast,action.control.skill,controlledActor);if(event)onSkillEffect(event);}s.intent='敵への指示：'+action.intent.replace('カード指示：','');if(s.hp<=0)return;}
  else if(enemy){s.intent=`隣接する${enemy.name}と交戦`;attackEnemy(s,enemy);}
@@ -227,7 +228,7 @@ export function tick(s,{onSkillEffect,onTrapEffect,onPickup}={}){
  }
  updateThemeExploration(s,{has:hasAugment,stats,log});
  if(s.augmentOffer)return;
- pickup(s,onPickup);
+ pickup(s,onPickup,onChestPickup);
  const house=s.gimmick?.room;
  if(house&&!s.gimmick.triggered&&s.player.x>=house.x&&s.player.x<house.x+house.w&&s.player.y>=house.y&&s.player.y<house.y+house.h){s.gimmick.triggered=true;log(s,s.gimmick.name+'！','bad');if(s.gimmick.id==='monsters')for(const e of s.enemies)if(e.house)e.aggro=true;}
  applyTrap(s,null,onTrapEffect);

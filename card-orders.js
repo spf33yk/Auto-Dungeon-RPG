@@ -3,7 +3,7 @@ import{activeOrderCount}from'./order-capacity.js';
 import{DIRECTIVE_LIMITS}from'./directive-safety.js';
 import{actorCanUse,roomContains,enemySkillReasons}from'./actor-rules.js';
 import{themedSkills}from'./build-themes.js';
-import{skillCanRun}from'./theme-runtime.js';
+import{skillCanRun,skillAlreadyUsed}from'./theme-runtime.js';
 import{gearById}from'./data.js';
 // Card data and evaluation are shared by the editor, AI and save migration.
 import{cardOwned,cardRarity}from'./card-access.js';
@@ -117,35 +117,43 @@ export function chooseCardOrder(s,ctx){
  const visible=s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)),blocked=new Set(visible.map(key));
  if(cardModifier(s,'avoid-traps',ctx))for(const t of s.traps||[])if(t.revealed&&!t.spent&&(s.gimmick?.id==='traps'||s.seen[t.y][t.x]))blocked.add(key(t));
  const seek=test=>ctx.route(s,test,{blocked})||ctx.route(s,test,{blocked:new Set(visible.map(key))});
+ let selected=null;
  const rules=effectiveCardOrders(s);for(let index=0;index<rules.length;index++){
-  const fixed=index===s.orders.length;if(ctx.ignoreDirectives&&!fixed)continue;const r=legacyToCards(rules[index]),effect=effectDefinition(r),targets=fixed?([s.stairs].filter(p=>s.seen[p.y]?.[p.x]&&!s.enemies.some(e=>e.boss))):matchingCardTargets(s,r,ctx);
+  const fixed=index===s.orders.length;if(fixed&&selected)break;if(ctx.ignoreDirectives&&!fixed)continue;const r=legacyToCards(rules[index]),effect=effectDefinition(r),targets=fixed?([s.stairs].filter(p=>s.seen[p.y]?.[p.x]&&!s.enemies.some(e=>e.boss))):matchingCardTargets(s,r,ctx);
   if(fixed&&fixedChestUnlocked(s)&&!ctx.ignoreDirectives){
    const next=seek(p=>s.items.some(i=>i.type==='chest'&&s.seen[i.y]?.[i.x]&&key(i)===key(p)));
    if(next)return {id:'cards',ruleIndex:null,fixed:'chests',next,intent:'固定指示：宝箱を取得'};
   }
+  if(ctx.onRuleCheck&&!fixed&&!r.disabled&&validCardRule(s,r)){
+   const candidates=r.target==='self'?destinations(s,r,ctx):subjects(s,r,ctx);
+   if(!candidates.length)ctx.onRuleCheck(index,'noTarget');
+   if(targets.length)ctx.onRuleCheck(index,'matched');
+  }
   if(!targets.length||effect?.modifier||effect?.id==='wait'&&s.steps<(s.directiveSafety?.waitUntil||0))continue;
+  if(r.effect.kind==='skill'&&skillAlreadyUsed(s,effect.id,r.target==='enemy'?targets[0]:null))ctx.onRuleCheck?.(index,'used');
+  const accept=action=>{if(!selected)selected=action;else ctx.onRuleCheck?.(index,'lowerPriority');return !ctx.onRuleCheck;};
   const base={id:'cards',ruleIndex:fixed?null:index,fixed,intent:`カード指示：${effect.name}`};
-  if(r.target==='enemy'){const command=ctx.enemyPlan?.(s,r,targets[0]);if(command)return {...base,control:command};continue;}
-  if(r.effect.kind==='skill'){if(skillCanRun(s,effect.id,ctx))return {...base,skill:effect.id,exit:effect.id==='homeward'};continue;}
-  if(effect.id==='wait')return {...base,wait:true};
+  if(r.target==='enemy'){const command=ctx.enemyPlan?.(s,r,targets[0]);if(command){if(accept({...base,control:command}))return selected;continue;}continue;}
+  if(r.effect.kind==='skill'){if(skillCanRun(s,effect.id,ctx)){if(accept({...base,skill:effect.id,exit:effect.id==='homeward'}))return selected;continue;}continue;}
+  if(effect.id==='wait'){if(accept({...base,wait:true}))return selected;continue;}
   if(effect.id==='retreat'){
    if(s.retreatCooldown>0||!visible.length)continue;
    const danger=p=>visible.reduce((n,e)=>n+(dist(p,e)===1?20:0)+6/(1+dist(p,e)),0);
    const next=dirs.map(([dx,dy])=>({x:s.player.x+dx,y:s.player.y+dy})).filter(p=>s.grid[p.y]?.[p.x]&&s.seen[p.y][p.x]&&!blocked.has(key(p))).sort((a,b)=>danger(a)-danger(b))[0];
-   if(next&&danger(next)<danger(s.player))return {...base,next,flee:true};
+   if(next&&danger(next)<danger(s.player)){if(accept({...base,next,flee:true}))return selected;continue;}
   }else if(['frontier','explore-all'].includes(effect.id)){
    const range=r.conditions.find(c=>c.id==='range')?.value??Infinity;
    const nearby=visible.filter(e=>dist(s.player,e)<=range),combat=nearby.length?seek(p=>dist(s.player,p)<=range&&nearby.some(e=>dist(p,e)===1)):null;
-   if(combat)return {...base,next:combat,intent:'進路の敵に向き合う'};
+   if(combat){const plan={...base,next:combat,intent:'進路の敵に向き合う'};if(accept(plan))return selected;continue;}
    const rooms=s.rooms||[],entered=i=>(s.themeState?.rooms||[]).includes(i)||roomContains(rooms[i],s.player);if(effect.id==='frontier'&&rooms.length&&rooms.every((_,i)=>entered(i)))continue;
    const roomStep=effect.id==='frontier'?seek(p=>dist(s.player,p)<=range&&rooms.some((room,i)=>!entered(i)&&roomContains(room,p))):null;const next=roomStep||seek(p=>dist(s.player,p)<=range&&!s.visited[p.y][p.x]&&(effect.id==='explore-all'||dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false)));
-   if(next)return {...base,next};
+   if(next){if(accept({...base,next}))return selected;continue;}
   }else{
    const next=seek(p=>targets.some(t=>key(t)===key(p)));
-   if(next)return {...base,next,exit:effect.id==='stairs'};
+   if(next){if(accept({...base,next,exit:effect.id==='stairs'}))return selected;continue;}
   }
  }
- return null;
+ return selected;
 }
 
 export function describeCardRule(input){

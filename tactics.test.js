@@ -16,4 +16,22 @@ test('guard halves exactly three damaging hits and focus supports the charged au
 test('presets persist across journeys, include disabled state, and reject unavailable cards or capacity atomically',()=>{const mem=storage(),s=arena();s.phase='prepare';s.orders=[{...createCardRule(),disabled:true}];assert.ok(savePreset(mem,'帰還',s.orders).ok);const p=readPresets(mem)[0];assert.equal(p.orders[0].disabled,true);const other=newGame(2);other.phase='prepare';assert.ok(applyPreset(other,p).ok);assert.deepEqual(other.orders,s.orders);const before=JSON.stringify(other.orders);assert.ok(applyPreset(other,{orders:[createCardRule('self',[],'skill','mend')]}).error);assert.equal(JSON.stringify(other.orders),before);assert.ok(applyPreset(other,{orders:Array(3).fill(createCardRule())}).error);assert.equal(JSON.stringify(other.orders),before);assert.ok(deletePreset(mem,0));assert.deepEqual(readPresets(mem),[]);});
 test('preset limits and corrupt storage are safe',()=>{const mem=storage();for(let i=0;i<10;i++)assert.ok(savePreset(mem,'構成'+i,[]).ok);assert.ok(savePreset(mem,'追加',[]).error);assert.ok(savePreset(mem,'構成0',[]).ok);mem.setItem(PRESET_KEY,'{broken');assert.deepEqual(readPresets(mem),[]);assert.ok(savePreset({getItem:()=>null,setItem:()=>{throw Error();}},'test',[]).error);});
 
-test('forecast resolves candidate zero on clones without granting real cards or stalling',async()=>{const s=arena();s.phase='prepare';s.items=[{...s.player,type:'chest',cardId:'skill:mend'}];s.orders=[createCardRule('self',[],'action','chests')];const original=JSON.stringify(s);const result=await forecastExploration(s,{samples:2,maxTurns:20,yieldTask:async()=>{}});assert.equal(result.clearRate,100);assert.equal(JSON.stringify(s),original);assert.ok(result.warnings.some(w=>w.includes('候補の先頭')));});
+test('forecast resolves candidate zero on clones without granting real cards or stalling',async()=>{const s=arena();s.phase='prepare';s.items=[{...s.player,type:'chest',cardId:'skill:mend'}];s.orders=[createCardRule('self',[],'action','chests')];const original=JSON.stringify(s);const result=await forecastExploration(s,{samples:2,maxTurns:20,yieldTask:async()=>{}});assert.equal(result.clearRate,100);assert.equal(JSON.stringify(s),original);assert.equal(result.chests,1);assert.equal(result.rows[0].executed,2);});
+
+test('forecast distinguishes runnable lower rows from rows without targets or unused charges',async()=>{
+ const s=arena();
+ s.phase='prepare';
+ grantCard(s,'skill:first-aid');
+ s.hp=1;
+ s.orders=[
+  createCardRule('self',[],'skill','first-aid'),
+  createCardRule('self',[],'action','stairs'),
+  createCardRule('self',[],'action','chests')
+ ];
+ const result=await forecastExploration(s,{samples:2,maxTurns:10,yieldTask:async()=>{}});
+ assert.equal(result.rows[0].executed,2);
+ assert.equal(result.rows[0].used,2);
+ assert.equal(result.rows[1].lowerPriority,2);
+ assert.equal(result.rows[2].noTarget,2);
+ assert.equal(result.rows[2].lowerPriority,0);
+});

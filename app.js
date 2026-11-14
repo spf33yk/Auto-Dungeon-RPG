@@ -104,12 +104,28 @@ $('ending-options').onclick=()=>openOptions();
 $('bgm-toggle').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,bgmEnabled:!uiSettings.bgmEnabled});paintMusicOptions();syncSceneMusic();};
 $('bgm-volume').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,bgmVolume:Number($('bgm-volume').value)});paintMusicOptions();syncSceneMusic();};
 const preparationBaseline=createPreparationBaseline();let forecastBefore=null,forecastBeforeSamples=null,forecastBeforeError=false;
-let forecastTicket=0,forecastKey='',forecastCache=null,forecastSamples=8,forecastContext='',initialOrders=[];
+let forecastTicket=0,forecastKey='',forecastCache=null,forecastSamples=10,forecastContext='';
 function forecastDelta(result,index){const comparison=compareForecast(forecastBefore,result);return comparison?'<small class="forecast-delta '+(comparison[index].direction>0?'better':comparison[index].direction<0?'worse':'same')+'">準備開始時比 '+esc(comparison[index].text)+'</small>':'';}
 function paintForecastSummary(result=null,status='pending'){const summary=$('forecast-summary');if(!summary)return;summary.hidden=showingTitle||state.phase!=='prepare';summary.innerHTML=forecastSummary(floorLabel(state),result,status).map((item,index)=>'<div class="forecast-summary-item"><span>'+esc(item.label)+'</span><b>'+esc(item.value)+'</b>'+forecastDelta(result,index)+'</div>').join('');}
-function paintForecast(result){paintForecastSummary(result);const host=$('forecast-result');if(!host)return;host.innerHTML=`<div class="forecast-metric"><span>${floorLabel(state)}のClear見込み</span><b>${result.clearRate}%</b><progress max="100" value="${result.clearRate}"></progress></div><div class="forecast-metric"><span>想定ターン数（中央値）</span><b>${result.turns===null?'到達なし':'約'+result.turns}</b></div><div class="forecast-metric"><span>回復余力・終了時HP平均</span><b>${result.remainingHp>=50?'余裕あり':result.remainingHp>=25?'やや不足':'危険'} · ${result.remainingHp}%</b><progress max="100" value="${result.remainingHp}"></progress></div><div class="forecast-comparison-detail">${compareForecast(forecastBefore,result)?'<h4>準備開始時からの変化</h4>'+compareForecast(forecastBefore,result).map((d,i)=>'<p>'+['Clear見込み','ターン数','終了HP'][i]+'：'+esc(d.text)+'</p>').join(''):(forecastBeforeError?'<p>準備開始時の予測を比較できませんでした。再予測で試し直せます。</p>':'<p>準備開始時の予測と比較しています…</p>')}</div><h4>計算に使った探索指示</h4>${(result.orders||[]).map((text,i)=>'<p class="forecast-order">'+(i+1)+'. '+esc(text)+'</p>').join('')}<p class="forecast-disclaimer">指示の変更後も、同じ結果になる場合があります。未配置のカードは予測に含みません。</p><h4>試行中の行動例</h4>${result.examples.map((e,i)=>`<p class="forecast-example"><b>${i+1}</b><span>HP ${e.hp}<br>${esc(e.text)}</span></p>`).join('')}<small>${result.samples}試行／各1200ターン上限${result.incomplete?' · 未完了 '+result.incomplete+'回':''}</small>${result.warnings.map(t=>'<p class="forecast-warning">'+esc(t)+'</p>').join('')}`;host.removeAttribute('aria-busy');}
+function paintForecast(result){
+ paintForecastSummary(result);
+ const host=$('forecast-result');
+ const metrics=r=>[r.clearRate+'%',r.turns??'到達なし',r.remainingHp+'%',r.chests.toFixed(1)+'個'];
+ const before=forecastBefore?metrics(forecastBefore):[],now=metrics(result);
+ const table=['到達率','ターン数（中央値）','終了時HP（平均）','宝箱の取得数（平均）'].map((label,i)=>
+  '<tr><th scope="row">'+label+'</th><td>'+(before[i]??'—')+'</td><td><b>'+now[i]+'</b></td></tr>').join('');
+ const rows=result.rows.filter(row=>!row.disabled).map(row=>{
+  const reasons=[['lowerPriority','上位行を優先'],['noTarget','対象不在'],['used','スキル使用済み']].filter(([key])=>row[key]).map(([key,label])=>label+' '+row[key]+'試行');
+  const counts='条件成立 '+row.matched+'/'+result.samples+'試行、実行 '+row.executed+'/'+result.samples+'試行';
+  return '<article><strong>指示'+(row.index+1)+'「'+esc(row.name)+'」</strong><p>'+counts+(reasons.length?'。'+reasons.join('、'):'')+'</p><button type="button" data-forecast-row="'+row.index+'">指示'+(row.index+1)+'を確認</button></article>';
+ }).join('');
+ const status=forecastBefore?'':forecastBeforeError?' · 編集前の予測を取得できませんでした':' · 編集前を計算中…';
+ host.innerHTML='<small>同じ条件で '+result.samples+'試行'+status+(result.incomplete?' · 上限到達 '+result.incomplete+'試行':'')+'</small><table class="forecast-table"><thead><tr><th scope="col">結果</th><th scope="col">編集前</th><th scope="col">現在</th></tr></thead><tbody>'+table+'</tbody></table><h3>指示行の結果</h3><div class="forecast-rows">'+(rows||'<p>有効な指示行はありません。</p>')+'</div>';
+ host.removeAttribute('aria-busy');
+}
+
 function refreshForecast(force=false){
- const context=[state.seed,state.floor,state.profile.runs].join(':');if(state.phase==='prepare'&&context!==forecastContext){forecastContext=context;initialOrders=structuredClone(state.orders);preparationBaseline.capture(context,state);forecastBefore=null;}
+ const context=[state.seed,state.floor,state.profile.runs].join(':');if(state.phase==='prepare'&&context!==forecastContext){forecastContext=context;preparationBaseline.capture(context,state);forecastBefore=null;}
  if(showingTitle||state.phase!=='prepare'){forecastTicket++;forecastKey='';paintForecastSummary(null,'idle');return;}
  $('forecast-samples').value=String(forecastSamples);const signature=forecastSignature(state,forecastSamples);
  if(!force&&signature===forecastKey){if(forecastCache)paintForecast(forecastCache);return;}forecastKey=signature;forecastCache=null;paintForecastSummary();const ticket=++forecastTicket,copy=structuredClone(state);$('forecast-result').textContent='試行を開始しています…';$('forecast-result').setAttribute('aria-busy','true');
@@ -559,7 +575,21 @@ document.addEventListener('keydown',event=>{
 $('pause-toggle').onclick=()=>{if(state.phase!=='explore')return;paused=!paused;last=performance.now();render();if(!paused)tryMobileDisplay();};
 $('skip-opening').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,skipOpening:$('skip-opening').checked});};
 $('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,minimap:$('minimap-size').value});document.documentElement.dataset.minimapSize=uiSettings.minimap;drawAutoMap();};
- document.addEventListener('click',e=>{const history=e.target.closest('[data-order-history]');if(history&&!history.disabled&&orderHistory.move(state,history.dataset.orderHistory)){render();return;}if(e.target.closest('[data-order-expansions]')&&state.phase==='prepare'){renderExpansionShop();$('order-expansion-dialog').showModal();return;}if(e.target.closest('[data-forecast-run]'))refreshForecast(true);if(e.target.closest('[data-orders-undo]')&&state.phase==='prepare'&&forecastContext){state.orders=structuredClone(initialOrders);render();}});
+ document.addEventListener('click',e=>{
+ const forecastRow=e.target.closest('[data-forecast-row]');
+ if(forecastRow&&state.phase==='prepare'){
+  $('forecast-dialog').close();
+  document.querySelector('[data-tab="orders"]').click();
+  requestAnimationFrame(()=>{
+   const row=$('tab-content').querySelector('[data-card-row="'+forecastRow.dataset.forecastRow+'"]');
+   const toggle=row?.querySelector('[data-order-fold-button]');
+   if(row?.querySelector('[data-fold-body]')?.hidden)toggle?.click();
+   row?.scrollIntoView({block:'nearest'});
+   toggle?.focus({preventScroll:true});
+  });
+  return;
+ }
+ const history=e.target.closest('[data-order-history]');if(history&&!history.disabled&&orderHistory.move(state,history.dataset.orderHistory)){render();return;}if(e.target.closest('[data-order-expansions]')&&state.phase==='prepare'){renderExpansionShop();$('order-expansion-dialog').showModal();return;}if(e.target.closest('[data-forecast-run]'))refreshForecast(true);});
  document.addEventListener('change',e=>{if(e.target.id==='forecast-samples'){forecastSamples=Number(e.target.value);refreshForecast(true);}});
  $('sound').onclick=()=>{sound=!sound;uiSettings=saveUiSettings(uiStorage,{...uiSettings,soundEnabled:sound});paintSoundOptions();tone(440);};
 $('codex-open').onclick=()=>showCodex(codexKind);
