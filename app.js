@@ -153,16 +153,10 @@ const fieldSounds=Object.fromEntries(Object.entries({
 }).map(([cue,name])=>[cue,new Audio('./art/sfx/'+name+'.wav')]));
 // Match the TRUE END fire cue’s 5% playback level at the 30% setting.
 const FIELD_SOUND_GAIN=1/6;
-let prioritySoundUntil=0;
 function playFieldSound(cue){
  if(verificationMode||!sound||volume===0||document.hidden||$('debug-dialog').open)return;
  const clip=fieldSounds[cue];
- const gain=volume/100*FIELD_SOUND_GAIN,now=performance.now();
- if(['hurt','trap','heal'].includes(cue)){
-  prioritySoundUntil=now+240;
-  for(const blade of [fieldSounds.swing,fieldSounds.critical])if(!blade.paused)blade.volume=gain*.22;
- }
- clip.volume=['swing','critical'].includes(cue)&&now<prioritySoundUntil?gain*.22:gain;
+ clip.volume=volume/100*FIELD_SOUND_GAIN;
  clip.currentTime=0;
  clip.play().catch(()=>{});
 }
