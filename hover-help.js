@@ -12,7 +12,8 @@ export function installHoverHelp(){
   icon.className='theme-icon';
   icon.src=THEME_IMAGES[theme];
   icon.alt='';
-  box.prepend(icon,' ');
+  const themeLine=text.indexOf('\n')+1;
+  box.replaceChildren(text.slice(0,themeLine),icon,' ',text.slice(themeLine));
  }
  box.hidden=false;box.showPopover?.();box.style.left='0px';box.style.top='0px';const r=box.getBoundingClientRect();box.style.left=Math.max(8,Math.min(innerWidth-r.width-8,x+14))+'px';box.style.top=Math.max(8,Math.min(innerHeight-r.height-8,y+18))+'px';};
  document.addEventListener('pointerover',e=>{if(e.pointerType==='touch')return;const el=e.target.closest(selector);if(el)show(el,e.clientX,e.clientY);});
