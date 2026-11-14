@@ -153,10 +153,16 @@ const fieldSounds=Object.fromEntries(Object.entries({
 }).map(([cue,name])=>[cue,new Audio('./art/sfx/'+name+'.wav')]));
 // Match the TRUE END fire cue’s 5% playback level at the 30% setting.
 const FIELD_SOUND_GAIN=1/6;
+let prioritySoundUntil=0;
 function playFieldSound(cue){
  if(verificationMode||!sound||volume===0||document.hidden||$('debug-dialog').open)return;
  const clip=fieldSounds[cue];
- clip.volume=volume/100*FIELD_SOUND_GAIN;
+ const gain=volume/100*FIELD_SOUND_GAIN,now=performance.now();
+ if(['hurt','trap','heal'].includes(cue)){
+  prioritySoundUntil=now+240;
+  for(const blade of [fieldSounds.swing,fieldSounds.critical])if(!blade.paused)blade.volume=gain*.22;
+ }
+ clip.volume=['swing','critical'].includes(cue)&&now<prioritySoundUntil?gain*.22:gain;
  clip.currentTime=0;
  clip.play().catch(()=>{});
 }
@@ -232,7 +238,8 @@ function draw(){
   if(!floor)queue.push({footY:(y+1)*CELL,layer:0,x,draw(){ctx.save();ctx.globalAlpha=1;const walls=tintedWallTileset(wallSets.get(theme.id)||wallSets.get('*'),theme.wallColor);drawSightWall(ctx,walls,wallDrawBox(surface,x,y,walls?.definition.rise??.75,CELL),CELL,visible,lit=>drawRaisedWall(ctx,lit,surface,x,y,state.seed,theme,CELL,entranceFrames.get(x+','+y)),appearance);ctx.restore();}});
  }
  const stair=state.stairs;
- for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;if(trapAtlas.complete&&trapAtlas.naturalWidth===128){ctx.imageSmoothingEnabled=false;ctx.drawImage(trapAtlas,t.spent?64:0,TRAPS.findIndex(k=>k.id===trapType(t))*64,64,64,t.x*CELL,t.y*CELL,CELL,CELL);}else sprite(ctx,t.spent?'trap-spent':'trap',t.x*CELL,t.y*CELL);ctx.restore();}
+ const outline=color=>{ctx.shadowColor=color;ctx.shadowBlur=4;};
+ for(const t of state.traps||[])if(t.revealed&&(state.gimmick?.id==='traps'||state.seen[t.y][t.x])){ctx.save();ctx.globalAlpha=visible(t.x,t.y)?1:.4;if(!t.spent)outline(visible(t.x,t.y)?'#e4b879bb':'#080606');if(trapAtlas.complete&&trapAtlas.naturalWidth===128){ctx.imageSmoothingEnabled=false;ctx.drawImage(trapAtlas,t.spent?64:0,TRAPS.findIndex(k=>k.id===trapType(t))*64,64,64,t.x*CELL,t.y*CELL,CELL,CELL);}else sprite(ctx,t.spent?'trap-spent':'trap',t.x*CELL,t.y*CELL);ctx.restore();}
  const actorEffectCenters=new Map();let heroEffectCenter={x:(position.x+.5)*CELL,y:(position.y+.5)*CELL};
  function entity(o,type,{standing=false,layer=1,hero=false,enemy=false}={}){
   const hit=hitPresentation(combat,o,{hero,size:CELL,reducedMotion:reducedMotion.matches});
@@ -244,6 +251,7 @@ function draw(){
    const oldPalette={g:palette.g,l:palette.l,r:palette.r,p:palette.p};if(enemy){if(type==='slime'){palette.g=theme.wallColor;palette.l='#c0c7b1';}else{palette.r=theme.floorColor;palette.p=theme.wallColor;}}
    const footOffset=enemy?0:(hero?actorFootOffset(sprites[type],box.height):0);
    const chest=type==='chest'?chestPresentation(o):null;if(chest?.legendary)drawLegendaryChestEffect(ctx,box,performance.now(),matchMedia('(prefers-reduced-motion: reduce)').matches);
+   if(type==='stairs'||['heart','herb','potion'].includes(type))outline(visible(o.x,o.y)?'#f0cd9cbb':'#080606');
    if(o.type==='letter'&&drawReadableProp(ctx,readableAtlas,'letter',box.x,box.y,box.width,box.height)){}else if(type==='chest'&&chest?.red&&drawReadableProp(ctx,readableAtlas,'chest-red',box.x,box.y,box.width,box.height)){}else if(type==='chest'&&chest?.red&&redChestAtlas.complete&&redChestAtlas.naturalWidth===64){ctx.imageSmoothingEnabled=false;ctx.drawImage(redChestAtlas,box.x,box.y,box.width,box.height);}else if(hero&&heroSheet)drawCharacter(ctx,heroSheet,heroFrame,at.x+hit.offsetX/CELL,at.y+hit.offsetY/CELL,CELL);else if(!enemy||!drawEnemySprite(ctx,enemyAtlas,o,box,{crouch,cut:idleCut}))sprite(ctx,type,box.x,box.y+footOffset-(hero?hop:0),box.width,box.height);if(enemy){if(hit.flash&&enemyAtlas.complete){const f=enemyFrame(o);if(f)ctx.drawImage(enemyFlashAtlas,f.x,f.y,64,64,box.x,box.y,box.width,box.height);}Object.assign(palette,oldPalette);}
    // The chest artwork supplies its own latch: no oversized yellow lock rectangle.
    if(type==='chest'&&o.cardId&&state.augments?.includes('destiny')&&!state.themeState?.destinyUsed&&gambleChestIcon.complete&&gambleChestIcon.naturalWidth){ctx.drawImage(gambleChestIcon,box.x+box.width*.62,box.y-12,24,24);}
