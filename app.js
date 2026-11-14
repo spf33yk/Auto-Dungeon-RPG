@@ -286,6 +286,8 @@ const orderHistory=createOrderHistory();
 let selectedExtension='scout';
 function renderExpansionShop(){
  const host=$('tab-content');
+ const listScroll=host.querySelector('.extension-branches')?.scrollTop??0;
+ const tabScroll=host.querySelector('.extension-shop')?host.scrollTop:0;
  const list=skills.filter(k=>['commandSlots','cardSlots','scout'].includes(k.id));
  const upgrades=list.map(k=>{
   const full=state.levels[k.id]>=k.max;
@@ -298,6 +300,8 @@ function renderExpansionShop(){
   const [base,unit]={scout:[3,'マス'],cardSlots:[4,'枚'],commandSlots:[2,'行']}[k.id];
   host.querySelector('.extension-detail').innerHTML='<h3>'+esc(k.name)+'</h3><p>'+esc(k.detail)+'</p><strong>'+(base+level)+unit+(full?'（上限）':' → '+(base+level+1)+unit)+'</strong>'+ (full?'':'<p>'+(state.shards>=cost?'購入後の残高 '+(state.shards-cost)+'個':'あと '+(cost-state.shards)+'個必要')+'</p>')+'<button data-upgrade="'+k.id+'" '+(state.phase!=='prepare'||state.floor===1||full||state.shards<cost?'disabled':'')+'>'+(full?'最大まで取得済み':cost+'個で購入')+'</button>';
  }
+ host.querySelector('.extension-branches').scrollTop=listScroll;
+ host.scrollTop=tabScroll;
 }
 
 
@@ -611,7 +615,7 @@ $('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettin
 $('codex-open').onclick=()=>showCodex(codexKind);
 $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dialog').close();$('guide-start').onclick=()=>$('dialog').close();
 $('tab-content').addEventListener('change',e=>{if(e.target.id!=='exchange-source-a')return;const first=e.target.value,second=$('exchange-source-b');for(const o of second.options)o.hidden=o.disabled=o.value===first||o.value.split(':')[0]!==first.split(':')[0];second.value=[...second.options].find(o=>!o.disabled)?.value||'';});
-$('tab-content').addEventListener('click',e=>{const b=e.target.closest('button');if(tab!=='extensions'||!b||b.disabled||state.phase!=='prepare')return;if(b.dataset.extensionUpgradeSelect){selectedExtension=b.dataset.extensionUpgradeSelect;renderExpansionShop();e.currentTarget.querySelector('[aria-pressed=true]')?.focus();return;}if(b.dataset.extensionSelect){selectedExtension=b.dataset.extensionSelect;renderExpansionShop();e.currentTarget.querySelector('[aria-pressed=true]')?.focus();return;}let changed=false;if(b.dataset.upgrade)changed=upgrade(state,b.dataset.upgrade);if(b.dataset.extensionUnlock)changed=unlockExtension(state,b.dataset.extensionUnlock);if(b.hasAttribute('data-extension-exchange'))changed=startExchange(state,[$('exchange-source-a')?.value,$('exchange-source-b')?.value]);if(b.dataset.extensionChoice)changed=chooseExchange(state,b.dataset.extensionChoice);if(changed){tone(550);render();}});
+$('tab-content').addEventListener('click',e=>{const b=e.target.closest('button');if(tab!=='extensions'||!b||b.disabled||state.phase!=='prepare')return;if(b.dataset.extensionUpgradeSelect){selectedExtension=b.dataset.extensionUpgradeSelect;renderExpansionShop();e.currentTarget.querySelector('[aria-pressed=true]')?.focus({preventScroll:true});return;}if(b.dataset.extensionSelect){selectedExtension=b.dataset.extensionSelect;renderExpansionShop();e.currentTarget.querySelector('[aria-pressed=true]')?.focus({preventScroll:true});return;}let changed=false;if(b.dataset.upgrade)changed=upgrade(state,b.dataset.upgrade);if(b.dataset.extensionUnlock)changed=unlockExtension(state,b.dataset.extensionUnlock);if(b.hasAttribute('data-extension-exchange'))changed=startExchange(state,[$('exchange-source-a')?.value,$('exchange-source-b')?.value]);if(b.dataset.extensionChoice)changed=chooseExchange(state,b.dataset.extensionChoice);if(changed){tone(550);render();}});
 
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());document.querySelectorAll('dialog').forEach(d=>{if(d.id!=='field-event-dialog')d.addEventListener('close',finishDialog);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.phase==='explore'){paused=true;dialogWasPaused=true;render();}});
