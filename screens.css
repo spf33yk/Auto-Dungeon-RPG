@@ -922,4 +922,4 @@ body.preparing #workspace.has-hud-augments #prepare-scene{top:calc(var(--shared-
 body.preparing #workspace.has-hud-augments::before{top:calc(var(--shared-hud-space,82px) + 34px)}
 body.exploring .hud-alerts{left:auto;right:12px;text-align:right}
 body.exploring #map-wrap:has(#field-gimmick:not([hidden])) .automap-overlay{top:calc(var(--hud-top-space,70px) + 31px)}
-body.exploring #field-gimmick{background:transparent;text-shadow:0 1px 4px #000,0 0 3px #000}
+body.exploring :is(#field-gimmick,#floor-message){background:transparent;text-shadow:0 1px 4px #000,0 0 3px #000}
