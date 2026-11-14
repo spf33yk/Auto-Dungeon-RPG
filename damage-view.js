@@ -2,8 +2,11 @@ export const DAMAGE_DURATION=850;
 export function queueDamage(current,events,time){
  const live=current.filter(p=>time-p.time<DAMAGE_DURATION).map(p=>({...p}));
  for(const e of events){
-  const stack=live.filter(p=>p.x===e.x&&p.y===e.y).length;
-  live.push({...e,time,stack});
+  for(const popup of live){
+   const sameTarget=e.hero ? popup.hero : !popup.hero&&popup.x===e.x&&popup.y===e.y;
+   if(sameTarget)popup.stack=Math.min(3,(popup.stack||0)+1);
+  }
+  live.push({...e,time,stack:0});
  }
  return live.slice(-64);
 }
