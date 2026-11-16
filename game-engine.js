@@ -125,13 +125,28 @@ export function makeFloor(s){
  if(['monsters','traps'].includes(s.gimmick.id)){
   const inside=(p,r)=>p.x>=r.x&&p.x<r.x+r.w&&p.y>=r.y&&p.y<r.y+r.h;
   const candidates=rooms.filter(r=>!inside(start,r)&&!inside(end,r));
-  const room=candidates[Math.floor(rng()*candidates.length)];s.gimmick.room=room;
-  const houseTiles=free.filter(p=>inside(p,room));
-  const count=Math.min(s.gimmick.id==='monsters'?4:8,houseTiles.length);
-  for(let i=0;i<count;i++){const tile=houseTiles.splice(Math.floor(rng()*houseTiles.length),1)[0];
-   if(s.gimmick.id==='monsters'){const base=monsters[z.index*2+(i%2)];s.enemies.push({...base,baseId:base.id,...tile,maxHp:base.hp,aggro:false,house:true});}
-   else s.traps.push({...tile,type:rollTrap(rng),spent:false,revealed:true});
+  const monsterHouse=s.gimmick.id==='monsters';
+  // Prefer a large existing room so corridors and stairs stay in place.
+  if(monsterHouse)candidates.sort((a,b)=>b.w*b.h-a.w*a.h);
+  const room=monsterHouse?candidates[0]:candidates[Math.floor(rng()*candidates.length)];
+  s.gimmick.room=room;
+  if(room){
+   const houseTiles=free.filter(p=>inside(p,room));
+   const lootCount=monsterHouse?Math.min(5,Math.floor(houseTiles.length/2)):0;
+   const enemyCount=Math.max(5,Math.min(8,Math.floor(room.w*room.h/6)));
+   const count=Math.min(monsterHouse?enemyCount:8,houseTiles.length-lootCount);
+   const takeTile=()=>houseTiles.splice(Math.floor(rng()*houseTiles.length),1)[0];
+   for(let i=0;i<count;i++){
+    const tile=takeTile();
+    if(monsterHouse){const base=monsters[z.index*2+(i%2)];s.enemies.push({...base,baseId:base.id,...tile,maxHp:base.hp,aggro:false,house:true});}
+    else s.traps.push({...tile,type:rollTrap(rng),spent:false,revealed:true});
+   }
+   for(const type of ['heart','chest','fragment','chest','fragment'].slice(0,lootCount)){
+    const tile=takeTile();
+    s.items.push({...tile,type,...(type==='chest'?{cardId:rollCardChest(s,rng)}:{})});
+   }
   }
+
  }
  if(s.gimmick.id==='none'&&s.floor>1){const trapRng=random(s.seed+s.floor*7919+43);if(trapRng()<.25){for(let i=0,n=1+Math.floor(trapRng()*2);i<n&&free.length;i++)s.traps.push({...spot(),type:rollTrap(trapRng),spent:false,revealed:true});}}
  if(z.id==='crypt')placeCryptObstacles(s,rooms);

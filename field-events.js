@@ -6,7 +6,7 @@ export const bossForFloor=floor=>minibosses.find(b=>b.basement===NORMAL_FLOORS+1
 export const fieldEvents={
  boss:{id:'boss',name:'封印された闘技場',hint:'門番の気配がする。固定の闘技場で門番を倒すまで階段は封印される。'},
  none:{id:'none',name:'静かな階',hint:'強い異変は感じない。油断せず、階段への道を探そう。'},
- monsters:{id:'monsters',name:'モンスターハウス',hint:'一室に幾つもの敵意が重なる。包囲への備えと、引き返す判断を。'},
+ monsters:{id:'monsters',name:'モンスターハウス',hint:'広い一室に敵とアイテムが集まる。包囲に備えよう。'},
  traps:{id:'traps',name:'トラップハウス',hint:'棘の紋様が密集する。罠は最初から見える。HPに余裕を残そう。'},
  fog:{id:'fog',name:'忘却の霧',hint:'白い霧の記憶。視界が2マス狭まる。回復と帰還を優先しよう。'},
 };
