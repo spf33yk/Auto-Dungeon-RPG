@@ -541,7 +541,10 @@ codexNavigation.addEventListener('click',event=>{
 });
 function showCodex(kind){selectCodex(kind);openDialog('codex-dialog');}
 const getRef=r=>r.startsWith('i')?Number(r.slice(1)):r;
-$('tab-content').onclick=e=>{if(tab==='extensions')return;if(e.target.closest('[data-drop-return],[data-drag-source],[data-inline-condition]')&&handleOrderClick(e,$('tab-content')))return;const b=e.target.closest('button');if(!b||b.disabled)return;if(b.hasAttribute('data-best-equipment')){equipBest(state);render();return;}if(b.dataset.category){const type=b.dataset.category;if(type==='gear')gearSlot=b.dataset.value;}else if(b.dataset.sort){gearSorts[gearSlot]=b.dataset.value;}else if(handleOrderClick(e,$('tab-content')))return;else if(b.dataset.upgrade){if(upgrade(state,b.dataset.upgrade))tone(550);}else if(b.dataset.action){const ref=getRef(b.dataset.ref);switch(b.dataset.action){case'equip':equip(state,ref);break;case'discard':discard(state,ref);break;}}render();};
+$('prepare-scene').addEventListener('contextmenu',e=>{
+ if(!e.target.closest('button,input,select,textarea,a,[data-drag-source],[data-drop-slot]'))e.preventDefault();
+});
+$('tab-content').onclick=e=>{if(tab==='extensions')return;if(e.target.closest('[data-drag-source],[data-inline-condition]')&&handleOrderClick(e,$('tab-content')))return;const b=e.target.closest('button');if(!b||b.disabled)return;if(b.hasAttribute('data-best-equipment')){equipBest(state);render();return;}if(b.dataset.category){const type=b.dataset.category;if(type==='gear')gearSlot=b.dataset.value;}else if(b.dataset.sort){gearSorts[gearSlot]=b.dataset.value;}else if(handleOrderClick(e,$('tab-content')))return;else if(b.dataset.upgrade){if(upgrade(state,b.dataset.upgrade))tone(550);}else if(b.dataset.action){const ref=getRef(b.dataset.ref);switch(b.dataset.action){case'equip':equip(state,ref);break;case'discard':discard(state,ref);break;}}render();};
 $('live-orders').onclick=e=>handleOrderClick(e,$('live-orders'));
 $('live-orders').onchange=e=>{if(tab!=='extensions')handleOrderChange(e);};;
 $('tab-content').onchange=e=>{if(tab!=='extensions')handleOrderChange(e);};;
