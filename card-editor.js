@@ -124,16 +124,26 @@ export function installCardDragging(host,getState,onCommit){
  const toggleAlternative=e=>{
   const slot=e.target.closest('[data-drag-source^="slot|"][data-card-kind="condition"]');
   const s=getState();
-  if(!slot||s.phase!=='prepare'||!s.extensions?.unlocked?.includes('condition-or')||e.target.closest('input,select'))return;
+  if(!slot||s.phase!=='prepare')return;
   const [,row,,index]=slot.dataset.dragSource.split('|');
-  if(Number(index)<1||!s.orders[row]?.conditions?.[index])return;
+  if(!s.orders[row]?.conditions?.[index])return;
   e.preventDefault();
+  const help=host.querySelector('[data-card-status]');
+  help?.classList.add('condition-toggle-help');
+  if(!s.extensions?.unlocked?.includes('condition-or')){
+   if(help)help.textContent='拡張機能で「または」条件を解放してください。';
+   return;
+  }
+  if(Number(index)<1){
+   if(help)help.textContent='同じ行に条件カードを2枚以上置き、2枚目以降を右クリックしてください。';
+   return;
+  }
   const rule=legacyToCards(s.orders[row]);
   rule.conditions[index]={...rule.conditions[index],or:!rule.conditions[index].or};
   if(replaceCardRule(s,Number(row),rule))onCommit();
  };
  host.addEventListener('contextmenu',toggleAlternative);
- host.addEventListener('keydown',e=>{if(e.key==='ContextMenu'||e.shiftKey&&e.key==='F10')toggleAlternative(e);});
+ host.addEventListener('keydown',e=>{if((e.key==='ContextMenu'||e.shiftKey&&e.key==='F10')&&!e.target.closest('input,select'))toggleAlternative(e);});
 
  host.addEventListener('keydown',e=>{if(e.target.matches('[data-inline-condition]')&&e.key==='Enter'){e.preventDefault();e.target.dispatchEvent(new Event('change',{bubbles:true}));}else if(e.target.matches('.board-slot[role="group"]')&&['Enter',' '].includes(e.key)){e.preventDefault();e.target.click();}});
  host.addEventListener('keydown',e=>{if(!['Enter',' '].includes(e.key)||!e.target.matches('[data-drop-return]')||getState().phase!=='prepare'||!/^(slot|row)\|/.test(host.dataset.cardSource||''))return;e.preventDefault();if(applySource(host,getState(),host.dataset.cardSource,e.target))onCommit();});

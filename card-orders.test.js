@@ -52,10 +52,10 @@ test('alternative conditions require a purchased unlock and survive a save',asyn
  let contextMenu,commits=0;
  globalThis.document=globalThis.window={addEventListener(){}};
  try{
-  installCardDragging({addEventListener(type,listener){if(type==='contextmenu')contextMenu=listener;}},()=>s,()=>commits++);
+  installCardDragging({querySelector(){return null;},addEventListener(type,listener){if(type==='contextmenu')contextMenu=listener;}},()=>s,()=>commits++);
  }finally{delete globalThis.document;delete globalThis.window;}
  const rightClick=index=>contextMenu({
-  target:{closest(selector){return selector==='input,select'?null:{dataset:{dragSource:'slot|0|condition|'+index}};}},
+  target:{closest(selector){return selector==='input,select'?this:{dataset:{dragSource:'slot|0|condition|'+index}};}},
   preventDefault(){}
  });
  rightClick(0);
