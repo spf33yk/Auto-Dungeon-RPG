@@ -126,13 +126,11 @@ export function makeFloor(s){
   const inside=(p,r)=>p.x>=r.x&&p.x<r.x+r.w&&p.y>=r.y&&p.y<r.y+r.h;
   const candidates=rooms.filter(r=>!inside(start,r)&&!inside(end,r));
   const monsterHouse=s.gimmick.id==='monsters';
-  // Prefer a large existing room so corridors and stairs stay in place.
-  if(monsterHouse)candidates.sort((a,b)=>b.w*b.h-a.w*a.h);
-  const room=monsterHouse?candidates[0]:candidates[Math.floor(rng()*candidates.length)];
+  const room=candidates[Math.floor(rng()*candidates.length)];
   s.gimmick.room=room;
   if(room){
    const houseTiles=free.filter(p=>inside(p,room));
-   const lootCount=monsterHouse?Math.min(5,Math.floor(houseTiles.length/2)):0;
+   const lootCount=monsterHouse?Math.min(4+Math.floor(rng()*4),Math.floor(houseTiles.length/2)):0;
    const enemyCount=Math.max(5,Math.min(8,Math.floor(room.w*room.h/6)));
    const count=Math.min(monsterHouse?enemyCount:8,houseTiles.length-lootCount);
    const takeTile=()=>houseTiles.splice(Math.floor(rng()*houseTiles.length),1)[0];
@@ -141,7 +139,8 @@ export function makeFloor(s){
     if(monsterHouse){const base=monsters[z.index*2+(i%2)];s.enemies.push({...base,baseId:base.id,...tile,maxHp:base.hp,aggro:false,house:true});}
     else s.traps.push({...tile,type:rollTrap(rng),spent:false,revealed:true});
    }
-   for(const type of ['heart','chest','fragment','chest','fragment'].slice(0,lootCount)){
+   for(let i=0;i<lootCount;i++){
+    const roll=rng(),type=roll<.3?'chest':roll<.6?'heart':'fragment';
     const tile=takeTile();
     s.items.push({...tile,type,...(type==='chest'?{cardId:rollCardChest(s,rng)}:{})});
    }
