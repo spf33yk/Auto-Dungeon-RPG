@@ -1,3 +1,4 @@
+export const forecastAtRisk=value=>Number.isFinite(value)&&value<=30;
 export function forecastSummary(floor,result,status='pending'){
  const unavailable=status==='error'?'予測できません':status==='pending'?'計算中…':'—';
  return [

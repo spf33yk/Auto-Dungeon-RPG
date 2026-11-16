@@ -40,7 +40,7 @@ import {loadWallTilesets,wallDrawBox} from './wall-tileset.js';
 import {entranceWallFrames} from './entrance-view.js';
 import {readUiSettings,saveUiSettings,resetJourneyTutorials} from './ui-settings.js';
 import {forecastExploration,forecastSignature} from './exploration-forecast.js';
-import {forecastSummary} from './forecast-view.js';
+import {forecastSummary,forecastAtRisk} from './forecast-view.js';
 import {MEMORY_SHADE,floorLight,drawSightWall,actorFootOffset,renderSightState,drawExplorationLight,shadeSightFloor} from './scene-lighting.js';
 import {standingBox,sceneDrawOrder,drawFootShadow} from './scene-depth.js';
 import {drawProp,drawMapProp} from './prop-view.js';
@@ -66,7 +66,14 @@ let titleTransitionPreview=false;
 let endingPreview=false,endingPlayback=null,subtitlePreviewKind='first-end',musicAudition=null;
 function syncSceneMusic(){bgm.configure({enabled:!verificationMode&&!titleTransitionPreview&&uiSettings.bgmEnabled,volume:uiSettings.bgmVolume,hidden:document.hidden});bgm.select(musicAudition||(endingPreview?(subtitlePreviewKind.endsWith('intro')?'opening':'ending'):musicScene(state,{title:showingTitle,teaser:Boolean(pendingJourney),houseEntered:Boolean(state.gimmick?.triggered)&&!fieldMessages.waiting}))); }
 function paintMusicOptions(){$('bgm-toggle').textContent='BGM：'+(uiSettings.bgmEnabled?'ON':'OFF');$('bgm-toggle').setAttribute('aria-pressed',String(uiSettings.bgmEnabled));$('bgm-volume').value=uiSettings.bgmVolume;$('bgm-volume-value').textContent=uiSettings.bgmVolume+'%';}
-function paintBrightness(){$('screen-brightness').value=uiSettings.brightness-50;$('screen-brightness-value').textContent=(uiSettings.brightness-50)+'%'+(uiSettings.brightness===100?'（標準）':'');}paintBrightness();$('screen-brightness').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,brightness:Number($('screen-brightness').value)+50});paintBrightness();draw();};
+function paintCameraSettings(){$('camera-x').value=uiSettings.cameraX;$('camera-y').value=uiSettings.cameraY;}
+ paintCameraSettings();
+ for(const axis of ['x','y'])$('camera-'+axis).onchange=e=>{
+  const key=axis==='x'?'cameraX':'cameraY';
+  uiSettings=saveUiSettings(uiStorage,{...uiSettings,[key]:Number(e.target.value)});
+  paintCameraSettings();draw();
+ };
+ function paintBrightness(){$('screen-brightness').value=uiSettings.brightness-50;$('screen-brightness-value').textContent=(uiSettings.brightness-50)+'%'+(uiSettings.brightness===100?'（標準）':'');}paintBrightness();$('screen-brightness').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,brightness:Number($('screen-brightness').value)+50});paintBrightness();draw();};
 $('screen-shake').checked=uiSettings.screenShake;$('screen-shake').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,screenShake:$('screen-shake').checked});};
 paintMusicOptions();document.addEventListener('pointerdown',()=>bgm.unlock(),{capture:true});document.addEventListener('keydown',()=>bgm.unlock(),{capture:true});document.addEventListener('visibilitychange',()=>syncSceneMusic());
 function renderNormalEnding(){
@@ -104,23 +111,28 @@ $('ending-options').onclick=()=>openOptions();
 $('bgm-toggle').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,bgmEnabled:!uiSettings.bgmEnabled});paintMusicOptions();syncSceneMusic();};
 $('bgm-volume').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,bgmVolume:Number($('bgm-volume').value)});paintMusicOptions();syncSceneMusic();};
 const preparationBaseline=createPreparationBaseline();let forecastBefore=null,forecastBeforeSamples=null,forecastBeforeError=false;
-let forecastTicket=0,forecastKey='',forecastCache=null,forecastSamples=10,forecastContext='';
+let forecastTicket=0,forecastKey='',forecastCache=null,forecastSamples=10,forecastPage=0,forecastContext='';
 function forecastDelta(result,index){const comparison=compareForecast(forecastBefore,result);return comparison?'<small class="forecast-delta '+(comparison[index].direction>0?'better':comparison[index].direction<0?'worse':'same')+'">準備開始時比 '+esc(comparison[index].text)+'</small>':'';}
-function paintForecastSummary(result=null,status='pending'){const summary=$('forecast-summary');if(!summary)return;summary.hidden=showingTitle||state.phase!=='prepare';summary.innerHTML=forecastSummary(floorLabel(state),result,status).map((item,index)=>'<div class="forecast-summary-item"><span>'+esc(item.label)+'</span><b>'+esc(item.value)+'</b>'+forecastDelta(result,index)+'</div>').join('');}
+function forecastRiskClass(result,index){return forecastAtRisk(index===0?result?.clearRate:index===2?result?.remainingHp:null)?' class="forecast-risk"':'';}
+function paintForecastSummary(result=null,status='pending'){const summary=$('forecast-summary');if(!summary)return;summary.hidden=showingTitle||state.phase!=='prepare';summary.innerHTML=forecastSummary(floorLabel(state),result,status).map((item,index)=>'<div class="forecast-summary-item"><span>'+esc(item.label)+'</span><b'+forecastRiskClass(result,index)+'>'+esc(item.value)+'</b>'+forecastDelta(result,index)+'</div>').join('');}
 function paintForecast(result){
  paintForecastSummary(result);
  const host=$('forecast-result');
  const metrics=r=>[r.clearRate+'%',r.turns??'到達なし',r.remainingHp+'%',r.chests.toFixed(1)+'個'];
  const before=forecastBefore?metrics(forecastBefore):[],now=metrics(result);
  const table=['到達率','ターン数（中央値）','終了時HP（平均）','宝箱の取得数（平均）'].map((label,i)=>
-  '<tr><th scope="row">'+label+'</th><td>'+(before[i]??'—')+'</td><td><b>'+now[i]+'</b></td></tr>').join('');
- const rows=result.rows.filter(row=>!row.disabled).map(row=>{
+  '<tr><th scope="row">'+label+'</th><td>'+(before[i]??'—')+'</td><td><b'+forecastRiskClass(result,i)+'>'+now[i]+'</b></td></tr>').join('');
+ const enabledRows=result.rows.filter(row=>!row.disabled),pageSize=2;
+ const pageCount=Math.max(1,Math.ceil(enabledRows.length/pageSize));
+ forecastPage=Math.min(forecastPage,pageCount-1);
+ const rows=enabledRows.slice(forecastPage*pageSize,(forecastPage+1)*pageSize).map(row=>{
   const reasons=[['lowerPriority','上位行を優先'],['noTarget','対象不在'],['used','スキル使用済み']].filter(([key])=>row[key]).map(([key,label])=>label+' '+row[key]+'試行');
   const counts='条件成立 '+row.matched+'/'+result.samples+'試行、実行 '+row.executed+'/'+result.samples+'試行';
   return '<article><strong>指示'+(row.index+1)+'「'+esc(row.name)+'」</strong><p>'+counts+(reasons.length?'。'+reasons.join('、'):'')+'</p><button type="button" data-forecast-row="'+row.index+'">指示'+(row.index+1)+'を確認</button></article>';
  }).join('');
+ const pages=pageCount>1?'<nav class="forecast-pages" aria-label="指示行のページ"><button type="button" data-forecast-page="-1" '+(forecastPage===0?'disabled':'')+'>前へ</button><span>'+(forecastPage+1)+' / '+pageCount+'</span><button type="button" data-forecast-page="1" '+(forecastPage+1===pageCount?'disabled':'')+'>次へ</button></nav>':'';
  const status=forecastBefore?'':forecastBeforeError?' · 編集前の予測を取得できませんでした':' · 編集前を計算中…';
- host.innerHTML='<small>同じ条件で '+result.samples+'試行'+status+(result.incomplete?' · 上限到達 '+result.incomplete+'試行':'')+'</small><table class="forecast-table"><thead><tr><th scope="col">結果</th><th scope="col">編集前</th><th scope="col">現在</th></tr></thead><tbody>'+table+'</tbody></table><h3>指示行の結果</h3><div class="forecast-rows">'+(rows||'<p>有効な指示行はありません。</p>')+'</div>';
+ host.innerHTML='<small>同じ条件で '+result.samples+'試行'+status+(result.incomplete?' · 上限到達 '+result.incomplete+'試行':'')+'</small><table class="forecast-table"><thead><tr><th scope="col">結果</th><th scope="col">編集前</th><th scope="col">現在</th></tr></thead><tbody>'+table+'</tbody></table><h3>指示行の結果</h3><div class="forecast-rows">'+(rows||'<p>有効な指示行はありません。</p>')+'</div>'+pages;
  host.removeAttribute('aria-busy');
 }
 
@@ -128,7 +140,7 @@ function refreshForecast(force=false){
  const context=[state.seed,state.floor,state.profile.runs].join(':');if(state.phase==='prepare'&&context!==forecastContext){forecastContext=context;preparationBaseline.capture(context,state);forecastBefore=null;}
  if(showingTitle||state.phase!=='prepare'){forecastTicket++;forecastKey='';paintForecastSummary(null,'idle');return;}
  $('forecast-samples').value=String(forecastSamples);const signature=forecastSignature(state,forecastSamples);
- if(!force&&signature===forecastKey){if(forecastCache)paintForecast(forecastCache);return;}forecastKey=signature;forecastCache=null;paintForecastSummary();const ticket=++forecastTicket,copy=structuredClone(state);$('forecast-result').textContent='試行を開始しています…';$('forecast-result').setAttribute('aria-busy','true');
+ if(!force&&signature===forecastKey){if(forecastCache)paintForecast(forecastCache);return;}forecastKey=signature;forecastCache=null;forecastPage=0;paintForecastSummary();const ticket=++forecastTicket,copy=structuredClone(state);$('forecast-result').textContent='試行を開始しています…';$('forecast-result').setAttribute('aria-busy','true');
  forecastBeforeError=false;const baselineContext=preparationBaseline.context,baselineSamples=forecastSamples;if(forecastBeforeSamples!==baselineSamples){forecastBefore=null;forecastBeforeSamples=baselineSamples;}
  const baselineJob=preparationBaseline.result(baselineSamples,(input,samples)=>forecastExploration(input,{samples,cancelled:()=>state.phase!=='prepare'||showingTitle||preparationBaseline.context!==baselineContext}));
  void baselineJob.then(result=>{if(result&&state.phase==='prepare'&&preparationBaseline.context===baselineContext&&forecastSamples===baselineSamples){forecastBefore=result;if(forecastCache)paintForecast(forecastCache);}}).catch(error=>{if(preparationBaseline.context===baselineContext&&forecastSamples===baselineSamples){forecastBeforeError=true;if(forecastCache)paintForecast(forecastCache);}console.error('Baseline forecast:',error);});
@@ -218,7 +230,7 @@ function draw(){
  const appearance={position:state.player,radius:radius(state),size:CELL,smooth:true};
  const sightState=renderSightState(state,position),visible=(x,y)=>canSee(sightState,x,y);
  const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y),hop=moving?Math.sin(progress*Math.PI)*CELL/12:0;
- const camera=cameraFor(position,cameraSight(state),map.width,map.height);ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);const shake=combatShake(combat,{enabled:uiSettings.screenShake,reducedMotion:reducedMotion.matches,size:CELL});ctx.translate(shake.x,shake.y);
+ const camera=cameraFor(position,cameraSight(state),map.width,map.height,{x:uiSettings.cameraX,y:uiSettings.cameraY});ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);const shake=combatShake(combat,{enabled:uiSettings.screenShake,reducedMotion:reducedMotion.matches,size:CELL});ctx.translate(shake.x,shake.y);
  const graves=new Set((state.obstacles||[]).map(o=>o.x+','+o.y)),surface=state.grid.map((r,y)=>r.map((v,x)=>(v||graves.has(x+','+y))?1:0)),queue=[];
  if(entranceGrid!==state.grid){entranceGrid=state.grid;entranceFrames=entranceWallFrames(surface);}
  for(let y=0;y<state.grid.length;y++)for(let x=0;x<state.grid[y].length;x++){
@@ -268,7 +280,7 @@ function draw(){
  ctx.translate(-shake.x,-shake.y);
  for(const label of layoutEnemyLabels(state.enemies.filter(enemy=>visible(enemy.x,enemy.y)),CELL))drawEnemyLabel(ctx,label.enemy,CELL,label.offset);
  const now=combat.time;damagePopups=damagePopups.filter(p=>damageFrame(p,now).alive);
- for(const p of damagePopups){if(!p.hero&&!visible(p.x,p.y))continue;const frame=damageFrame(p,now,{reducedMotion:reducedMotion.matches}),at=p.hero?position:p;ctx.save();ctx.globalAlpha=frame.alpha;ctx.font=p.critical?'bold 30px Futogo, Georgia, serif':'bold 25px Futogo, Georgia, serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineJoin='round';ctx.lineWidth=7;ctx.strokeStyle='#09090b';ctx.fillStyle=p.hero?'#ff9b99':'#ffe6a4';const x=at.x*CELL+CELL*(p.hero?.72:.5),y=at.y*CELL-(p.hero?34:42)-frame.rise*CELL/64;const text=(p.hero?'−':'')+p.damage+(p.critical?'!':'');ctx.strokeText(text,x,y);ctx.fillText(text,x,y);ctx.restore();}
+ for(const p of damagePopups){if(!p.hero&&!visible(p.x,p.y))continue;const frame=damageFrame(p,now,{reducedMotion:reducedMotion.matches}),at=p.hero?position:p;ctx.save();ctx.globalAlpha=frame.alpha;ctx.font=p.critical?'bold 30px Futogo, Georgia, serif':'bold 25px Futogo, Georgia, serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineJoin='round';ctx.lineWidth=7;ctx.strokeStyle='#09090b';ctx.fillStyle=p.hero?'#ff9b99':'#ffe6a4';const x=at.x*CELL+CELL*(p.hero?.72:.5),y=at.y*CELL-(p.hero?34:42)-frame.rise*CELL/64;const text='−'+p.damage+(p.critical?'!':'');ctx.strokeText(text,x,y);ctx.fillText(text,x,y);ctx.restore();}
  if(skillPopup){const age=performance.now()-skillPopup.time;if(age<1000){ctx.save();ctx.globalAlpha=Math.min(1,(1000-age)/250);ctx.font='bold 18px Futogo, serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#091013';ctx.fillStyle='#f4df9a';const at=skillPopup.position||position,sx=(at.x+.5)*CELL,sy=at.y*CELL-24-age*.018;ctx.strokeText(skillPopup.name,sx,sy);ctx.fillText(skillPopup.name,sx,sy);ctx.restore();}else skillPopup=null;}
  ctx.restore();drawAutoMap();
 }
@@ -585,7 +597,14 @@ $('return-title').onclick=()=>confirmOption('タイトルへ戻りますか？',
  if(!save()){ $('settings-help').textContent=$('save-status').textContent;return; }
  paused=true;dialogWasPaused=true;showingTitle=true;motion=null;$('options-dialog').close();render();
 });
-$('primary').onclick=()=>{if(state.phase==='explore')return;if(state.phase==='awakening'){if(!memoryReveal){memoryReveal={player:new SubtitlePlayer(awakeningLines(state.profile.normalClears)),last:performance.now()};$('awakening-text').textContent='';$('awakening-caret').hidden=true;render();}return;}if(state.phase==='prepare'){beginExploration(state);paused=false;last=performance.now();tone();}else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();if(state.phase==='explore')tryMobileDisplay();};
+$('primary').onclick=()=>{if(state.phase==='explore')return;if(state.phase==='awakening'){if(!memoryReveal){memoryReveal={player:new SubtitlePlayer(awakeningLines(state.profile.normalClears)),last:performance.now()};$('awakening-text').textContent='';$('awakening-caret').hidden=true;render();}return;}if(state.phase==='prepare'){
+ const start=()=>{if(state.phase!=='prepare')return;beginExploration(state);paused=false;last=performance.now();tone();render();tryMobileDisplay();};
+ const current=forecastKey===forecastSignature(state,forecastSamples)?forecastCache:null;
+ if(current&&(forecastAtRisk(current.clearRate)||forecastAtRisk(current.remainingHp))){
+  confirmOption('このまま探索を始めますか？','クリア見込み、回復余力のいずれかが30%以下です。装備と探索指示の更新をおすすめします。','このまま始める',start);
+ }else start();
+ return;
+ }else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();if(state.phase==='explore')tryMobileDisplay();};
 const askAbandon=()=>{if(['prepare','explore'].includes(state.phase))openDialog('abandon-dialog');};$('abandon-run').onclick=askAbandon;$('explore-abandon').onclick=askAbandon;
 $('confirm-abandon').onclick=()=>{const next=abandonRun(state);if(!next)return;$('abandon-dialog').close();reset(next);};
 document.addEventListener('keydown',event=>{
@@ -600,6 +619,8 @@ $('pause-toggle').onclick=()=>{if(state.phase!=='explore')return;paused=!paused;
 $('skip-opening').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,skipOpening:$('skip-opening').checked});};
 $('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,minimap:$('minimap-size').value});document.documentElement.dataset.minimapSize=uiSettings.minimap;drawAutoMap();};
  document.addEventListener('click',e=>{
+ const page=e.target.closest('[data-forecast-page]');
+ if(page&&forecastCache){forecastPage+=Number(page.dataset.forecastPage);paintForecast(forecastCache);$('forecast-result').querySelector('[data-forecast-page]:not(:disabled)')?.focus({preventScroll:true});return;}
  const forecastRow=e.target.closest('[data-forecast-row]');
  if(forecastRow&&state.phase==='prepare'){
   $('forecast-dialog').close();
@@ -644,7 +665,7 @@ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement
 const optionsDialog=$('options-dialog');
 const optionTabs=[...optionsDialog.querySelectorAll('[role="tab"]')];
 const optionResetKeys={
- 'settings-display':['brightness','minimap','screenShake','optionsContrast','skipOpening'],
+ 'settings-display':['brightness','cameraX','cameraY','minimap','screenShake','optionsContrast','skipOpening'],
  'settings-audio':['bgmEnabled','bgmVolume','soundEnabled','soundVolume']
 };
 let activeOptionTab=0,confirmedOptionAction;
@@ -722,7 +743,7 @@ $('options-reset').onclick=()=>{
   const defaults=readUiSettings(null);
   const reset=Object.fromEntries(optionResetKeys[panel].map(key=>[key,defaults[key]]));
   uiSettings=saveUiSettings(uiStorage,{...uiSettings,...reset});
-  paintOptionsContrast();paintBrightness();paintMusicOptions();
+  paintOptionsContrast();paintBrightness();paintCameraSettings();paintMusicOptions();
   $('skip-opening').checked=uiSettings.skipOpening;
   $('screen-shake').checked=uiSettings.screenShake;
   $('minimap-size').value=document.documentElement.dataset.minimapSize=uiSettings.minimap;

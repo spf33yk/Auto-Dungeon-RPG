@@ -15,9 +15,9 @@ export function autoMapModel(s,visible){
 export const cameraSight=s=>s.gimmick?.id==='fog'?2:3;
 
 // The camera follows the interpolated hero; padding keeps the full sight square on screen.
-export function cameraFor(position,sight,width=744,height=552){
+export function cameraFor(position,sight,width=744,height=552,{x=0,y=0}={}){
  const cell=64,rows=2*Math.ceil(sight)+5,scale=Math.min(width,height)/(rows*cell);
- return {scale,left:(position.x+.5)*cell-width/scale/2,top:(position.y+.5)*cell-height/scale/2,rows:height/(cell*scale),columns:width/(cell*scale)};
+ return {scale,left:(position.x+.5+x)*cell-width/scale/2,top:(position.y+.5+y)*cell-height/scale/2,rows:height/(cell*scale),columns:width/(cell*scale)};
 }
 
 export function miniMapGeometry(columns,rows,cell=6){

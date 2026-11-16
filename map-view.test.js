@@ -52,3 +52,12 @@ test('scout upgrades and floors keep normal framing while fog retains a closer v
   assert.equal(cameraSight({...s,gimmick:{id:'fog'}}),2);
  }
 });
+
+test('camera offset moves the view by one cell without changing zoom',()=>{
+ const position={x:15,y:12};
+ const center=cameraFor(position,3,800,600);
+ const shifted=cameraFor(position,3,800,600,{x:-1,y:1});
+ assert.ok(Math.abs(shifted.left-center.left+64)<1e-8);
+ assert.ok(Math.abs(shifted.top-center.top-64)<1e-8);
+ assert.equal(shifted.scale,center.scale);
+});
