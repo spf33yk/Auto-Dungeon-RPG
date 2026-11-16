@@ -131,7 +131,7 @@ B20・B10・B1のボス撃破直後に字幕を表示する。回想・入場通
 
 画面は16:9。内部UI設計座標1280×720を縦横同倍率で拡縮し、探索Canvasの描画面は1920×1080。1マス64pxのワールド座標・保存セル・画面表示倍率を区別する。横長端末では左右余白を設ける。横向き・全画面要求はブラウザが許可する場合だけ成立する。実機スマホのタッチ・回転・Safari対応は未検証部分がある。
 
-細かいポインターを持つ端末ではKenney Cursor PackのOutline/Double系64×64px透過カーソルを使用する。通常カーソルは添付見本に対応する矢印（pointer_a、標準）・立体の矢印（pointer_b_shaded）・三角の矢印（pointer_b）から、オプションの「画面」カテゴリで選択する。変更は即時反映し端末設定に保存する。同カテゴリの初期化で矢印へ戻る。選択、掴む、ドラッグ中、操作不可、ヘルプ、文字入力も同じ64×64px版を使い、操作対象の状態に合わせて切り替える。素材ごとのホットスポットを指定し、等倍率で表示する。タッチ操作とゲームの保存形式は変更しない。ブラウザが画像カーソルに対応しない場合は標準カーソルを使う。
+細かいポインターを持つ端末ではKenney Cursor PackのOutline/Default系32×32px透過カーソルを使用する。通常、選択、掴む、ドラッグ中、操作不可、ヘルプ、文字入力の7種類。操作対象の状態に合わせて切り替え、素材ごとのホットスポットを指定する。タッチ操作とゲームの保存形式は変更しない。画像は等倍で表示し、ブラウザが画像カーソルに対応しない場合は標準カーソルを使う。
 
 「旅の記録」の全件表示はオプションと同じ固定枠を使う。記録を時系列で並べ、開いたときは最新の記録を表示する。本文だけをスクロールでき、件数と戻る操作は枠の下に置く。
 
@@ -162,7 +162,7 @@ BGMはopening／dungeon／boss／traps／monsters／fog／endingを場面で切�
 
 ゲームlocalStorageはabyss-normal-v2、保存v16。seed／rngState・進行・カード・オーグメント候補・図鑑等を保存。旧v2〜v15を順次移行・検証し、不正データを拒否。旧一括取得カードは個別の武器／回復ポーション等へ置換・防具を補填し、会心・吸命・追撃はオーグメントへ変換する。旧鍵と鍵条件を除去。途中探索の旧保存に開始3択を遡及しない。旧5階試作キーは自動移行しない。
 
-端末設定abyss-ui-settingsにはoptionsContrast、brightness、minimap、cursorStyle（arrow／shaded／triangle、未定義・不正値はarrow）、skipOpening、preparationSkin、bgmEnabled、bgmVolume、soundEnabled、soundVolume、screenShake、tutorials.explore／prepareを保存。ゲームv16と別。未定義の案内フラグは未閲覧。効果音も端末設定へ保存する。映像・描画時計・ダメージ数字・ドラッグ選択・スクロール位置はゲームセーブへ含めない。
+端末設定abyss-ui-settingsにはoptionsContrast、brightness、minimap、skipOpening、preparationSkin、bgmEnabled、bgmVolume、soundEnabled、soundVolume、screenShake、tutorials.explore／prepareを保存。ゲームv16と別。未定義の案内フラグは未閲覧。効果音も端末設定へ保存する。映像・描画時計・ダメージ数字・ドラッグ選択・スクロール位置はゲームセーブへ含めない。
 
 JS/CSS変更後はupdate-assets.jsで配信URLを更新し--checkを通す。mainのコミット・GitHubテスト・Pages公開・実際の配信URLを区別して記録する。検証はローカルを基本とし、公開走行は必要時のみ。
 

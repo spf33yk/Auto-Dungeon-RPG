@@ -6,7 +6,7 @@
 
 ビルド不要のJavaScript ES modulesとCanvas。server.jsで静的配信し、index.htmlのimport mapで内容ハッシュ付きURLを指定する。ゲーム進行の乱数と視覚表現の時計を分離する。
 
-マウスカーソルはKenney Cursor Pack 1.1のOutline/Doubleから64×64px透過PNGを採用する。通常カーソルの3候補と操作状態6種の原本名・ホットスポットを `art/ui/cursors-v1/manifest.json` に記録する。`scripts/update-assets.js` が各PNGの内容ハッシュ付きURLを `index.html` のCSS変数へ反映し、`screens.css` が操作状態へ割り当てる。通常カーソルの選択は `ui-settings.js` のcursorStyleをHTMLのdata-cursor-styleに反映し、CSS変数を切り替える。「画面」のカテゴリ初期化はarrowへ戻す。タッチ端末には適用しない。
+マウスカーソルはKenney Cursor Pack 1.1のOutline/Defaultから32×32px透過PNGを7種選び、原本名とホットスポットを `art/ui/cursors-v1/manifest.json` に記録する。`scripts/update-assets.js` が各PNGの内容ハッシュ付きURLを `index.html` のCSS変数へ反映し、`screens.css` が操作状態へ割り当てる。タッチ端末には適用しない。
 
 | 分野 | 実装 | 責務 |
 |---|---|---|
@@ -47,7 +47,7 @@ tickはexploreかつaugmentOffer・cardOfferなしでのみ実行。turnは旅�
 
 旧鍵・廃止カード・常時スキルは互換移行で処理し、新規取得とは分ける。data.jsの旧rewardDefinitions・chestRewards、orders.jsの旧形式、非公開の旧図鑑経路が残っていても、現在の画面で利用する新規カード箱・4図鑑とは区別する。
 
-ゲーム保存とui-settings.jsの端末設定を分離。設定はミニマップ・通常カーソルの形・映像スキップ・準備スキン・BGM・効果音・画面揺れ・明るさ・オプションの高コントラスト・画面別案内閲覧フラグ。optionsContrastが未定義ならOFF、cursorStyleが未定義・不正値ならarrow。手動保存とタイトルに戻る際の保存は既存saveを共用し、保存形式はv16。案内やスクロールのためゲーム保存版を上げない。視覚時計、ドラッグ・選択、スクロール、ダメージ演出は一時状態。
+ゲーム保存とui-settings.jsの端末設定を分離。設定はミニマップ・映像スキップ・準備スキン・BGM・効果音・画面揺れ・明るさ・オプションの高コントラスト・画面別案内閲覧フラグ。optionsContrastが未定義ならOFF。手動保存とタイトルに戻る際の保存は既存saveを共用し、保存形式はv16。案内やスクロールのためゲーム保存版を上げない。視覚時計、ドラッグ・選択、スクロール、ダメージ演出は一時状態。
 
 ## 4. 乱数・地形・到達性
 

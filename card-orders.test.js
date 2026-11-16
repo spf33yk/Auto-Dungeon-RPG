@@ -74,3 +74,18 @@ test('alternative conditions require a purchased unlock and survive a save',asyn
  loaded.steps=20;
  assert.equal(matchingCardTargets(loaded,loaded.orders[0],ctx).length,1);
 });
+
+test('expanded preparation row renders target, conditions and action cards',async()=>{
+ const {renderCardEditor}=await import('./card-editor.js');
+ const s=newGame(7);
+ s.phase='prepare';
+ s.extensions={unlocked:['condition-or']};
+ s.orders=[createCardRule('self',[{id:'turns',value:20},{id:'hp-above',value:50,or:true}])];
+ const host={id:'test-editor',dataset:{},querySelector:()=>null,querySelectorAll:()=>[],classList:{toggle(){}}};
+ renderCardEditor(host,s,2);
+ for(const slot of ['target|0','condition|0','condition|1','effect|0']){
+  assert.ok(host.innerHTML.includes('data-drop-slot="0|'+slot+'"'),slot);
+ }
+ assert.match(host.innerHTML,/<div [^<>]+ data-condition-or [^<>]+>/);
+ assert.doesNotMatch(host.innerHTML,/condition-or-label/);
+});
