@@ -6,7 +6,6 @@ import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
 // Normalize line endings so Windows and Linux generate the same release URLs.
 const version=file=>createHash('sha256').update(/\.(png|jpg|webm|mp4|webp|mp3)$/.test(file)?readFileSync(root+file):readFileSync(root+file,'utf8').replace(/\r\n/g,'\n')).digest('hex').slice(0,12);
-const cursorManifest=JSON.parse(readFileSync(root+'art/ui/cursors-v1/manifest.json','utf8'));
 // Generated illustration URLs participate in the same cache/version checks as JS.
 const augmentFormat=JSON.parse(readFileSync(root+'art/ui/build-themes-v2/format.json','utf8'));
 const assetUrl=file=>'./art/ui/build-themes-v2/'+file+'?v='+version('art/ui/build-themes-v2/'+file);
@@ -63,9 +62,6 @@ for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukur
  const asset='./art/'+file;
  updated=updated.replace(new RegExp('\\./art/'+file.replaceAll('.','\\.')+'(?:\\?v=[^"\\s>]*)?','g'),asset+'?v='+version('art/'+file));
 }
-const cursorFallback={default:'auto',select:'pointer',grab:'grab',grabbing:'grabbing',blocked:'not-allowed',help:'help',text:'text'};
-const cursorStyle='<style id="game-cursor-assets">:root{'+Object.entries(cursorManifest.states).map(([name,{file,hotspot}])=>'--game-cursor-'+name+':url("./art/ui/cursors-v1/'+file+'?v='+version('art/ui/cursors-v1/'+file)+'") '+hotspot.join(' ') +', '+cursorFallback[name]).join(';')+'}</style>';
-updated=updated.includes('id="game-cursor-assets"')?updated.replace(/<style id="game-cursor-assets">[\s\S]*?<\/style>/,cursorStyle):updated.replace('</head>',cursorStyle+'</head>');
 if(process.argv.includes('--check')){
  if(updated!==html){console.error('Asset URLs are stale. Run node scripts/update-assets.js and commit index.html.');process.exitCode=1;}
  else console.log('Asset URLs match all browser modules and styles.');
