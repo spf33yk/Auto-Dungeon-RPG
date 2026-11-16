@@ -2,7 +2,7 @@
 
 ## 本編用マウスカーソル
 
-57efe28を基準にKenney Cursor Pack 1.1（CC0）のOutline/Defaultから7種の32×32px透過PNGを無改変で採用。各素材のホットスポットと内容ハッシュ付きURLを設定した。隔離したチェックアウトで全500件の自動テストと `node scripts/update-assets.js --check` が成功。BGM・効果音OFFのローカルブラウザでタイトル画面の通常背景とNewGameボタンに新しいPNGのURLとホットスポットが適用されることを確認した。ドラッグ中の実マウス操作とタッチ実機は未確認。公開確認はGitHubへの反映後に行う。
+57efe28を基準にKenney Cursor Pack 1.1（CC0）のOutline/Defaultから7種の32×32px透過PNGを無改変で採用。各素材のホットスポットと内容ハッシュ付きURLを設定した。隔離したチェックアウトで全500件の自動テストと `node scripts/update-assets.js --check` が成功。BGM・効果音OFFのローカルブラウザでタイトル画面の通常背景とNewGameボタンに新しいPNGのURLとホットスポットが適用されることを確認した。ゲーム変更コミット8dea957のGame testsとPublish gameは成功。公開 `deploy-version.json` は8dea957・run 43886731811を返し、公開HTMLはカーソルCSS変数と現行 `screens.css?v=bb6921abaa69` を参照。公開CSSの指定と7枚のPNGのHTTP 200・サイズを確認し、古いCSSとの混在は見つからなかった。公開版の実際のマウス操作、ドラッグ中、タッチ実機は未確認。
 
 ## 物語台詞レビュー画面
 
