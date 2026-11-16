@@ -95,6 +95,7 @@ export function handleCardClick(e,s){
  if(e.target.closest('[data-inline-condition]')){if(e.currentTarget)selectSource(e.currentTarget,'',s);return 'selected';}
  const toggle=e.target.closest('[data-toggle-rule]');if(toggle&&s.phase==='prepare'){const r=s.orders[Number(toggle.dataset.toggleRule)];if(r.disabled&&activeOrderCount(s.orders)>=2+s.levels.commandSlots){e.currentTarget.dataset.cardMessage='有効な行数が上限です。先に別の行を無効にしてください。';return true;}r.disabled=!r.disabled;return true;}
  const host=e.currentTarget,tab=e.target.closest('[data-palette-tab]');
+ if(s.phase==='prepare'&&e.target.closest('[data-drop-return]')&&/^(slot|row)\|/.test(host.dataset.cardSource||'')){applySource(host,s,host.dataset.cardSource,e.target);return true;}
  if(tab&&s.phase==='prepare'){host.dataset.cardGroup=tab.dataset.paletteTab;host.dataset.cardMessage='';selectSource(host,'',s);return true;}
  if(e.target.closest('[data-close-condition]')){selectSource(host,'',s);return 'folded';}
  const insertion=e.target.closest('[data-insert-condition]');if(insertion&&s.phase==='prepare'&&!host.dataset.cardSource){host.dataset.cardGroup='condition';host.dataset.cardMessage='追加する条件を選び、追加口へ配置してください。';return true;}
