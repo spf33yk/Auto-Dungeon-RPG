@@ -945,7 +945,10 @@ body.exploring :is(#field-gimmick,#floor-message){background:transparent;text-sh
 
 input,select,textarea{font-family:Futogo,sans-serif}
 
-.fitted-card-editor .board-slot[data-condition-or]{--card-type-color:#a3b693}
-.fitted-card-editor .board-slot[data-condition-or]:before{background:#677e60;opacity:.48}
+.fitted-card-editor .board-slot[data-condition-or]{--card-type-color:#9bc694}
+.fitted-card-editor .board-slot[data-condition-or]:before{background:#52885d;opacity:.64}
 
 .fitted-card-editor .card-help.condition-toggle-help{position:static!important;width:auto!important;height:auto!important;clip-path:none;white-space:normal}
+
+body{user-select:none;-webkit-user-select:none}
+input,textarea,[contenteditable]:not([contenteditable="false"]){user-select:text;-webkit-user-select:text}
