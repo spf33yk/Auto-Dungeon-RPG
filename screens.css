@@ -954,3 +954,7 @@ body.exploring :is(#field-gimmick,#floor-message){background:transparent;text-sh
 }
 
 input,select,textarea{font-family:Futogo,sans-serif}
+
+.fitted-card-editor .board-slot[data-condition-or]{--card-type-color:#62b985}
+.fitted-card-editor .board-slot .condition-or-label{position:absolute;top:4%;right:12%;z-index:6;padding:0 4px;border-radius:2px;background:#102d1d;color:#e2ffdf;font:12px/1.3 Futogo,sans-serif;pointer-events:none}
+.fitted-card-editor .board-slot[data-condition-or]:before{background:#58b77c;opacity:.9}

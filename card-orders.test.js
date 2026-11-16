@@ -34,3 +34,43 @@ test('regeneration requires a configured matching card and spends one turn once 
 test('visible trap avoidance is active only with reward and matching conditions',()=>{const s=arena();s.unlockedOrders.push('avoid-traps');s.traps=[{x:6,y:5,revealed:true,spent:false}];s.orders=[rule([{id:'visible'}],'avoid-traps'),rule()];assert.equal(cardModifier(s,'avoid-traps',ctx),true);assert.notDeepEqual(chooseCardOrder(s,ctx).next,{x:6,y:5});s.traps[0].x=15;assert.equal(cardModifier(s,'avoid-traps',ctx),false);});
 test('stair navigation still fights adjacent blockers instead of endlessly changing escape paths',()=>{const s=arena();s.phase='explore';s.hp=20;s.orders=[rule([{id:'hp-below',value:50}])];s.enemies=[{id:'enemy-0-0',baseId:'enemy-0-0',name:'敵',x:5,y:6,hp:50,maxHp:50,attack:1,defense:0,period:1,aggro:true}];tick(s);assert.deepEqual(s.player,{x:5,y:5});assert.equal(s.enemies[0].hp,50-stats(s).attack);});
 test('v9 migration preserves progression and converts rules once, adding owned regeneration when space exists',()=>{const s=arena();s.version=9;delete s.levels.cardSlots;s.abilities=['mend'];s.orders=[{id:'stairs-low',hp:35}];const m=normalizeSave(s);assert.ok(validateSave(m));assert.equal(m.version,16);assert.equal(m.orders[0].effect.id,'mend');assert.deepEqual(m.orders[1],legacyToCards(s.orders[0]));for(const key of ['rngState','grid','hp','shards','gear','inventory','profile'])assert.deepEqual(m[key],s[key]);assert.deepEqual(normalizeSave(m),m);s.orders.push({id:'chests'});assert.equal(normalizeSave(s).orders.length,2);});
+
+test('alternative conditions require a purchased unlock and survive a save',async()=>{
+ const {unlockExtension}=await import('./extensions.js');
+ const {installCardDragging}=await import('./card-editor.js');
+ const s=newGame(7);
+ s.floor=2;makeFloor(s);s.phase='prepare';s.augmentOffer=null;s.shards=12;s.levels.cardSlots=1;s.enemies=[];
+ s.seen[s.stairs.y][s.stairs.x]=true;
+ s.steps=0;
+ s.hp=stats(s).maxHp;
+ const row=createCardRule('self',[{id:'turns',value:20},{id:'hp-above',value:50}]);
+ s.orders=[row];
+ assert.equal(matchingCardTargets(s,row,ctx).length,0);
+ assert.equal(unlockExtension(s,'condition-or'),true);
+ assert.equal(unlockExtension(s,'condition-or'),false);
+ assert.equal(s.shards,0);
+ let contextMenu,commits=0;
+ globalThis.document=globalThis.window={addEventListener(){}};
+ try{
+  installCardDragging({addEventListener(type,listener){if(type==='contextmenu')contextMenu=listener;}},()=>s,()=>commits++);
+ }finally{delete globalThis.document;delete globalThis.window;}
+ const rightClick=index=>contextMenu({
+  target:{closest(selector){return selector==='input,select'?null:{dataset:{dragSource:'slot|0|condition|'+index}};}},
+  preventDefault(){}
+ });
+ rightClick(0);
+ assert.equal(commits,0);
+ rightClick(1);
+ assert.equal(matchingCardTargets(s,s.orders[0],ctx).length,1);
+ rightClick(1);
+ assert.equal(matchingCardTargets(s,s.orders[0],ctx).length,0);
+ rightClick(1);
+ assert.equal(commits,3);
+ const loaded=normalizeSave(JSON.parse(JSON.stringify(s)));
+ assert.ok(loaded);
+ assert.equal(matchingCardTargets(loaded,loaded.orders[0],ctx).length,1);
+ loaded.hp=1;
+ assert.equal(matchingCardTargets(loaded,loaded.orders[0],ctx).length,0);
+ loaded.steps=20;
+ assert.equal(matchingCardTargets(loaded,loaded.orders[0],ctx).length,1);
+});

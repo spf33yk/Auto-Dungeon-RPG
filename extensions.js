@@ -4,6 +4,7 @@ import{grantCard,chestCategoryChoices,pickCandidate}from'./card-inventory.js';
 import{offerAugments}from'./augments.js';
 import{nextRandom}from'./drop-system.js';
 export const EXTENSIONS=[
+{id:'condition-or',name:'「または」条件の解放',cost:12,branch:'指示の拡張',detail:'配置した2枚目以降の条件カードを右クリックして「または」に切り替えます。'},
 {id:'chest',name:'リロール権＋1（カード）',cost:10,branch:'ビルドの選別',detail:'カード選択用のリロール権を1回分購入。種類選択後のリロールで1回分を消費。何回でも購入できます。'},
 {id:'augment',name:'リロール権＋1（オーグメント）',cost:20,branch:'ビルドの選別',detail:'オーグメント用のリロール権を1回分購入。取得機会：B30開始時、B20・B10・B1のボス討伐時。'},
 {id:'exchange',name:'カードを再抽選',cost:10,branch:'ビルドの選別',detail:'同じ種類の未配置カード2枚と記憶の欠片10個で、その種類の候補を3枚再抽選し1枚を取得。回数制限なし。'},

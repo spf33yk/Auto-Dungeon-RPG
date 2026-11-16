@@ -69,7 +69,7 @@ export function validCardRule(s,input,{requireOwned=true}={}){
  if(!r.cards||!r.effect||!targetCards.some(t=>t.id===r.target)||!['skill','action'].includes(r.effect.kind)||!effect||!actorCanUse(r.target,effect))return false;
  if(requireOwned&&!effectUnlocked(s,effect))return false;
  if(requireOwned&&(!cardOwned(s,'target',r.target)||(Array.isArray(r.conditions)&&r.conditions.some(c=>!c||!cardOwned(s,'condition',c.id)))))return false;
- if(!Array.isArray(r.conditions)||r.conditions.some(c=>!c||typeof c.id!=='string')||r.conditions.length+2>cardCapacity(s)||new Set(r.conditions.map(c=>c.id)).size!==r.conditions.length)return false;
+ if(!Array.isArray(r.conditions)||r.conditions.some(c=>!c||(c.or!==undefined&&typeof c.or!=='boolean')||typeof c.id!=='string')||r.conditions.length+2>cardCapacity(s)||new Set(r.conditions.map(c=>c.id)).size!==r.conditions.length)return false;
  return r.conditions.every(c=>{const d=conditionById[c.id];return d&&(!d.param||(Number.isFinite(c.value)&&c.value>=d.min&&c.value<=d.max&&(c.value-d.min)%d.step===0));});
 }
 export function addCardRule(s){if(s.phase!=='prepare'||activeOrderCount(s.orders)>=2+s.levels.commandSlots)return false;s.orders.push(createCardRule());s.mode='custom';return true;}
@@ -92,7 +92,7 @@ function destinations(s,r,ctx){
 }
 function match(s,r,subject,destination,ctx){
  const enemy=r.target!=='self',hp=enemy?subject.hp:s.hp,maxHp=enemy?subject.maxHp:ctx.stats(s).maxHp;
- return r.conditions.every(c=>{
+ const test=c=>{
   switch(c.id){
    case'hp-below':return hp/maxHp*100<=c.value;
    case'hp-above':return hp/maxHp*100>=c.value;
@@ -104,7 +104,14 @@ function match(s,r,subject,destination,ctx){
    case'one-hit':{const opponent=enemy?{hp:s.hp,defense:ctx.stats(s).defense}:s.enemies.filter(e=>ctx.canSee(s,e.x,e.y)).sort((a,b)=>dist(s.player,a)-dist(s.player,b))[0];return Boolean(opponent)&&opponent.hp<=Math.ceil(Math.max(1,(enemy?subject.attack:ctx.stats(s).attack)-opponent.defense));}
    default:return false;
   }
- });
+ };
+ if(!s.extensions?.unlocked?.includes('condition-or'))return r.conditions.every(test);
+ let group=true;
+ for(const [index,condition] of r.conditions.entries()){
+  if(index>0&&condition.or){if(group)return true;group=true;}
+  group=group&&test(condition);
+ }
+ return group;
 }
 export function matchingCardTargets(s,input,ctx){
  const r=legacyToCards(input);if(r.disabled||!validCardRule(s,r))return [];
@@ -142,11 +149,13 @@ export function chooseCardOrder(s,ctx){
    const next=dirs.map(([dx,dy])=>({x:s.player.x+dx,y:s.player.y+dy})).filter(p=>s.grid[p.y]?.[p.x]&&s.seen[p.y][p.x]&&!blocked.has(key(p))).sort((a,b)=>danger(a)-danger(b))[0];
    if(next&&danger(next)<danger(s.player)){if(accept({...base,next,flee:true}))return selected;continue;}
   }else if(['frontier','explore-all'].includes(effect.id)){
-   const range=r.conditions.find(c=>c.id==='range')?.value??Infinity;
-   const nearby=visible.filter(e=>dist(s.player,e)<=range),combat=nearby.length?seek(p=>dist(s.player,p)<=range&&nearby.some(e=>dist(p,e)===1)):null;
+   const hasAlternative=s.extensions?.unlocked?.includes('condition-or')&&r.conditions.slice(1).some(c=>c.or);
+   const range=hasAlternative?Infinity:r.conditions.find(c=>c.id==='range')?.value??Infinity;
+   const inRange=p=>hasAlternative?match(s,r,s.player,p,ctx):dist(s.player,p)<=range;
+   const nearby=visible.filter(inRange),combat=nearby.length?seek(p=>inRange(p)&&nearby.some(e=>dist(p,e)===1)):null;
    if(combat){const plan={...base,next:combat,intent:'進路の敵に向き合う'};if(accept(plan))return selected;continue;}
    const rooms=s.rooms||[],entered=i=>(s.themeState?.rooms||[]).includes(i)||roomContains(rooms[i],s.player);if(effect.id==='frontier'&&rooms.length&&rooms.every((_,i)=>entered(i)))continue;
-   const roomStep=effect.id==='frontier'?seek(p=>dist(s.player,p)<=range&&rooms.some((room,i)=>!entered(i)&&roomContains(room,p))):null;const next=roomStep||seek(p=>dist(s.player,p)<=range&&!s.visited[p.y][p.x]&&(effect.id==='explore-all'||dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false)));
+   const roomStep=effect.id==='frontier'?seek(p=>inRange(p)&&rooms.some((room,i)=>!entered(i)&&roomContains(room,p))):null;const next=roomStep||seek(p=>inRange(p)&&!s.visited[p.y][p.x]&&(effect.id==='explore-all'||dirs.some(([dx,dy])=>s.seen[p.y+dy]?.[p.x+dx]===false)));
    if(next){if(accept({...base,next}))return selected;continue;}
   }else{
    const next=seek(p=>targets.some(t=>key(t)===key(p)));
@@ -159,7 +168,7 @@ export function chooseCardOrder(s,ctx){
 export function describeCardRule(input){
  const r=legacyToCards(input),target=targetCards.find(t=>t.id===r.target)?.name||'？',effect=effectDefinition(r);
  const conditions=r.conditions.map(c=>{const d=conditionById[c.id];if(c.id==='visible')return (r.effect.id==='stairs'?'階段':r.effect.id==='chests'?'宝箱':r.effect.id==='avoid-traps'?'トラップ':r.target==='self'?'対象':'敵')+'が視界内';return d?.param?d.name.replace('指定%',String(c.value)+'%').replace('指定距離',String(c.value)+'マス').replace('指定ターン',String(c.value)+'ターン').replace('指定数',String(c.value)):d?.name||'？';});
- return `${target}が、${conditions.length?conditions.join('、かつ')+(/(?:いる|ある|できる|倒せる)$/.test(conditions.at(-1))?'とき、':'のとき、'):''}${effect?.name||'？'}${r.effect.kind==='skill'?'を発動する':r.effect.id==='wait'?'する':''}。`;
+ return `${target}が、${conditions.length?conditions.map((text,i)=>(i?(r.conditions[i].or?'、または':'、かつ'):'')+text).join('')+(/(?:いる|ある|できる|倒せる)$/.test(conditions.at(-1))?'とき、':'のとき、'):''}${effect?.name||'？'}${r.effect.kind==='skill'?'を発動する':r.effect.id==='wait'?'する':''}。`;
 }
 
 export function collapseAllCardRows(s){if(s.phase!=='prepare')return false;for(const row of s.orders)row.folded=true;s.fixedOrderExpanded=[];return true;}
