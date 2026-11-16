@@ -942,7 +942,7 @@ body.exploring :is(#field-gimmick,#floor-message){background:transparent;text-sh
 .extension-shop .extension-node small{flex:none}
 .extension-shop .extension-detail{border:1px solid var(--prep-theme-edge);padding:10px 12px;background:#111817;overflow:auto}
 
-/* Kenney Cursor Pack 1.1, Outline/Default. Touch input remains unchanged. */
+/* Kenney Cursor Pack 1.1, Outline/Double 64px. Touch input remains unchanged. */
 @media (pointer:fine){
  body{cursor:var(--game-cursor-default,auto)}
  button,a,select,summary,[role="button"],input[type="checkbox"],input[type="range"]{cursor:var(--game-cursor-select,pointer)!important}

@@ -1,62 +1,18 @@
 {
-  "source": "Kenney Cursor Pack 1.1 / PNG/Outline/Default (CC0)",
+  "cell": 64,
+  "source": "Kenney Cursor Pack 1.1 / PNG/Outline/Double (CC0)",
   "states": {
-    "default": {
-      "hotspot": [
-        8,
-        6
-      ],
-      "sourceFile": "pointer_b_shaded.png",
-      "file": "default.png"
-    },
-    "select": {
-      "hotspot": [
-        9,
-        2
-      ],
-      "sourceFile": "hand_point.png",
-      "file": "select.png"
-    },
-    "grab": {
-      "hotspot": [
-        16,
-        15
-      ],
-      "sourceFile": "hand_open.png",
-      "file": "grab.png"
-    },
-    "grabbing": {
-      "hotspot": [
-        16,
-        15
-      ],
-      "sourceFile": "hand_closed.png",
-      "file": "grabbing.png"
-    },
-    "blocked": {
-      "hotspot": [
-        3,
-        1
-      ],
-      "sourceFile": "cursor_disabled.png",
-      "file": "blocked.png"
-    },
-    "help": {
-      "hotspot": [
-        3,
-        1
-      ],
-      "sourceFile": "cursor_help.png",
-      "file": "help.png"
-    },
-    "text": {
-      "hotspot": [
-        16,
-        16
-      ],
-      "sourceFile": "bracket_a_vertical.png",
-      "file": "text.png"
-    }
+    "default": {"file":"default.png","sourceFile":"pointer_a.png","hotspot":[16,12]},
+    "select": {"file":"select.png","sourceFile":"hand_point.png","hotspot":[18,4]},
+    "grab": {"file":"grab.png","sourceFile":"hand_open.png","hotspot":[32,30]},
+    "grabbing": {"file":"grabbing.png","sourceFile":"hand_closed.png","hotspot":[32,30]},
+    "blocked": {"file":"blocked.png","sourceFile":"cursor_disabled.png","hotspot":[6,2]},
+    "help": {"file":"help.png","sourceFile":"cursor_help.png","hotspot":[6,2]},
+    "text": {"file":"text.png","sourceFile":"bracket_a_vertical.png","hotspot":[32,32]}
   },
-  "cell": 32
+  "variants": {
+    "arrow": {"file":"default.png","sourceFile":"pointer_a.png","hotspot":[16,12]},
+    "shaded": {"file":"default-shaded.png","sourceFile":"pointer_b_shaded.png","hotspot":[16,12]},
+    "triangle": {"file":"default-triangle.png","sourceFile":"pointer_b.png","hotspot":[16,12]}
+  }
 }

@@ -59,6 +59,8 @@ const launchParams=new URLSearchParams(location.search);
 const verificationMode=launchParams.get('verify')==='1';if(verificationMode)document.querySelectorAll('video,audio').forEach(el=>{el.muted=true;});
 const $=id=>document.getElementById(id), key='abyss-normal-v2';
 let uiStorage;try{uiStorage=localStorage;}catch{}let uiSettings=readUiSettings(uiStorage);document.documentElement.dataset.minimapSize=uiSettings.minimap;$('minimap-size').value=uiSettings.minimap;$('skip-opening').checked=uiSettings.skipOpening;
+function applyCursorStyle(){document.documentElement.dataset.cursorStyle=uiSettings.cursorStyle;$('cursor-style').value=uiSettings.cursorStyle;}
+applyCursorStyle();$('cursor-style').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,cursorStyle:$('cursor-style').value});applyCursorStyle();};
 function applyPreparationSkin(){const skin=skinById(uiSettings.preparationSkin);document.documentElement.dataset.preparationSkin=skin.id;for(const [key,value]of Object.entries(skin))if(['accent','edge','panel','text'].includes(key))document.documentElement.style.setProperty('--prep-theme-'+key,value);$('preparation-skin').textContent='スキン：'+skin.name;$('preparation-skin').title='次のスキン：'+nextPreparationSkin(skin.id).name;}
 applyPreparationSkin();$('preparation-skin').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,preparationSkin:nextPreparationSkin(uiSettings.preparationSkin).id});applyPreparationSkin();};
 const bgm=new SceneMusic($('scene-bgm'),$('scene-bgm').dataset);
@@ -645,7 +647,7 @@ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement
 const optionsDialog=$('options-dialog');
 const optionTabs=[...optionsDialog.querySelectorAll('[role="tab"]')];
 const optionResetKeys={
- 'settings-display':['brightness','minimap','screenShake','optionsContrast','skipOpening'],
+ 'settings-display':['brightness','minimap','cursorStyle','screenShake','optionsContrast','skipOpening'],
  'settings-audio':['bgmEnabled','bgmVolume','soundEnabled','soundVolume']
 };
 let activeOptionTab=0,confirmedOptionAction;
@@ -723,7 +725,7 @@ $('options-reset').onclick=()=>{
   const defaults=readUiSettings(null);
   const reset=Object.fromEntries(optionResetKeys[panel].map(key=>[key,defaults[key]]));
   uiSettings=saveUiSettings(uiStorage,{...uiSettings,...reset});
-  paintOptionsContrast();paintBrightness();paintMusicOptions();
+  paintOptionsContrast();paintBrightness();paintMusicOptions();applyCursorStyle();
   $('skip-opening').checked=uiSettings.skipOpening;
   $('screen-shake').checked=uiSettings.screenShake;
   $('minimap-size').value=document.documentElement.dataset.minimapSize=uiSettings.minimap;

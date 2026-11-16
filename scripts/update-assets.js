@@ -64,7 +64,8 @@ for(const file of ['opening-awakening.png','opening-son-journey.png','logo-mukur
  updated=updated.replace(new RegExp('\\./art/'+file.replaceAll('.','\\.')+'(?:\\?v=[^"\\s>]*)?','g'),asset+'?v='+version('art/'+file));
 }
 const cursorFallback={default:'auto',select:'pointer',grab:'grab',grabbing:'grabbing',blocked:'not-allowed',help:'help',text:'text'};
-const cursorStyle='<style id="game-cursor-assets">:root{'+Object.entries(cursorManifest.states).map(([name,{file,hotspot}])=>'--game-cursor-'+name+':url("./art/ui/cursors-v1/'+file+'?v='+version('art/ui/cursors-v1/'+file)+'") '+hotspot.join(' ') +', '+cursorFallback[name]).join(';')+'}</style>';
+const cursorValue=({file,hotspot},fallback)=>'url("./art/ui/cursors-v1/'+file+'?v='+version('art/ui/cursors-v1/'+file)+'") '+hotspot.join(' ')+', '+fallback;
+const cursorStyle='<style id="game-cursor-assets">:root{'+Object.entries(cursorManifest.states).map(([name,asset])=>'--game-cursor-'+name+':'+cursorValue(asset,cursorFallback[name])).join(';')+'}'+Object.entries(cursorManifest.variants).filter(([name])=>name!=='arrow').map(([name,asset])=>':root[data-cursor-style="'+name+'"]{--game-cursor-default:'+cursorValue(asset,'auto')+'}').join('')+'</style>';
 updated=updated.includes('id="game-cursor-assets"')?updated.replace(/<style id="game-cursor-assets">[\s\S]*?<\/style>/,cursorStyle):updated.replace('</head>',cursorStyle+'</head>');
 if(process.argv.includes('--check')){
  if(updated!==html){console.error('Asset URLs are stale. Run node scripts/update-assets.js and commit index.html.');process.exitCode=1;}
