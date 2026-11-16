@@ -941,3 +941,14 @@ body.exploring :is(#field-gimmick,#floor-message){background:transparent;text-sh
 .extension-shop .extension-node{width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:0;padding:5px 8px;text-align:left}
 .extension-shop .extension-node small{flex:none}
 .extension-shop .extension-detail{border:1px solid var(--prep-theme-edge);padding:10px 12px;background:#111817;overflow:auto}
+
+/* Kenney Cursor Pack 1.1, Outline/Default. Touch input remains unchanged. */
+@media (pointer:fine){
+ body{cursor:var(--game-cursor-default,auto)}
+ button,a,select,summary,[role="button"],input[type="checkbox"],input[type="range"]{cursor:var(--game-cursor-select,pointer)!important}
+ input:not([type="checkbox"]):not([type="range"]):not([type="button"]):not([type="submit"]),textarea,[contenteditable="true"]{cursor:var(--game-cursor-text,text)!important}
+ button:disabled,input:disabled,select:disabled,[aria-disabled="true"]{cursor:var(--game-cursor-blocked,not-allowed)!important}
+ [data-drag-source],.row-handle,.board-slot[role="group"]{cursor:var(--game-cursor-grab,grab)!important}
+ [data-drag-source]:active,.row-handle:active,.board-slot[role="group"]:active{cursor:var(--game-cursor-grabbing,grabbing)!important}
+ #hud-augments button,[title][data-help]{cursor:var(--game-cursor-help,help)!important}
+}

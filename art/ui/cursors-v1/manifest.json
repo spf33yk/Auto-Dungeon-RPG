@@ -1,0 +1,62 @@
+{
+  "source": "Kenney Cursor Pack 1.1 / PNG/Outline/Default (CC0)",
+  "states": {
+    "default": {
+      "hotspot": [
+        8,
+        6
+      ],
+      "sourceFile": "pointer_b_shaded.png",
+      "file": "default.png"
+    },
+    "select": {
+      "hotspot": [
+        9,
+        2
+      ],
+      "sourceFile": "hand_point.png",
+      "file": "select.png"
+    },
+    "grab": {
+      "hotspot": [
+        16,
+        15
+      ],
+      "sourceFile": "hand_open.png",
+      "file": "grab.png"
+    },
+    "grabbing": {
+      "hotspot": [
+        16,
+        15
+      ],
+      "sourceFile": "hand_closed.png",
+      "file": "grabbing.png"
+    },
+    "blocked": {
+      "hotspot": [
+        3,
+        1
+      ],
+      "sourceFile": "cursor_disabled.png",
+      "file": "blocked.png"
+    },
+    "help": {
+      "hotspot": [
+        3,
+        1
+      ],
+      "sourceFile": "cursor_help.png",
+      "file": "help.png"
+    },
+    "text": {
+      "hotspot": [
+        16,
+        16
+      ],
+      "sourceFile": "bracket_a_vertical.png",
+      "file": "text.png"
+    }
+  },
+  "cell": 32
+}

@@ -6,6 +6,8 @@
 
 ビルド不要のJavaScript ES modulesとCanvas。server.jsで静的配信し、index.htmlのimport mapで内容ハッシュ付きURLを指定する。ゲーム進行の乱数と視覚表現の時計を分離する。
 
+マウスカーソルはKenney Cursor Pack 1.1のOutline/Defaultから32×32px透過PNGを7種選び、原本名とホットスポットを `art/ui/cursors-v1/manifest.json` に記録する。`scripts/update-assets.js` が各PNGの内容ハッシュ付きURLを `index.html` のCSS変数へ反映し、`screens.css` が操作状態へ割り当てる。タッチ端末には適用しない。
+
 | 分野 | 実装 | 責務 |
 |---|---|---|
 | 定義 | data.js、field-events.js | 敵・装備・強化・エリア・階数・異変・次階ヒント |
