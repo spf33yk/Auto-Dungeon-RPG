@@ -8,35 +8,19 @@ export function bossMemoryMessage(floor,normalClears){
  return text?{kind:normalClears>0?'memory':'story',text}:null;
 }
 const sceneKey=s=>[s.seed,s.profile?.runs,s.floor].join(':');
-export function captureFieldMessages(s){return {scene:sceneKey(s),turn:s.turn,house:s.gimmick?.id,triggered:Boolean(s.gimmick?.triggered),used:[...(s.themeState?.used||[])],boss:s.enemies?.some(e=>e.boss),letter:s.letter,battle:s.bossFloor&&s.enemies?.find(e=>e.boss)?{hero:{...s.player},boss:{...s.enemies.find(e=>e.boss)}}:null};}
+export function captureFieldMessages(s){return {scene:sceneKey(s),turn:s.turn,house:s.gimmick?.id,triggered:Boolean(s.gimmick?.triggered),used:[...(s.themeState?.used||[])],boss:s.enemies?.some(e=>e.boss),letter:s.letter};}
 export function collectFieldMessages(before,s){
  if(before.scene!==sceneKey(s)||before.turn===s.turn)return [];
  const messages=[];
- if(before.battle){
-  const {hero,boss}=before.battle,next=s.enemies.find(e=>e.boss);
-  const events=s.damageEvents||[],heroHits=events.filter(e=>!e.hero),bossHits=events.filter(e=>e.hero&&e.source?.x===boss.x&&e.source?.y===boss.y);
-  const skillId=(s.themeState?.used||[]).find(id=>!before.used.includes(id)&&themedSkillById[id]);
-  const heroAction=skillId?'「'+themedSkillById[skillId].name+'」を発動':heroHits.length?'攻撃':hero.x!==s.player.x||hero.y!==s.player.y?'移動':'待機';
-  const technique=bossHits.map(e=>bossSkills[e.skillId]).find(Boolean);
-  const bossAction=!next?'撃破された':technique?'「'+technique.name+'」を発動':bossHits.length?'攻撃':next.x!==boss.x||next.y!==boss.y?'移動':'待機';
-  const damage=hits=>hits.length?'（'+hits.map(hit=>hit.damage).join('＋')+'ダメージ）':'';
-  const addAction=(actor,action,hits)=>messages.push({kind:'boss-turn',text:'ターン '+s.turn+'\n'+actor+'　'+action+damage(hits)});
-  addAction('骸',heroAction,heroHits);
-  if(bossAction!=='待機')addAction(boss.name,bossAction,bossHits);
-  for(const hit of events.filter(e=>e.hero&&e.source&&!bossHits.includes(e))){
-   const attacker=s.enemies.find(e=>e.x===hit.source.x&&e.y===hit.source.y);
-   if(attacker)addAction(attacker.name,'攻撃',[hit]);
-  }
- }
  if(!before.letter&&s.letter)messages.push(willFoundMessage);
  if(before.boss&&!s.enemies?.some(e=>e.boss)){
   const memory=bossMemoryMessage(s.floor,s.profile?.normalClears);
   if(memory)messages.push(memory);
  }
  if(!before.triggered&&before.house===s.gimmick?.id&&s.gimmick?.triggered&&['monsters','traps'].includes(s.gimmick.id))messages.push({kind:'house',text:s.gimmick.id==='monsters'?'モンスターハウスだ！！':'トラップハウスだ！！'});
- for(const event of s.damageEvents||[]){const skill=bossSkills[event.skillId];if(skill&&!before.battle)messages.push({kind:'skill',skill:event.skillId,text:'「'+skill.name+'」を発動！'});}
+ for(const event of s.damageEvents||[]){const skill=bossSkills[event.skillId];if(skill){const actor=s.enemies.find(e=>(e.baseId||e.id)===event.skillId);messages.push({kind:'skill',skill:event.skillId,text:(actor?.name||'ボス')+'が「'+skill.name+'」を発動！'});}}
  const used=new Set(before.used);
- for(const id of s.themeState?.used||[])if(!before.battle&&!used.has(id)&&themedSkillById[id]){messages.push({kind:'skill',skill:id,text:'「'+themedSkillById[id].name+'」を発動！'});used.add(id);}
+ for(const id of s.themeState?.used||[])if(!used.has(id)&&themedSkillById[id]){const event=s.actorSkillEvent,actor=event?.name===id?s.enemies.find(e=>e.x===event.x&&e.y===event.y):null;const label=s.bossFloor?(actor?.name||'骸')+'が':'';messages.push({kind:'skill',skill:id,text:label+'「'+themedSkillById[id].name+'」を発動！'});used.add(id);}
  return messages;
 }
 export class FieldMessageQueue{

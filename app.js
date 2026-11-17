@@ -343,9 +343,9 @@ const displayAttack=()=>state.gear.weapon.identified?stats(state).attack:'？';
 const displayDefense=()=>state.gear.armor.identified?stats(state).defense:'？';
 function renderAugmentOwnedSkills(){
  const cards=(state.ownedCards||[]).map(key=>cardByKey[key]).filter(card=>card?.kind==='skill');
- const groups=[...buildThemes,{id:null,name:'共通'}];
+ const groups=buildThemes;
  $('augment-skill-groups').innerHTML=groups.map(theme=>{
-  const owned=cards.filter(card=>(card.themeId??null)===theme.id);
+  const owned=cards.filter(card=>card.themeId===theme.id);
   return '<section><h3>'+esc(theme.name)+' <b>'+owned.length+'種</b></h3>'+
    (owned.length?'<ul>'+owned.map(card=>'<li>'+esc(card.name)+'</li>').join('')+'</ul>':'<small>所持なし</small>')+'</section>';
  }).join('');
