@@ -34,8 +34,8 @@ export function prepareAuditRun(s,policy){
  s.orders=candidates.slice(0,orderCapacity(s));s.mode='custom';
  if(!s.orders.every(r=>validCardRule(s,r))||!validateSave(s))throw Error('Invalid legal preparation');
 }
-export function simulateAuditRun(seed,policy,profile,{floorCap=2000,round=1}={}){
- const s=newGame(seed,profile),floors=[],metrics={augments:[],cards:[],skillUses:0,controlledTurns:0,safetyRecoveries:0,floorTimeouts:0,maxStars:0},started=performance.now();let loop=0,capTrace=[];
+export function simulateAuditRun(seed,policy,profile,{floorCap=2000,round=1,shortJourney=false}={}){
+ const s=newGame(seed,profile,{shortJourney}),floors=[],metrics={augments:[],cards:[],skillUses:0,controlledTurns:0,safetyRecoveries:0,floorTimeouts:0,maxStars:0},started=performance.now();let loop=0,capTrace=[];
  while(!['dead','ending'].includes(s.phase)){
   if(++loop>100000)throw Error('No phase progress');
   if(resolveOffer(s,policy,metrics))continue;

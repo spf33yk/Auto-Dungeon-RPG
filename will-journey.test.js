@@ -75,3 +75,42 @@ test('older saves migrate the will chest once and retain an already collected wi
   state.letter = true;
   assert.equal(normalizeSave(state).letter, true);
 });
+
+test('first ending carries the actual card inventory into the next journey',async()=>{
+ const {newGame,ascend,LAST_FLOOR}=await import('./engine.js');
+ const {grantCard}=await import('./card-inventory.js');
+ const first=newGame(43);grantCard(first,'skill:warp');
+ first.extensions={unlocked:['condition-or']};first.levels.cardSlots=1;
+ first.phase='cleared';first.floor=LAST_FLOOR;ascend(first);
+ const second=newGame(44,first.profile,{shortJourney:true});
+ assert.ok(second.ownedCards.includes('skill:warp'));
+ assert.ok(second.unlockedOrders.includes('warp')||second.abilities.includes('warp'));
+ assert.equal(second.extensions,undefined);
+ assert.equal(second.levels.cardSlots,0);
+ assert.deepEqual(second.augments,[]);
+});
+
+test('B25 route preserves legacy saves and exposes debug boss techniques',async()=>{
+ const {newGame,normalizeSave,zoneFor,nextStageHint,tick,startFloorFor}=await import('./engine.js');
+ const {debugJourney}=await import('./debug-tools.js');
+ const {tutorialKey}=await import('./screen-tutorial.js');
+ const {bossSkills}=await import('./field-events.js');
+ const first=newGame(1,undefined,{shortJourney:true});
+ const legacy=newGame(1);
+ assert.equal(startFloorFor(first),6);
+ assert.equal(startFloorFor(normalizeSave(legacy)),1);
+ assert.equal(zoneFor(first).id,'crypt');
+ assert.ok(normalizeSave(first).items.some(i=>i.type==='letter'));
+ assert.equal(tutorialKey({...first,phase:'explore'}),'explore:1');
+ assert.equal(tutorialKey({...first,floor:10,phase:'prepare'}),'prepare:5');
+ for(const basement of [20,10,1]){
+  const s=debugJourney(first,basement,true);
+  const boss=s.enemies.find(e=>e.boss),skill=bossSkills[boss.id];
+  assert.ok(nextStageHint({...s,floor:s.floor-1}).text.includes(skill.name));
+  tick(s);
+  assert.equal(boss.bossSkillUsed,true);
+  assert.ok(s.damageEvents.some(event=>event.skillId===boss.id));
+  const loaded=normalizeSave(s);
+  assert.equal(loaded.enemies.find(e=>e.boss).bossSkillUsed,true);
+ }
+});

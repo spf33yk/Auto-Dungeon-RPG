@@ -35,8 +35,8 @@ import {nextRandom,rollEnemyDrop,rollChestReward,grantReward} from './drop-syste
 export {nextRandom,rollEnemyDrop,rollChestReward,grantReward};
 import {rewardDefinitions,rewardById,enemyDropTables,chestRewards} from './data.js';
 export {rewardDefinitions,rewardById,enemyDropTables,chestRewards};
-import {NORMAL_FLOORS,LETTER_FLOOR,fieldPlan,nextStageHint,zoneIndexForFloor,bossForFloor} from './field-events.js';
-export {NORMAL_FLOORS,LETTER_FLOOR,fieldPlan,nextStageHint,zoneIndexForFloor,bossForFloor};
+import {NORMAL_FLOORS,LETTER_FLOOR,SHORT_START_FLOOR,startFloorFor,bossSkills,fieldPlan,nextStageHint,zoneIndexForFloor,bossForFloor} from './field-events.js';
+export {NORMAL_FLOORS,LETTER_FLOOR,startFloorFor,fieldPlan,nextStageHint,zoneIndexForFloor,bossForFloor};
 import {orderDefinitions,orderById,orderCapacity,makeOrder,orderUnlocked,addOrder,editOrder,activeOrders,chooseOrder} from './orders.js';
 export {orderDefinitions,orderById,orderCapacity,makeOrder,orderUnlocked,addOrder,editOrder,activeOrders};
 import {zones,monsters,equipment,gearById,monsterById,skills} from './data.js';
@@ -47,7 +47,13 @@ const dirs=[[0,-1],[1,0],[0,1],[-1,0]],key=p=>`${p.x},${p.y}`;
 const distance=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 export function random(seed){let a=seed>>>0;return()=>{a+=0x6D2B79F5;let t=Math.imul(a^a>>>15,1|a);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
 export function profileDefault(){return {normalClears:0,trueEnding:false,augments:[],cards:[],runs:0,monsters:[],equipment:[],knownEquipment:[],skills:[]};}
-export function zoneFor(s){return zones[Math.min(9,zoneIndexForFloor(s.floor))];}
+function floorEnemy(s,zone,index){
+ const base=monsters[zone*2+index];
+ if(!s.shortJourney||zone!==9)return base;
+ const grade=Math.min(9,5+s.floor-26),power=monsters[grade*2+index];
+ return {...base,hp:power.hp,attack:power.attack,defense:power.defense};
+}
+export function zoneFor(s){return zones[Math.min(9,zoneIndexForFloor(s.floor,s.shortJourney))];}
 export function floorLabel(s){return s.phase==='ending'?'地上 1F':`B${LAST_FLOOR+1-s.floor}`;}
 export function radius(s){return Math.max(2,3+s.levels.scout+themeBuff(s,'sight')-themeBuff(s,'sightFatigue')-(s.gimmick?.id==='fog'?2:0)-trapSightPenalty(s));}
 export function log(s,text,type=''){s.logs.unshift({text,type,turn:s.turn});}
@@ -58,16 +64,18 @@ export function gearName(g){return g.identified?gearById[g.baseId].name+(g.plus?
 export function acquire(s,g){g.identified=true;g.cursed=false;g.boundKnown=false;g.acquiredOrder=s.nextAcquisition++;s.inventory.push(g);register(s.profile.equipment,g.baseId);if(g.identified)register(s.profile.knownEquipment,g.baseId);}
 export const incomingDamage=(attack,defense)=>Math.max(1,Math.ceil(attack*.2),attack-defense);
 export function stats(s){const w=gearStats(s.gear.weapon),a=gearStats(s.gear.armor),maxHp=54+((s.level??1)-1)*HP_PER_LEVEL+s.levels.vitality*12,b=augmentBonus(s,maxHp,(s.enemies||[]).filter(e=>canSee(s,e.x,e.y)).length);return {maxHp,attack:Number(((7+s.levels.power*2+w.attack+a.attack+b.attack)*trapAttackFactor(s)).toFixed(6)),defense:Number((1+s.levels.guard+w.defense+a.defense+b.defense).toFixed(6))};}
-export function newGame(seed=Date.now()%10000000,profile=profileDefault()){
+export function newGame(seed=Date.now()%10000000,profile=profileDefault(),{shortJourney=false}={}){
  const p=structuredClone(profile);migrateHealingItems({profile:p});p.augments??=[];p.skills??=[];p.cards??=[];for(const key of INITIAL_CARDS)if(!p.cards.includes(key))p.cards.push(key);p.trueEnding??=false;p.runs++;
- const s={version:16,actorRuleRevision:ACTOR_RULE_REVISION,heroWeakenedHits:0,augments:[],augmentOffer:null,augmentStarted:false,trapTriggers:0,ownedCards:[...INITIAL_CARDS],newCards:[],level:1,experience:0,damageEvents:[],abilities:[],unlockedOrders:[],rngState:seed>>>0,warped:false,nextAcquisition:0,willChestRevision:1,willHintShown:false,orders:[createCardRule()],seed,floor:1,phase:'awakening',hp:54,shards:12,levels:Object.fromEntries(skills.map(k=>[k.id,0])),gear:{weapon:createGear('weapon-0'),armor:createGear('armor-0')},inventory:[],potionStock:1,tutorialFloors:[],guidedJourney:true,mode:'stairs',turn:0,kills:0,logs:[],memories:[],profile:p,letter:false};
+ const s={version:16,...(shortJourney?{shortJourney:true}:{}),actorRuleRevision:ACTOR_RULE_REVISION,heroWeakenedHits:0,augments:[],augmentOffer:null,augmentStarted:false,trapTriggers:0,ownedCards:[...INITIAL_CARDS],newCards:[],level:1,experience:0,damageEvents:[],abilities:[],unlockedOrders:[],rngState:seed>>>0,warped:false,nextAcquisition:0,willChestRevision:1,willHintShown:false,orders:[createCardRule()],seed,floor:shortJourney?SHORT_START_FLOOR:LETTER_FLOOR,phase:'awakening',hp:54,shards:12,levels:Object.fromEntries(skills.map(k=>[k.id,0])),gear:{weapon:createGear('weapon-0'),armor:createGear('armor-0')},inventory:[],potionStock:1,tutorialFloors:[],guidedJourney:true,mode:'stairs',turn:0,kills:0,logs:[],memories:[],profile:p,letter:false};
  for(const g of Object.values(s.gear)){g.acquiredOrder=s.nextAcquisition++;register(p.equipment,g.baseId);register(p.knownEquipment,g.baseId);}
- grantCard(s,'skill:first-aid');const cloak=createGear('armor-1');cloak.acquiredOrder=s.nextAcquisition++;s.inventory.push(cloak);register(p.equipment,cloak.baseId);register(p.knownEquipment,cloak.baseId);s.newCards=[];makeFloor(s);log(s,'目が覚めると、そこには骨だけの手があった。','story');log(s,openingThought(p.normalClears),'story');return s;
+ grantCard(s,'skill:first-aid');
+ if(shortJourney&&p.normalClears>0)for(const key of Array.isArray(p.carryCards)?p.carryCards:p.cards)if(cardByKey[key]&&key!=='action:letter'&&!s.ownedCards.includes(key))grantCard(s,key);
+ const cloak=createGear('armor-1');cloak.acquiredOrder=s.nextAcquisition++;s.inventory.push(cloak);register(p.equipment,cloak.baseId);register(p.knownEquipment,cloak.baseId);s.newCards=[];makeFloor(s);log(s,'目が覚めると、そこには骨だけの手があった。','story');log(s,openingThought(p.normalClears),'story');return s;
 }
-export function abandonRun(s){return ['prepare','explore'].includes(s.phase)?newGame(undefined,s.profile):null;}
+export function abandonRun(s,options={shortJourney:s.shortJourney}){return ['prepare','explore'].includes(s.phase)?newGame(undefined,s.profile,options):null;}
 export function price(s,k){return k.cost+s.levels[k.id]*(k.costStep??4);}
 export function locked(s,k){return Boolean((k.requires&&!s.levels[k.requires])||(k.event&&!s.profile.normalClears));}
-export function upgrade(s,id){const k=skills.find(k=>k.id===id);if(!k||s.phase!=='prepare'||s.floor===1||locked(s,k)||s.levels[id]>=k.max||s.shards<price(s,k))return false;s.shards-=price(s,k);s.levels[id]++;if(id==='vitality')s.hp+=12;reveal(s);log(s,`「${k.name}」を思い出した。`,'good');return true;}
+export function upgrade(s,id){const k=skills.find(k=>k.id===id);if(!k||s.phase!=='prepare'||s.floor===startFloorFor(s)||locked(s,k)||s.levels[id]>=k.max||s.shards<price(s,k))return false;s.shards-=price(s,k);s.levels[id]++;if(id==='vitality')s.hp+=12;reveal(s);log(s,`「${k.name}」を思い出した。`,'good');return true;}
 export function setMode(s,mode){if(s.phase!=='prepare')return false;if(!['stairs','collect','explore'].includes(mode))return false;s.mode=mode;s.orders=(mode==='stairs'?['stairs']:mode==='collect'?['collect-weapons','stairs']:['explore-all','stairs']).map(makeOrder);return true;}
 export function equip(s,index){const g=s.inventory[index];if(s.phase!=='prepare'||!g)return false;const slot=gearById[g.baseId].slot;if(s.gear[slot].cursed){log(s,'呪いで装備を外せない。先に解呪が必要。','bad');return false;}const old=s.gear[slot];s.gear[slot]=g;s.inventory[index]=old;if(g.cursed)g.boundKnown=true;log(s,`${gearName(g)}を装備。${g.cursed?'呪いにより外せなくなった。':''}`,g.cursed?'bad':'good');return true;}
 export function equipBest(s){
@@ -91,7 +99,7 @@ export function discard(s,index){const g=s.inventory[index];if(s.phase!=='prepar
 export function synthesisResult(a,b){if(!a||!b||a===b||!a.identified||!b.identified||a.cursed||b.cursed||a.baseId!==b.baseId)return null;if((a.plus===0)!==(b.plus===0))return null;const result=a.plus===0?1:a.plus+b.plus;return result<=SYNTHESIS_CAP?result:null;}
 export function synthesize(){return false;}
 export function sortedInventory(s,slot,sort='acquired'){return s.inventory.map((g,index)=>({g,index})).filter(({g})=>gearById[g.baseId].slot===slot).sort((a,b)=>sort==='acquired'?(a.g.acquiredOrder??a.index)-(b.g.acquiredOrder??b.index):Number(b.g.identified)-Number(a.g.identified)||(a.g.identified&&b.g.identified?gearStats(b.g)[sort]-gearStats(a.g)[sort]:0)||(a.g.acquiredOrder??a.index)-(b.g.acquiredOrder??b.index));}
-export function notifyWillChest(s){if(s.floor===LETTER_FLOOR&&!s.willHintShown){s.willHintShown=true;log(s,letterFloorThought(s.profile.normalClears),'story');return true;}return false;}
+export function notifyWillChest(s){if(s.floor===startFloorFor(s)&&!s.willHintShown){s.willHintShown=true;log(s,letterFloorThought(s.profile.normalClears),'story');return true;}return false;}
 export function beginExploration(s){if(!['awakening','prepare'].includes(s.phase))return false;if(s.phase==='awakening'&&!s.augmentStarted){if(offerAugments(s,()=>nextRandom(s),'start')||s.augmentOffer)return false;s.augmentStarted=true;}if(s.augmentOffer)return false;if(s.phase==='prepare')s.newCards=[];s.phase='explore';notifyWillChest(s);return true;}
 export function lineOfSight(s,a,b){let x=a.x,y=a.y;const dx=Math.abs(b.x-x),dy=Math.abs(b.y-y),sx=Math.sign(b.x-x),sy=Math.sign(b.y-y);let err=dx-dy;while(x!==b.x||y!==b.y){const twice=2*err;let nx=x,ny=y;if(twice>-dy){err-=dy;nx+=sx;}if(twice<dx){err+=dx;ny+=sy;}if(nx!==x&&ny!==y&&!s.grid[y]?.[nx]&&!s.grid[ny]?.[x])return false;x=nx;y=ny;if(x===b.x&&y===b.y)return true;if(!s.grid[y]?.[x])return false;}return true;}
 export function canSee(s,x,y){return withinSightShape(x-s.player.x,y-s.player.y,radius(s))&&lineOfSight(s,s.player,{x,y});}
@@ -103,7 +111,7 @@ export function makeBossFloor(s,boss){
  s.trapStatus={};s.trapContact=null;
  s.undyingUsed=false;s.firstAttackUsed=false;s.unharmedTurns=0;
  const arena=bossArena(boss.basement,W,H),{grid}=arena;
- Object.assign(s,{rooms:arena.rooms,grid,player:arena.player,stairs:arena.stairs,seen:grid.map(r=>r.map(()=>false)),visited:grid.map(r=>r.map(()=>false)),enemies:[{...boss,baseId:boss.id,...arena.boss,maxHp:boss.hp,aggro:true,boss:true}],items:arena.items,traps:[],obstacles:[],bossFloor:true,gimmick:{...fieldPlan(s.seed,s.floor),triggered:false,room:null},nextHint:null,warped:false,mended:false,floorKills:0,steps:0,flash:null,intent:'階段を封じる門番の気配',retreatTurns:0,retreatCooldown:0,activeOrder:null});reveal(s);
+ Object.assign(s,{rooms:arena.rooms,grid,player:arena.player,stairs:arena.stairs,seen:grid.map(r=>r.map(()=>false)),visited:grid.map(r=>r.map(()=>false)),enemies:[{...boss,baseId:boss.id,...arena.boss,maxHp:boss.hp,aggro:true,boss:true}],items:arena.items,traps:[],obstacles:[],bossFloor:true,gimmick:{...fieldPlan(s.seed,s.floor,s.shortJourney),triggered:false,room:null},nextHint:null,warped:false,mended:false,floorKills:0,steps:0,flash:null,intent:'階段を封じる門番の気配',retreatTurns:0,retreatCooldown:0,activeOrder:null});reveal(s);
 }
 export function makeFloor(s){
  delete s.debugWillChest;
@@ -111,13 +119,13 @@ export function makeFloor(s){
  resetThemeFloor(s);
  s.buildReport=emptyBuildReport(s.floor);
  s.undyingUsed=false;s.firstAttackUsed=false;s.unharmedTurns=0;
- const boss=bossForFloor(s.floor);if(boss){makeBossFloor(s,boss);return;}s.bossFloor=false;
- const z=zoneFor(s),rng=random(s.seed+s.floor*997),{grid,rooms,start,end}=generateDungeonLayout(s.floor,rng,{width:W,height:H,layout:z.layout});
- s.gimmick={...fieldPlan(s.seed,s.floor),triggered:false,room:null};s.traps=[];s.obstacles=[];s.nextHint=null;
+ const boss=bossForFloor(s.floor);if(boss){const tuning=s.shortJourney&&({20:{hp:70,attack:12,defense:3},10:{hp:125,attack:21,defense:6},1:{hp:185,attack:28,defense:9}}[boss.basement]);makeBossFloor(s,tuning?{...boss,...tuning}:boss);return;}s.bossFloor=false;
+ const z=zoneFor(s),rng=random(s.seed+(s.floor-startFloorFor(s)+1)*997),{grid,rooms,start,end}=generateDungeonLayout(s.floor-startFloorFor(s)+1,rng,{width:W,height:H,layout:z.layout});
+ s.gimmick={...fieldPlan(s.seed,s.floor,s.shortJourney),triggered:false,room:null};s.traps=[];s.obstacles=[];s.nextHint=null;
  s.rooms=rooms;s.grid=grid;s.player={...start};s.stairs={...end};s.seen=grid.map(row=>row.map(()=>false));s.visited=grid.map(row=>row.map(()=>false));s.enemies=[];s.items=[];s.cardOffer=null;s.skillUses=[];s.guardHits=0;s.focusPower=false;s.executingRule=null;s.mended=false;s.warped=false;s.floorKills=0;s.heroWeakenedHits=0;s.actorSkillEvent=null;s.steps=0;s.flash=null;s.damageEvents=[];s.intent='視界の先を調べる';s.retreatTurns=0;s.retreatCooldown=0;s.activeOrder=null;
  const occupied=new Set([key(start),key(end)]);const free=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(grid[y][x]&&!occupied.has(`${x},${y}`)&&distance({x,y},start)>4)free.push({x,y});
  function spot(){if(!free.length)throw Error('No free tile');const p=free.splice(Math.floor(rng()*free.length),1)[0];occupied.add(key(p));return p;}
- for(let i=0;i<BALANCE.enemyCount(z.index);i++){const base=monsters[z.index*2+(i%3===2?1:0)];s.enemies.push({...base,baseId:base.id,...spot(),maxHp:base.hp,aggro:false});}
+ for(let i=0;i<BALANCE.enemyCount(s.shortJourney&&z.index===9?6:z.index);i++){const base=floorEnemy(s,z.index,i%3===2?1:0);s.enemies.push({...base,baseId:base.id,...spot(),maxHp:base.hp,aggro:false});}
  for(let i=0;i<BALANCE.heartCount;i++)s.items.push({...spot(),type:'heart'});
  for(let i=0;i<2;i++)s.items.push({...spot(),type:rng()<.25?'heart':'fragment'});
  for(let i=0;i<4;i++)if(rng()<CHEST_CHANCE)s.items.push({...spot(),type:'chest',cardId:rollCardChest(s,rng)});
@@ -136,7 +144,7 @@ export function makeFloor(s){
    const takeTile=()=>houseTiles.splice(Math.floor(rng()*houseTiles.length),1)[0];
    for(let i=0;i<count;i++){
     const tile=takeTile();
-    if(monsterHouse){const base=monsters[z.index*2+(i%2)];s.enemies.push({...base,baseId:base.id,...tile,maxHp:base.hp,aggro:false,house:true});}
+    if(monsterHouse){const base=floorEnemy(s,z.index,i%2);s.enemies.push({...base,baseId:base.id,...tile,maxHp:base.hp,aggro:false,house:true});}
     else s.traps.push({...tile,type:rollTrap(rng),spent:false,revealed:true});
    }
    for(let i=0;i<lootCount;i++){
@@ -147,7 +155,7 @@ export function makeFloor(s){
   }
 
  }
- if(s.gimmick.id==='none'&&s.floor>1){const trapRng=random(s.seed+s.floor*7919+43);if(trapRng()<.25){for(let i=0,n=1+Math.floor(trapRng()*2);i<n&&free.length;i++)s.traps.push({...spot(),type:rollTrap(trapRng),spent:false,revealed:true});}}
+ if(s.gimmick.id==='none'&&s.floor>startFloorFor(s)){const trapRng=random(s.seed+s.floor*7919+43);if(trapRng()<.25){for(let i=0,n=1+Math.floor(trapRng()*2);i<n&&free.length;i++)s.traps.push({...spot(),type:rollTrap(trapRng),spent:false,revealed:true});}}
  if(z.id==='crypt')placeCryptObstacles(s,rooms);
  reveal(s);
 }
@@ -156,7 +164,7 @@ export function route(s,test,{start=s.player,known=true,blocked=new Set()}={}){c
 function modifierActive(s,id){return s.orders.some(o=>o.cards)?cardModifier(s,id,{canSee,stats,obtainable}):activeOrders(s).some(o=>o.id===id);}
 export function targetEnemy(s){return dirs.map(([dx,dy])=>s.enemies.find(e=>e.x===s.player.x+dx&&e.y===s.player.y+dy)).find(Boolean);}
 function placeWillChest(s){
- if(s.floor!==LETTER_FLOOR||s.letter||s.items.some(i=>i.type==='letter'))return;
+ if(s.floor!==startFloorFor(s)||s.letter||s.items.some(i=>i.type==='letter'))return;
  const occupied=[s.stairs,...s.items,...s.enemies,...(s.obstacles||[]),...(s.traps||[])];
  const adjacent=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:s.player.x+dx,y:s.player.y+dy}));
  const free=p=>s.grid[p.y]?.[p.x]&&!occupied.some(i=>key(i)===key(p));
@@ -164,7 +172,7 @@ function placeWillChest(s){
  if(position)s.items.push({...position,type:'letter'});
 }
 
-export function obtainable(s,i){return i.type==='letter'?(fixedChestUnlocked(s)||s.debugUsed===true&&s.debugWillChest===true&&s.floor===LETTER_FLOOR)&&!s.letter:true;}
+export function obtainable(s,i){return i.type==='letter'?(fixedChestUnlocked(s)||s.debugUsed===true&&s.debugWillChest===true&&s.floor===startFloorFor(s))&&!s.letter:true;}
 function receiveReward(s,id){const fresh=grantReward(s,id);log(s,fresh?'「'+rewardById[id].name+'」を手に入れた。'+(rewardById[id].kind==='order'?'次の準備で探索指示に設定できる。':'この旅で使用できる。'):'「'+rewardById[id].name+'」は取得済み。記憶の欠片 +5','good');}
 function pickup(s,onPickup,onChestPickup){const hpBefore=s.hp,item=s.items.find(i=>i.x===s.player.x&&i.y===s.player.y);if(!item)return;if(!obtainable(s,item)){s.intent='封じられた宝箱。まだ思い出せない';return;}s.items=s.items.filter(i=>i!==item);
  if(isHealingItem(item)){if(s.hp>=stats(s).maxHp){s.potionStock=(s.potionStock||0)+1;log(s,'回復ポーションをストックした。','good');}else{const heal=Math.min(stats(s).maxHp-s.hp,BALANCE.heartHeal);s.hp+=heal;log(s,'回復ポーション。HP +'+heal,'good');}}
@@ -256,7 +264,13 @@ export function tick(s,{onSkillEffect,onTrapEffect,onPickup,onRuleCheck,onRuleAc
    const alarm=e.trapAlarm?.until>=s.steps?e.trapAlarm:null;
    const obscured=(trapSightPenalty(s,e)>0||skillLocked(s,'sightFatigue',e))&&(distance(e,s.player)>sight||!lineOfSight(s,e,s.player));
    if((!e.house||s.gimmick?.triggered||alarm)&&(!obscured||alarm)&&e.aggro&&s.turn%e.period===0){
-    if(distance(e,s.player)===1){if(!skillLocked(s,'attackLock',e))controlledHitHero(s,e,{controlled:false});if(s.hp<=0)return;}
+    const skill=e.boss&&s.shortJourney&&s.profile.normalClears>0&&!e.bossSkillUsed?bossSkills[e.baseId||e.id]:null;
+    if(skill&&e.hp/e.maxHp<=skill.hpRatio&&distance(e,s.player)<=skill.range&&lineOfSight(s,e,s.player)&&!skillLocked(s,'attackLock',e)){
+     e.bossSkillUsed=true;log(s,e.name+'は「'+skill.name+'」を放った。','bad');
+     controlledHitHero(s,e,{controlled:false,power:skill.power,skill:true,skillId:e.baseId||e.id});
+     if(s.hp<=0)return;
+    }
+    else if(distance(e,s.player)===1){if(!skillLocked(s,'attackLock',e))controlledHitHero(s,e,{controlled:false});if(s.hp<=0)return;}
     else if(!trapActive(s,e,'snare')&&!skillLocked(s,'root',e)){const next=route(s,p=>alarm?key(p)===key(alarm):distance(p,s.player)===1,{start:e,known:false,blocked:new Set(s.enemies.filter(o=>o!==e).map(key))});if(next&&key(next)!==key(s.player)){e.x=next.x;e.y=next.y;}}
    }
   }
@@ -269,16 +283,16 @@ export function tick(s,{onSkillEffect,onTrapEffect,onPickup,onRuleCheck,onRuleAc
  if(bossAlive&&(sealedStart||key(s.player)===key(s.stairs)))s.intent='階段は封印中。中ボスを倒す必要がある';
  const done=Boolean(action?.exit)&&!bossAlive;
  if(done&&key(s.player)===key(s.stairs)){const reward=8+Math.floor(s.floor/3);s.shards+=reward;s.phase='cleared';const heal=clearAugmentHealing(s,stats(s).maxHp);if(heal){recordBuild(s,'swiftHealing',heal);s.hp+=heal;log(s,'駆け上がる記憶。HP +'+heal,'good');}s.nextHint=nextStageHint(s);log(s,`${floorLabel(s)} Clear。記憶の欠片 +${reward}`,'good');const memory=storyFragment(s.floor,s.profile.normalClears);if(memory){s.memories.push(memory);log(s,memory,'story');}}
- if(s.phase==='explore'){const z=zoneFor(s),e=spawnReinforcement(s,{canSee,rng:()=>nextRandom(s),pool:monsters.filter(m=>m.id.startsWith('enemy-')&&m.zone===z.index)});if(e)log(s,'遠くで、新たな足音が響いた。長居は危険だ。','bad');}
+ if(s.phase==='explore'){const z=zoneFor(s),e=spawnReinforcement(s,{canSee,rng:()=>nextRandom(s),pool:[floorEnemy(s,z.index,0),floorEnemy(s,z.index,1)]});if(e)log(s,'遠くで、新たな足音が響いた。長居は危険だ。','bad');}
 }
 export function ascend(s){if(s.phase!=='cleared')return false;if(s.floor===LAST_FLOOR){s.phase='ending';const first=!fixedChestUnlocked(s);s.runEnding=first?'first':s.letter?'will':'missed';
  if(s.runEnding==='will'){s.profile.trueEnding=true;log(s,'遺書を握ったまま、地上で骸は朽ち果てた。','story');}
- else{s.profile.normalClears++;log(s,'地上で、若者が剣を抜いた。「魔物か」','story');log(s,'骸は若者の剣に倒れた。','story');if(first)log(s,WILL_UNLOCK_LINE,'story');}
- return true;}if(s.buildReport)s.lastBuildReport=structuredClone(s.buildReport);s.floor++;s.phase='prepare';makeFloor(s);s.hp=Math.min(stats(s).maxHp,s.hp+Math.ceil(stats(s).maxHp*(BALANCE.restRatio+(hasAugment(s,'restful')?ap(s,'restful').heal:0))));log(s,`${floorLabel(s)}へ。休息して次の探索に備える。`,'good');return true;}
+ else{if(first)s.profile.carryCards=[...s.ownedCards];s.profile.normalClears++;log(s,'地上で、若者が剣を抜いた。「魔物か」','story');log(s,'骸は若者の剣に倒れた。','story');if(first)log(s,WILL_UNLOCK_LINE,'story');}
+ return true;}if(s.buildReport)s.lastBuildReport=structuredClone(s.buildReport);s.floor++;s.phase='prepare';makeFloor(s);s.hp=Math.min(stats(s).maxHp,s.hp+Math.ceil(stats(s).maxHp*((s.shortJourney?.2:BALANCE.restRatio)+(hasAugment(s,'restful')?ap(s,'restful').heal:0))));log(s,`${floorLabel(s)}へ。休息して次の探索に備える。`,'good');return true;}
 export function codexRows(s,kind){if(kind==='augments')return augments.map(a=>({...a,known:true,owned:hasAugment(s,a.id),discovered:s.profile.augments?.includes(a.id)??false}));if(kind==='cards')return cardCodexRows(s);if(kind==='skills')return rewardDefinitions.filter(r=>Boolean(themedSkillById[r.id])).map(r=>s.profile.skills.includes(r.id)?{...r,known:true,owned:(r.kind==='skill'?s.abilities:s.unlockedOrders).includes(r.id)}:{known:false});if(kind==='monsters')return monsters.map(m=>s.profile.monsters.includes(m.id)?{name:m.name,attack:m.attack,defense:m.defense,zone:zones[m.zone].name,known:true}:{known:false});return equipment.map(g=>s.profile.knownEquipment.includes(g.id)&&s.profile.equipment.includes(g.id)?{name:g.name,attack:g.attack,defense:g.defense,slot:g.slot,acquiredOrder:s.profile.equipment.indexOf(g.id),known:true}:{known:false,slot:g.slot});}
 function validMapShape(s){const h=s.grid?.length,w=s.grid?.[0]?.length;return ((w===W&&h===H)||(w===31&&h===23))&&s.grid.every(r=>Array.isArray(r)&&r.length===w)&&[s.seen,s.visited].every(g=>Array.isArray(g)&&g.length===h&&g.every(r=>Array.isArray(r)&&r.length===w))&&(s.rooms===undefined||Array.isArray(s.rooms)&&s.rooms.every(r=>r&&['x','y','w','h'].every(k=>Number.isInteger(r[k]))&&r.x>=0&&r.y>=0&&r.w>0&&r.h>0&&r.x+r.w<=w&&r.y+r.h<=h));}
 function validTacticsSave(s){if(!s||s.fixedOrderExpanded!==undefined&&(!Array.isArray(s.fixedOrderExpanded)||s.fixedOrderExpanded.some(i=>!Number.isInteger(i)||i<0||i>(fixedChestUnlocked(s)?2:1)))||!validTraps(s)||!validDirectiveSafety(s)||!validEnemyControls(s)||!validThemeState(s.themeState)||!validChestCategories(s.cardOffer))return false;if(s.themeState&&(!s.themeState.rooms.every(i=>i<(s.rooms?.length||0))||!s.themeState.mappedRooms.every(i=>i<(s.rooms?.length||0))||!s.themeState.mappedTiles.every(i=>i<(s.grid?.length||0)*(s.grid?.[0]?.length||0))))return false;return (s.cardOffer==null||s.phase==='explore'&&(s.cardOffer.remaining===undefined||Number.isInteger(s.cardOffer.remaining)&&s.cardOffer.remaining>=1&&s.cardOffer.remaining<=2)&&(s.cardOffer.gamble===undefined||typeof s.cardOffer.gamble==='boolean')&&(s.cardOffer.lost===undefined||typeof s.cardOffer.lost==='boolean')&&(s.cardOffer.consolation===undefined||[10,12,16,24].includes(s.cardOffer.consolation))&&Array.isArray(s.cardOffer.choices)&&s.cardOffer.choices.length>=1&&s.cardOffer.choices.length<=8&&new Set(s.cardOffer.choices).size===s.cardOffer.choices.length&&s.cardOffer.choices.every(k=>cardByKey[k]&&!INITIAL_CARDS.includes(k)&&k!=='action:letter'&&cardByKey[k].kind===cardByKey[s.cardOffer.choices[0]]?.kind))&&(s.skillUses===undefined||Array.isArray(s.skillUses)&&new Set(s.skillUses).size===s.skillUses.length&&s.skillUses.every(id=>Boolean(themedSkillById[id])))&&(s.focusPower===undefined||typeof s.focusPower==='boolean')&&(s.guardHits===undefined||Number.isInteger(s.guardHits)&&s.guardHits>=0&&s.guardHits<=4);}
-export function validateSave(s){return Boolean(validExtensions(s)&&validTacticsSave(s)&&s?.version===16&&validBuildReport(s.buildReport)&&validBuildReport(s.lastBuildReport)&&(s.runEnding===undefined||['first','will','missed'].includes(s.runEnding))&&typeof s.augmentStarted==='boolean'&&['trapTriggers','unharmedTurns'].every(k=>Number.isSafeInteger(s[k])&&s[k]>=0)&&typeof s.undyingUsed==='boolean'&&typeof s.firstAttackUsed==='boolean'&&Array.isArray(s.profile?.augments)&&s.profile.augments.every(id=>augmentById[id])&&Array.isArray(s.augments)&&s.augments.every(id=>augmentById[id])&&new Set(s.augments).size===s.augments.length&&(!s.augmentOffer||['start','boss:11','boss:21'].includes(s.augmentOffer.source)&&Array.isArray(s.augmentOffer.choices)&&s.augmentOffer.choices.length>=1&&s.augmentOffer.choices.length<=3&&new Set(s.augmentOffer.choices).size===s.augmentOffer.choices.length&&s.augmentOffer.choices.every(id=>augmentById[id]&&!s.augments.includes(id)))&&(s.newCards===undefined||Array.isArray(s.newCards)&&new Set(s.newCards).size===s.newCards.length&&s.newCards.every(k=>Boolean(cardByKey[k])&&s.ownedCards?.includes(k)&&!INITIAL_CARDS.includes(k)))&&Array.isArray(s.ownedCards)&&s.ownedCards.every(key=>Boolean(cardByKey[key]))&&new Set(s.ownedCards).size===s.ownedCards.length&&Number.isInteger(s.level)&&s.level>=1&&s.level<=MAX_LEVEL&&Number.isSafeInteger(s.experience)&&s.experience>=0&&(s.level===MAX_LEVEL?s.experience===0:s.experience<experienceToNext(s.level))&&!Object.hasOwn(s,'keys')&&Number.isInteger(s.rngState)&&s.rngState>=0&&s.rngState<=4294967295&&typeof s.warped==='boolean'&&Array.isArray(s.abilities)&&s.abilities.every(id=>rewardById[id]?.kind==='skill')&&new Set(s.abilities).size===s.abilities.length&&Array.isArray(s.unlockedOrders)&&s.unlockedOrders.every(id=>rewardById[id]?.kind==='order')&&new Set(s.unlockedOrders).size===s.unlockedOrders.length&&Number.isInteger(s.nextAcquisition)&&s.nextAcquisition>=0&&Array.isArray(s.logs)&&Array.isArray(s.enemies)&&Array.isArray(s.items)&&s.items.every(i=>i&&Number.isInteger(i.x)&&Number.isInteger(i.y)&&i.x>=0&&i.x<W&&i.y>=0&&i.y<H&&(['heart','potion','herb','fragment','letter'].includes(i.type)||i.type==='gear'&&gearById[i.gear?.baseId]||i.type==='reward'&&rewardById[i.rewardId]||i.type==='chest'&&(i.gear?gearById[i.gear.baseId]:Boolean((cardByKey[i.cardId]||rewardById[i.rewardId])&&!Object.hasOwn(i,'locked')))))&&Array.isArray(s.memories)&&Number.isInteger(s.floor)&&s.floor>=1&&s.floor<=LAST_FLOOR&&['awakening','prepare','explore','cleared','dead','ending'].includes(s.phase)&&validMapShape(s)&&s.levels&&skills.every(k=>Number.isInteger(s.levels[k.id])&&s.levels[k.id]>=0&&s.levels[k.id]<=k.max)&&Array.isArray(s.orders)&&activeOrderCount(s.orders)<=orderCapacity(s)&&s.orders.every(o=>validCardRule(s,o))&&s.profile&&typeof s.profile.trueEnding==='boolean'&&['monsters','equipment','knownEquipment','skills','cards'].every(k=>Array.isArray(s.profile[k]))&&s.profile.skills.every(id=>rewardById[id])&&s.profile.cards.every(key=>Boolean(cardByKey[key]))&&s.gear&&Object.values(s.gear).every(g=>gearById[g.baseId])&&Array.isArray(s.inventory)&&s.inventory.every(g=>gearById[g.baseId])&&validCryptObstacles(s));}
+export function validateSave(s){return Boolean(validExtensions(s)&&validTacticsSave(s)&&s?.version===16&&validBuildReport(s.buildReport)&&validBuildReport(s.lastBuildReport)&&(s.runEnding===undefined||['first','will','missed'].includes(s.runEnding))&&typeof s.augmentStarted==='boolean'&&['trapTriggers','unharmedTurns'].every(k=>Number.isSafeInteger(s[k])&&s[k]>=0)&&typeof s.undyingUsed==='boolean'&&typeof s.firstAttackUsed==='boolean'&&Array.isArray(s.profile?.augments)&&s.profile.augments.every(id=>augmentById[id])&&Array.isArray(s.augments)&&s.augments.every(id=>augmentById[id])&&new Set(s.augments).size===s.augments.length&&(!s.augmentOffer||['start','boss:11','boss:21'].includes(s.augmentOffer.source)&&Array.isArray(s.augmentOffer.choices)&&s.augmentOffer.choices.length>=1&&s.augmentOffer.choices.length<=3&&new Set(s.augmentOffer.choices).size===s.augmentOffer.choices.length&&s.augmentOffer.choices.every(id=>augmentById[id]&&!s.augments.includes(id)))&&(s.newCards===undefined||Array.isArray(s.newCards)&&new Set(s.newCards).size===s.newCards.length&&s.newCards.every(k=>Boolean(cardByKey[k])&&s.ownedCards?.includes(k)&&!INITIAL_CARDS.includes(k)))&&Array.isArray(s.ownedCards)&&s.ownedCards.every(key=>Boolean(cardByKey[key]))&&new Set(s.ownedCards).size===s.ownedCards.length&&Number.isInteger(s.level)&&s.level>=1&&s.level<=MAX_LEVEL&&Number.isSafeInteger(s.experience)&&s.experience>=0&&(s.level===MAX_LEVEL?s.experience===0:s.experience<experienceToNext(s.level))&&!Object.hasOwn(s,'keys')&&Number.isInteger(s.rngState)&&s.rngState>=0&&s.rngState<=4294967295&&typeof s.warped==='boolean'&&Array.isArray(s.abilities)&&s.abilities.every(id=>rewardById[id]?.kind==='skill')&&new Set(s.abilities).size===s.abilities.length&&Array.isArray(s.unlockedOrders)&&s.unlockedOrders.every(id=>rewardById[id]?.kind==='order')&&new Set(s.unlockedOrders).size===s.unlockedOrders.length&&Number.isInteger(s.nextAcquisition)&&s.nextAcquisition>=0&&Array.isArray(s.logs)&&Array.isArray(s.enemies)&&Array.isArray(s.items)&&s.items.every(i=>i&&Number.isInteger(i.x)&&Number.isInteger(i.y)&&i.x>=0&&i.x<W&&i.y>=0&&i.y<H&&(['heart','potion','herb','fragment','letter'].includes(i.type)||i.type==='gear'&&gearById[i.gear?.baseId]||i.type==='reward'&&rewardById[i.rewardId]||i.type==='chest'&&(i.gear?gearById[i.gear.baseId]:Boolean((cardByKey[i.cardId]||rewardById[i.rewardId])&&!Object.hasOwn(i,'locked')))))&&Array.isArray(s.memories)&&Number.isInteger(s.floor)&&s.floor>=startFloorFor(s)&&s.floor<=LAST_FLOOR&&['awakening','prepare','explore','cleared','dead','ending'].includes(s.phase)&&validMapShape(s)&&s.levels&&skills.every(k=>Number.isInteger(s.levels[k.id])&&s.levels[k.id]>=0&&s.levels[k.id]<=k.max)&&Array.isArray(s.orders)&&activeOrderCount(s.orders)<=orderCapacity(s)&&s.orders.every(o=>validCardRule(s,o))&&s.profile&&typeof s.profile.trueEnding==='boolean'&&['monsters','equipment','knownEquipment','skills','cards'].every(k=>Array.isArray(s.profile[k]))&&s.profile.skills.every(id=>rewardById[id])&&s.profile.cards.every(key=>Boolean(cardByKey[key]))&&s.gear&&Object.values(s.gear).every(g=>gearById[g.baseId])&&Array.isArray(s.inventory)&&s.inventory.every(g=>gearById[g.baseId])&&validCryptObstacles(s));}
 
 export function normalizeSave(input){
  if(!input||![2,3,4,5,6,7,8,9,10,11,12,13,14,15,16].includes(input.version))return null;const s=structuredClone(input);if(input.version<16)delete s.actorRuleRevision;if(input.version<16){delete s.buildReport;delete s.lastBuildReport;}if(s.obstacles===undefined)s.obstacles=[];if(s.profile&&s.profile.trueEnding===undefined)s.profile.trueEnding=false;
@@ -344,7 +358,7 @@ export function normalizeSave(input){
  if(!validateSave(s))return null;
  if(s.willChestRevision!==1){
   s.willChestRevision=1;
-  if(s.floor!==LETTER_FLOOR)s.items=s.items.filter(i=>i.type!=='letter');
+  if(s.floor!==startFloorFor(s))s.items=s.items.filter(i=>i.type!=='letter');
   else placeWillChest(s);
  }
  // Legacy winning skill offers with one pick left already granted their first card.

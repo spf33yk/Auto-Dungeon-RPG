@@ -1,5 +1,6 @@
 import {SubtitlePlayer} from './subtitle-player.js';
 import{themedSkillById}from'./build-themes.js';
+import {bossSkills} from './field-events.js';
 import {bossMemory} from './story-text.js';
 export const willFoundMessage={kind:'will',text:'遺書を手に入れた'};
 export function bossMemoryMessage(floor,normalClears){
@@ -17,6 +18,7 @@ export function collectFieldMessages(before,s){
   if(memory)messages.push(memory);
  }
  if(!before.triggered&&before.house===s.gimmick?.id&&s.gimmick?.triggered&&['monsters','traps'].includes(s.gimmick.id))messages.push({kind:'house',text:s.gimmick.id==='monsters'?'モンスターハウスだ！！':'トラップハウスだ！！'});
+ for(const event of s.damageEvents||[]){const skill=bossSkills[event.skillId];if(skill)messages.push({kind:'skill',skill:event.skillId,text:'「'+skill.name+'」を発動！'});}
  const used=new Set(before.used);
  for(const id of s.themeState?.used||[])if(!used.has(id)&&themedSkillById[id]){messages.push({kind:'skill',skill:id,text:'「'+themedSkillById[id].name+'」を発動！'});used.add(id);}
  return messages;

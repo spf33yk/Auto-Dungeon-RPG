@@ -56,7 +56,7 @@ function fixedInstructionRows(host,s){
   {condition:'相手と隣接している',action:'通常攻撃',summary:'自分は隣接する敵を攻撃する',detail:'隣接する敵を攻撃。移動指示中も交戦します。スキル・待機・退避・敵への指示は優先されます。'},
   {condition:'',action:'階段を探して上る',summary:'自分は階段を探して上る',detail:'階段が未発見なら未踏マスを調べ、発見後は階段へ向かいます。ボスが生存中は封印解除が必要です。'}
  ];
- if(fixedChestUnlocked(s))rows.push({condition:"",action:"宝箱を取得",summary:"自分は宝箱を取得する",detail:"B30の遺書を優先して回収し、他に指示がなければ発見済みの宝箱へ向かいます。"});
+ if(fixedChestUnlocked(s))rows.push({condition:"",action:"宝箱を取得",summary:"自分は宝箱を取得する",detail:"開始階の遺書を優先して回収し、他に指示がなければ発見済みの宝箱へ向かいます。"});
  return `<article class="board-rule fixed-stair-order" data-fixed-order aria-label="固定指示・変更不可"><div class="fixed-order-label">固定指示</div>${rows.map((r,i)=>{const folded=!folds.fixed.has(i),id=prefix+'-fixed-fold-'+i;return `<div class="fixed-basic-row ${folded?'is-folded':''}" data-fixed-fold="${i}"><div class="order-row-controls"><span class="fixed-active">有効（固定）</span>${foldButton(id,folded)}${foldSummary('固定'+(i+1),r.summary,'',folded)}</div><div class="order-fold-body" data-fold-body id="${id}" ${folded?'hidden':''}><div class="tray-scroll" tabindex="0" aria-label="固定指示${i+1} ${r.summary}"><div class="tray-surface"><span class="row-handle" aria-hidden="true">固定${i+1}</span><div class="board-slots">${slot('target','自分')}${r.condition?slot('condition',r.condition):''}${slot('action',r.action)}</div></div></div><div class="tray-caption">${r.detail}</div></div></div>`;}).join('')}</article>`;
 }
 function renderCardBoard(host,s,capacity){

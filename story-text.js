@@ -15,7 +15,7 @@ export const openingThought=normalClears=>normalClears>0?'この箱を、前に�
 export const letterFloorThought=normalClears=>normalClears>0?'あの箱に残した遺書を、持っていこう。':'何か大事なものを忘れている気がする';
 
 export const WILL_PICKUP_LINE='箱の底に、帰れなかったときのために書いた遺書があった。骸はそれを懐にしまった。';
-export const WILL_UNLOCK_LINE='次の旅でB30の遺書の宝箱が開き、固定探索指示「自分は宝箱を取得する」が追加されます。';
+export const WILL_UNLOCK_LINE='次の旅でB25の遺書の宝箱が開き、固定探索指示「自分は宝箱を取得する」が追加されます。';
 export const fixedChestUnlocked = state => state.profile?.normalClears > 0;
 
 const bossMemories = {

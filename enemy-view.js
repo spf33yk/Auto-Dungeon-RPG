@@ -2,11 +2,20 @@ import {monsters} from './data.js';
 const indices=new Map(monsters.map((m,index)=>[m.id,index]));
 export function enemyFrame(enemy){const id=enemy.spriteId||monsters.find(m=>m.id===(enemy.baseId||enemy.id))?.spriteId||enemy.baseId||enemy.id,index=indices.get(id);return index===undefined?null:{x:index%5*64,y:Math.floor(index/5)*64,width:64,height:64};}
 export function drawEnemySprite(ctx,atlas,enemy,box,{crouch=0,cut=54}={}){const frame=enemyFrame(enemy);if(!frame||!atlas.complete||atlas.naturalWidth!==320||atlas.naturalHeight!==320)return false;ctx.imageSmoothingEnabled=false;if(crouch>0){const split=Math.max(1,Math.min(63,cut)),scale=box.height/64;ctx.drawImage(atlas,frame.x,frame.y+split,64,64-split,box.x,box.y+split*scale,box.width,(64-split)*scale);ctx.drawImage(atlas,frame.x,frame.y,64,split,box.x,box.y+Math.min(2,crouch)*scale,box.width,split*scale);}else ctx.drawImage(atlas,frame.x,frame.y,64,64,box.x,box.y,box.width,box.height);return true;}
+const bossFrames={'boss-b20':0,'boss-b10':1,'boss-b1':2};
+export function drawBossSprite(ctx,atlas,enemy,box){
+ const index=bossFrames[enemy.baseId||enemy.id];
+ if(index===undefined||!atlas||!(atlas.naturalWidth??atlas.width)||atlas.width!==384)return false;
+ ctx.imageSmoothingEnabled=false;
+ ctx.drawImage(atlas,index*128,0,128,128,box.x,box.y,box.width,box.height);
+ return true;
+}
+export const enemyVisualSize=enemy=>enemy.boss?2:1;
 export function enemyHealth(enemy){const max=Number.isFinite(enemy.maxHp)&&enemy.maxHp>0?enemy.maxHp:Math.max(1,Number.isFinite(enemy.hp)?enemy.hp:1),hp=Math.max(0,Math.min(max,Number.isFinite(enemy.hp)?enemy.hp:0));return {hp,max,ratio:hp/max};}
 // Labels are an overlay after world depth sorting, so walls and actors cannot cover them.
-export function layoutEnemyLabels(enemies,size=64){const boxes=[];return [...enemies].sort((a,b)=>a.y-b.y||a.x-b.x).map(enemy=>{const width=Math.max(enemy.boss?76:56,Array.from(enemy.name).length*11+(enemy.boss?20:4)),box={x:(enemy.x+.5)*size-width/2,y:enemy.y*size-34,width,height:enemy.boss?46:29};let offset=0;while(boxes.some(b=>box.x<b.x+b.width&&box.x+box.width>b.x&&box.y<b.y+b.height&&box.y+box.height>b.y)&&offset>-260){offset-=30;box.y-=30;}boxes.push(box);return {enemy,offset};});}
+export function layoutEnemyLabels(enemies,size=64){const boxes=[];return [...enemies].sort((a,b)=>a.y-b.y||a.x-b.x).map(enemy=>{const width=Math.max(enemy.boss?76:56,Array.from(enemy.name).length*11+(enemy.boss?20:4)),box={x:(enemy.x+.5)*size-width/2,y:(enemy.y+1-enemyVisualSize(enemy))*size-34,width,height:enemy.boss?46:29};let offset=0;while(boxes.some(b=>box.x<b.x+b.width&&box.x+box.width>b.x&&box.y<b.y+b.height&&box.y+box.height>b.y)&&offset>-260){offset-=30;box.y-=30;}boxes.push(box);return {enemy,offset};});}
 export function drawEnemyLabel(ctx,enemy,size=64,offset=0){
- const health=enemyHealth(enemy),width=enemy.boss?72:52,x=(enemy.x+.5)*size-width/2,y=enemy.y*size-16+offset;
+ const health=enemyHealth(enemy),width=enemy.boss?72:52,x=(enemy.x+.5)*size-width/2,y=(enemy.y+1-enemyVisualSize(enemy))*size-16+offset;
  ctx.save();ctx.globalAlpha=1;ctx.textAlign='center';ctx.textBaseline='bottom';ctx.font=(enemy.boss?'bold ':'')+'11px Futogo, sans-serif';ctx.lineWidth=3;ctx.strokeStyle='#090c10';ctx.fillStyle=enemy.boss?'#f2d48a':'#f0e9d9';const name=(enemy.boss?'◆ ':'')+enemy.name;
  ctx.strokeText(name,x+width/2,y-3);ctx.fillText(name,x+width/2,y-3);
  ctx.fillStyle='#080c10';ctx.fillRect(x-1,y,width+2,9);ctx.fillStyle=enemy.boss?'#bf9b54':'#746b63';ctx.fillRect(x,y+1,width,7);ctx.fillStyle='#351e23';ctx.fillRect(x+1,y+2,width-2,5);ctx.fillStyle=health.ratio<=.25?'#ed6f67':health.ratio<=.5?'#deb56b':'#a5bc7c';ctx.fillRect(x+1,y+2,Math.round((width-2)*health.ratio),5);

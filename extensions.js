@@ -1,3 +1,4 @@
+import {startFloorFor} from './field-events.js';
 import{INITIAL_CARDS}from'./card-access.js';
 import{cardByKey,cardCatalog}from'./card-catalog.js';
 import{grantCard,chestCategoryChoices,pickCandidate}from'./card-inventory.js';
@@ -6,11 +7,11 @@ import{nextRandom}from'./drop-system.js';
 export const EXTENSIONS=[
 {id:'condition-or',name:'「または」条件の解放',cost:12,branch:'指示の拡張',detail:'配置した2枚目以降の条件カードを右クリックして「または」に切り替えます。'},
 {id:'chest',name:'リロール権＋1（カード）',cost:10,branch:'ビルドの選別',detail:'カード選択用のリロール権を1回分購入。種類選択後のリロールで1回分を消費。何回でも購入できます。'},
-{id:'augment',name:'リロール権＋1（オーグメント）',cost:20,branch:'ビルドの選別',detail:'オーグメント用のリロール権を1回分購入。取得機会：B30開始時、B20・B10・B1のボス討伐時。'},
+{id:'augment',name:'リロール権＋1（オーグメント）',cost:20,branch:'ビルドの選別',detail:'オーグメント用のリロール権を1回分購入。取得機会：開始時、B20・B10のボス討伐時。'},
 {id:'exchange',name:'カードを再抽選',cost:10,branch:'ビルドの選別',detail:'同じ種類の未配置カード2枚と記憶の欠片10個で、その種類の候補を3枚再抽選し1枚を取得。回数制限なし。'},
 {id:'potion',name:'回復ポーションを購入',cost:10,branch:'旅の支度',detail:'記憶の欠片10個でストックを1個購入。ひとやすみ中に1個使うとHP10回復。購入・使用の階内回数制限はありません。'}];
 export const extensionOwned=(s,id)=>s.extensions?.unlocked?.includes(id)===true;
-const preparing=s=>s.phase==='prepare'&&s.floor!==1;
+const preparing=s=>s.phase==='prepare'&&s.floor!==startFloorFor(s);
 export function normalizeExtensions(s){if(s.extensions&&s.extensions.serviceRevision===undefined&&Array.isArray(s.extensions.unlocked)){s.extensions.cardRerolls=s.extensions.unlocked.includes('chest')?1:0;s.extensions.augmentRerolls=s.extensions.unlocked.includes('augment')?1:0;if(s.extensions.unlocked.includes('potion'))s.potionStock=(s.potionStock||0)+1;s.extensions.serviceRevision=1;}}
 const data=s=>{normalizeExtensions(s);return s.extensions??={unlocked:[],uses:{},serviceRevision:1,cardRerolls:0,augmentRerolls:0};};
 export const rerollCount=(s,id)=>s.extensions?.[id==='chest'?'cardRerolls':'augmentRerolls']??(extensionOwned(s,id)?1:0);
