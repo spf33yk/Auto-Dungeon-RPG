@@ -86,7 +86,20 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
  const startWill=message=>{
   if(!willAdvance){
    willAdvance=willPage.querySelector('#will-advance');
-   willAdvance.addEventListener('click',advanceWill);
+   let pointer=null;
+   const trackDrag=e=>{
+    if(pointer?.id===e.pointerId&&Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>7)pointer.dragged=true;
+   };
+   willAdvance.addEventListener('pointerdown',e=>{
+    if(e.isPrimary&&e.button===0)pointer={id:e.pointerId,x:e.clientX,y:e.clientY,dragged:false};
+   });
+   willAdvance.addEventListener('pointermove',trackDrag);
+   willAdvance.addEventListener('pointerup',trackDrag);
+   willAdvance.addEventListener('pointercancel',e=>{if(pointer?.id===e.pointerId)pointer.dragged=true;});
+   willAdvance.addEventListener('click',e=>{
+    if(e.detail!==0&&pointer?.dragged)return;
+    advanceWill();
+   });
   }
   willSubtitle??=willPage.querySelector('#will-subtitle');
   willCaret??=willPage.querySelector('.will-caret');
