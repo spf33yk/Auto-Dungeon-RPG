@@ -34,7 +34,6 @@ import {awakeningLines} from './awakening.js';
 import{cardByKey,cardCodexRows}from'./card-catalog.js';
 import{chestPresentation,drawLegendaryChestEffect}from'./chest-view.js';
 import {enemyFrame,enemyVisualSize,drawBossSprite,drawEnemySprite,drawEnemyLabel,layoutEnemyLabels} from './enemy-view.js';
-import {skinById,nextPreparationSkin} from './preparation-skins.js';
 import {CharacterAnimation,loadCharacterSheet,drawCharacter,characterFrame,characterPresentation,characterAttackDuration} from './character-animation.js';
 import {loadWallTilesets,wallDrawBox} from './wall-tileset.js';
 import {entranceWallFrames} from './entrance-view.js';
@@ -59,8 +58,6 @@ const launchParams=new URLSearchParams(location.search);
 const verificationMode=launchParams.get('verify')==='1';if(verificationMode)document.querySelectorAll('video,audio').forEach(el=>{el.muted=true;});
 const $=id=>document.getElementById(id), key='abyss-normal-v2';
 let uiStorage;try{uiStorage=localStorage;}catch{}let uiSettings=readUiSettings(uiStorage);document.documentElement.dataset.minimapSize=uiSettings.minimap;$('minimap-size').value=uiSettings.minimap;$('skip-opening').checked=uiSettings.skipOpening;
-function applyPreparationSkin(){const skin=skinById(uiSettings.preparationSkin);document.documentElement.dataset.preparationSkin=skin.id;for(const [key,value]of Object.entries(skin))if(['accent','edge','panel','text'].includes(key))document.documentElement.style.setProperty('--prep-theme-'+key,value);$('preparation-skin').textContent='スキン：'+skin.name;$('preparation-skin').title='次のスキン：'+nextPreparationSkin(skin.id).name;}
-applyPreparationSkin();$('preparation-skin').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,preparationSkin:nextPreparationSkin(uiSettings.preparationSkin).id});applyPreparationSkin();};
 const bgm=new SceneMusic($('scene-bgm'),$('scene-bgm').dataset);
 let titleTransitionPreview=false;
 let endingPreview=false,endingPlayback=null,subtitlePreviewKind='first-end',musicAudition=null;

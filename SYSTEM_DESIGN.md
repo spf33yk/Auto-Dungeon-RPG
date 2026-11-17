@@ -21,7 +21,7 @@
 | 画面統括 | app.js、index.html、style.css、screens.css | 入力・フェイズ表示・ダイアログ停止・描画・保存 |
 | 指示UI | card-editor.js、editor-scroll.js | ドラッグ／タップ・行ゴースト・再描画前後の位置保持 |
 | 準備予測 | exploration-forecast.js、forecast-view.js | 複製状態の非同期試行、比較表と指示行の診断 |
-| 表示・設定 | display-mode.js、ui-settings.js、preparation-skins.js、screen-tutorial.js | 16:9拡縮・全画面要求・端末設定・スキン・案内 |
+| 表示・設定 | display-mode.js、ui-settings.js、screen-tutorial.js | 16:9拡縮・全画面要求・端末設定・古金共通テーマ・案内 |
 | 視界・地図 | map-view.js、map-discovery.js、scene-lighting.js、scene-depth.js | 追従カメラ・入室式地図・明暗・足元ソート |
 | 素材描画 | skill-effects.js、character-animation.js、terrain-view.js、wall-tileset.js、entrance-view.js、prop-view.js、readable-props.js、enemy-view.js | 形式検証・セル切出し・統合壁・小物・敵HP表示 |
 | 演出 | awakening.js、normal-ending.js、subtitle-player.js、opening.js、thought-view.js、story-text.js、damage-view.js、log-visibility.js、field-messages.js | 回想・終了・文字送り・タイトル版・思考・ダメージ・5秒ログ |
@@ -46,7 +46,7 @@ tickはexploreかつaugmentOffer・cardOfferなしでのみ実行。turnは旅�
 
 旧鍵・廃止カード・常時スキルは互換移行で処理し、新規取得とは分ける。data.jsの旧rewardDefinitions・chestRewards、orders.jsの旧形式、非公開の旧図鑑経路が残っていても、現在の画面で利用する新規カード箱・4図鑑とは区別する。
 
-ゲーム保存とui-settings.jsの端末設定を分離。設定はミニマップ・映像スキップ・準備スキン・BGM・効果音・画面揺れ・明るさ・オプションの高コントラスト・画面別案内閲覧フラグ。optionsContrastが未定義ならOFF。手動保存とタイトルに戻る際の保存は既存saveを共用し、保存形式はv16。案内やスクロールのためゲーム保存版を上げない。視覚時計、ドラッグ・選択、スクロール、ダメージ演出は一時状態。
+ゲーム保存とui-settings.jsの端末設定を分離。設定はミニマップ・映像スキップ・BGM・効果音・画面揺れ・明るさ・オプションの高コントラスト・画面別案内閲覧フラグ。optionsContrastが未定義ならOFF。手動保存とタイトルに戻る際の保存は既存saveを共用し、保存形式はv16。案内やスクロールのためゲーム保存版を上げない。視覚時計、ドラッグ・選択、スクロール、ダメージ演出は一時状態。
 
 ## 4. 乱数・地形・到達性
 
