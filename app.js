@@ -66,11 +66,10 @@ let titleTransitionPreview=false;
 let endingPreview=false,endingPlayback=null,subtitlePreviewKind='first-end',musicAudition=null;
 function syncSceneMusic(){bgm.configure({enabled:!verificationMode&&!titleTransitionPreview&&uiSettings.bgmEnabled,volume:uiSettings.bgmVolume,hidden:document.hidden});bgm.select(musicAudition||(endingPreview?(subtitlePreviewKind.endsWith('intro')?'opening':'ending'):musicScene(state,{title:showingTitle,teaser:Boolean(pendingJourney),houseEntered:Boolean(state.gimmick?.triggered)&&!fieldMessages.waiting}))); }
 function paintMusicOptions(){$('bgm-toggle').textContent='BGM：'+(uiSettings.bgmEnabled?'ON':'OFF');$('bgm-toggle').setAttribute('aria-pressed',String(uiSettings.bgmEnabled));$('bgm-volume').value=uiSettings.bgmVolume;$('bgm-volume-value').textContent=uiSettings.bgmVolume+'%';}
-function paintCameraSettings(){$('camera-x').value=uiSettings.cameraX;$('camera-y').value=uiSettings.cameraY;}
+function paintCameraSettings(){$('camera-zoom').value=uiSettings.cameraZoom;}
  paintCameraSettings();
- for(const axis of ['x','y'])$('camera-'+axis).onchange=e=>{
-  const key=axis==='x'?'cameraX':'cameraY';
-  uiSettings=saveUiSettings(uiStorage,{...uiSettings,[key]:Number(e.target.value)});
+ $('camera-zoom').onchange=e=>{
+  uiSettings=saveUiSettings(uiStorage,{...uiSettings,cameraZoom:Number(e.target.value)});
   paintCameraSettings();draw();
  };
  function paintBrightness(){$('screen-brightness').value=uiSettings.brightness-50;$('screen-brightness-value').textContent=(uiSettings.brightness-50)+'%'+(uiSettings.brightness===100?'（標準）':'');}paintBrightness();$('screen-brightness').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,brightness:Number($('screen-brightness').value)+50});paintBrightness();draw();};
@@ -230,7 +229,7 @@ function draw(){
  const appearance={position:state.player,radius:radius(state),size:CELL,smooth:true};
  const sightState=renderSightState(state,position),visible=(x,y)=>canSee(sightState,x,y);
  const moving=motion&&(motion.from.x!==state.player.x||motion.from.y!==state.player.y),hop=moving?Math.sin(progress*Math.PI)*CELL/12:0;
- const camera=cameraFor(position,cameraSight(state),map.width,map.height,{x:uiSettings.cameraX,y:uiSettings.cameraY});ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);const shake=combatShake(combat,{enabled:uiSettings.screenShake,reducedMotion:reducedMotion.matches,size:CELL});ctx.translate(shake.x,shake.y);
+ const camera=cameraFor(position,cameraSight(state),map.width,map.height,uiSettings.cameraZoom);ctx.save();ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.left,-camera.top);const shake=combatShake(combat,{enabled:uiSettings.screenShake,reducedMotion:reducedMotion.matches,size:CELL});ctx.translate(shake.x,shake.y);
  const graves=new Set((state.obstacles||[]).map(o=>o.x+','+o.y)),surface=state.grid.map((r,y)=>r.map((v,x)=>(v||graves.has(x+','+y))?1:0)),queue=[];
  if(entranceGrid!==state.grid){entranceGrid=state.grid;entranceFrames=entranceWallFrames(surface);}
  for(let y=0;y<state.grid.length;y++)for(let x=0;x<state.grid[y].length;x++){
@@ -554,7 +553,10 @@ codexNavigation.addEventListener('click',event=>{
 function showCodex(kind){selectCodex(kind);openDialog('codex-dialog');}
 const getRef=r=>r.startsWith('i')?Number(r.slice(1)):r;
 document.addEventListener('contextmenu',e=>e.preventDefault());
-document.addEventListener('dragstart',e=>e.preventDefault());
+document.addEventListener('dragstart',e=>e.preventDefault(),{capture:true});
+document.addEventListener('selectstart',e=>{
+ if(!e.target.closest('input,textarea,[contenteditable]:not([contenteditable="false"])'))e.preventDefault();
+},{capture:true});
 $('tab-content').onclick=e=>{if(tab==='extensions')return;if(e.target.closest('[data-drag-source],[data-inline-condition]')&&handleOrderClick(e,$('tab-content')))return;const b=e.target.closest('button');if(!b||b.disabled)return;if(b.hasAttribute('data-best-equipment')){equipBest(state);render();return;}if(b.dataset.category){const type=b.dataset.category;if(type==='gear')gearSlot=b.dataset.value;}else if(b.dataset.sort){gearSorts[gearSlot]=b.dataset.value;}else if(handleOrderClick(e,$('tab-content')))return;else if(b.dataset.upgrade){if(upgrade(state,b.dataset.upgrade))tone(550);}else if(b.dataset.action){const ref=getRef(b.dataset.ref);switch(b.dataset.action){case'equip':equip(state,ref);break;case'discard':discard(state,ref);break;}}render();};
 $('live-orders').onclick=e=>handleOrderClick(e,$('live-orders'));
 $('live-orders').onchange=e=>{if(tab!=='extensions')handleOrderChange(e);};;
@@ -665,7 +667,7 @@ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement
 const optionsDialog=$('options-dialog');
 const optionTabs=[...optionsDialog.querySelectorAll('[role="tab"]')];
 const optionResetKeys={
- 'settings-display':['brightness','cameraX','cameraY','minimap','screenShake','optionsContrast','skipOpening'],
+ 'settings-display':['brightness','cameraZoom','minimap','screenShake','optionsContrast','skipOpening'],
  'settings-audio':['bgmEnabled','bgmVolume','soundEnabled','soundVolume']
 };
 let activeOptionTab=0,confirmedOptionAction;
