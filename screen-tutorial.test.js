@@ -4,7 +4,7 @@ import {readUiSettings,saveUiSettings} from './ui-settings.js';
 import {captureEditorScroll,restoreEditorScroll} from './editor-scroll.js';
 import {isTutorialJourney,screenTutorials,tutorialKey,tutorialSteps} from './screen-tutorial.js';
 test('normal ending completion suppresses the augment and floor tutorials on later journeys',()=>{
- for(const [phase,floor] of [['explore',1],['prepare',2],['prepare',3],['prepare',4],['prepare',5]]){
+ for(const [phase,floor] of [['explore',6],['prepare',7],['prepare',8],['prepare',9],['prepare',10]]){
   const state={phase,floor,profile:{normalClears:0}};
   assert.equal(isTutorialJourney(state),true);
   assert.ok(tutorialKey(state));

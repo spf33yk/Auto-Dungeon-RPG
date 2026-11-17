@@ -162,7 +162,7 @@ let state,tab='orders',speed=1,paused=false,last=0,sound=uiSettings.soundEnabled
 
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 try{const data=JSON.parse(localStorage.getItem(key));state=normalizeSave(data);if(state){hasSave=true;paused=state.phase==='explore';if(data.version!==state.version){try{const backup=key+'-v'+data.version+'-before-ui';if(!localStorage.getItem(backup))localStorage.setItem(backup,JSON.stringify(data));}catch{}}}}catch{}
-const newGame=(seed,profile)=>createJourney(seed,profile,{shortJourney:true});
+const newGame=(seed,profile)=>createJourney(seed,profile);
 state ||= newGame();
 function save(){try{localStorage.setItem(key,JSON.stringify(state,(name,value)=>['damageEvents','actorSkillEvent'].includes(name)?undefined:value));hasSave=true;$('save-status').textContent='端末に保存済み';return true;}catch{$('save-status').textContent='保存できません（空き容量・設定）';return false;}}
 const fieldSounds=Object.fromEntries(Object.entries({
@@ -352,7 +352,7 @@ function renderAugmentOwnedSkills(){
 }
 function renderAugments(){
  const offer=state.augmentOffer,dialog=$('augment-dialog');
- if(!showingTitle&&offer?.source==='start'&&state.shortJourney&&state.profile.normalClears===1&&!state.secondJourneyNoticeSeen){
+ if(!showingTitle&&offer?.source==='start'&&state.profile.normalClears===1&&!state.secondJourneyNoticeSeen){
   const notice=$('second-journey-notice');
   if(!notice.open)notice.showModal();
   return;
@@ -636,7 +636,7 @@ $('primary').onclick=()=>{if(state.phase==='explore')return;if(state.phase==='aw
  return;
  }else if(state.phase==='cleared'){ascend(state);motion=null;}else reset();render();if(state.phase==='explore')tryMobileDisplay();};
 const askAbandon=()=>{if(['prepare','explore'].includes(state.phase))openDialog('abandon-dialog');};$('abandon-run').onclick=askAbandon;$('explore-abandon').onclick=askAbandon;
-$('confirm-abandon').onclick=()=>{const next=abandonRun(state,{shortJourney:true});if(!next)return;$('abandon-dialog').close();reset(next);};
+$('confirm-abandon').onclick=()=>{const next=abandonRun(state);if(!next)return;$('abandon-dialog').close();reset(next);};
 document.addEventListener('keydown',event=>{
  if(event.code!=='Space'||event.defaultPrevented||event.isComposing||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
  if(state.phase!=='explore'||showingTitle||pendingJourney||endingPreview||tutorialKind||fieldMessages.active||document.querySelector('dialog[open]'))return;

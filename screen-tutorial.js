@@ -9,4 +9,4 @@ case'prepare:3':return [step('「装備/ステータス」を押してくださ�
 case'prepare:4':return [step('カードリストの「条件」を押してください。','#tab-content [data-palette-tab="condition"]'),step('「指定ターン経過」を選んでください。','#tab-content [data-drag-source="palette|condition|turns"]'),step('「指定ターン経過」を光る「＋条件」へ置いてください。','#tab-content .insert-condition.valid-drop',{complete:s=>s.orders.some(r=>r.conditions?.some(c=>c.id==='turns'))}),step('カードリストの「スキル」を押してください。','#tab-content [data-palette-tab="skill"]'),step('「応急手当」を選んでください。','#tab-content [data-drag-source="palette|skill|first-aid"]'),step('「応急手当」をターン条件と同じ行の実行カードの位置へ置いてください。','#tab-content [data-drop-slot]',{complete:s=>s.orders.some(r=>r.effect?.id==='first-aid'&&r.conditions?.some(c=>c.id==='turns'))}),step('同テーマのスキルを有効な行に配置すると、所持オーグメントが強化されます。1・3・6種類で星が増えます。'),step('番号や土台をドラッグすると行を入れ替えられます。折りたたんだ行は全体を掴めます。')];
 case'prepare:5':return [step('装備/ステータスの右の「拡張機能」を押してください。','[data-order-expansions]'),step('左から項目を選ぶと、右に効果と費用が出ます。上の記憶の欠片の所持数も確認しましょう。')];
 default:return [];}}
-export const screenTutorials={prepare:tutorialSteps({phase:'prepare',floor:2})};
+export const screenTutorials={prepare:tutorialSteps({phase:'prepare',floor:7})};

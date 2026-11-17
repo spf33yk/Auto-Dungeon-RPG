@@ -28,7 +28,7 @@ test('collection rules approach and open ordinary chests without keys',()=>{
 });
 
 test('ground gear is acquired and registered, herbs heal and fragments are common pickups',()=>{
- const s=arena();s.stairs={...s.player};for(const item of [{type:'gear',gear:{baseId:'weapon-2',plus:1,identified:true,cursed:false}},{type:'herb'},{type:'fragment'},{type:'reward',rewardId:'mend'}]){s.phase='explore';s.hp=10;s.items=[{...s.player,...item}];const shards=s.shards;tick(s);if(item.type==='herb')assert.equal(s.hp,20);if(item.type==='fragment')assert.equal(s.shards,shards+3+8);}
+ const s=arena();s.stairs={...s.player};for(const item of [{type:'gear',gear:{baseId:'weapon-2',plus:1,identified:true,cursed:false}},{type:'herb'},{type:'fragment'},{type:'reward',rewardId:'mend'}]){s.phase='explore';s.hp=10;s.items=[{...s.player,...item}];const shards=s.shards;tick(s);if(item.type==='herb')assert.equal(s.hp,20);if(item.type==='fragment')assert.equal(s.shards,shards+3+10);}
  assert.ok(s.profile.equipment.includes('weapon-2'));assert.ok(s.abilities.includes('mend'));assert.ok(s.profile.skills.includes('mend'));
 });
 
@@ -41,7 +41,7 @@ test('special orders must be obtained and configured in an available slot',()=>{
 });
 
 test('warp is once per floor, preserves saved usage, and resets on the next floor',()=>{
- const s=arena(42);grantReward(s,'warp');s.orders=[makeOrder('warp')];s.hp=10;foe(s,{hp:999});const before={...s.player};tick(s);assert.equal(s.warped,true);assert.notDeepEqual(s.player,before);assert.ok(s.grid[s.player.y][s.player.x]);assert.ok(!s.enemies.some(e=>e.x===s.player.x&&e.y===s.player.y));assert.equal(normalizeSave(s).warped,true);s.floor=2;makeFloor(s);assert.equal(s.warped,false);
+ const s=arena(42);grantReward(s,'warp');s.orders=[makeOrder('warp')];s.hp=10;foe(s,{hp:999});const before={...s.player};tick(s);assert.equal(s.warped,true);assert.notDeepEqual(s.player,before);assert.ok(s.grid[s.player.y][s.player.x]);assert.ok(!s.enemies.some(e=>e.x===s.player.x&&e.y===s.player.y));assert.equal(normalizeSave(s).warped,true);s.floor=7;makeFloor(s);assert.equal(s.warped,false);
 });
 
 test('unavoidable traps still trigger despite avoidance',()=>{

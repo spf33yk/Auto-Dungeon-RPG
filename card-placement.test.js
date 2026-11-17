@@ -5,7 +5,7 @@ import {newGame as baseNewGame,createCardRule,validCardRule,normalizeSave} from 
 import {placeCard,moveCardRow,canPlaceCard,removePlacedCard} from './card-placement.js';
 import {targetCards,conditionCards,actionCards,skillCards} from './card-orders.js';
 const newGame=(...args)=>withCardInventory(baseNewGame(...args));
-const prep=()=>{const s=newGame(31);s.phase='prepare';s.floor=2;s.orders=[createCardRule('self',[{id:'hp-below',value:45}],'action','stairs'),createCardRule('self',[{id:'visible'}],'action','chests')];return s;};
+const prep=()=>{const s=newGame(31);s.phase='prepare';s.floor=7;s.orders=[createCardRule('self',[{id:'hp-below',value:45}],'action','stairs'),createCardRule('self',[{id:'visible'}],'action','chests')];return s;};
 const palette=(type,id)=>({origin:'palette',type,id}),slot=(row,slot,index)=>({origin:'slot',row,slot,index}),dest=(row,slot,index)=>({row,slot,index});
 test('insertion seams add and move conditions without replacing adjacent cards',()=>{
  const s=prep();s.levels.cardSlots=2;

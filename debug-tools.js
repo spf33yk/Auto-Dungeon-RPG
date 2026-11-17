@@ -25,7 +25,7 @@ export function debugJourney(current,basement,second=false){
  profile.normalClears=second?1:0;
  profile.carryCards??=[...current.ownedCards];
  profile.trueEnding=false;
- const state=newGame(current.seed,profile,{shortJourney:true});
+ const state=newGame(current.seed,profile);
  if(basement!==25){
   if(!debugJump(state,LAST_FLOOR+1-basement))return null;
   state.augmentStarted=true;

@@ -86,8 +86,8 @@ test('first ending carries the actual card inventory into the next journey',asyn
  const second=newGame(44,first.profile,{shortJourney:true});
  assert.ok(second.ownedCards.includes('skill:warp'));
  assert.ok(second.unlockedOrders.includes('warp')||second.abilities.includes('warp'));
- assert.equal(second.extensions,undefined);
- assert.equal(second.levels.cardSlots,0);
+ assert.deepEqual(second.extensions.unlocked,['condition-or']);
+ assert.equal(second.levels.cardSlots,1);
  assert.deepEqual(second.augments,[]);
 });
 
@@ -99,7 +99,7 @@ test('B25 route preserves legacy saves and exposes debug boss techniques',async(
  const first=newGame(1,undefined,{shortJourney:true});
  const legacy=newGame(1);
  assert.equal(startFloorFor(first),6);
- assert.equal(startFloorFor(normalizeSave(legacy)),1);
+ assert.equal(startFloorFor(normalizeSave(legacy)),6);
  assert.equal(zoneFor(first).id,'crypt');
  assert.ok(normalizeSave(first).items.some(i=>i.type==='letter'));
  assert.equal(tutorialKey({...first,phase:'explore'}),'explore:1');
@@ -118,5 +118,37 @@ test('B25 route preserves legacy saves and exposes debug boss techniques',async(
   assert.ok(s.damageEvents.some(event=>event.skillId===boss.id));
   const loaded=normalizeSave(s);
   assert.equal(loaded.enemies.find(e=>e.boss).bossSkillUsed,true);
+ }
+});
+
+test('first-clear instruction growth is fixed across later losses and endings',async()=>{
+ const {newGame,ascend,LAST_FLOOR,normalizeSave}=await import('./engine.js');
+ const {grantCard}=await import('./card-inventory.js');
+ const first=newGame(43);first.levels.commandSlots=5;first.levels.cardSlots=2;
+ first.extensions={unlocked:['condition-or'],uses:{},serviceRevision:1,cardRerolls:0,augmentRerolls:0};
+ first.floor=LAST_FLOOR;first.phase='cleared';ascend(first);
+ const saved=structuredClone(first.profile.carryInstructions);
+ const second=newGame(44,first.profile);
+ assert.equal(second.levels.commandSlots,5);assert.equal(second.levels.cardSlots,2);
+ assert.deepEqual(second.extensions.unlocked,['condition-or']);
+ grantCard(second,'action:wait');second.levels.commandSlots=8;second.phase='cleared';second.floor=LAST_FLOOR;
+ ascend(second);assert.deepEqual(second.profile.carryInstructions,saved);
+ const third=newGame(45,second.profile);assert.equal(third.levels.commandSlots,5);
+ assert.equal(third.ownedCards.includes('action:wait'),first.ownedCards.includes('action:wait'));
+ const corrupt=structuredClone(first);corrupt.profile.carryInstructions.cardSlots=999;
+ assert.equal(normalizeSave(corrupt),null);
+});
+
+test('legacy 30-floor saves migrate to B25 without dropping inventory or growth',async()=>{
+ const {newGame,normalizeSave,createGear}=await import('./engine.js');
+ for(const floor of [1,5,6,12,21]){
+  const legacy=newGame(81);delete legacy.shortJourney;legacy.floor=floor;
+  legacy.inventory.push(createGear('weapon-3'));legacy.levels.commandSlots=2;legacy.shards=91;
+  const before=JSON.stringify(legacy),loaded=normalizeSave(legacy);
+  assert.ok(loaded);assert.equal(loaded.floor,Math.max(6,floor));assert.equal(loaded.shortJourney,true);
+  assert.deepEqual(loaded.inventory,legacy.inventory);assert.equal(loaded.shards,91);
+  assert.equal(loaded.levels.commandSlots,2);assert.deepEqual(loaded.ownedCards,legacy.ownedCards);
+  if(floor>=6)assert.deepEqual(loaded.grid,legacy.grid);
+  assert.equal(JSON.stringify(legacy),before);assert.deepEqual(normalizeSave(loaded),loaded);
  }
 });

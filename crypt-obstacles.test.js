@@ -5,7 +5,7 @@ import {autoMapModel} from './map-view.js';
 
 test('crypt tombstones stay deterministic, reachable and clear of every reserved object',()=>{
  let count=0;const variants=new Set();
- for(let seed=1;seed<=80;seed++)for(let floor=1;floor<=5;floor++){
+ for(let seed=1;seed<=80;seed++)for(let floor=6;floor<=10;floor++){
   const s=newGame(seed);s.floor=floor;makeFloor(s);const before=JSON.stringify(s.obstacles);makeFloor(s);assert.equal(JSON.stringify(s.obstacles),before);
   assert.ok(s.obstacles.length>0&&s.obstacles.length<=6);count+=s.obstacles.length;
   const occupied=new Set([s.player,s.stairs,...s.items,...s.enemies,...s.traps].map(p=>p.x+','+p.y));
@@ -19,7 +19,7 @@ test('crypt tombstones stay deterministic, reachable and clear of every reserved
 test('other zones and boss arenas reset tombstones; old saves keep their current grid',()=>{
  const s=newGame(42);assert.ok(s.obstacles.length);const old=structuredClone(s);delete old.obstacles;const grid=JSON.stringify(old.grid),loaded=normalizeSave(old);
  assert.ok(loaded);assert.deepEqual(loaded.obstacles,[]);assert.equal(JSON.stringify(loaded.grid),grid);assert.equal(old.obstacles,undefined);
- for(const floor of [6,11,16,21,26]){s.floor=floor;makeFloor(s);assert.deepEqual(s.obstacles,[]);}
+ for(const floor of [11,16,21,26]){s.floor=floor;makeFloor(s);assert.deepEqual(s.obstacles,[]);}
  const current=newGame(9);assert.deepEqual(normalizeSave(current).obstacles,current.obstacles);
  for(const corrupt of [[{x:current.player.x,y:current.player.y,type:'tombstone',variant:0}],null,[{x:-1,y:2,type:'tombstone',variant:0}]]){const bad=structuredClone(current);bad.obstacles=corrupt;assert.equal(normalizeSave(bad),null);}
 });

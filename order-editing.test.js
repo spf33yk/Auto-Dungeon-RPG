@@ -16,7 +16,7 @@ test('every instruction mutation is rejected outside preparation without changin
 });
 
 test('preparation still supports adding, reordering, changing thresholds and removing orders',()=>{
- const s=newGame(7);s.floor=2;s.phase='prepare';s.levels.commandSlots=2;
+ const s=newGame(7);s.floor=7;s.phase='prepare';s.levels.commandSlots=2;
  assert.equal(addOrder(s,'retreat-low'),true);
  assert.equal(editOrder(s,1,50),true);
  assert.equal(editOrder(s,1,'up'),true);

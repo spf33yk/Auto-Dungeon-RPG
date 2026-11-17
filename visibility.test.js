@@ -20,7 +20,7 @@ test('walls and closed diagonal corners still occlude square vision',()=>{
 });
 test('fog, memory purchases and loaded discovery use the same square',()=>{
  const s=room();s.gimmick={id:'fog'};assert.equal(radius(s),2);assert.equal(canSee(s,17,13),true);assert.equal(canSee(s,18,13),false);
- s.gimmick={id:'none'};s.floor=2;s.phase='prepare';s.shards=100;
+ s.gimmick={id:'none'};s.floor=7;s.phase='prepare';s.shards=100;
  assert.equal(upgrade(s,'scout'),true);assert.equal(s.shards,90);assert.equal(s.seen[15][19],true);assert.equal(s.seen[16][19],false);
  assert.equal(skills.find(k=>k.id==='scout').costStep,8);
  s.levels.scout=0;s.seen=s.grid.map(r=>r.map(()=>false));s.seen[0][0]=true;
