@@ -957,3 +957,5 @@ input,textarea,[contenteditable]:not([contenteditable="false"]){user-select:text
 .forecast-pages{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px}
 .forecast-rows article{padding:5px 8px}
 .forecast-rows p{margin:3px 0}
+
+#field-event-dialog[data-kind=boss-turn] #field-event-text{white-space:pre-line;font-size:clamp(12px,2.3dvh,19px);line-height:1.25}

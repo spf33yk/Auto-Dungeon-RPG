@@ -345,11 +345,22 @@ function renderAugmentOwnedSkills(){
  }).join('');
 }
 function renderAugments(){
- const offer=state.augmentOffer,dialog=$('augment-dialog');$('augment-reroll').hidden=false;$('augment-reroll').disabled=!offer||rerollCount(state,'augment')<1;$('augment-reroll').textContent='リロール（残り '+rerollCount(state,'augment')+'回）';$('augment-tutorial').hidden=!offer||!isTutorialJourney(state)||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){renderAugmentOwnedSkills();$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
+ const offer=state.augmentOffer,dialog=$('augment-dialog');
+ if(!showingTitle&&offer?.source==='start'&&state.shortJourney&&state.profile.normalClears===1&&!state.secondJourneyNoticeSeen){
+  const notice=$('second-journey-notice');
+  if(!notice.open)notice.showModal();
+  return;
+ }$('augment-reroll').hidden=false;$('augment-reroll').disabled=!offer||rerollCount(state,'augment')<1;$('augment-reroll').textContent='リロール（残り '+rerollCount(state,'augment')+'回）';$('augment-tutorial').hidden=!offer||!isTutorialJourney(state)||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){renderAugmentOwnedSkills();$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
  if(state.phase==='prepare'){const hint=nextStageHint({...state,floor:state.floor-1});$('prep-hint').textContent=hint.title.replace('次は','')+' · '+hint.text;}
 }
 $('debug-augment').innerHTML=augments.map(a=>'<option value="'+a.id+'">'+a.rarity+' · '+a.theme+' · '+a.name+'</option>').join('');
-$('augment-dialog').addEventListener('cancel',e=>e.preventDefault());
+$('second-journey-notice').addEventListener('cancel',e=>e.preventDefault());
+ $('second-journey-notice-next').onclick=()=>{
+  state.secondJourneyNoticeSeen=true;
+  $('second-journey-notice').close();
+  render();
+ };
+ $('augment-dialog').addEventListener('cancel',e=>e.preventDefault());
 $('augment-reroll').onclick=()=>{if(rerollAugment(state)){$('augment-dialog').close();pendingAugment=null;render();}};
 let pendingAugment=null;
 $('augment-choices').onclick=e=>{const b=e.target.closest('[data-augment]');if(!b||!state.augmentOffer?.choices.includes(b.dataset.augment))return;pendingAugment=b.dataset.augment;$('augment-confirm-name').textContent=augmentById[pendingAugment].name;$('augment-confirm-dialog').showModal();};
@@ -610,7 +621,7 @@ $('return-title').onclick=()=>confirmOption('タイトルへ戻りますか？',
  if(!save()){ $('settings-help').textContent=$('save-status').textContent;return; }
  paused=true;dialogWasPaused=true;showingTitle=true;motion=null;$('options-dialog').close();render();
 });
-$('primary').onclick=()=>{if(state.phase==='explore')return;if(state.phase==='awakening'){if(!memoryReveal){memoryReveal={player:new SubtitlePlayer(awakeningLines(state.profile.normalClears,state.shortJourney===true)),last:performance.now()};$('awakening-text').textContent='';$('awakening-caret').hidden=true;render();}return;}if(state.phase==='prepare'){
+$('primary').onclick=()=>{if(state.phase==='explore')return;if(state.phase==='awakening'){if(!memoryReveal){memoryReveal={player:new SubtitlePlayer(awakeningLines(state.profile.normalClears)),last:performance.now()};$('awakening-text').textContent='';$('awakening-caret').hidden=true;render();}return;}if(state.phase==='prepare'){
  const start=()=>{if(state.phase!=='prepare')return;beginExploration(state);paused=false;last=performance.now();tone();render();tryMobileDisplay();};
  const current=forecastKey===forecastSignature(state,forecastSamples)?forecastCache:null;
  if(current&&(forecastAtRisk(current.clearRate)||forecastAtRisk(current.remainingHp))){

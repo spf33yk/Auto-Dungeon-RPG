@@ -56,7 +56,11 @@ test('boss defeats trigger the correct story beat on both journeys', () => {
       const text = bossMemory(floor, normalClears);
       assert.equal(state.augmentOffer?.source, floor === 30 ? undefined : 'boss:' + floor);
       assert.ok(state.memories.includes(text));
-      assert.deepEqual(collectFieldMessages(before, state)[0], {kind: normalClears ? 'memory' : 'story', text});
+      const messages=collectFieldMessages(before,state);
+      assert.equal(messages[0].kind,'boss-turn');
+      assert.match(messages[0].text,/骸　攻撃/);
+      assert.match(messages[1].text,/撃破された/);
+      assert.deepEqual(messages[2], {kind: normalClears ? 'memory' : 'story', text});
     }
   }
 });
@@ -107,7 +111,12 @@ test('B25 route preserves legacy saves and exposes debug boss techniques',async(
   const s=debugJourney(first,basement,true);
   const boss=s.enemies.find(e=>e.boss),skill=bossSkills[boss.id];
   assert.ok(nextStageHint({...s,floor:s.floor-1}).text.includes(skill.name));
+  const before=captureFieldMessages(s);
   tick(s);
+  const messages=collectFieldMessages(before,s);
+  assert.equal(messages[0].kind,'boss-turn');
+  assert.ok(messages[1].text.includes(skill.name));
+  assert.ok(!messages[0].text.includes(skill.name));
   assert.equal(boss.bossSkillUsed,true);
   assert.ok(s.damageEvents.some(event=>event.skillId===boss.id));
   const loaded=normalizeSave(s);
