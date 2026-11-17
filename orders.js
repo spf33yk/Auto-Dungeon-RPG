@@ -12,7 +12,7 @@ export const orderDefinitions=[
  {id:'chests-near',name:'近くの宝箱だけ回収',detail:'指定距離内の通常宝箱へ向かう。',param:'range',value:6,min:1,max:20,step:1,unit:'マス以内'},
  {id:'heal-critical',name:'瀕死時に回復ポーションへ向かう',detail:'指定HP以下で、発見済みの回復ポーションへ向かう。',param:'hp',value:35,min:10,max:90,step:5,unit:'%以下'},
  {id:'heal-wounded',name:'負傷したら回復ポーションへ向かう',detail:'回復ポーションで回復を早めに使うHP基準を指定する。',param:'hp',value:70,min:10,max:95,step:5,unit:'%以下'},
- {id:'letter',name:'遺書の宝箱を優先',detail:'開封条件を満たす遺書の宝箱へ向かう。',},
+ {id:'letter',name:'古びた遺書の宝箱を優先',detail:'開封条件を満たす古びた遺書の宝箱へ向かう。',},
  {id:'frontier',name:'視界の先を優先して調べる',detail:'未発見の地形に接する既知かつ未踏の床へ進む。'},
  {id:'explore-near',name:'近くの未踏床を調べる',detail:'指定距離内の、まだ踏んでいない床へ。',param:'range',value:6,min:1,max:20,step:1,unit:'マス以内'},
  {id:'explore-all',name:'すべての床を探索',detail:'未踏の床がある間は探索を続ける。',},

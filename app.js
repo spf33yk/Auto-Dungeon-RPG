@@ -96,10 +96,10 @@ function renderNormalEnding(){
  reading.classList.toggle('is-visible',willScene&&(player.index>=4||done));
  if(willScene)reading.loading='eager';
  $('ending-text').textContent=player.text;$('ending-caret').hidden=!player.full||done;$('ending-subtitle').hidden=done;$('ending-result').hidden=!done;$('ending-skip').hidden=done;$('ending-advance').hidden=done;$('ending-hint').hidden=done;$('ending-hint').textContent='';
- $('ending-heading').textContent=intro?'字幕の確認':ending==='will'?'残された遺書':'届かなかった声';
+ $('ending-heading').textContent=intro?'字幕の確認':ending==='will'?'残された古びた遺書':'届かなかった声';
  $('ending-label').textContent=endingPreview?'PREVIEW':ending==='will'?'TRUE END':'NORMAL END';
  $('ending-next').textContent=endingPreview?'確認を終える':ending==='will'?'タイトルへ':'次の旅へ';
- $('ending-result-note').textContent=endingPreview?'プレビュー：達成記録・現在の旅は変更しません。':ending==='will'?'遺書は、息子の手に渡った。':ending==='first'?WILL_UNLOCK_LINE:'次の旅では、B25の遺書を持って地上へ。';
+ $('ending-result-note').textContent=endingPreview?'プレビュー：達成記録・現在の旅は変更しません。':ending==='will'?'古びた遺書は、息子の手に渡った。':ending==='first'?WILL_UNLOCK_LINE:'次の旅では、B25の古びた遺書を持って地上へ。';
 }
 $('ending-advance').onclick=()=>{endingPlayback?.player.advance();renderNormalEnding();};
 $('ending-skip').onclick=()=>{endingPlayback?.player.finish();renderNormalEnding();};
@@ -109,6 +109,12 @@ $('debug-dialog').addEventListener('close',()=>{musicAudition=null;syncSceneMusi
 $('ending-options').onclick=()=>openOptions();
 $('bgm-toggle').onclick=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,bgmEnabled:!uiSettings.bgmEnabled});paintMusicOptions();syncSceneMusic();};
 $('bgm-volume').oninput=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,bgmVolume:Number($('bgm-volume').value)});paintMusicOptions();syncSceneMusic();};
+// Delegation also covers choices rendered after startup and keyboard activation.
+document.addEventListener('click',e=>{
+ const button=e.target.closest?.('button,[role="button"],summary');
+ if(!e.isTrusted||!button||button.matches(':disabled,[aria-disabled="true"],#sound,#rest-potion'))return;
+ tone(440);
+},{capture:true});
 const preparationBaseline=createPreparationBaseline();let forecastBefore=null,forecastBeforeSamples=null,forecastBeforeError=false;
 let forecastTicket=0,forecastKey='',forecastCache=null,forecastSamples=10,forecastPage=0,forecastContext='';
 function forecastDelta(result,index){const comparison=compareForecast(forecastBefore,result);return comparison?'<small class="forecast-delta '+(comparison[index].direction>0?'better':comparison[index].direction<0?'worse':'same')+'">準備開始時比 '+esc(comparison[index].text)+'</small>':'';}
@@ -500,7 +506,7 @@ function renderScreens(){
  const visited=state.visited.flat().filter(Boolean).length;
  const summary=`<dl class="stat-list"><div><dt>レベル / 経験値</dt><dd>Lv.${state.level} / ${state.level===MAX_LEVEL?'MAX':state.experience+' / '+experienceToNext(state.level)}</dd></div><div><dt>HP</dt><dd>${state.hp} / ${st.maxHp}</dd></div><div><dt>攻撃力 / 防御力</dt><dd>${displayAttack()} / ${displayDefense()}</dd></div><div><dt>記憶の欠片</dt><dd id="shards">${state.shards}個</dd></div><div><dt>武器</dt><dd>${esc(gearName(state.gear.weapon))}${state.gear.weapon.boundKnown?' · 呪い':''}</dd></div><div><dt>防具</dt><dd>${esc(gearName(state.gear.armor))}${state.gear.armor.boundKnown?' · 呪い':''}</dd></div><div><dt>指示枠</dt><dd>${activeOrderCount(state.orders)} / ${orderCapacity(state)}枠</dd></div><div><dt>1行のカード枠</dt><dd>${cardCapacity(state)}枚</dd></div><div><dt>視界範囲</dt><dd>半径${radius(state)}マス</dd></div><div><dt>再生の祈り</dt><dd>${state.abilities.includes('mend')?(state.mended?'使用済み':state.orders.some(o=>o.effect?.id==='mend')?'使用可能':'指示未設定'):'未習得'}</dd></div></dl>`;
 
- $('expedition-summary').innerHTML=summary+`<div class="current-action"><small>今の判断</small><p>${esc(prep?'出発の準備をしています':state.intent)}</p></div><dl class="stat-list"><div><dt>探索済みの床 / この階の撃破</dt><dd>${visited}マス / ${state.floorKills}体</dd></div><div><dt>所持品 / 遺書</dt><dd>${state.inventory.length}個 / ${state.letter?'入手済':'未入手'}</dd></div></dl><h3>習得した記憶</h3><p class="section-caption">${skills.filter(k=>state.levels[k.id]).map(k=>k.name+(k.max>1?' Lv.'+state.levels[k.id]:'')).join(' / ')||'未習得'}</p><h3>この旅で得たスキル・特殊指示</h3><p class="section-caption">${[...state.abilities,...state.unlockedOrders].map(id=>esc(rewardDefinitions.find(r=>r.id===id).name)).join(' / ')||'未取得'}<br>特殊指示は準備中に探索指示へ設定して使います。</p>`;
+ $('expedition-summary').innerHTML=summary+`<div class="current-action"><small>今の判断</small><p>${esc(prep?'出発の準備をしています':state.intent)}</p></div><dl class="stat-list"><div><dt>探索済みの床 / この階の撃破</dt><dd>${visited}マス / ${state.floorKills}体</dd></div><div><dt>所持品 / 古びた遺書</dt><dd>${state.inventory.length}個 / ${state.letter?'入手済':'未入手'}</dd></div></dl><h3>習得した記憶</h3><p class="section-caption">${skills.filter(k=>state.levels[k.id]).map(k=>k.name+(k.max>1?' Lv.'+state.levels[k.id]:'')).join(' / ')||'未習得'}</p><h3>この旅で得たスキル・特殊指示</h3><p class="section-caption">${[...state.abilities,...state.unlockedOrders].map(id=>esc(rewardDefinitions.find(r=>r.id===id).name)).join(' / ')||'未取得'}<br>特殊指示は準備中に探索指示へ設定して使います。</p>`;
  renderOrderEditor($('live-orders'));
  const inJourney=!showingTitle&&!awake;
  $('status-open').closest('.settings-row').hidden=!inJourney;
@@ -579,7 +585,7 @@ document.addEventListener('dragstart',e=>e.preventDefault(),{capture:true});
 document.addEventListener('selectstart',e=>{
  if(!e.target.closest('input,textarea,[contenteditable]:not([contenteditable="false"])'))e.preventDefault();
 },{capture:true});
-$('tab-content').onclick=e=>{if(tab==='extensions')return;if(e.target.closest('[data-drag-source],[data-inline-condition]')&&handleOrderClick(e,$('tab-content')))return;const b=e.target.closest('button');if(!b||b.disabled)return;if(b.hasAttribute('data-best-equipment')){equipBest(state);render();return;}if(b.dataset.category){const type=b.dataset.category;if(type==='gear')gearSlot=b.dataset.value;}else if(b.dataset.sort){gearSorts[gearSlot]=b.dataset.value;}else if(handleOrderClick(e,$('tab-content')))return;else if(b.dataset.upgrade){if(upgrade(state,b.dataset.upgrade))tone(550);}else if(b.dataset.action){const ref=getRef(b.dataset.ref);switch(b.dataset.action){case'equip':equip(state,ref);break;case'discard':discard(state,ref);break;}}render();};
+$('tab-content').onclick=e=>{if(tab==='extensions')return;if(e.target.closest('[data-drag-source],[data-inline-condition]')&&handleOrderClick(e,$('tab-content')))return;const b=e.target.closest('button');if(!b||b.disabled)return;if(b.hasAttribute('data-best-equipment')){equipBest(state);render();return;}if(b.dataset.category){const type=b.dataset.category;if(type==='gear')gearSlot=b.dataset.value;}else if(b.dataset.sort){gearSorts[gearSlot]=b.dataset.value;}else if(handleOrderClick(e,$('tab-content')))return;else if(b.dataset.upgrade){upgrade(state,b.dataset.upgrade);}else if(b.dataset.action){const ref=getRef(b.dataset.ref);switch(b.dataset.action){case'equip':equip(state,ref);break;case'discard':discard(state,ref);break;}}render();};
 $('live-orders').onclick=e=>handleOrderClick(e,$('live-orders'));
 $('live-orders').onchange=e=>{if(tab!=='extensions')handleOrderChange(e);};;
 $('tab-content').onchange=e=>{if(tab!=='extensions')handleOrderChange(e);};;
@@ -622,13 +628,13 @@ $('return-title').onclick=()=>confirmOption('タイトルへ戻りますか？',
  paused=true;dialogWasPaused=true;showingTitle=true;motion=null;$('options-dialog').close();render();
 });
 $('primary').onclick=()=>{if(state.phase==='explore')return;if(state.phase==='awakening'){if(!memoryReveal){memoryReveal={player:new SubtitlePlayer(awakeningLines(state.profile.normalClears)),last:performance.now()};$('awakening-text').textContent='';$('awakening-caret').hidden=true;render();}return;}if(state.phase==='prepare'){
- const start=()=>{if(state.phase!=='prepare')return;beginExploration(state);paused=false;last=performance.now();tone();render();tryMobileDisplay();};
+ const start=()=>{if(state.phase!=='prepare')return;beginExploration(state);paused=false;last=performance.now();render();tryMobileDisplay();};
  const current=forecastKey===forecastSignature(state,forecastSamples)?forecastCache:null;
  if(current&&(forecastAtRisk(current.clearRate)||forecastAtRisk(current.remainingHp))){
   confirmOption('このまま探索を始めますか？','クリア見込み、回復余力のいずれかが30%以下です。装備と探索指示の更新をおすすめします。','このまま始める',start);
  }else start();
  return;
- }else if(state.phase==='cleared'){ascend(state);motion=null;tone(440);}else reset();render();if(state.phase==='explore')tryMobileDisplay();};
+ }else if(state.phase==='cleared'){ascend(state);motion=null;}else reset();render();if(state.phase==='explore')tryMobileDisplay();};
 const askAbandon=()=>{if(['prepare','explore'].includes(state.phase))openDialog('abandon-dialog');};$('abandon-run').onclick=askAbandon;$('explore-abandon').onclick=askAbandon;
 $('confirm-abandon').onclick=()=>{const next=abandonRun(state,{shortJourney:true});if(!next)return;$('abandon-dialog').close();reset(next);};
 document.addEventListener('keydown',event=>{
@@ -664,7 +670,7 @@ $('minimap-size').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettin
 $('codex-open').onclick=()=>showCodex(codexKind);
 $('help').onclick=()=>openDialog('dialog');$('close-dialog').onclick=()=>$('dialog').close();$('guide-start').onclick=()=>$('dialog').close();
 $('tab-content').addEventListener('change',e=>{if(e.target.id!=='exchange-source-a')return;const first=e.target.value,second=$('exchange-source-b');for(const o of second.options)o.hidden=o.disabled=o.value===first||o.value.split(':')[0]!==first.split(':')[0];second.value=[...second.options].find(o=>!o.disabled)?.value||'';});
-$('tab-content').addEventListener('click',e=>{const b=e.target.closest('button');if(tab!=='extensions'||!b||b.disabled||state.phase!=='prepare')return;if(b.dataset.extensionUpgradeSelect){selectedExtension=b.dataset.extensionUpgradeSelect;renderExpansionShop();e.currentTarget.querySelector('[aria-pressed=true]')?.focus({preventScroll:true});return;}if(b.dataset.extensionSelect){selectedExtension=b.dataset.extensionSelect;renderExpansionShop();e.currentTarget.querySelector('[aria-pressed=true]')?.focus({preventScroll:true});return;}let changed=false;if(b.dataset.upgrade)changed=upgrade(state,b.dataset.upgrade);if(b.dataset.extensionUnlock)changed=unlockExtension(state,b.dataset.extensionUnlock);if(b.hasAttribute('data-extension-exchange'))changed=startExchange(state,[$('exchange-source-a')?.value,$('exchange-source-b')?.value]);if(b.dataset.extensionChoice)changed=chooseExchange(state,b.dataset.extensionChoice);if(changed){tone(550);render();}});
+$('tab-content').addEventListener('click',e=>{const b=e.target.closest('button');if(tab!=='extensions'||!b||b.disabled||state.phase!=='prepare')return;if(b.dataset.extensionUpgradeSelect){selectedExtension=b.dataset.extensionUpgradeSelect;renderExpansionShop();e.currentTarget.querySelector('[aria-pressed=true]')?.focus({preventScroll:true});return;}if(b.dataset.extensionSelect){selectedExtension=b.dataset.extensionSelect;renderExpansionShop();e.currentTarget.querySelector('[aria-pressed=true]')?.focus({preventScroll:true});return;}let changed=false;if(b.dataset.upgrade)changed=upgrade(state,b.dataset.upgrade);if(b.dataset.extensionUnlock)changed=unlockExtension(state,b.dataset.extensionUnlock);if(b.hasAttribute('data-extension-exchange'))changed=startExchange(state,[$('exchange-source-a')?.value,$('exchange-source-b')?.value]);if(b.dataset.extensionChoice)changed=chooseExchange(state,b.dataset.extensionChoice);if(changed)render();});
 
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());document.querySelectorAll('dialog').forEach(d=>{if(d.id!=='field-event-dialog')d.addEventListener('close',finishDialog);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.phase==='explore'){paused=true;dialogWasPaused=true;render();}});
@@ -806,7 +812,7 @@ $('debug-dialog').addEventListener('click',e=>{const b=e.target.closest('[data-d
  return;
 }case'ending-preview':subtitlePreviewKind=$('debug-subtitle-kind').value;endingPreview=true;endingPlayback=null;musicAudition=null;for(const d of document.querySelectorAll('dialog[open]'))d.close();render();return;case'will-jump':{
  const next=debugBeforeWillChest(state);
- if(!next){debugStatus('遺書の宝箱の隣に移動できませんでした。');return;}
+ if(!next){debugStatus('古びた遺書の宝箱の隣に移動できませんでした。');return;}
  state=next;showingTitle=false;endingPreview=false;endingPlayback=null;
  paused=true;dialogWasPaused=true;motion=null;resetHeroVisual();
  for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();

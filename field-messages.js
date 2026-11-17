@@ -2,7 +2,7 @@ import {SubtitlePlayer} from './subtitle-player.js';
 import{themedSkillById}from'./build-themes.js';
 import {bossSkills} from './field-events.js';
 import {bossMemory} from './story-text.js';
-export const willFoundMessage={kind:'will',text:'遺書を手に入れた'};
+export const willFoundMessage={kind:'will',text:'古びた遺書を手に入れた'};
 export function bossMemoryMessage(floor,normalClears){
  const text=bossMemory(floor,normalClears);
  return text?{kind:normalClears>0?'memory':'story',text}:null;
@@ -81,7 +81,7 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
  const paintWill=()=>{
   if(willSubtitle.textContent!==willPlayer.text)willSubtitle.textContent=willPlayer.text;
   willCaret.hidden=!willPlayer.full;
-  willAdvance.setAttribute('aria-label',willIntroRemaining>0?'遺書を表示中':!willPlayer.full?'字幕をすぐ表示':willPlayer.index===willLines.length-1?'読み終える':'次のページ');
+  willAdvance.setAttribute('aria-label',willIntroRemaining>0?'古びた遺書を表示中':!willPlayer.full?'字幕をすぐ表示':willPlayer.index===willLines.length-1?'読み終える':'次のページ');
  };
  const startWill=message=>{
   if(!willAdvance){
@@ -115,7 +115,7 @@ export function installFieldMessages({dialog,button,text,skillBox,skillText,host
   if(!queue.active){visibility();return;}
   const {kind,text:message}=queue.current,reading=kind==='will';
   dialog.dataset.kind=kind;
-  dialog.setAttribute('aria-label',reading?'取得した遺書':'探索イベント');
+  dialog.setAttribute('aria-label',reading?'取得した古びた遺書':'探索イベント');
   button.hidden=reading;willPage.hidden=!reading;
   const startingWill=reading&&willMessage!==queue.current;
   if(startingWill)startWill(queue.current);

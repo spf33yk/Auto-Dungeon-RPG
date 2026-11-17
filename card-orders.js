@@ -25,7 +25,7 @@ export const actionCards=[
  {id:'collect-armor',name:'防具を取得',detail:'発見済みの防具へ向かう。'},
  {id:'collect-fragments',name:'記憶の欠片を取得',detail:'床の記憶の欠片へ向かう。'},
  {id:'collect-herbs',name:'回復ポーションを取得',detail:'床の回復ポーションへ向かう。'},
- {id:'letter',name:'遺書の箱を開ける',detail:'旧セーブの互換用。開封できる遺書の箱へ向かう。'},
+ {id:'letter',name:'古びた遺書の箱を開ける',detail:'旧セーブの互換用。開封できる古びた遺書の箱へ向かう。'},
  {id:'frontier',name:'全ての部屋を探索する',detail:'まだ入っていない部屋を優先し、全ての部屋へ入ったら完了。'},
  {id:'explore-all',name:'全てのマスを探索する',detail:'到達できる未踏の床を順に歩く。'},
  {id:'wait',name:'1ターン待機',detail:`移動・通常攻撃をせず1ターン待つ。連続${DIRECTIVE_LIMITS.wait}ターンまで。その後${DIRECTIVE_LIMITS.waitCooldown}ターンは待機指示を飛ばす。`},

@@ -11,7 +11,7 @@ export function debugBeforeWillChest(current){
  state.augmentOffer=null;
  state.guidedJourney=false;
  state.debugWillChest=true;
- log(state,'DEBUG：遺書の宝箱の手前。探索を再開すると取得します。','story');
+ log(state,'DEBUG：古びた遺書の宝箱の手前。探索を再開すると取得します。','story');
  return state;
 }
 export function debugHeal(s){s.hp=stats(s).maxHp;s.debugUsed=true;log(s,'DEBUG：HPを全回復。','good');}
