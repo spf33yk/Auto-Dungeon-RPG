@@ -959,4 +959,12 @@ input,textarea,[contenteditable]:not([contenteditable="false"]){user-select:text
 .forecast-rows p{margin:3px 0}
 
 
-#augment-dialog{height:min(820px,88dvh);box-sizing:border-box;scrollbar-gutter:stable}
+#augment-dialog{
+ --augment-top:clamp(8px,3dvh,24px);
+ inset:var(--augment-top) 0 auto;
+ margin:0 auto;
+ height:auto;
+ max-height:calc(100dvh - var(--augment-top) - 8px);
+ box-sizing:border-box;
+ scrollbar-gutter:stable;
+}
