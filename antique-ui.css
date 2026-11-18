@@ -352,3 +352,26 @@ html body :is(dialog .dialog-close,.preset-close){display:flex;align-items:cente
 html body #prepare-scene .fitted-card-editor .card-library-tabs button{background-origin:border-box!important;background-clip:border-box!important;border-image:var(--gold-button) 58 / 4px / 0 repeat!important;border-width:4px!important}
 html body *::-webkit-scrollbar-thumb,html body::-webkit-scrollbar-thumb{background-size:100% auto!important;border:1px solid #b59a63!important;box-shadow:inset 1px 0 #e0c48b,inset -1px 0 #68512c!important} html body *::-webkit-scrollbar-thumb:horizontal{background-size:auto 100%!important} #codex-dialog{background-size:contain}
 @supports selector(::-webkit-scrollbar){html body,html body *{scrollbar-width:auto!important}html body #hud-augments{scrollbar-width:none!important}}
+
+/* Use the approved empty tray, never a card edge as the central rail. */
+html body #prepare-scene #prep-hint{background:transparent!important;box-shadow:none!important;border:0!important}
+html body #prepare-scene #prep-hint:before,html body #prepare-scene #prep-hint:after{background:none!important;content:none!important}
+html body #prepare-scene .fitted-card-editor .card-library-tabs button{isolation:isolate;background:none!important}
+html body #prepare-scene .fitted-card-editor .card-library-tabs button:before{content:'';position:absolute;inset:3px;background:var(--button-background);clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px);z-index:-1;pointer-events:none}
+html body *::-webkit-scrollbar-thumb,html body::-webkit-scrollbar-thumb{background:var(--gold-scroll-grip) center/100% auto no-repeat,var(--gold-scroll-cap-top) top/100% auto no-repeat,var(--gold-scroll-cap-bottom) bottom/100% auto no-repeat,var(--gold-scroll-body) center/100% auto repeat-y!important;border:0!important;box-shadow:none!important;min-height:38px}
+html body *::-webkit-scrollbar-thumb:horizontal{background:var(--gold-scroll-grip-horizontal) center/auto 100% no-repeat,var(--gold-scroll-cap-top-horizontal) right/auto 100% no-repeat,var(--gold-scroll-cap-bottom-horizontal) left/auto 100% no-repeat,var(--gold-scroll-body-horizontal) center/auto 100% repeat-x!important;min-width:38px}
+/* Left page navigation is centered within the actual left sheet. */
+#codex-dialog .settings-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12%}
+#codex-dialog .settings-layout>nav{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:8px 4%;gap:9px}
+#codex-dialog .settings-layout>nav button{width:100%;text-align:center;flex:none}
+#codex-dialog #codex-title{width:44%;text-align:center}
+/* Complete the compact instructions and preparation panels with the adopted frame. */
+html body .fitted-card-editor .order-fold-summary{border:6px solid transparent;border-image:var(--gold-field) 30 fill / 6px / 0 repeat;border-radius:0;background:transparent;padding:3px 7px;min-height:34px;box-sizing:border-box}
+html body .fitted-card-editor .fixed-order-state{border:6px solid transparent;border-image:var(--gold-button) 58 fill / 6px / 0 repeat;border-radius:0;padding:3px 5px;min-height:30px;box-sizing:border-box}
+html body #prepare-scene :is(.gear-overview>div,.gear-details,.extension-balance,.extension-detail){border:7px solid transparent;border-image:var(--gold-window) 65 fill / 7px / 0 repeat;border-radius:0;background:transparent;box-sizing:border-box}
+html body #prepare-scene .gear-item{border:8px solid transparent;border-image:var(--gold-reward) 36 fill / 8px / 0 repeat;border-radius:0}
+html body #prepare-scene .gear-empty{border:7px solid transparent;border-image:var(--gold-window) 65 fill / 7px / 0 repeat;border-radius:0}
+html body #prepare-scene .fitted-card-editor .card-library-tabs button[data-palette-tab]:not(.palette-card):not(.board-slot):not(.row-handle):not(.insert-condition){border-image:var(--gold-button) 58 / 3px / 0 repeat!important;border-width:3px!important;background:none!important}html body #prepare-scene .fitted-card-editor .card-library-tabs button[data-palette-tab]:before{inset:0!important}
+html body .fitted-card-editor .fixed-active{border:6px solid transparent;border-image:var(--gold-button) 58 fill / 6px / 0 repeat;border-radius:0;padding:3px 5px;min-height:30px;box-sizing:border-box}
+#codex-dialog .settings-layout>nav button{text-align:center!important;justify-content:center!important}
+@media(max-height:540px){#codex-dialog .settings-layout>nav{gap:5px;padding:2px 4%;overflow:auto}#codex-dialog .settings-layout>nav button{min-height:30px!important;padding:1px 3px!important;font-size:10px!important}#codex-body .codex-table{table-layout:fixed;font-size:10px}#codex-body .codex-table :is(th,td){padding:5px 3px;width:auto!important;min-width:0;overflow-wrap:anywhere}#codex-body .codex-table :is(th,td):first-child{width:64%!important}#codex-body .codex-table small{font-size:8px}}
