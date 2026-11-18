@@ -213,10 +213,10 @@ card-editorのfoldSummaryは常時描画し、開閉ではorder-fold-bodyだけ�
 
 ui-settingsのtutorialEnabledを読込・保存・初期値へ追加し、maybeTutorial/startTutorialとオーグメント案内を同じ設定で制御する。resetJourneyTutorialsは完了状態だけをリセットし、表示設定を保持する。報酬リロールはchest-reroll-actionsへ移動し、横画面でもグリッド最下段全幅の中央へ配置する。
 
-主外枠は採用済みwindow.pngで全辺・角を維持し、選択タブ直下の内幅だけをマスクする。選択タブも同じ画像と10pxのborder-imageで描画し、外枠再描画用のSVGは生成しない。通常ボタンの暗色版SVGは画像埋め込みを使わず、閉じた輪郭と金縁・暗色グラデーションを直接描画する。共通変数gold-button-grayを差し替えて、金縁・文字・透明外周を保持する。
+主外枠は採用済みwindow.pngで全辺・角を維持し、選択タブ直下の内幅だけをマスクする。選択タブも同じ画像と10pxのborder-imageで描画し、外枠再描画用のSVGは生成しない。通常の暗色ボタンはgray-button-faceの複数背景で4つの角・4辺・内面を独立描画し、border-imageを無効にする。
 
-syncPreparationTabFrameの接続マスクは左＋3px・幅−6px。タブ擬似要素の下端は−2px。button-gray-dark.svgのpreserveAspectRatioはnoneとし、border-imageの各領域で余分な余白が生じないようにする。
+syncPreparationTabFrameの接続マスクは左＋3px・幅−6px。タブ擬似要素の下端は−2px。暗色ボタンはborder-image分割の倍率依存を避ける。
 
-暗色ボタンは1200×187の左右対称SVGを58pxスライスで描画。section-divider.svgは単一の水平パスだけを持つ。
+暗色ボタンはbutton-corner-rising/falling.svgの7px固定角とCSSの1px辺を独立背景として描画し、透明borderによる既存寸法は保持する。section-divider.svgは単一の水平パスだけを持つ。
 
 古金共通素材の配信生成対象はPNGとSVGとし、暗色ボタン・区切り線もGOLD_ARTとgold-assetsの内容ハッシュ付きURLを経由する。CSSから未版管理のSVG直指定を行わない。
