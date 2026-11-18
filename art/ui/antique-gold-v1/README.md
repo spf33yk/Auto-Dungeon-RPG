@@ -4,11 +4,11 @@
 
 カードと土台は承認済みの文字なし画像（exec-1e5e65f7-1ac9-408a-8cbd-5a849827dab5.png）から切り出し。全面の色・二重金縁・見出し下の菱形飾り・レアリティ欄・土台の装飾を保持。簡素化した別原画は使用しない。共通ボタン・タブ・入力欄・ウィンドウ・報酬台・装備枠・HP枠・スクロールは、古金と暖かい青銅に再制作した原画から透明余白を除き、等倍率で縮小して使用する。文字面は暗褐色。画像生成には内蔵imagegenを使用。
 
-- card-target / condition / action / alternative / skill: 青灰・金・赤茶・深緑・紫。または時も外枠は通常条件画像を共用し、深緑画像を内側だけに重ねる。表示はどちらも194×74px。文字と共通アイコンはDOMで別描画。
+- card-target / condition / action / alternative / skill: 青灰・金・赤茶・深緑・紫。または時は通常条件の画像と配置をそのまま使い、SVGフィルターで暗い面だけを緑へ変換する。別の緑画像は描画へ重ねない。表示はどちらも194×74px。文字と共通アイコンはDOMで別描画。
 - tray-left / middle / right: 指定の空土台原画を基準に、内枠の折れ・重複線を修復したexec-532aa61e-f5c1-48e7-94de-1d36d352a351.pngから切り出し。 左右の装飾を固定寸法で描画し、中央レールは原画中央256pxを左右反転して接続した512px素材を反復し、端ピクセルを一致させる。切り出し参照用の原画は配信対象に含めない。
 - kind-target / condition / action / skill: 照準・4節点の菱形・剣・8方向の星。カード、カードリスト、宝箱種類選択、カード図鑑で共用。
 - ability-attack / defense / sight / hp / chest / move: 能力・装備の共通アイコン。
-- surface-tile: 256×192px。原画の暗褐色面を上下左右に対称接続した反復背景。辺と分離して描画し、面を伸ばさない。
+- surface-tile: 256×192pxの反復面。現在は未使用。ゲームの背景は採用済み素材の中央面を表示し、枠線だけ反復する。
 - window / button / tab / field / rail / hp / reward / slot: 端と角を保持し、長い辺を反復する。新しい文字は素材へ焼き込まない。
 - scroll-cap-top / cap-bottom / grip / body（horizontalを含む）: つまみの端・溝・反復金属面。単色の金背景で画像外を補わず、等倍率で合成する。
 - scroll-track / scroll-thumb / scroll-thumb-horizontal: 暗い青銅レールと溝付き古金つまみを切り出した縦横共通スクロール部品。画像は等倍率で描画する。

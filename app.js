@@ -422,7 +422,7 @@ function render(){
  $('floor-message').hidden=state.floor!==startFloorFor(state)||state.letter;$('floor-message').textContent=floorLabel(state)+' ― '+letterFloorThought(state.profile.normalClears);
  $('turn').textContent=`TURN ${String(state.turn).padStart(3,'0')}`;
  $('hud-shards').textContent=state.shards;$('hud-sight').textContent=radius(state)+'マス';
- $('level-text').textContent='Lv.'+state.level;const expNeed=experienceToNext(state.level);$('exp-bar').style.width=(expNeed?state.experience/expNeed*100:100)+'%';$('level-vitals').setAttribute('aria-label',`レベル${state.level}、経験値${state.experience}、次のレベルまで${expNeed?expNeed-state.experience:0}`);$('level-vitals').title=state.level===MAX_LEVEL?'最大レベル':`EXP ${state.experience} / ${expNeed}`;
+ $('level-text').textContent='Lv.'+state.level;const expNeed=experienceToNext(state.level);$('exp-text').textContent=expNeed?state.experience+' / '+expNeed:'MAX';$('exp-bar').style.width=(expNeed?state.experience/expNeed*100:100)+'%';$('level-vitals').setAttribute('aria-label',`レベル${state.level}、経験値${state.experience}、次のレベルまで${expNeed?expNeed-state.experience:0}`);$('level-vitals').title=state.level===MAX_LEVEL?'最大レベル':`EXP ${state.experience} / ${expNeed}`;
  const stock=state.potionStock||0;
  $('potion-stock').hidden=state.phase!=='explore';
  $('potion-stock').setAttribute('aria-label','回復ポーション '+stock+'個');

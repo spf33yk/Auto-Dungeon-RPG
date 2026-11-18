@@ -4,14 +4,14 @@ body{scrollbar-color:#9b814f #101615;scrollbar-width:thin}
 *::-webkit-scrollbar{width:8px;height:8px}*::-webkit-scrollbar-track{background:#101615}*::-webkit-scrollbar-thumb{background:#8b7347;border:2px solid #101615;border-radius:4px}*::-webkit-scrollbar-thumb:hover{background:#c5a76a}
 dialog:not(.field-event-dialog){border:10px solid transparent;border-image:var(--gold-window) 65 fill / 10px / 0 repeat;background:#101615;color:var(--gold-text);box-sizing:border-box;max-width:calc(100vw - 20px);scrollbar-width:thin}
 button{font-family:Futogo,sans-serif}
-dialog button:not(.illustrated-augment):not(.card-reward-choice):not(#will-advance):not(.subtitle-advance),#hud-bottom :is(.pause-toggle,.speed button),body.preparing #prepare-scene button:not(.palette-card):not(.board-slot):not(.row-handle):not(.insert-condition){border:9px solid transparent;border-image:var(--gold-button) 58 var(--button-fill,) / 9px / 0 repeat;background:transparent;color:var(--gold-text);box-shadow:none;border-radius:0;min-height:30px;box-sizing:border-box;line-height:1.3;padding:3px 8px}
+dialog button:not(.illustrated-augment):not(.card-reward-choice):not(#will-advance):not(.subtitle-advance),#hud-bottom :is(.pause-toggle,.speed button),body.preparing #prepare-scene button:not(.palette-card):not(.board-slot):not(.row-handle):not(.insert-condition){border:9px solid transparent;border-image:var(--gold-button) 58 var(--button-fill,fill) / 9px / 0 repeat;background:transparent;color:var(--gold-text);box-shadow:none;border-radius:0;min-height:30px;box-sizing:border-box;line-height:1.3;padding:3px 8px}
 :is(dialog,#hud-bottom,#prepare-scene) button:disabled{opacity:.42}
 :is(dialog,#hud-bottom,#prepare-scene) button:focus-visible{outline:2px solid #e4c57f;outline-offset:1px}
 :is(dialog,#hud-bottom,#prepare-scene) button:not(:disabled):hover{filter:brightness(1.18)}
 :is(dialog,#hud-bottom) button.primary,body.preparing #prepare-scene #primary{filter:brightness(1.18);color:#ffe6a7}
 :is(dialog,#prepare-scene) :is(.tabs,.subtabs,.settings-layout nav) button,body.preparing #prepare-scene>.tabs button{border-image-source:var(--gold-tab);border-image-slice:58;border-image-width:8px;padding:5px 12px;background:transparent;color:var(--gold-text)}
 :is(dialog,#prepare-scene) :is(.tabs,.subtabs) button.active,dialog nav button[aria-pressed=true]{filter:brightness(1.3);color:#ffe5a3}
-:is(dialog,#prepare-scene) input:not([type=range]):not([type=checkbox]),:is(dialog,#prepare-scene) select{border:7px solid transparent;border-image:var(--gold-field) 30 / 7px / 0 repeat;background:#101615;color:var(--gold-text);padding:2px 6px;box-sizing:border-box;max-width:100%;font-family:Futogo,sans-serif}
+:is(dialog,#prepare-scene) input:not([type=range]):not([type=checkbox]),:is(dialog,#prepare-scene) select{border:7px solid transparent;border-image:var(--gold-field) 30 fill / 7px / 0 repeat;background:#101615;color:var(--gold-text);padding:2px 6px;box-sizing:border-box;max-width:100%;font-family:Futogo,sans-serif}
 :is(dialog,#prepare-scene) select option{background:#151a18;color:#eadfc4}
 :is(dialog,#prepare-scene) details>summary{list-style:none;cursor:pointer}
 :is(dialog,#prepare-scene) details>summary:before{content:'▶';display:inline-block;font-size:.75em;color:#cfb779;margin-right:.6em}
@@ -68,7 +68,7 @@ body:is(.exploring,.preparing) #hud-top #hp-bar{height:100%;max-width:100%;box-s
 /* Shared reward tables, consistent symbols. */
 #card-choice-dialog{width:min(1080px,96vw);max-height:94dvh;padding:20px 22px;overflow:auto}
 #chest-card-categories{gap:12px;margin:12px 0 16px}
-#chest-card-categories button{min-height:83px;gap:4px;align-items:center;justify-content:center;padding:9px 14px;border-image:var(--gold-button) 58 var(--button-fill,) / 10px / 0 repeat;flex-direction:row;flex-wrap:wrap}
+#chest-card-categories button{min-height:83px;gap:4px;align-items:center;justify-content:center;padding:9px 14px;border-image:var(--gold-button) 58 var(--button-fill,fill) / 10px / 0 repeat;flex-direction:row;flex-wrap:wrap}
 #chest-card-categories button>.card-kind-icon{width:28px;height:28px}
 #chest-card-categories strong{font-size:18px;line-height:1.3}
 #chest-card-categories :is(small,.chest-category-rarity){flex-basis:100%;text-align:center;font-size:11px}
@@ -77,7 +77,7 @@ body:is(.exploring,.preparing) #hud-top #hp-bar{height:100%;max-width:100%;box-s
 #chest-owned-augments .illustrated-chip strong{font-size:13px}#chest-owned-augments .illustrated-chip small{font-size:11px}
 #card-choice-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 #card-choice-list:empty{display:none}
-#card-choice-dialog .card-reward-choice{padding:14px 12px;border:10px solid transparent;border-image:var(--gold-reward) 36 / 10px / 0 repeat;border-radius:0;min-width:0;display:flex;flex-direction:column;align-items:stretch}
+#card-choice-dialog .card-reward-choice{padding:14px 12px;border:10px solid transparent;border-image:var(--gold-reward) 36 fill / 10px / 0 repeat;border-radius:0;min-width:0;display:flex;flex-direction:column;align-items:stretch}
 #card-choice-dialog .card-reward-choice p{font-size:13px;line-height:1.6;overflow-wrap:anywhere}
 .reward-card{width:100%;aspect-ratio:2.57;height:auto;min-height:0;margin:4px auto 10px;flex:none}
 .reward-card-name,.gold-card-name{position:absolute;left:31%;top:40%;width:61%;height:31%;display:grid;place-items:center;font:15px/1.25 Futogo,sans-serif;text-align:center;white-space:normal;overflow-wrap:anywhere;color:#eee2c8;margin:0}
@@ -89,7 +89,7 @@ body:is(.exploring,.preparing) #hud-top #hp-bar{height:100%;max-width:100%;box-s
 .ability-icon{width:25px;height:25px;object-fit:contain;vertical-align:middle;flex:none}
 .gear-overview>div{position:relative;padding-left:40px}
 .gear-overview>div>.ability-icon{position:absolute;left:8px;top:50%;transform:translateY(-50%)}
-.gear-item{border:8px solid transparent;border-image:var(--gold-reward) 36 / 8px / 0 repeat;padding:8px}
+.gear-item{border:8px solid transparent;border-image:var(--gold-reward) 36 fill / 8px / 0 repeat;padding:8px}
 .gear-item-top strong{font-size:14px;line-height:1.4}.gear-item-top{gap:8px}
 .gear-overview strong{font-size:18px}.gear-columns{gap:12px}.gear-item-values{margin-top:5px}
 .gear-item-actions{gap:5px;margin-top:8px}.gear-inventory-grid{gap:8px}
@@ -139,8 +139,8 @@ body:is(.exploring,.preparing) #hud-top #hp-bar{height:100%;max-width:100%;box-s
 @media(max-width:620px){#card-choice-list{grid-template-columns:minmax(0,1fr)}#chest-card-categories{gap:6px}#chest-owned-augments>div{grid-template-columns:1fr}#codex-dialog{padding:25px 30px}#codex-dialog .settings-layout{grid-template-columns:28% minmax(0,1fr);gap:16%}}
 /* Artwork wins over legacy panel shorthand without changing special cinematic buttons. */
 html body dialog:not(.field-event-dialog):not(#codex-dialog){border:10px solid transparent!important;border-image:var(--gold-window) 65 fill / 10px / 0 repeat!important}
-html body dialog:not(.field-event-dialog):not(#codex-dialog) button:not(.illustrated-augment):not(.card-reward-choice):not(.subtitle-advance){border-image:var(--gold-button) 58 var(--button-fill,) / 9px / 0 repeat!important}
-html body #prepare-scene button:not(.palette-card):not(.board-slot):not(.row-handle):not(.insert-condition){border-image:var(--gold-button) 58 var(--button-fill,) / 8px / 0 repeat!important;background:var(--button-background,var(--gold-surface-tile) center/128px 96px repeat)!important}
+html body dialog:not(.field-event-dialog):not(#codex-dialog) button:not(.illustrated-augment):not(.card-reward-choice):not(.subtitle-advance){border-image:var(--gold-button) 58 var(--button-fill,fill) / 9px / 0 repeat!important}
+html body #prepare-scene button:not(.palette-card):not(.board-slot):not(.row-handle):not(.insert-condition){border-image:var(--gold-button) 58 var(--button-fill,fill) / 8px / 0 repeat!important;background:var(--button-background,transparent)!important}
 html body #prepare-scene :is(.tabs,.subtabs) button{border-image-source:var(--gold-tab)!important}
 body.preparing #prepare-scene .fitted-card-editor .tray-surface{zoom:1}
 #codex-dialog[open]{display:flex;flex-direction:column;width:min(1200px,calc(94dvh * 1200 / 798),98vw);height:min(798px,94dvh,calc(98vw * 798 / 1200));aspect-ratio:1200/798;background-size:contain}
@@ -366,13 +366,13 @@ html body *::-webkit-scrollbar-thumb:horizontal{background:var(--gold-scroll-gri
 #codex-dialog .settings-layout>nav button{width:100%;text-align:center;flex:none}
 #codex-dialog #codex-title{width:44%;text-align:center}
 /* Complete the compact instructions and preparation panels with the adopted frame. */
-html body .fitted-card-editor .order-fold-summary{border:6px solid transparent;border-image:var(--gold-field) 30 / 6px / 0 repeat;border-radius:0;background:transparent;padding:3px 7px;min-height:34px;box-sizing:border-box}
-html body .fitted-card-editor .fixed-order-state{border:6px solid transparent;border-image:var(--gold-button) 58 / 6px / 0 repeat;border-radius:0;padding:3px 5px;min-height:30px;box-sizing:border-box}
+html body .fitted-card-editor .order-fold-summary{border:6px solid transparent;border-image:var(--gold-field) 30 fill / 6px / 0 repeat;border-radius:0;background:transparent;padding:3px 7px;min-height:34px;box-sizing:border-box}
+html body .fitted-card-editor .fixed-order-state{border:6px solid transparent;border-image:var(--gold-button) 58 fill / 6px / 0 repeat;border-radius:0;padding:3px 5px;min-height:30px;box-sizing:border-box}
 html body #prepare-scene :is(.gear-overview>div,.gear-details,.extension-balance,.extension-detail){border:7px solid transparent;border-image:var(--gold-window) 65 fill / 7px / 0 repeat;border-radius:0;background:transparent;box-sizing:border-box}
-html body #prepare-scene .gear-item{border:8px solid transparent;border-image:var(--gold-reward) 36 / 8px / 0 repeat;border-radius:0}
+html body #prepare-scene .gear-item{border:8px solid transparent;border-image:var(--gold-reward) 36 fill / 8px / 0 repeat;border-radius:0}
 html body #prepare-scene .gear-empty{border:7px solid transparent;border-image:var(--gold-window) 65 fill / 7px / 0 repeat;border-radius:0}
 html body #prepare-scene .fitted-card-editor .card-library-tabs button[data-palette-tab]:not(.palette-card):not(.board-slot):not(.row-handle):not(.insert-condition){border-image:var(--gold-button) 58 / 3px / 0 repeat!important;border-width:3px!important;background:none!important}html body #prepare-scene .fitted-card-editor .card-library-tabs button[data-palette-tab]:before{inset:0!important}
-html body .fitted-card-editor .fixed-active{border:6px solid transparent;border-image:var(--gold-button) 58 / 6px / 0 repeat;border-radius:0;padding:3px 5px;min-height:30px;box-sizing:border-box}
+html body .fitted-card-editor .fixed-active{border:6px solid transparent;border-image:var(--gold-button) 58 fill / 6px / 0 repeat;border-radius:0;padding:3px 5px;min-height:30px;box-sizing:border-box}
 #codex-dialog .settings-layout>nav button{text-align:center!important;justify-content:center!important}
 @media(max-height:540px){#codex-dialog .settings-layout>nav{gap:5px;padding:2px 4%;overflow:auto}#codex-dialog .settings-layout>nav button{min-height:30px!important;padding:1px 3px!important;font-size:10px!important}#codex-body .codex-table{table-layout:fixed;font-size:10px}#codex-body .codex-table :is(th,td){padding:5px 3px;width:auto!important;min-width:0;overflow-wrap:anywhere}#codex-body .codex-table :is(th,td):first-child{width:64%!important}#codex-body .codex-table small{font-size:8px}}
 
@@ -391,13 +391,9 @@ html body .card-kind-label{left:30%;width:56%;top:6%;height:18%!important;max-he
 
 /* Normal and alternative states share the identical outer silhouette. */
 html body .fitted-card-editor .board-slot[data-card-kind=condition][data-condition-or]{--gold-card:var(--gold-card-condition)}
-html body .fitted-card-editor .board-slot[data-condition-or]:after{content:'';position:absolute;inset:0;background:var(--gold-card-alternative) center/contain no-repeat;clip-path:polygon(4% 5%,90% 5%,92% 8%,92% 29%,98% 44%,98% 56%,92% 71%,92% 92%,90% 95%,4% 95%,2% 91%,2% 72%,8% 60%,8% 40%,2% 28%,2% 9%);pointer-events:none;z-index:0}
+html body .fitted-card-editor .board-slot[data-condition-or]:after{content:none!important}
 html body .fitted-card-editor .skill-theme-badge{position:relative;display:inline-flex;margin:0 0 9px;vertical-align:top}
 html body .fitted-card-editor .skill-theme-badge+.tray-scroll{margin-top:4px}
-/* Tileable warm surface, independent from fixed edge artwork. */
-html body :is(dialog button,#hud-bottom button):not(.illustrated-augment):not(.card-reward-choice):not(.subtitle-advance):not(#will-advance){background:var(--gold-surface-tile) center/128px 96px repeat}
-html body #prepare-scene :is(.gear-item,.order-fold-summary,.fixed-active,.gear-overview>div,.gear-details,.extension-balance,.extension-detail,.gear-empty){background:var(--gold-surface-tile) center/128px 96px repeat!important}
-html body dialog:not(#codex-dialog):not(.field-event-dialog){background:#21180f var(--gold-surface-tile) center/128px 96px repeat}
 /* Contents page; the book, text and dismiss button are separate layers. */
 #codex-dialog[open]{width:min(1200px,calc(90dvh * 1200 / 798),calc(100vw - 64px));height:min(798px,90dvh,calc((100vw - 64px) * 798 / 1200));overflow:visible!important;position:relative}
 #codex-dialog .settings-heading{height:0;min-height:0;padding:0;margin:0;flex:none}
@@ -416,7 +412,23 @@ html body #codex-dialog .settings-layout>nav button{display:flex;align-items:bas
 #codex-dialog nav button[aria-pressed=true]{font-weight:bold;text-decoration:underline;text-underline-offset:4px}
 #codex-dialog nav button:hover{color:#8b5419!important}
 #codex-dialog #codex-note,#codex-dialog .settings-footer{display:none!important}
-#codex-dialog[data-kind=augments] #codex-body{background:#000!important;color:#eadbb6;padding:10px}
-#codex-dialog[data-kind=augments] #codex-body :is(.section-caption,.augment-codex-group h3){color:#eadbb6}
+#codex-dialog[data-kind=augments] #codex-body{background:transparent!important;color:#241e16;padding:0 5px 12px 0}
+#codex-dialog[data-kind=augments] #codex-body :is(.section-caption,.augment-codex-group h3){color:#403526}
 @media(max-height:540px){#codex-dialog .codex-index-label{font-size:17px}#codex-dialog nav #codex-title{font-size:12px;margin-bottom:10px}html body #codex-dialog .settings-layout>nav button{font-size:11px!important;min-height:26px!important;padding:3px 0!important;gap:6px}#codex-dialog .settings-layout>nav{gap:4px;padding:5px 3%}}
 html body #codex-dialog .settings-layout>nav button{color:#3a2916!important}html body #codex-dialog .settings-layout>nav button:hover{color:#8b5419!important}#codex-dialog[data-kind=augments] #codex-body :is(.augment-theme,.augment-theme small,.augment-card-content>small,.augment-set-hint){color:#e4d1a1!important}
+
+/* Pixel-preserving green state: identical source pixels and coordinates. */
+html body .fitted-card-editor .board-slot[data-condition-or]{filter:url(#condition-green-filter)}
+html body .fitted-card-editor .board-slot[data-condition-or]:hover{filter:url(#condition-green-filter) brightness(1.25)}
+html body #codex-dialog .settings-layout>nav button:is(:hover,:focus-visible){color:#241604!important;background:#f4dfadbd!important;box-shadow:inset 4px 0 #725022!important;text-shadow:none;outline:1px solid #8c6c40;outline-offset:0}
+#codex-dialog[data-kind=augments] .illustrated-augment{background:transparent!important}
+#codex-dialog[data-kind=augments] .illustrated-augment:before{content:'';position:absolute;inset:0;background:#000;clip-path:url(#augment-inner-clip);z-index:-2;pointer-events:none}
+/* Match EXP and HP heading rows, trough height and vertical spacing. */
+body:is(.preparing,.exploring) #hud-top .level-vitals{flex:0 0 120px}
+body:is(.preparing,.exploring) #hud-top :is(.level-heading,.player-name){display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:22px;line-height:22px}
+body:is(.preparing,.exploring) #hud-top :is(.level-heading strong,.player-name strong,.player-name span){font-size:15px;line-height:22px}
+#hud-top #exp-text{font-size:12px;white-space:nowrap;color:var(--gold-text)}
+body:is(.preparing,.exploring) #hud-top :is(.exp-track,.hp-track){height:12px;margin:6px 0 0;padding:2px 4px;position:relative;overflow:visible;box-sizing:border-box;background:#21190e;border:1px solid #7d7049}
+body:is(.preparing,.exploring) #hud-top .exp-track:after{content:'';position:absolute;inset:-1px;border:4px solid transparent;border-image:var(--gold-hp) 22 / 4px / 0 repeat;pointer-events:none}
+#hud-top #exp-bar{height:100%;background:#c5a75f;box-shadow:inset 0 1px #eddbad77}
+@container(max-width:480px){body:is(.preparing,.exploring) #hud-top .level-vitals{flex-basis:96px}#hud-top #exp-text{font-size:10px}}
