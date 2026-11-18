@@ -541,3 +541,6 @@ html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active{hei
 html body .fitted-card-editor .order-row-controls>.skill-theme-badge{width:82px;min-width:82px;height:28px;border:6px solid transparent;border-image:url('art/ui/antique-gold-v1/theme-plaque.svg') 8 fill / 6px / 0 repeat;background:none;justify-content:center;padding:0 3px}
 html body .fitted-card-editor .order-row-controls>.skill-theme-badge:before{content:none}
 html body .fitted-card-editor .order-row-controls>.theme-empty{color:#9bada4}
+
+/* Explicit four-side geometry prevents the open edge from collapsing side slices. */
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab]:before{display:block;box-sizing:border-box;left:0;right:0;top:0;bottom:-10px;width:auto;height:auto;border:7px solid transparent!important;border-bottom-width:0!important;border-image:url('art/ui/antique-gold-v1/connected-tab.svg') 9 12 1 12 / 7px 7px 0 7px / 0 repeat!important;box-shadow:none;background:none}

@@ -198,3 +198,5 @@ placeCardのパレット由来スキル配置時に、移動先以外の行のef
 一覧の状態札はalreadyPlacedを用いて配置中と配置不可を区別する。無効カード全体へopacity/filterを掛けず、背景のluminosity合成と状態札以外の減光を分離する。
 
 augmentGrowthTextはAUGMENT_GROWTHから4段階の全パラメータを取得し、augmentStrengthに成長一覧を付加する。割合キーと会心率のstep/capは百分率へ変換する。
+
+タブ枠は9/12/1/12のスライスと7/7/0/7pxの描画幅を明示し、下辺を描かず左右辺を保つ。

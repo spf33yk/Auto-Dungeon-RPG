@@ -35,5 +35,5 @@ export function augmentName(a,s){const stars=s?starText(s,a.id):'';return a.name
 
 export function augmentGrowthText(id){
  const names={sight:'視界半径',duration:'持続ターン',extra:'追加個数',heal:'回復率',step:'増加量',cap:'上限',candidates:'候補数',shards:'欠片',attack:'ATK',uses:'回数',damage:'ダメージ倍率',perCharge:'蓄積ごとの増加率',rate:'吸命率',leech:'吸命率',defense:'DEF',reduction:'軽減率',immunity:'無効回数',chance:'確率',consolation:'外れ時の欠片'};
- return '\n成長（☆0/★1/★2/★3）：'+Object.entries(AUGMENT_GROWTH[id]||{}).map(([key,values])=>{const pct=['heal','perCharge','rate','leech','reduction','chance'].includes(key)||(['hunter','pity'].includes(id)&&['step','cap'].includes(key));return (names[key]||key)+' '+values.map(v=>f(pct?v*100:v)+(pct?'%':'')).join('/');}).join('、');
+ return '\n'+Object.entries(AUGMENT_GROWTH[id]||{}).map(([key,values])=>{const pct=['heal','perCharge','rate','leech','reduction','chance'].includes(key)||(['hunter','pity'].includes(id)&&['step','cap'].includes(key));return (names[key]||key)+' '+f(pct?values[0]*100:values[0])+(pct?'%':'')+' ★['+values.slice(1).map(v=>f(pct?v*100:v)+(pct?'%':'')).join('/')+']';}).join('、');
 }
