@@ -625,3 +625,12 @@ TRUE ENDの炎に添付SEを5%で追加し、映像の消え際と同じ1.5秒�
 - タブは本編未変更。output/preparation-tab-options.htmlにA下線・B綴じ込み・C均等3分割の比較案を作成。採用は未確定。
 - 無音のローカル本編と保存なしの本編レンダラー検証を使用。公開版実操作・Safari・スマホ実機は未確認。ローカル表示とハッシュ整合を確認する変更のため公開操作は省略。カード判定・保存形式・取得条件は変更しない。
 - 全507テスト成功。node scripts/update-assets.js --check、git diff --check成功。
+
+
+## 準備レイアウトと右クリック入力
+- 基点7d323c6。上部をタブボタンにし、フロア情報を左下、既存の予測をその右へ配置。通常ボタンは専用button-gray.png、開始とカード種類色は維持。ターゲット分類の面をカードに近い青灰へ調整。
+- preparationFloorInfoは準備中の現在floorを5項目へ整形。B25開始の表示とB20固有スキルの周回条件を2テストで確認。固有スキルの名前・各戦闘1回を表示し詳細はtitleへ置く。予測処理と結果項目は変更しない。
+- contextmenuをネイティブ入力が消費する場合に備え、右pointerdownをcaptureで扱い後続contextmenuを1回抑制。pointerdown/contextmenuの組を二重実行しないテストを追加。数値input・select・カード面の右クリックでfalse/true/false/true、数値なし条件もtrueへ切替を実操作。ホバー状態でもfilterにcondition-green-filterが残ることを確認。従来の汎用button:hoverより強い指定にした。
+- 無音ローカルverify=1、本編1280×720で探索指示・装備・拡張の下部位置維持を確認。844×390でfooterのclientWidth/scrollWidthは1280/1280、info327/327、summary598/598、情報dd253/253で横はみ出しなし。画像はoutput/preparation-layout-v2。
+- 公開版実操作・Safari・スマホ実機は未確認。ローカル本編と配信ハッシュ整合を確認する変更のため公開操作は省略。保存形式・カード効果・報酬抽選・予測計算は変更しない。
+- 全510テスト成功。node scripts/update-assets.js --check、git diff --check成功。

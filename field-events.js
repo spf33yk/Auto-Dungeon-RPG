@@ -32,3 +32,9 @@ export function nextStageHint(s){
  const floor=s.floor+1,boss=bossForFloor(floor),skill=s.profile?.normalClears>0&&bossSkills[boss?.id],z=zones[zoneIndexForFloor(floor)],plan=fieldPlan(s.seed,floor);
  return {floor,event:plan.id,title:`次はB${NORMAL_FLOORS+1-floor} · ${z.name}`,text:`${plan.hint} 主な魔物：${bossForFloor(floor)?.name||monsters[z.index*2].name+'、'+monsters[z.index*2+1].name}。${skill?' 固有スキル「'+skill.name+'」：'+skill.detail+' 各戦闘1回。':''}`};
 }
+
+// Preparation already points at the floor that will be explored next.
+export function preparationFloorInfo(s){
+ const floor=s.floor,z=zones[zoneIndexForFloor(floor)],boss=bossForFloor(floor),event=fieldPlan(s.seed,floor),skill=s.profile?.normalClears>0?bossSkills[boss?.id]:null;
+ return {basement:'B'+(NORMAL_FLOORS+1-floor),name:z.name,event:event.id==='none'?'なし':event.name,monsters:boss?[boss.name]:[monsters[z.index*2].name,monsters[z.index*2+1].name],skill:skill?skill.name+'（各戦闘1回）':'なし',skillDetail:skill?skill.detail+' 各戦闘1回。':''};
+}

@@ -89,3 +89,18 @@ test('expanded preparation row renders target, conditions and action cards',asyn
  assert.match(host.innerHTML,/<div [^<>]+ data-condition-or [^<>]+>/);
  assert.doesNotMatch(host.innerHTML,/condition-or-label/);
 });
+
+
+test('right-click on a native condition control toggles once across pointerdown and contextmenu',async()=>{
+ const {installCardDragging}=await import('./card-editor.js');
+ const s=newGame(7);s.phase='prepare';s.levels.cardSlots=1;s.extensions={...s.extensions,unlocked:['condition-or']};s.orders=[createCardRule('self',[{id:'turns',value:20},{id:'hp-above',value:50}])];
+ const listeners=[];let commits=0;globalThis.document=globalThis.window={addEventListener(){}};
+ try{installCardDragging({querySelector(){return null;},addEventListener(type,listener,options){listeners.push({type,listener,options});}},()=>s,()=>commits++);}finally{delete globalThis.document;delete globalThis.window;}
+ const slot={dataset:{dragSource:'slot|0|condition|1'}},target={closest(selector){return selector.includes('data-card-kind="condition"')?slot:null;}};
+ const event={target,button:2,preventDefault(){}};
+ const down=listeners.find(x=>x.type==='pointerdown'&&x.options===true).listener,menu=listeners.find(x=>x.type==='contextmenu').listener;
+ down(event);assert.equal(s.orders[0].conditions[1].or,true);assert.equal(commits,1);
+ menu(event);assert.equal(s.orders[0].conditions[1].or,true);assert.equal(commits,1);
+ down(event);menu(event);assert.equal(Boolean(s.orders[0].conditions[1].or),false);assert.equal(commits,2);
+ menu(event);assert.equal(s.orders[0].conditions[1].or,true);assert.equal(commits,3);
+});

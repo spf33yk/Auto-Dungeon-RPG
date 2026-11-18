@@ -7,6 +7,7 @@ export const GOLD_ART={
   "ability-move": "./art/ui/antique-gold-v1/ability-move.png?v=0ca880a8ae1b",
   "ability-sight": "./art/ui/antique-gold-v1/ability-sight.png?v=ed027335c107",
   "book": "./art/ui/antique-gold-v1/book.png?v=edeb797b7264",
+  "button-gray": "./art/ui/antique-gold-v1/button-gray.png?v=590fe196e1e8",
   "button": "./art/ui/antique-gold-v1/button.png?v=f72ecfa82cca",
   "card-action": "./art/ui/antique-gold-v1/card-action.png?v=8c69a9cf6aab",
   "card-alternative": "./art/ui/antique-gold-v1/card-alternative.png?v=e8c5ffbff0fa",

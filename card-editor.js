@@ -139,11 +139,15 @@ export function installCardDragging(host,getState,onCommit){
    if(help)help.textContent='同じ行に条件カードを2枚以上置き、2枚目以降を右クリックしてください。';
    return;
   }
+  if(help){help.textContent='';help.classList.remove('condition-toggle-help');}
   const rule=legacyToCards(s.orders[row]);
   rule.conditions[index]={...rule.conditions[index],or:!rule.conditions[index].or};
   if(replaceCardRule(s,Number(row),rule))onCommit();
  };
- host.addEventListener('contextmenu',toggleAlternative);
+ // Native inputs/selects may consume contextmenu; handle the physical click first.
+ let rightClickHandledAt=0;
+ host.addEventListener('pointerdown',e=>{if(e.button!==2||!e.target.closest('[data-drag-source^="slot|"][data-card-kind="condition"]'))return;toggleAlternative(e);rightClickHandledAt=Date.now();},true);
+ host.addEventListener('contextmenu',e=>{if(rightClickHandledAt&&Date.now()-rightClickHandledAt<800){e.preventDefault();rightClickHandledAt=0;return;}toggleAlternative(e);});
  host.addEventListener('keydown',e=>{if((e.key==='ContextMenu'||e.shiftKey&&e.key==='F10')&&!e.target.closest('input,select'))toggleAlternative(e);});
 
  host.addEventListener('keydown',e=>{if(e.target.matches('[data-inline-condition]')&&e.key==='Enter'){e.preventDefault();e.target.dispatchEvent(new Event('change',{bubbles:true}));}else if(e.target.matches('.board-slot[role="group"]')&&['Enter',' '].includes(e.key)){e.preventDefault();e.target.click();}});
