@@ -521,3 +521,15 @@ html body.preparing #prepare-scene>#preparation-tabs button[data-tab]{border-ima
 html body .fitted-card-editor .order-row-controls>.skill-theme-badge{border:6px solid transparent;border-image:var(--gold-field) 30 fill / 6px / 0 repeat;border-radius:0;background:transparent;color:var(--gold-text);padding:1px 7px;box-sizing:border-box;height:28px;gap:5px;box-shadow:none}
 html body .fitted-card-editor .order-row-controls>.skill-theme-badge small{color:var(--gold-text);font-size:11px}
 html body .fitted-card-editor .palette-card:disabled{filter:grayscale(1)!important;opacity:.4!important;cursor:not-allowed}
+
+/* Carry the active tab sides into the frame; omit lower corner artwork. */
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab]{border-image-slice:65 65 0 65!important;clip-path:none}
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active{transform:translateY(5px)!important}
+html body .fitted-card-editor .order-row-controls>.skill-theme-badge{border-image-slice:30;border-image-width:6px;border-image-repeat:repeat;background:#263b39;border-image-source:var(--gold-field);border-image-slice:30;border-image-outset:0}
+html body .fitted-card-editor .order-row-controls>.skill-theme-badge:before{content:'';position:absolute;inset:3px;background:#263b39;z-index:-1}
+html body .fitted-card-editor .order-row-controls>.skill-theme-badge{isolation:isolate}
+html body .fitted-card-editor .palette-card:disabled{opacity:1!important;filter:none!important;background-color:#303030!important;background-blend-mode:luminosity}
+html body .fitted-card-editor .palette-card:disabled>:not(.card-placement-status){opacity:.45}
+html body .fitted-card-editor .palette-card .card-placement-status{z-index:7;bottom:5px;right:12px;color:#ffe29a;font-size:11px;font-weight:bold;line-height:1.3;background:#151b1a;padding:2px 6px;border:1px solid #a88c51;text-shadow:0 1px #000;opacity:1}
+
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active{height:33px;min-height:33px}
