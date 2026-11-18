@@ -21,7 +21,7 @@ dialog button:not(.illustrated-augment):not(.card-reward-choice):not(#will-advan
 [data-card-kind=condition]{--gold-card:var(--gold-card-condition);--card-width:194px}
 [data-card-kind=action]{--gold-card:var(--gold-card-action);--card-width:184.8px}
 [data-card-kind=skill]{--gold-card:var(--gold-card-skill);--card-width:190.4px}
-[data-condition-or]{--gold-card:var(--gold-card-alternative);--card-width:208px}
+[data-condition-or]{--gold-card:var(--gold-card-alternative);--card-width:194px}
 .fitted-card-editor :is(.palette-card,.board-slot),.reward-card,.codex-card-art{position:relative;background:var(--gold-card) center/contain no-repeat!important;border:0!important;box-shadow:none!important;color:#eee2c8!important;border-radius:0;padding:0!important;isolation:isolate}
 .fitted-card-editor :is(.palette-card,.board-slot):before{content:none!important}
 .fitted-card-editor .palette-card{height:auto;min-height:0;aspect-ratio:456/177;width:100%;font-size:13px;line-height:1.2}
@@ -357,7 +357,7 @@ html body *::-webkit-scrollbar-thumb,html body::-webkit-scrollbar-thumb{backgrou
 html body #prepare-scene #prep-hint{background:transparent!important;box-shadow:none!important;border:0!important}
 html body #prepare-scene #prep-hint:before,html body #prepare-scene #prep-hint:after{background:none!important;content:none!important}
 html body #prepare-scene .fitted-card-editor .card-library-tabs button{isolation:isolate;background:none!important}
-html body #prepare-scene .fitted-card-editor .card-library-tabs button:before{content:'';position:absolute;inset:3px;background:var(--button-background);clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px);z-index:-1;pointer-events:none}
+html body #prepare-scene .fitted-card-editor .card-library-tabs button:before{content:'';position:absolute;inset:3px;background:var(--button-background);clip-path:none;z-index:-1;pointer-events:none}
 html body *::-webkit-scrollbar-thumb,html body::-webkit-scrollbar-thumb{background:var(--gold-scroll-grip) center/100% auto no-repeat,var(--gold-scroll-cap-top) top/100% auto no-repeat,var(--gold-scroll-cap-bottom) bottom/100% auto no-repeat,var(--gold-scroll-body) center/100% auto repeat-y!important;border:0!important;box-shadow:none!important;min-height:38px}
 html body *::-webkit-scrollbar-thumb:horizontal{background:var(--gold-scroll-grip-horizontal) center/auto 100% no-repeat,var(--gold-scroll-cap-top-horizontal) right/auto 100% no-repeat,var(--gold-scroll-cap-bottom-horizontal) left/auto 100% no-repeat,var(--gold-scroll-body-horizontal) center/auto 100% repeat-x!important;min-width:38px}
 /* Left page navigation is centered within the actual left sheet. */
@@ -375,3 +375,16 @@ html body #prepare-scene .fitted-card-editor .card-library-tabs button[data-pale
 html body .fitted-card-editor .fixed-active{border:6px solid transparent;border-image:var(--gold-button) 58 fill / 6px / 0 repeat;border-radius:0;padding:3px 5px;min-height:30px;box-sizing:border-box}
 #codex-dialog .settings-layout>nav button{text-align:center!important;justify-content:center!important}
 @media(max-height:540px){#codex-dialog .settings-layout>nav{gap:5px;padding:2px 4%;overflow:auto}#codex-dialog .settings-layout>nav button{min-height:30px!important;padding:1px 3px!important;font-size:10px!important}#codex-body .codex-table{table-layout:fixed;font-size:10px}#codex-body .codex-table :is(th,td){padding:5px 3px;width:auto!important;min-width:0;overflow-wrap:anywhere}#codex-body .codex-table :is(th,td):first-child{width:64%!important}#codex-body .codex-table small{font-size:8px}}
+
+/* Warm antique-gold surfaces; keep approved tray artwork entirely independent. */
+html body #prepare-scene .fitted-card-editor .tray-surface{height:124px;padding:25px 64px 25px 78px;background-size:auto 124px,auto 124px}
+html body #prepare-scene .fitted-card-editor .tray-surface:before{inset:0 60px 0 72px;background-size:auto 124px}
+html body #prepare-scene .fitted-card-editor .board-rule .row-handle{left:20px;top:43px;width:40px;height:40px}
+html body #prepare-scene .fitted-card-editor .card-library-tabs button[data-palette-tab]:before{clip-path:none!important;inset:-1px!important}
+html body #prepare-scene .card-library-tabs button[data-palette-tab]{overflow:hidden;border-radius:2px}
+html body *::-webkit-scrollbar-track:horizontal{background:#332410!important;border-color:#88703e!important}
+html body *::-webkit-scrollbar-corner{background:#332410!important}
+
+/* Alternative conditions retain the identical slot dimensions and heading anchor. */
+html body .fitted-card-editor .board-slot[data-card-kind=condition][data-condition-or]{--card-width:194px;--gold-card:var(--gold-card-alternative)}
+html body .card-kind-label{left:30%;width:56%;top:6%;height:18%!important;max-height:none!important;display:flex!important;align-items:center;justify-content:center;text-align:center;line-height:1;transform:none}
