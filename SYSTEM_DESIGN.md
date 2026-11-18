@@ -189,7 +189,7 @@ Pagesの診断入力content_refはcheckoutのrefへ渡す。シェルには環�
 
 Git登録と公開配信は別管理する。Git登録ではdocs・story・テスト・制作スクリプト・再生成入力を保持し、公開配信はゲーム用ファイルのみ。互換主人公のbuild-mukuro-minimal.pyはart/characters/mukuro-minimal64-v1/source/manifest.jsonと原画14枚を参照し、outputへ依存しない。output等のローカル生成物は.gitignoreで除外する。
 
-準備外枠の上辺マスクはsyncPreparationTabFrameで選択タブのoffsetLeft/offsetWidthからCSS変数へ同期する。renderTab後およびタブ帯のResizeObserverで再計算し、画面全体の拡縮と独立した座標を使う。
+syncPreparationTabFrameは選択タブのoffsetLeft/offsetWidthとタブ帯高から、外枠上辺を兼ねるprep-joined-railのSVGパスを更新する。renderTab後およびタブ帯のResizeObserverで再計算し、拡縮と独立した場面内座標を使う。
 
 指示行テーマはorder-row-controls内で描画し、折りたたみ本文から独立する。区切り線はsection-divider.svg、配置先輪郭はcard-drop-outline.svgを共用する。
 
@@ -199,16 +199,18 @@ placeCardのパレット由来スキル配置時に、移動先以外の行のef
 
 augmentGrowthTextはAUGMENT_GROWTHから4段階の全パラメータを取得し、augmentStrengthに成長一覧を付加する。割合キーと会心率のstep/capは百分率へ変換する。
 
-タブ枠は9/12/1/12のスライスと7/7/0/7pxの描画幅を明示し、下辺を描かず左右辺を保つ。
+
 
 カード報酬の種類コンテナは未選択時だけ表示し、候補の説明段落に依存しない。
 
 HUDの成長値は改行ごとにaugment-growth-lineを生成し、nowrapで本文から分離する。カード灰色化は透明な疑似要素上の画像だけに適用する。
 
-選択タブの上角はtab-corner-left/right.svg、上・左右レールは独立した背景層で描画する。ゼロ高border-imageスライスに依存せず右辺を確保する。
+
 
 またはカードは元の金縁画像を保持し、同じ座標の内側疑似要素だけをクリップして緑化する。
 
 card-editorのfoldSummaryは常時描画し、開閉ではorder-fold-bodyだけを切り替える。旧tray-captionを生成しない。カード配置状態札はpalette-entryのdata-placement-statusと疑似要素に置き、カード画像のgrayscale/opacityから独立する。またはの内側レイヤーは旧マスクを明示解除する。
 
 ui-settingsのtutorialEnabledを読込・保存・初期値へ追加し、maybeTutorial/startTutorialとオーグメント案内を同じ設定で制御する。resetJourneyTutorialsは完了状態だけをリセットし、表示設定を保持する。報酬リロールはchest-reroll-actionsへ移動し、横画面でもグリッド最下段全幅の中央へ配置する。
+
+prep-joined-railは5/3/1pxの3ストロークを同じ単一輪郭へ重ね、主外枠の画像上辺中央だけをマスクする。左右下辺・角は採用済み画像で維持。通常ボタンの暗色版SVGは既存PNGを埋め込み、内側のみに黒を35%重ねる。共通変数gold-button-grayを差し替えて、金縁・文字・透明外周を保持する。
