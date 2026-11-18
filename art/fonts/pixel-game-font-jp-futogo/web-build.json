@@ -1,0 +1,9 @@
+{
+  "sourceSha256": "4fb1f020d514a7835c4df1aa94b9c0be26b684b1fdec75fce13b09fbf726c3c0",
+  "webSha256": "0662e4498627a28d4804f021ad09cf1dc2d64e2bd25a13b7c78d47d13737dedd",
+  "tool": "fonteditor-core",
+  "version": "2.6.3",
+  "glyphs": 16730,
+  "geometryMismatch": 0,
+  "license": "OFL-1.1"
+}

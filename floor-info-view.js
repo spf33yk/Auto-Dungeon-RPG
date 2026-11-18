@@ -1,0 +1,2 @@
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export function floorInfoMarkup(info){return '<dl class="preparation-floor-list">'+[['次のフロア',info.basement+' '+info.name],['異変',info.event],['出現する魔物',info.monsters.join('、')],['発動スキル',info.skill],['スキル内容',info.skillDetail||'なし']].map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+esc(value)+'</dd></div>').join('')+'</dl>';}

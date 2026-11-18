@@ -1,3 +1,4 @@
+import {floorInfoMarkup} from './floor-info-view.js';
 import {createAssetCache,preloadAssets,imageReady,videoReady,collectScreenImages,installScreenAssetGuard,prepareScreenAssets,screenFontsReady} from './screen-assets.js';
 import {GOLD_ART} from './gold-art.js';
 import {AUGMENT_IMAGES} from './augment-art.js';
@@ -299,7 +300,7 @@ function draw(){
  for(const label of layoutEnemyLabels(state.enemies.filter(enemy=>visible(enemy.x,enemy.y)),CELL))drawEnemyLabel(ctx,label.enemy,CELL,label.offset);
  const now=combat.time;damagePopups=damagePopups.filter(p=>damageFrame(p,now).alive);
  for(const p of damagePopups){if(!p.hero&&!visible(p.x,p.y))continue;const frame=damageFrame(p,now,{reducedMotion:reducedMotion.matches}),at=p.hero?position:p;ctx.save();ctx.globalAlpha=frame.alpha;ctx.font=p.critical?'bold 30px Futogo, Georgia, serif':'bold 25px Futogo, Georgia, serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineJoin='round';ctx.lineWidth=7;ctx.strokeStyle='#09090b';ctx.fillStyle=p.hero?'#ff9b99':'#ffe6a4';const x=at.x*CELL+CELL*(p.hero?.72:.5),y=at.y*CELL-(p.hero?34:42)-(p.hero?0:(enemyVisualSize(state.enemies.find(e=>e.x===p.x&&e.y===p.y)||{})-1)*CELL)-frame.rise*CELL/64;const text='−'+p.damage+(p.critical?'!':'');ctx.strokeText(text,x,y);ctx.fillText(text,x,y);ctx.restore();}
- if(skillPopup){const age=performance.now()-skillPopup.time;if(age<1000){ctx.save();ctx.globalAlpha=Math.min(1,(1000-age)/250);ctx.font='bold 18px Futogo, serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#091013';ctx.fillStyle='#f4df9a';const at=skillPopup.position||position,sx=(at.x+.5)*CELL,sy=at.y*CELL-24-age*.018;ctx.strokeText(skillPopup.name,sx,sy);ctx.fillText(skillPopup.name,sx,sy);ctx.restore();}else skillPopup=null;}
+ if(skillPopup){const age=performance.now()-skillPopup.time;if(age<1800){ctx.save();ctx.globalAlpha=Math.min(1,(1800-age)/350);ctx.font='bold 18px Futogo, serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#091013';ctx.fillStyle='#f4df9a';const at=skillPopup.position||position,sx=(at.x+.5)*CELL,sy=at.y*CELL-24-Math.min(age,1000)*.018;ctx.strokeText(skillPopup.name,sx,sy);ctx.fillText(skillPopup.name,sx,sy);ctx.restore();}else skillPopup=null;}
  ctx.restore();drawAutoMap();
 }
 
@@ -359,7 +360,7 @@ function renderAugments(){
   if(!notice.open)notice.showModal();
   return;
  }$('augment-reroll').hidden=false;$('augment-reroll').disabled=!offer||rerollCount(state,'augment')<1;$('augment-reroll').textContent='リロール（残り '+rerollCount(state,'augment')+'回）';$('augment-tutorial').hidden=!uiSettings.tutorialEnabled||!offer||!isTutorialJourney(state)||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){renderAugmentOwnedSkills();$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
- if(state.phase==='prepare'){const info=preparationFloorInfo(state);$('prep-hint').innerHTML='<dl class="preparation-floor-list">'+[['次のフロア',info.basement+' '+info.name],['異変',info.event],['出現する魔物',info.monsters.join('、')],['発動スキル',info.skill],['スキル内容',info.skillDetail||'なし']].map(([label,value])=>'<div><dt>'+esc(label)+'</dt><dd'+(label==='発動スキル'&&info.skillDetail?' title="'+esc(info.skillDetail)+'"':'')+'>'+esc(value)+'</dd></div>').join('')+'</dl>';}
+ if(state.phase==='prepare'){const info=preparationFloorInfo(state);$('prep-hint').innerHTML=floorInfoMarkup(info);}
 }
 $('debug-augment').innerHTML=augments.map(a=>'<option value="'+a.id+'">'+a.rarity+' · '+a.theme+' · '+a.name+'</option>').join('');
 $('second-journey-notice').addEventListener('cancel',e=>e.preventDefault());
@@ -441,7 +442,7 @@ function render(){
  $('map-notice').dataset.kind=resting?'rest':state.phase;
  const n=notices[state.phase]||(resting?['ひとやすみ','少し骨を休めよう。下の「探索を再開」で旅を続けられます。']:null);$('map-notice').hidden=!n||fieldMessages.active;$('map-notice').classList.toggle('has-hint',Boolean(n&&hint));
  $('notice-copy').innerHTML=n?'<strong>'+n[0]+'</strong><small>'+n[1]+'</small>':'';
- $('notice-hint').innerHTML=hint?'<div class="clear-hint"><h3>'+esc(displayStoryText(hint.title.replace(/^次は/,''),state.profile.normalClears))+'</h3><p>'+esc(displayStoryText(hint.text,state.profile.normalClears))+'</p></div>':'';
+ $('notice-hint').innerHTML=state.phase==='cleared'&&state.floor<LAST_FLOOR?'<div class="clear-hint">'+floorInfoMarkup(preparationFloorInfo(state,{floor:state.floor+1}))+'</div>':hint?'<div class="clear-hint"><h3>'+esc(displayStoryText(hint.title.replace(/^次は/,''),state.profile.normalClears))+'</h3><p>'+esc(displayStoryText(hint.text,state.profile.normalClears))+'</p></div>':'';
  $('primary').innerHTML=({awakening:'思い出す',prepare:'探索を始める',cleared:state.floor===LAST_FLOOR?'地上1Fへ':'準備画面へ',dead:'B25で再び目覚める',ending:'次の旅をはじめる'})[state.phase]||'';
  $('primary').hidden=state.phase==='explore';$('pause-toggle').hidden=state.phase!=='explore';$('explore-abandon').hidden=state.phase!=='explore';$('pause-toggle').textContent=paused?'探索を再開':'ひとやすみ';
  renderJourneyLog();
@@ -485,7 +486,7 @@ function holdLogs(key,hold){if(hold)logHolds.add(key);else logHolds.delete(key);
 for(const [id,prefix]of [['field-log-host','log'],['log-open','icon']]){const el=$(id);el.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch')holdLogs(prefix+'-hover',true);});el.addEventListener('pointerleave',()=>holdLogs(prefix+'-hover',false));el.addEventListener('focusin',()=>holdLogs(prefix+'-focus',true));el.addEventListener('focusout',e=>{if(!el.contains(e.relatedTarget))holdLogs(prefix+'-focus',false);});}
 $('field-log-host').addEventListener('pointerdown',e=>{if(e.pointerType==='touch')holdLogs('touch',true);});
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('#field-log-host,#log-open')){holdLogs('touch',false);if($('field-log-host').contains(document.activeElement))document.activeElement.blur();}});
-$('log-open').onclick=()=>{const runClears=Math.max(0,state.profile.normalClears-(state.phase==='ending'?1:0));$('full-log-count').textContent='この旅の記録 '+state.logs.length+'件';$('full-logs').innerHTML=[...state.logs].reverse().map(l=>'<div class="log-row '+esc(l.type)+'"><time>ターン '+String(l.turn).padStart(3,'0')+'</time><span>'+esc(displayStoryText(l.text,runClears))+'</span></div>').join('');openDialog('history-dialog');$('full-log-scroll').scrollTop=$('full-log-scroll').scrollHeight;};
+$('log-open').onclick=()=>{const runClears=Math.max(0,state.profile.normalClears-(state.phase==='ending'?1:0));$('full-log-count').textContent='この旅の記録';$('full-logs').innerHTML=[...state.logs].reverse().map(l=>'<div class="log-row '+esc(l.type)+'"><time>ターン '+String(l.turn).padStart(3,'0')+'</time><span>'+esc(displayStoryText(l.text,runClears))+'</span></div>').join('');openDialog('history-dialog');$('full-log-scroll').scrollTop=$('full-log-scroll').scrollHeight;};
 function itemCard(g,ref,equipped=false){
  const b=gearById[g.baseId],st=gearStats(g),target=typeof ref==='number'?'i'+ref:ref;
  return '<article class="item-card" data-gear-id="'+g.baseId+'"><div><small>'+ (b.slot==='weapon'?'武器':'防具')+(equipped?' · 装備中':'')+'</small><strong><span class="equipment-icon '+b.slot+'" aria-hidden="true"></span>'+esc(gearName(g))+'</strong><small>攻撃 '+st.attack+' / 防御 '+st.defense+'</small></div>'+(!equipped?'<div class="item-actions"><button data-action="equip" data-ref="'+target+'">装備</button><button data-action="discard" data-ref="'+target+'" class="text-button">処分</button></div>':'')+'</article>';
@@ -870,7 +871,7 @@ const gameAssetsReady=Promise.all([cryptAtlas,readableAtlas,trapAtlas,trapEffect
 const assetCache=createAssetCache(async url=>{const image=new Image();image.src=url;await imageReady(image);return image;});
 const commonImages=[...Object.values(GOLD_ART),...Object.values(THEME_IMAGES),...Object.values(AUGMENT_IMAGES),...collectScreenImages(document)];
 $('startup-message').textContent='画面の素材を読み込み中…';
-await Promise.all([titleAssetsReady,gameAssetsReady,preloadAssets(commonImages,{load:url=>assetCache.load(url),onProgress:(done,total)=>{if($('startup-retry').hidden)$('startup-message').textContent='画面の素材を読み込み中… '+done+' / '+total;}}),screenFontsReady(document.fonts,error=>{document.documentElement.dataset.fontFallback='true';console.warn('同梱フォントを使用できないため代替フォントで表示します。',error);})]);
+await Promise.all([titleAssetsReady,gameAssetsReady,preloadAssets(commonImages,{load:url=>assetCache.load(url),onProgress:(done,total)=>{if($('startup-retry').hidden)$('startup-message').textContent='画面の素材を読み込み中… '+done+' / '+total;}}),screenFontsReady(document.fonts).then(()=>{document.documentElement.dataset.fontReady='true';})]);
 await videoReady($('title-fx'),{enough:true});
 installScreenAssetGuard();
 drawHeroPortraits();draw();
