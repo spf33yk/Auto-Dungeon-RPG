@@ -119,3 +119,5 @@ Publish gameの手動実行にあるcontent_refは過去版との比較診断用
 GitHubにはゲーム本体・採用素材と必要な再生成入力・テスト／制作スクリプト・現行資料（docs・storyを含む）を保持します。output・タイトル動画用の再出力画像・未使用コンセプトはローカル保存とし、登録対象に含めません。Git履歴の書き換えは行いません。
 
 ゲーム内フォントはPixelGameFontJP Futogo（SIL Open Font License 1.1）です。[著作権表示とライセンス](art/fonts/pixel-game-font-jp-futogo/OFL.txt)を同梱しています。
+
+準備タブと下部情報欄の背景は透過し、選択中のタブは外枠と接続します。上下余白を抑え、カード編集領域を広く確保します。

@@ -188,3 +188,5 @@ data.equipmentのarmor-0は基礎DEF1。他防具は従来どおりrank×2。gea
 Pagesの診断入力content_refはcheckoutのrefへ渡す。シェルには環境変数として渡し、非空時はdeploy-version.jsonを付加しない。OIDCの配信版はワークフローのコミット、配信内容はcheckoutしたコミットとして比較する。
 
 Git登録と公開配信は別管理する。Git登録ではdocs・story・テスト・制作スクリプト・再生成入力を保持し、公開配信はゲーム用ファイルのみ。互換主人公のbuild-mukuro-minimal.pyはart/characters/mukuro-minimal64-v1/source/manifest.jsonと原画14枚を参照し、outputへ依存しない。output等のローカル生成物は.gitignoreで除外する。
+
+準備外枠の上辺マスクはsyncPreparationTabFrameで選択タブのoffsetLeft/offsetWidthからCSS変数へ同期する。renderTab後およびタブ帯のResizeObserverで再計算し、画面全体の拡縮と独立した座標を使う。

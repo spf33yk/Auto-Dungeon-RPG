@@ -487,7 +487,15 @@ function itemCard(g,ref,equipped=false){
  const b=gearById[g.baseId],st=gearStats(g),target=typeof ref==='number'?'i'+ref:ref;
  return '<article class="item-card" data-gear-id="'+g.baseId+'"><div><small>'+ (b.slot==='weapon'?'武器':'防具')+(equipped?' · 装備中':'')+'</small><strong><span class="equipment-icon '+b.slot+'" aria-hidden="true"></span>'+esc(gearName(g))+'</strong><small>攻撃 '+st.attack+' / 防御 '+st.defense+'</small></div>'+(!equipped?'<div class="item-actions"><button data-action="equip" data-ref="'+target+'">装備</button><button data-action="discard" data-ref="'+target+'" class="text-button">処分</button></div>':'')+'</article>';
 }
+function syncPreparationTabFrame(){
+ const scene=$('prepare-scene'),nav=$('preparation-tabs'),active=nav.querySelector('button.active');
+ if(!active)return;
+ scene.style.setProperty('--prep-tab-gap-left',(nav.offsetLeft+active.offsetLeft+1)+'px');
+ scene.style.setProperty('--prep-tab-gap-width',Math.max(0,active.offsetWidth-2)+'px');
+}
+new ResizeObserver(syncPreparationTabFrame).observe($('preparation-tabs'));
 function renderTab(){
+ requestAnimationFrame(syncPreparationTabFrame);
  if(tab==='skills')tab='orders';
  if(tab==='status')tab='gear';
  if(tab==='gear'){const host=$('tab-content'),scroll=host.querySelector('.gear-inventory-scroll'),top=host.dataset.gearSlot===gearSlot?scroll?.scrollTop||0:0,expanded=host.querySelector('.gear-details')?.open;host.dataset.gearSlot=gearSlot;host.innerHTML=equipmentPanel(state,{slot:gearSlot,sort:gearSorts[gearSlot],tabs:categoryTabs('gear',gearSlot),sorts:sortButtons('gear',gearSorts[gearSlot]),details:$('expedition-summary').innerHTML.replace(/\sid="[^"]*"/g,''),sight:radius(state)});host.querySelector('.gear-inventory-scroll').scrollTop=top;host.querySelector('.gear-details').open=Boolean(expanded);}

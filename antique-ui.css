@@ -486,3 +486,15 @@ html body.preparing #prepare-scene>#preparation-tabs{position:relative;z-index:4
 html body.preparing #prepare-scene>#preparation-tabs button[data-tab]{position:relative;height:29px;min-height:29px;padding:4px 17px;border:1px solid #927b4b!important;border-image:none!important;border-radius:5px 5px 0 0!important;background:linear-gradient(#3b4241,#242b2b)!important;box-shadow:inset 0 1px #cfbf8c33!important;transform:none;line-height:1.3}
 html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active{height:34px;min-height:34px;background:linear-gradient(#49504c,#1c2523)!important;border-bottom-color:#1c2523!important;box-shadow:inset 0 2px #d0b57a!important}
 html body.preparing #prepare-scene{padding-top:0!important}
+
+/* Transparent attached tabs remove only their connected frame segment. */
+html body.preparing #prepare-scene:before{inset:28px 0 0;mask-image:linear-gradient(#000,#000),linear-gradient(#000,#000);mask-size:100% 100%,var(--prep-tab-gap-width,0px) 10px;mask-position:0 0,var(--prep-tab-gap-left,0px) 0;mask-repeat:no-repeat;mask-composite:exclude}
+html body.preparing #prepare-scene>#preparation-tabs{height:28px;min-height:28px;background:transparent!important}
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab]{height:25px;min-height:25px;padding:3px 17px;background:transparent!important;box-shadow:none!important;font-size:12px}
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active{height:28px;min-height:28px;background:transparent!important;border-bottom-color:transparent!important;box-shadow:none!important}
+html body.preparing #prepare-scene>#preparation-tabs button.active:after{content:none!important}
+html body.preparing #prepare-scene>.preparation-launch{background:transparent!important;box-shadow:none!important;padding:3px 16px;min-height:84px}
+html body.preparing #prepare-scene>.preparation-launch #prep-hint{line-height:1.3}
+.preparation-floor-list{gap:1px}
+html body.preparing #prepare-scene>#tab-content{padding-top:9px}
+@media(max-height:540px){html body.preparing #prepare-scene>.preparation-launch{padding:3px 12px;min-height:84px}}
