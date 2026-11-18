@@ -204,3 +204,5 @@ augmentGrowthTextはAUGMENT_GROWTHから4段階の全パラメータを取得し
 カード報酬の種類コンテナは未選択時だけ表示し、候補の説明段落に依存しない。
 
 HUDの成長値は改行ごとにaugment-growth-lineを生成し、nowrapで本文から分離する。カード灰色化は透明な疑似要素上の画像だけに適用する。
+
+選択タブの上角はtab-corner-left/right.svg、上・左右レールは独立した背景層で描画する。ゼロ高border-imageスライスに依存せず右辺を確保する。
