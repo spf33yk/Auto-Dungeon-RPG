@@ -356,7 +356,7 @@ function renderAugments(){
   if(!notice.open)notice.showModal();
   return;
  }$('augment-reroll').hidden=false;$('augment-reroll').disabled=!offer||rerollCount(state,'augment')<1;$('augment-reroll').textContent='リロール（残り '+rerollCount(state,'augment')+'回）';$('augment-tutorial').hidden=!offer||!isTutorialJourney(state)||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){renderAugmentOwnedSkills();$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
- if(state.phase==='prepare'){const info=preparationFloorInfo(state);$('prep-hint').innerHTML='<dl class="preparation-floor-list">'+[['次のフロア',info.basement],['フロア名',info.name],['異変',info.event],['出現する魔物',info.monsters.join('、')],['発動スキル',info.skill]].map(([label,value])=>'<div><dt>'+esc(label)+'</dt><dd'+(label==='発動スキル'&&info.skillDetail?' title="'+esc(info.skillDetail)+'"':'')+'>'+esc(value)+'</dd></div>').join('')+'</dl>';}
+ if(state.phase==='prepare'){const info=preparationFloorInfo(state);$('prep-hint').innerHTML='<dl class="preparation-floor-list">'+[['次のフロア',info.basement+' '+info.name],['異変',info.event],['出現する魔物',info.monsters.join('、')],['発動スキル',info.skill],['スキル内容',info.skillDetail||'なし']].map(([label,value])=>'<div><dt>'+esc(label)+'</dt><dd'+(label==='発動スキル'&&info.skillDetail?' title="'+esc(info.skillDetail)+'"':'')+'>'+esc(value)+'</dd></div>').join('')+'</dl>';}
 }
 $('debug-augment').innerHTML=augments.map(a=>'<option value="'+a.id+'">'+a.rarity+' · '+a.theme+' · '+a.name+'</option>').join('');
 $('second-journey-notice').addEventListener('cancel',e=>e.preventDefault());

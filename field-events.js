@@ -36,5 +36,5 @@ export function nextStageHint(s){
 // Preparation already points at the floor that will be explored next.
 export function preparationFloorInfo(s){
  const floor=s.floor,z=zones[zoneIndexForFloor(floor)],boss=bossForFloor(floor),event=fieldPlan(s.seed,floor),skill=s.profile?.normalClears>0?bossSkills[boss?.id]:null;
- return {basement:'B'+(NORMAL_FLOORS+1-floor),name:z.name,event:event.id==='none'?'なし':event.name,monsters:boss?[boss.name]:[monsters[z.index*2].name,monsters[z.index*2+1].name],skill:skill?skill.name+'（各戦闘1回）':'なし',skillDetail:skill?skill.detail+' 各戦闘1回。':''};
+ return {basement:'B'+(NORMAL_FLOORS+1-floor),name:z.name,event:event.id==='none'?'なし':event.name,monsters:boss?[boss.name]:[monsters[z.index*2].name,monsters[z.index*2+1].name],skill:skill?skill.name:'なし',skillDetail:skill?skill.detail+' 各戦闘1回。':''};
 }

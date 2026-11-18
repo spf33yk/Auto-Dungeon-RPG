@@ -634,3 +634,12 @@ TRUE ENDの炎に添付SEを5%で追加し、映像の消え際と同じ1.5秒�
 - 無音ローカルverify=1、本編1280×720で探索指示・装備・拡張の下部位置維持を確認。844×390でfooterのclientWidth/scrollWidthは1280/1280、info327/327、summary598/598、情報dd253/253で横はみ出しなし。画像はoutput/preparation-layout-v2。
 - 公開版実操作・Safari・スマホ実機は未確認。ローカル本編と配信ハッシュ整合を確認する変更のため公開操作は省略。保存形式・カード効果・報酬抽選・予測計算は変更しない。
 - 全510テスト成功。node scripts/update-assets.js --check、git diff --check成功。
+
+
+## 外枠接続タブとフロア情報の整形
+- 基点11618e8。準備外枠をworkspaceの擬似要素からprepare-sceneの擬似要素へ移し、タブと同じ重なり順で描画。34pxのタブ帯の下端と外枠上辺を一致させ、選択中の下辺を開いた。接続形状はCSSの固定角と金縁で描画し、新規の画像素材は不要。
+- フロア情報を階層＋名前、異変、魔物、スキル名、スキル内容の5行へ整理。名称は右、値は左揃え。スキル名から回数の括弧を外し、内容行へ効果・各戦闘1回を表示。B20の詳細に回数が含まれることも既存テストで確認。
+- 通常ボタンと固定有効表示のCSS背景・影を除去。素材の角alpha=0、rule-toggleの背景RGBA0・background-image none・box-shadow noneを確認。画像の金縁内だけにグレーを描く。
+- 無音ローカル1280×720でタブ帯下端138px、prepare-scene上端104px＋外枠inset34pxが一致。探索指示と装備の選択切替を目視。844×390で情報欄clientWidth/scrollWidth327/327、footer1280/1280で横はみ出しなし。画像はoutput/attached-preparation-tabs。
+- 公開版実操作、Safari、スマホ実機は未確認。ローカル本編と配信URLの整合を確認する変更のため公開操作は省略。保存形式・スキルの性能・カード判定は変更しない。
+- 全510テスト成功。node scripts/update-assets.js --check、git diff --check成功。
