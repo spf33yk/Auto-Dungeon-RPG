@@ -557,3 +557,8 @@ html body .fitted-card-editor .palette-card:disabled:before{content:''!important
 
 /* End the active rails at the main frame, above the inner card panels. */
 html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active:before{border:0!important;border-image:none!important;bottom:-5px;left:0;right:0;background:url('art/ui/antique-gold-v1/tab-corner-left.svg') left top/9px 9px no-repeat,url('art/ui/antique-gold-v1/tab-corner-right.svg') right top/9px 9px no-repeat,linear-gradient(#71542c,#ddc17b,#9d824e) center top/calc(100% - 18px) 5px no-repeat,linear-gradient(90deg,#71542c,#ddc17b,#9d824e) left bottom/5px calc(100% - 9px) no-repeat,linear-gradient(90deg,#9d824e,#ddc17b,#71542c) right bottom/5px calc(100% - 9px) no-repeat!important}
+
+/* Keep the original gold rim; recolor only the inset card face. */
+html body #prepare-scene .fitted-card-editor .board-slot[data-condition-or]{filter:none!important}
+html body #prepare-scene .fitted-card-editor .board-slot[data-condition-or]:is(:hover,:focus-within){filter:brightness(1.25)!important}
+html body #prepare-scene .fitted-card-editor .board-slot[data-condition-or]:before{content:''!important;position:absolute;inset:0;background:var(--gold-card-condition) center/contain no-repeat;filter:url(#condition-green-filter);clip-path:polygon(8% 12%,90% 12%,94% 25%,94% 38%,99% 47%,99% 54%,94% 63%,94% 76%,90% 88%,8% 88%,4% 76%,4% 64%,9% 54%,9% 46%,4% 36%,4% 24%);z-index:-1;pointer-events:none}

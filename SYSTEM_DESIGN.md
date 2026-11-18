@@ -206,3 +206,5 @@ augmentGrowthTextはAUGMENT_GROWTHから4段階の全パラメータを取得し
 HUDの成長値は改行ごとにaugment-growth-lineを生成し、nowrapで本文から分離する。カード灰色化は透明な疑似要素上の画像だけに適用する。
 
 選択タブの上角はtab-corner-left/right.svg、上・左右レールは独立した背景層で描画する。ゼロ高border-imageスライスに依存せず右辺を確保する。
+
+またはカードは元の金縁画像を保持し、同じ座標の内側疑似要素だけをクリップして緑化する。
