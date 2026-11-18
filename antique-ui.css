@@ -498,3 +498,20 @@ html body.preparing #prepare-scene>.preparation-launch #prep-hint{line-height:1.
 .preparation-floor-list{gap:1px}
 html body.preparing #prepare-scene>#tab-content{padding-top:9px}
 @media(max-height:540px){html body.preparing #prepare-scene>.preparation-launch{padding:3px 12px;min-height:84px}}
+
+/* Matched frame rails and aligned instruction controls. */
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab]{border:5px solid transparent!important;border-bottom:0!important;border-image:var(--gold-window) 65 / 5px / 0 repeat!important;border-radius:0!important;padding:1px 13px;height:27px;min-height:27px}
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active{height:28px;min-height:28px}
+html body .fitted-card-editor .order-row-controls{display:flex;align-items:center;gap:6px;min-height:28px;margin:2px 0 5px}
+html body.preparing #prepare-scene .fitted-card-editor .order-row-controls>:is(.rule-toggle,.order-fold-button,.fixed-active){height:28px;min-height:28px;display:flex;align-items:center;justify-content:center;padding:0 5px;box-sizing:border-box}
+html body.preparing #prepare-scene .fitted-card-editor .order-row-controls>.rule-toggle{width:44px;flex:0 0 44px}
+html body.preparing #prepare-scene .fitted-card-editor .order-row-controls>.order-fold-button{width:86px;flex:0 0 86px}
+html body .fitted-card-editor .order-row-controls>.skill-theme-badge{margin:0!important;height:24px;flex:none}
+html body .fitted-card-editor .order-fold-summary{height:28px;min-height:28px;padding:1px 7px}
+html body .fitted-card-editor .fixed-stair-order{border-top:0!important;padding-top:18px!important;position:relative}
+html body .fitted-card-editor .fixed-stair-order:before{content:'';position:absolute;top:0;left:0;right:0;height:12px;background:url('art/ui/antique-gold-v1/section-divider.svg') center/512px 12px repeat-x}
+html body .fitted-card-editor .card-library-tabs:after{content:'';grid-column:1/-1;display:block;height:12px;background:url('art/ui/antique-gold-v1/section-divider.svg') center/512px 12px repeat-x}
+html body .fitted-card-editor :is(.board-slot,.palette-card).valid-drop{outline:none!important}
+html body .fitted-card-editor :is(.board-slot,.palette-card).valid-drop:after{content:'';position:absolute;inset:0;background:url('art/ui/antique-gold-v1/card-drop-outline.svg') center/100% 100% no-repeat;pointer-events:none;z-index:5}
+
+html body.preparing #prepare-scene .fitted-card-editor .order-row-controls>:is(.rule-toggle,.order-fold-button,.fixed-active){height:28px!important;min-height:28px!important}

@@ -190,3 +190,5 @@ Pagesの診断入力content_refはcheckoutのrefへ渡す。シェルには環�
 Git登録と公開配信は別管理する。Git登録ではdocs・story・テスト・制作スクリプト・再生成入力を保持し、公開配信はゲーム用ファイルのみ。互換主人公のbuild-mukuro-minimal.pyはart/characters/mukuro-minimal64-v1/source/manifest.jsonと原画14枚を参照し、outputへ依存しない。output等のローカル生成物は.gitignoreで除外する。
 
 準備外枠の上辺マスクはsyncPreparationTabFrameで選択タブのoffsetLeft/offsetWidthからCSS変数へ同期する。renderTab後およびタブ帯のResizeObserverで再計算し、画面全体の拡縮と独立した座標を使う。
+
+指示行テーマはorder-row-controls内で描画し、折りたたみ本文から独立する。区切り線はsection-divider.svg、配置先輪郭はcard-drop-outline.svgを共用する。
