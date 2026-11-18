@@ -192,3 +192,5 @@ Git登録と公開配信は別管理する。Git登録ではdocs・story・テ�
 準備外枠の上辺マスクはsyncPreparationTabFrameで選択タブのoffsetLeft/offsetWidthからCSS変数へ同期する。renderTab後およびタブ帯のResizeObserverで再計算し、画面全体の拡縮と独立した座標を使う。
 
 指示行テーマはorder-row-controls内で描画し、折りたたみ本文から独立する。区切り線はsection-divider.svg、配置先輪郭はcard-drop-outline.svgを共用する。
+
+placeCardのパレット由来スキル配置時に、移動先以外の行のeffect重複を検査する。canPlaceCardも同じ判定を共有する。カード一覧は配置済みスキルを明示的にdisabledとし、カード交換は既存の原子的処理を維持する。

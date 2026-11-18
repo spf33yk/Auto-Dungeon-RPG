@@ -77,3 +77,19 @@ test('trash removes only placed conditions or entire rows during preparation',()
 test('removing essential cards removes their row and never edits during exploration',()=>{
  for(const type of ['target','effect']){const s=prep();assert.equal(removePlacedCard(s,slot(0,type,0)),true);assert.equal(s.orders.length,1);assert.ok(validCardRule(s,s.orders[0]));s.phase='explore';const before=JSON.stringify(s);assert.equal(removePlacedCard(s,slot(0,type,0)),false);assert.equal(JSON.stringify(s),before);}
 });
+
+test('a skill cannot be copied to another row, including disabled rows; swapping remains possible',()=>{
+ const s=prep();s.abilities.push('mend');
+ assert.equal(placeCard(s,palette('skill','mend'),dest(0,'effect')),true);
+ const before=structuredClone(s.orders);
+ assert.equal(canPlaceCard(s,palette('skill','mend'),dest(1,'effect')),false);
+ assert.equal(placeCard(s,palette('skill','mend'),dest(1,'effect')),false);
+ assert.deepEqual(s.orders,before);
+ s.orders[0].disabled=true;
+ assert.equal(placeCard(s,palette('skill','mend'),dest(1,'effect')),false);
+ assert.equal(placeCard(s,slot(0,'effect'),dest(1,'effect')),true);
+ assert.equal(s.orders[1].effect.id,'mend');
+ assert.equal(s.orders[0].effect.kind,'action');
+ assert.equal(removePlacedCard(s,slot(1,'effect')),true);
+ assert.equal(canPlaceCard(s,palette('skill','mend'),dest(0,'effect')),true);
+});

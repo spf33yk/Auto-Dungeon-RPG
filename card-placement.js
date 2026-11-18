@@ -16,7 +16,8 @@ export function placeCard(s,source,destination){
    const value=conditionDefault(source.id);if(source.value!==undefined&&conditionById[source.id].param)value.value=source.value;if(destination.insert)dest.conditions.splice(ci,0,value);else if(ci===dest.conditions.length)dest.conditions.push(value);else dest.conditions[ci]=value;
   }else if(['action','skill'].includes(source.type)&&slot==='effect'){
    const list=source.type==='action'?actionCards:skillCards,card=list.find(c=>c.id===source.id);
-   if(!effectUnlocked(s,card))return false;dest.effect={kind:source.type,id:source.id};
+   if(!effectUnlocked(s,card))return false;
+   if(source.type==='skill'&&rows.some((r,i)=>i!==destination.row&&r.effect.kind==='skill'&&r.effect.id===source.id))return false;dest.effect={kind:source.type,id:source.id};
   }else return false;
  }else if(source.origin==='slot'){
   const si=Number(source.index),sr=Number(source.row);if(!Number.isInteger(sr)||!rows[sr]||source.slot!==slot)return false;

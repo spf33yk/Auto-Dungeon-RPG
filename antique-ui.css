@@ -515,3 +515,9 @@ html body .fitted-card-editor :is(.board-slot,.palette-card).valid-drop{outline:
 html body .fitted-card-editor :is(.board-slot,.palette-card).valid-drop:after{content:'';position:absolute;inset:0;background:url('art/ui/antique-gold-v1/card-drop-outline.svg') center/100% 100% no-repeat;pointer-events:none;z-index:5}
 
 html body.preparing #prepare-scene .fitted-card-editor .order-row-controls>:is(.rule-toggle,.order-fold-button,.fixed-active){height:28px!important;min-height:28px!important}
+
+/* Open-bottom tabs join the main frame without a separate lower rail. */
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab]{border-image-width:5px 5px 0!important;clip-path:inset(0 0 0 0);border-bottom-width:0!important}
+html body .fitted-card-editor .order-row-controls>.skill-theme-badge{border:6px solid transparent;border-image:var(--gold-field) 30 fill / 6px / 0 repeat;border-radius:0;background:transparent;color:var(--gold-text);padding:1px 7px;box-sizing:border-box;height:28px;gap:5px;box-shadow:none}
+html body .fitted-card-editor .order-row-controls>.skill-theme-badge small{color:var(--gold-text);font-size:11px}
+html body .fitted-card-editor .palette-card:disabled{filter:grayscale(1)!important;opacity:.4!important;cursor:not-allowed}
