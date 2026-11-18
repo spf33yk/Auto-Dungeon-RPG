@@ -19,6 +19,7 @@ export const GOLD_ART={
   "kind-condition": "./art/ui/antique-gold-v1/kind-condition.png?v=da177ba18aeb",
   "kind-skill": "./art/ui/antique-gold-v1/kind-skill.png?v=41aff171829a",
   "kind-target": "./art/ui/antique-gold-v1/kind-target.png?v=f2ae6b7dcaf2",
+  "rail-track": "./art/ui/antique-gold-v1/rail-track.png?v=fa020306cde2",
   "rail": "./art/ui/antique-gold-v1/rail.png?v=092eb8de84ce",
   "reward": "./art/ui/antique-gold-v1/reward.png?v=07437a71fd06",
   "slot": "./art/ui/antique-gold-v1/slot.png?v=9fc07263a9d2",

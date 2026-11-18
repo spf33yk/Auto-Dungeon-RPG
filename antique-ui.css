@@ -4,7 +4,7 @@ body{scrollbar-color:#9b814f #101615;scrollbar-width:thin}
 *::-webkit-scrollbar{width:8px;height:8px}*::-webkit-scrollbar-track{background:#101615}*::-webkit-scrollbar-thumb{background:#8b7347;border:2px solid #101615;border-radius:4px}*::-webkit-scrollbar-thumb:hover{background:#c5a76a}
 dialog:not(.field-event-dialog){border:10px solid transparent;border-image:var(--gold-window) 65 fill / 10px / 0 repeat;background:#101615;color:var(--gold-text);box-sizing:border-box;max-width:calc(100vw - 20px);scrollbar-width:thin}
 button{font-family:Futogo,sans-serif}
-dialog button:not(.illustrated-augment):not(.card-reward-choice):not(#will-advance):not(.subtitle-advance),#hud-bottom :is(.pause-toggle,.speed button),body.preparing #prepare-scene button:not(.palette-card):not(.board-slot):not(.row-handle):not(.insert-condition){border:9px solid transparent;border-image:var(--gold-button) 58 fill / 9px / 0 repeat;background:transparent;color:var(--gold-text);box-shadow:none;border-radius:0;min-height:30px;box-sizing:border-box;line-height:1.3;padding:3px 8px}
+dialog button:not(.illustrated-augment):not(.card-reward-choice):not(#will-advance):not(.subtitle-advance),#hud-bottom :is(.pause-toggle,.speed button),body.preparing #prepare-scene button:not(.palette-card):not(.board-slot):not(.row-handle):not(.insert-condition){border:9px solid transparent;border-image:var(--gold-button) 58 var(--button-fill,fill) / 9px / 0 repeat;background:transparent;color:var(--gold-text);box-shadow:none;border-radius:0;min-height:30px;box-sizing:border-box;line-height:1.3;padding:3px 8px}
 :is(dialog,#hud-bottom,#prepare-scene) button:disabled{opacity:.42}
 :is(dialog,#hud-bottom,#prepare-scene) button:focus-visible{outline:2px solid #e4c57f;outline-offset:1px}
 :is(dialog,#hud-bottom,#prepare-scene) button:not(:disabled):hover{filter:brightness(1.18)}
@@ -68,7 +68,7 @@ body:is(.exploring,.preparing) #hud-top #hp-bar{height:100%;max-width:100%;box-s
 /* Shared reward tables, consistent symbols. */
 #card-choice-dialog{width:min(1080px,96vw);max-height:94dvh;padding:20px 22px;overflow:auto}
 #chest-card-categories{gap:12px;margin:12px 0 16px}
-#chest-card-categories button{min-height:83px;gap:4px;align-items:center;justify-content:center;padding:9px 14px;border-image:var(--gold-button) 58 fill / 10px / 0 repeat;flex-direction:row;flex-wrap:wrap}
+#chest-card-categories button{min-height:83px;gap:4px;align-items:center;justify-content:center;padding:9px 14px;border-image:var(--gold-button) 58 var(--button-fill,fill) / 10px / 0 repeat;flex-direction:row;flex-wrap:wrap}
 #chest-card-categories button>.card-kind-icon{width:28px;height:28px}
 #chest-card-categories strong{font-size:18px;line-height:1.3}
 #chest-card-categories :is(small,.chest-category-rarity){flex-basis:100%;text-align:center;font-size:11px}
@@ -139,8 +139,8 @@ body:is(.exploring,.preparing) #hud-top #hp-bar{height:100%;max-width:100%;box-s
 @media(max-width:620px){#card-choice-list{grid-template-columns:minmax(0,1fr)}#chest-card-categories{gap:6px}#chest-owned-augments>div{grid-template-columns:1fr}#codex-dialog{padding:25px 30px}#codex-dialog .settings-layout{grid-template-columns:28% minmax(0,1fr);gap:16%}}
 /* Artwork wins over legacy panel shorthand without changing special cinematic buttons. */
 html body dialog:not(.field-event-dialog):not(#codex-dialog){border:10px solid transparent!important;border-image:var(--gold-window) 65 fill / 10px / 0 repeat!important}
-html body dialog:not(.field-event-dialog):not(#codex-dialog) button:not(.illustrated-augment):not(.card-reward-choice):not(.subtitle-advance){border-image:var(--gold-button) 58 fill / 9px / 0 repeat!important}
-html body #prepare-scene button:not(.palette-card):not(.board-slot):not(.row-handle):not(.insert-condition){border-image:var(--gold-button) 58 fill / 8px / 0 repeat!important;background:transparent!important}
+html body dialog:not(.field-event-dialog):not(#codex-dialog) button:not(.illustrated-augment):not(.card-reward-choice):not(.subtitle-advance){border-image:var(--gold-button) 58 var(--button-fill,fill) / 9px / 0 repeat!important}
+html body #prepare-scene button:not(.palette-card):not(.board-slot):not(.row-handle):not(.insert-condition){border-image:var(--gold-button) 58 var(--button-fill,fill) / 8px / 0 repeat!important;background:var(--button-background,transparent)!important}
 html body #prepare-scene :is(.tabs,.subtabs) button{border-image-source:var(--gold-tab)!important}
 body.preparing #prepare-scene .fitted-card-editor .tray-surface{zoom:1}
 #codex-dialog[open]{display:flex;flex-direction:column;width:min(1200px,calc(94dvh * 1200 / 798),98vw);height:min(798px,94dvh,calc(98vw * 798 / 1200));aspect-ratio:1200/798;background-size:contain}
@@ -149,7 +149,7 @@ body.preparing #prepare-scene .fitted-card-editor .tray-surface{zoom:1}
 #codex-dialog .settings-footer #codex-note{flex:1;margin:0;font-size:11px;line-height:1.4;color:#382f23}
 #codex-dialog .settings-heading{flex:none}
 #codex-dialog #codex-body{background:transparent;border:0;margin:0;max-height:none}
-*::-webkit-scrollbar-track:vertical{background:#101615 var(--gold-rail) center/8px auto repeat-y}
+*::-webkit-scrollbar-track:vertical{background:#101615 var(--gold-rail-track) center/8px auto repeat-y}
 @media(max-height:540px){body.preparing #prepare-scene .fitted-card-editor .tray-surface{zoom:.88}#codex-dialog .settings-footer #codex-note{font-size:9px}}
 #codex-dialog .settings-layout{grid-template-columns:minmax(130px,41%) minmax(0,1fr);gap:13%}
 #codex-body .card-codex-item p{color:#241e16;font-size:14px;line-height:1.7}
@@ -258,4 +258,84 @@ body:is(.preparing,.exploring) #hud-top .icon-button{border:6px solid transparen
  #augment-dialog>#augment-owned-skills{grid-column:1;grid-row:5;min-width:0;width:100%;font-size:10px;margin:0}
  #augment-dialog>#augment-owned-skills>summary{padding:5px;line-height:1.4}
  #augment-dialog #augment-skill-groups{grid-template-columns:minmax(0,1fr);max-height:150px;overflow:auto;gap:4px}
+}
+/* Component refinements: selected surfaces must not be covered by image fill. */
+html body :is(dialog .dialog-close,.preset-close){display:grid;place-items:center;box-sizing:border-box;width:36px;height:36px;min-height:36px;flex:none;padding:0!important;border-width:6px!important;font-size:0!important;line-height:1!important;text-align:center}
+html body :is(dialog .dialog-close,.preset-close):before{content:'';display:block;width:15px;height:15px;background:linear-gradient(45deg,transparent calc(50% - 1px),#eaddba calc(50% - 1px),#eaddba calc(50% + 1px),transparent calc(50% + 1px)),linear-gradient(-45deg,transparent calc(50% - 1px),#eaddba calc(50% - 1px),#eaddba calc(50% + 1px),transparent calc(50% + 1px));pointer-events:none}
+html body :is(#load-game-dialog,#new-game-dialog,#abandon-dialog,#augment-confirm-dialog,#second-journey-notice,#options-confirm-dialog){width:min(540px,calc(100vw - 32px));max-width:540px;padding:28px 26px;max-height:calc(100dvh - 24px);overflow:auto;line-height:1.7}
+html body :is(#load-game-dialog,#new-game-dialog,#abandon-dialog,#augment-confirm-dialog) h2{padding-right:28px;font-size:21px;line-height:1.5;margin:8px 0 14px}
+html body :is(#load-game-dialog,#new-game-dialog,#abandon-dialog) .abandon-confirm-actions{gap:10px;margin-top:18px}
+html body :is(#load-game-dialog,#new-game-dialog,#abandon-dialog) .abandon-confirm-actions>button{min-height:38px;line-height:1.4;padding:4px 8px}
+/* Shared active state for navigation, filters and extension selection. */
+html body :is(.tabs,.subtabs,[role=tablist],.card-library-tabs,.settings-layout nav,.sort-controls,.speed) button:is(.active,[aria-selected=true],[aria-pressed=true]),html body .extension-node.selected{
+ --button-fill: ;--button-background:linear-gradient(120deg,#d8c183,#ac8c43 55%,#c9ad68);--button-ink:#171b13;
+ background:var(--button-background)!important;color:var(--button-ink)!important;box-shadow:inset 0 0 0 2px #e9d397,inset 0 -3px #84652f!important;filter:none;font-weight:bold;text-shadow:none;
+}
+html body :is(.tabs,.subtabs,[role=tablist],.card-library-tabs,.settings-layout nav,.sort-controls,.speed) button:is(.active,[aria-selected=true],[aria-pressed=true]):hover{filter:brightness(1.08)}
+html body .extension-node.selected :is(strong,small){color:#171b13}
+html body #prepare-scene #primary{--button-fill: ;border-image:var(--gold-button) 58 / 8px / 0 repeat!important;background:linear-gradient(120deg,#e2cd90,#b59445 55%,#d8bd78)!important;color:#171c13!important;text-shadow:none;filter:none;font-weight:bold;box-shadow:inset 0 1px #fff0ba,inset 0 0 0 2px #a08241!important}
+html body #prepare-scene #primary:hover:not(:disabled){filter:brightness(1.08)}
+/* Uniform type selectors keep their own card colours even when selected. */
+body.preparing #prepare-scene .fitted-card-editor .card-library-tabs{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:4px}
+body.preparing #prepare-scene .fitted-card-editor .card-library-tabs button{--button-fill: ;box-sizing:border-box;width:100%;min-width:0;max-width:100%;height:32px;min-height:32px;display:flex;align-items:center;justify-content:center;gap:3px;padding:2px 4px;border-width:7px;font-size:10px;line-height:1.2;white-space:nowrap;position:relative;color:#eee2c8!important}
+#prepare-scene .card-library-tabs button[data-palette-tab=target]{--button-background:linear-gradient(#304552,#182830)}
+#prepare-scene .card-library-tabs button[data-palette-tab=condition]{--button-background:linear-gradient(#66552e,#382e19)}
+#prepare-scene .card-library-tabs button[data-palette-tab=action]{--button-background:linear-gradient(#674331,#37231c)}
+#prepare-scene .card-library-tabs button[data-palette-tab=skill]{--button-background:linear-gradient(#503d5e,#2a2034)}
+#prepare-scene .card-library-tabs button[data-palette-tab=target].active{--button-background:linear-gradient(#54758a,#345466)}
+#prepare-scene .card-library-tabs button[data-palette-tab=condition].active{--button-background:linear-gradient(#9b8343,#6b562b)}
+#prepare-scene .card-library-tabs button[data-palette-tab=action].active{--button-background:linear-gradient(#9b664a,#6c4432)}
+#prepare-scene .card-library-tabs button[data-palette-tab=skill].active{--button-background:linear-gradient(#826395,#543c65)}
+#prepare-scene .card-library-tabs button .card-kind-icon{width:14px;height:14px;margin:0;flex:none}
+#prepare-scene .card-library-tabs .card-tab-new{position:absolute;right:3px;top:1px;font-size:7px;line-height:1;color:#ffe69a}
+html body .fitted-card-editor :is(.palette-card,.board-slot)>.card-rarity{left:50%;right:auto;width:70%;transform:translateX(-50%);text-align:center;top:82%}
+html body :is(.reward-card-rarity,.gold-card-rarity){left:50%;right:auto;width:70%;transform:translateX(-50%);text-align:center;top:82%}
+html body .fitted-card-editor .board-rule .row-handle{left:17px;top:37px;width:36px;height:36px;display:grid;place-items:center;padding:0;line-height:1;text-align:center}
+html body .fitted-card-editor .row-handle .priority-number{display:block;position:static;width:100%;text-align:center;line-height:1;margin:0;transform:translateY(-1px)}
+/* Continuous, quiet scrollbar track; end ornaments are not repeated mid-track. */
+*::-webkit-scrollbar-button{display:none;width:0;height:0}
+*::-webkit-scrollbar-thumb{background:#a58a50;border:2px solid #101615;border-radius:4px;min-height:28px}
+#prepare-scene .extension-shop .extension-tree-layout{min-height:0;overflow:hidden}
+#prepare-scene .extension-shop .extension-branches,#prepare-scene .extension-shop .extension-detail{min-height:0;overflow:auto;scrollbar-gutter:stable;overscroll-behavior:contain}
+#prepare-scene .extension-shop .extension-branches{padding:4px 10px 4px 4px;gap:10px}
+#prepare-scene .extension-shop .extension-branches section{gap:5px;flex:none}
+#prepare-scene .extension-shop .extension-branches h3{font-size:12px;line-height:1.4;margin:1px 0 3px}
+html body #prepare-scene .extension-shop .extension-node{min-height:46px!important;height:auto;flex:none;padding:5px 8px;gap:8px;line-height:1.4}
+#prepare-scene .extension-shop .extension-node strong{flex:1;min-width:0;font-size:12px;line-height:1.4}
+#prepare-scene .extension-shop .extension-node small{font-size:10px;line-height:1.4;white-space:nowrap}
+/* Options: all seven display controls fit at standard desktop and landscape sizes. */
+#options-dialog{width:min(1100px,calc(100vw - 20px));height:min(620px,calc(100dvh - 20px));max-height:calc(100dvh - 20px);padding:18px;overflow:hidden;gap:10px}
+#options-dialog .settings-heading{margin:0;min-height:36px;align-items:center}
+#options-dialog .settings-heading h2{font-size:28px;line-height:1.2}
+#options-dialog .settings-layout{gap:12px;min-height:0}
+#options-dialog .settings-layout>nav{gap:5px;overflow:auto}
+#options-dialog .settings-layout>nav button{min-height:36px;border-width:6px;padding:3px 8px;line-height:1.3}
+#options-dialog .settings-panels h3{font-size:15px;line-height:1.2;padding:8px 12px}
+#options-dialog .settings-row{min-height:36px;gap:8px;margin:0 5px;padding:3px 8px}
+#options-dialog .settings-name{font-size:12px;line-height:1.4}
+#options-dialog .settings-control{font-size:12px;line-height:1.4}
+#options-dialog .settings-control :is(select,button){min-height:30px;border-width:6px;padding:0 5px;font-size:12px;line-height:1.3}
+#options-dialog .settings-footer{margin:0;min-height:54px;padding:6px 10px;gap:8px}
+#options-dialog .settings-footer strong{font-size:12px;line-height:1.3}
+#options-dialog .settings-footer p{font-size:11px;line-height:1.4;margin-top:3px}
+#options-dialog .settings-actions button{min-height:32px;padding:2px 6px;border-width:6px;font-size:11px;line-height:1.3}
+@media(max-height:540px) and (min-width:621px){
+ #options-dialog{height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);padding:10px;gap:8px}
+ #options-dialog .settings-heading{min-height:32px}
+ #options-dialog .settings-heading h2{font-size:22px}
+ #options-dialog .settings-layout{grid-template-columns:110px minmax(0,1fr);gap:8px}
+ #options-dialog .settings-layout>nav{gap:4px}
+ #options-dialog .settings-layout>nav button{min-height:29px;padding:1px 5px;font-size:11px}
+ #options-dialog #settings-display:not([hidden]){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}
+ #options-dialog #settings-display>h3{grid-column:1/-1;padding:5px 8px;font-size:13px}
+ #options-dialog #settings-display>.settings-row:first-of-type{grid-column:1/-1}
+ #options-dialog .settings-row{min-height:38px;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:4px;padding:2px 5px;margin:0 3px}
+ #options-dialog .settings-name{font-size:10px;line-height:1.35}
+ #options-dialog .settings-control{font-size:10px}
+ #options-dialog .settings-control :is(select,button){min-height:27px;border-width:5px;padding:0 3px;font-size:10px;line-height:1.3}
+ #options-dialog .settings-footer{min-height:46px;padding:5px 7px;gap:6px;flex-wrap:nowrap}
+ #options-dialog .settings-footer strong{font-size:10px;line-height:1.3}
+ #options-dialog .settings-footer p{font-size:9px;line-height:1.35;margin-top:2px}
+ #options-dialog .settings-actions{flex:none;gap:5px;flex-wrap:nowrap}
+ #options-dialog .settings-actions button{min-height:28px;font-size:9px;border-width:5px;padding:1px 4px}
 }

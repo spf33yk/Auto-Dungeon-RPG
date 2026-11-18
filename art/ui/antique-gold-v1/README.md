@@ -9,6 +9,7 @@
 - kind-target / condition / action / skill: 照準・4節点の菱形・剣・8方向の星。カード、カードリスト、宝箱種類選択、カード図鑑で共用。
 - ability-attack / defense / sight / hp / chest / move: 能力・装備の共通アイコン。
 - window / button / tab / field / rail / hp / reward / slot: 端と角を保持し、長い辺を反復する。新しい文字は素材へ焼き込まない。
+- rail-track: rail中央から切り出した40×16pxの反復用ストリップ。スクロール途中に端飾りを繰り返さない。
 - book: 1200×798。縦横比を保って表示し、綴じ目を避けた左右のページにナビゲーションと本文を配置。
 
 UI寸法はワールドの1マス64pxと独立した画面座標。ゲームの保存形式、条件判定、数値、報酬抽選、ゲーム乱数には影響しない。
