@@ -18,7 +18,8 @@
 | 罠 | traps.js、art/props/traps-v1/format.json | 6種類・接触検知・破損抽選・期限付き状態・共通64px素材 |
 | 成長・報酬 | progression.js、drop-system.js、reinforcements.js | EXP・二段階ドロップ・保存RNG・増援 |
 | オーグメント | augments.js、augment-view.js、augment-art.js | 30効果・3択・計算・共通画像付き表示・配信URL |
-| 画面統括 | app.js、index.html、style.css、screens.css | 入力・フェイズ表示・ダイアログ停止・描画・保存 |
+| 画面統括 | app.js、index.html、style.css、screens.css、antique-ui.css | 入力・フェイズ表示・ダイアログ停止・描画・保存 |
+| 共通UI装飾 | gold-ui.js、gold-art.js、art/ui/antique-gold-v1 | 共通アイコン・文字の別描画・カード接続・固定端と反復辺・画像ハッシュ配信 |
 | 指示UI | card-editor.js、editor-scroll.js | ドラッグ／タップ・行ゴースト・再描画前後の位置保持 |
 | 準備予測 | exploration-forecast.js、forecast-view.js | 複製状態の非同期試行、比較表と指示行の診断 |
 | 表示・設定 | display-mode.js、ui-settings.js、screen-tutorial.js | 16:9拡縮・全画面要求・端末設定・古金共通テーマ・案内 |
