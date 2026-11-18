@@ -19,7 +19,7 @@
 | 成長・報酬 | progression.js、drop-system.js、reinforcements.js | EXP・二段階ドロップ・保存RNG・増援 |
 | オーグメント | augments.js、augment-view.js、augment-art.js | 30効果・3択・計算・共通画像付き表示・配信URL |
 | 画面統括 | app.js、index.html、style.css、screens.css、antique-ui.css | 入力・フェイズ表示・ダイアログ停止・描画・保存 |
-| 共通UI装飾 | gold-ui.js、gold-art.js、art/ui/antique-gold-v1 | 共通アイコン・素材中央に合わせた見出しの別描画・通常/または条件の同寸カード接続・古金・青銅の共通素材と土台・スクロールの固定端・反復面・種類別全面色・ホバー強調・共通スクロール素材・画像ハッシュ配信 |
+| 共通UI装飾 | gold-ui.js、gold-art.js、art/ui/antique-gold-v1 | 共通アイコン・見出しの別描画・通常/または条件の外枠共有・反復面と固定角の分離・古金・青銅の共通素材と土台・スクロールの固定端・反復面・種類別全面色・ホバー強調・共通スクロール素材・画像ハッシュ配信 |
 | 指示UI | card-editor.js、editor-scroll.js | ドラッグ／タップ・行ゴースト・再描画前後の位置保持 |
 | 準備予測 | exploration-forecast.js、forecast-view.js | 複製状態の非同期試行、比較表と指示行の診断 |
 | 表示・設定 | display-mode.js、ui-settings.js、screen-tutorial.js | 16:9拡縮・全画面要求・端末設定・古金共通テーマ・案内 |

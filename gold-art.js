@@ -34,9 +34,10 @@ export const GOLD_ART={
   "scroll-thumb": "./art/ui/antique-gold-v1/scroll-thumb.png?v=6c304595778d",
   "scroll-track": "./art/ui/antique-gold-v1/scroll-track.png?v=7dd5ef276253",
   "slot": "./art/ui/antique-gold-v1/slot.png?v=7f8bdeb37670",
+  "surface-tile": "./art/ui/antique-gold-v1/surface-tile.png?v=25cb48ffa718",
   "tab": "./art/ui/antique-gold-v1/tab.png?v=1f13d56cb86c",
   "tray-left": "./art/ui/antique-gold-v1/tray-left.png?v=0c0946839bea",
-  "tray-middle": "./art/ui/antique-gold-v1/tray-middle.png?v=f19c15e8cdaa",
+  "tray-middle": "./art/ui/antique-gold-v1/tray-middle.png?v=6697215833b8",
   "tray-right": "./art/ui/antique-gold-v1/tray-right.png?v=662570f6d936",
   "window": "./art/ui/antique-gold-v1/window.png?v=cb808601afcd"
 };
