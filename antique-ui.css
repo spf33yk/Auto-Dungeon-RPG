@@ -266,15 +266,6 @@ html body :is(#load-game-dialog,#new-game-dialog,#abandon-dialog,#augment-confir
 html body :is(#load-game-dialog,#new-game-dialog,#abandon-dialog,#augment-confirm-dialog) h2{padding-right:28px;font-size:21px;line-height:1.5;margin:8px 0 14px}
 html body :is(#load-game-dialog,#new-game-dialog,#abandon-dialog) .abandon-confirm-actions{gap:10px;margin-top:18px}
 html body :is(#load-game-dialog,#new-game-dialog,#abandon-dialog) .abandon-confirm-actions>button{min-height:38px;line-height:1.4;padding:4px 8px}
-/* Shared active state for navigation, filters and extension selection. */
-html body :is(.tabs,.subtabs,[role=tablist],.card-library-tabs,.settings-layout nav,.sort-controls,.speed) button:is(.active,[aria-selected=true],[aria-pressed=true]),html body .extension-node.selected{
- --button-fill: ;--button-background:linear-gradient(120deg,#d8c183,#ac8c43 55%,#c9ad68);--button-ink:#171b13;
- background:var(--button-background)!important;color:var(--button-ink)!important;box-shadow:inset 0 0 0 2px #e9d397,inset 0 -3px #84652f!important;filter:none;font-weight:bold;text-shadow:none;
-}
-html body :is(.tabs,.subtabs,[role=tablist],.card-library-tabs,.settings-layout nav,.sort-controls,.speed) button:is(.active,[aria-selected=true],[aria-pressed=true]):hover{filter:brightness(1.08)}
-html body .extension-node.selected :is(strong,small){color:#171b13}
-html body #prepare-scene #primary{--button-fill: ;border-image:var(--gold-button) 58 / 8px / 0 repeat!important;background:linear-gradient(120deg,#e2cd90,#b59445 55%,#d8bd78)!important;color:#171c13!important;text-shadow:none;filter:none;font-weight:bold;box-shadow:inset 0 1px #fff0ba,inset 0 0 0 2px #a08241!important}
-html body #prepare-scene #primary:hover:not(:disabled){filter:brightness(1.08)}
 /* Uniform type selectors keep their own card colours even when selected. */
 body.preparing #prepare-scene .fitted-card-editor .card-library-tabs{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:4px}
 body.preparing #prepare-scene .fitted-card-editor .card-library-tabs button{--button-fill: ;box-sizing:border-box;width:100%;min-width:0;max-width:100%;height:32px;min-height:32px;display:flex;align-items:center;justify-content:center;gap:3px;padding:2px 4px;border-width:7px;font-size:10px;line-height:1.2;white-space:nowrap;position:relative;color:#eee2c8!important}
@@ -282,16 +273,12 @@ body.preparing #prepare-scene .fitted-card-editor .card-library-tabs button{--bu
 #prepare-scene .card-library-tabs button[data-palette-tab=condition]{--button-background:linear-gradient(#66552e,#382e19)}
 #prepare-scene .card-library-tabs button[data-palette-tab=action]{--button-background:linear-gradient(#674331,#37231c)}
 #prepare-scene .card-library-tabs button[data-palette-tab=skill]{--button-background:linear-gradient(#503d5e,#2a2034)}
-#prepare-scene .card-library-tabs button[data-palette-tab=target].active{--button-background:linear-gradient(#54758a,#345466)}
-#prepare-scene .card-library-tabs button[data-palette-tab=condition].active{--button-background:linear-gradient(#9b8343,#6b562b)}
-#prepare-scene .card-library-tabs button[data-palette-tab=action].active{--button-background:linear-gradient(#9b664a,#6c4432)}
-#prepare-scene .card-library-tabs button[data-palette-tab=skill].active{--button-background:linear-gradient(#826395,#543c65)}
 #prepare-scene .card-library-tabs button .card-kind-icon{width:14px;height:14px;margin:0;flex:none}
 #prepare-scene .card-library-tabs .card-tab-new{position:absolute;right:3px;top:1px;font-size:7px;line-height:1;color:#ffe69a}
 html body .fitted-card-editor :is(.palette-card,.board-slot)>.card-rarity{left:50%;right:auto;width:70%;transform:translateX(-50%);text-align:center;top:82%}
 html body :is(.reward-card-rarity,.gold-card-rarity){left:50%;right:auto;width:70%;transform:translateX(-50%);text-align:center;top:82%}
 html body .fitted-card-editor .board-rule .row-handle{left:17px;top:37px;width:36px;height:36px;display:grid;place-items:center;padding:0;line-height:1;text-align:center}
-html body .fitted-card-editor .row-handle .priority-number{display:block;position:static;width:100%;text-align:center;line-height:1;margin:0;transform:translateY(-1px)}
+html body .fitted-card-editor .row-handle .priority-number{display:block;position:static;width:100%;text-align:center;line-height:1;margin:0;transform:translateY(-4px)}
 /* Continuous, quiet scrollbar track; end ornaments are not repeated mid-track. */
 *::-webkit-scrollbar-button{display:none;width:0;height:0}
 *::-webkit-scrollbar-thumb{background:#a58a50;border:2px solid #101615;border-radius:4px;min-height:28px}
@@ -339,3 +326,29 @@ html body #prepare-scene .extension-shop .extension-node{min-height:46px!importa
  #options-dialog .settings-actions{flex:none;gap:5px;flex-wrap:nowrap}
  #options-dialog .settings-actions button{min-height:28px;font-size:9px;border-width:5px;padding:1px 4px}
 }
+
+/* Optical alignment and full inner-field colour. */
+:root{--text:#e1cf9f;--gold-text:#e1cf9f}
+html body :is(dialog .dialog-close,.preset-close){grid-template-columns:1fr;grid-template-rows:1fr;gap:0!important;overflow:hidden;color:transparent!important}
+html body :is(dialog .dialog-close,.preset-close):before{grid-area:1/1;align-self:center;justify-self:center}
+html body .fitted-card-editor :is(.palette-card,.board-slot)>.card-rarity,html body :is(.reward-card-rarity,.gold-card-rarity){top:79%;bottom:6%;height:auto;display:flex;align-items:center;justify-content:center;line-height:1;transform:translateX(-50%) translateY(-1px)}
+body.preparing #prepare-scene .fitted-card-editor .card-library-tabs button{background:var(--button-background)!important;background-origin:border-box!important;background-clip:border-box!important;box-shadow:none!important;color:var(--gold-text)!important;filter:none}
+#prepare-scene .card-library-tabs button[data-palette-tab=target]{--button-background:linear-gradient(#28353b,#182229)}
+#prepare-scene .card-library-tabs button[data-palette-tab=condition]{--button-background:linear-gradient(#59411b,#34280f)}
+#prepare-scene .card-library-tabs button[data-palette-tab=action]{--button-background:linear-gradient(#58301d,#321c14)}
+#prepare-scene .card-library-tabs button[data-palette-tab=skill]{--button-background:linear-gradient(#392d3d,#211a28)}
+html body #prepare-scene #primary{color:var(--gold-text)!important;filter:none}
+html body #prepare-scene #primary:hover:not(:disabled){filter:brightness(1.3);box-shadow:0 0 8px #c9aa5055!important}
+html body .fitted-card-editor .board-slot[role=group]:hover{filter:brightness(1.25);cursor:pointer}
+body.preparing #prepare-scene .card-library-tabs button:hover:not(:disabled){filter:brightness(1.25)}
+/* Reference scrollbar: black iron track, antique gold grooved thumb. */
+html body *::-webkit-scrollbar,html body::-webkit-scrollbar{width:12px!important;height:12px!important}
+html body *::-webkit-scrollbar-track,html body::-webkit-scrollbar-track{background:#141412 var(--gold-scroll-track) center/100% auto repeat-y!important;border:1px solid #76603b!important;border-radius:0!important}
+html body *::-webkit-scrollbar-thumb,html body::-webkit-scrollbar-thumb{background:#a58951 var(--gold-scroll-thumb) center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;min-height:38px;min-width:38px}
+html body *::-webkit-scrollbar-track:horizontal{background:#171713!important;border:1px solid #76603b!important}
+html body *::-webkit-scrollbar-thumb:horizontal{background:#a58951 var(--gold-scroll-thumb-horizontal) center/100% 100% no-repeat!important}
+html body *::-webkit-scrollbar-corner{background:#141412!important}
+html body :is(dialog .dialog-close,.preset-close){display:flex;align-items:center;justify-content:center;font-size:0!important;line-height:0!important}
+html body #prepare-scene .fitted-card-editor .card-library-tabs button{background-origin:border-box!important;background-clip:border-box!important;border-image:var(--gold-button) 58 / 4px / 0 repeat!important;border-width:4px!important}
+html body *::-webkit-scrollbar-thumb,html body::-webkit-scrollbar-thumb{background-size:100% auto!important;border:1px solid #b59a63!important;box-shadow:inset 1px 0 #e0c48b,inset -1px 0 #68512c!important} html body *::-webkit-scrollbar-thumb:horizontal{background-size:auto 100%!important} #codex-dialog{background-size:contain}
+@supports selector(::-webkit-scrollbar){html body,html body *{scrollbar-width:auto!important}html body #hud-augments{scrollbar-width:none!important}}
