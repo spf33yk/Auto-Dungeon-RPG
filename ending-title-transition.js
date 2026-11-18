@@ -1,10 +1,11 @@
+import {prepareScreenAssets} from './screen-assets.js';
 const BURN_START_MS=7000;
 const TITLE_REVEALED_MS=9350;
 const BURN_CLEANUP_MS=10600;
 const TITLE_HOLD_MS=2400;
 const MENU_FADE_MS=1000;
 
-export function playEndingTitleTransition(title,onComplete,{fireSound=false}={}){
+export async function playEndingTitleTransition(title,onComplete,{fireSound=false}={}){
  const fireAudio=fireSound?prepareFireAudio(title.dataset.endingFire):null;
  const overlay=document.createElement('div');
  overlay.className='ending-title-transition';
@@ -41,6 +42,7 @@ export function playEndingTitleTransition(title,onComplete,{fireSound=false}={})
  surface.height=540;
  overlay.append(outgoing,still,surface);
  title.dataset.endingTransition='playing';
+ await prepareScreenAssets([background,logo,still,effect,flame],{enough:true});
  title.append(overlay);
 
  const playVideo=video=>video.play().catch(()=>{});

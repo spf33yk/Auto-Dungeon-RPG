@@ -133,7 +133,7 @@ skill-effect-art.jsはscripts/update-assets.jsがformat.jsonから生成し、5�
 
 ## 起動と準備画面の表示
 
-app.jsはtitleAssetsReadyとgameAssetsReadyを分離。モジュールのtop-level awaitは前者だけとし、index.htmlがタイトル画像とレイアウトの確定後にdata-startupを解除する。全スキルアトラスの通信開始はtitleAssetsReadyの後へ移し、HTTP接続枠でタイトル画像と競合しないようにする。gameAssetsReadyは従来のマップ素材に加えマップ品物・赤箱・敵画像もdecodeし、enterJourneyが開始動画後／スキップ後の遷移を一度だけ実行する。未完了時はstartup-statusを待機表示に再利用。タイトル・開始動画・ENDプレビュー中のdrawは早期終了する。
+app.jsは起動時にtitleAssetsReady・gameAssetsReadyと共通UI画像のpreloadAssets、screenFontsReadyを待つ。共通画像はGOLD_ART・AUGMENT_IMAGES・THEME_IMAGESに加え、DOMの画像とdataset、CSSルールのローカル画像URLから収集する。画像通信は最大6並列・同一URLは1Promiseを共有し、失敗キャッシュを捨てて再試行できる。全画像とタイトル映像が準備できてからモジュールimportを完了し、index.htmlが2描画フレーム後にdata-startupを解除する。主人公・壁・スキル・マップ画像の失敗を黙って通過させない。フォント利用不可時は代替フォントで表示を確定する。
 
 準備タブはorders／gear。gearの描画にexpedition-summaryのIDを除去したコピーと既存の装備UIを併置し、能力確認と装備操作を統合する。下部のprepare-journalと非表示のprepare-statusボタンを除去。ログ本体の保持と上部ログアイコンは維持する。abandon-runの左autoマージンとprimaryの左0マージンで右側へ2ボタンを隣接配置する。
 
@@ -220,3 +220,7 @@ syncPreparationTabFrameの接続マスクは左＋3px・幅−6px。タブ擬似
 暗色ボタンはbutton-corner-rising/falling.svgの7px固定角とCSSの1px辺を独立背景として描画し、透明borderによる既存寸法は保持する。section-divider.svgは単一の水平パスだけを持つ。
 
 古金共通素材の配信生成対象はPNGとSVGとし、暗色ボタン・区切り線もGOLD_ARTとgold-assetsの内容ハッシュ付きURLを経由する。CSSから未版管理のSVG直指定を行わない。
+
+## 表示素材の共通バリア
+
+screen-assets.jsはデコード・映像準備・30秒期限・先読み・キャッシュとscreen-asset-loadingを提供する。installScreenAssetGuardはMutationObserverを1バッチへまとめ、実表示されるimg/videoを監視。複数の準備要求が重なった時は参照カウントで待機を保ち、全要求完了後に次の描画フレームで解除する。失敗は同じモーダルの再試行で処理する。従来のループのdialog[open]判定により探索ターン・字幕を停止する。開始前動画とending-title-transitionはprepareScreenAssetsを明示awaitし、素材準備前にタイマーを登録しない。

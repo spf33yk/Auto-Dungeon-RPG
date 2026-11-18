@@ -1,3 +1,6 @@
+import {createAssetCache,preloadAssets,imageReady,videoReady,collectScreenImages,installScreenAssetGuard,prepareScreenAssets,screenFontsReady} from './screen-assets.js';
+import {GOLD_ART} from './gold-art.js';
+import {AUGMENT_IMAGES} from './augment-art.js';
 import {preparationFloorInfo} from './field-events.js';
 import {kindMark,kindIcon} from './gold-ui.js';
 import {playEndingTitleTransition} from './ending-title-transition.js';
@@ -222,12 +225,12 @@ let combat=createCombatFeedback();
 let enemyAttacks=[],skillEffects=[],trapEffects=[],skillEffectScene='';
 const trapEffectAtlas=new Image();trapEffectAtlas.src=$('map').dataset.trapEffects;
 const skillEffectAtlases=new Map();
-const loadSkillEffectAssets=()=>Promise.all(Object.entries(SKILL_EFFECT_IMAGES).map(async([id,url])=>{const image=new Image();image.src=url;try{await image.decode();skillEffectAtlases.set(id,image);}catch(error){console.error('Skill effect atlas:',id,error);}}));
+const loadSkillEffectAssets=()=>Promise.all(Object.entries(SKILL_EFFECT_IMAGES).map(async([id,url])=>{const image=new Image();image.src=url;await imageReady(image);skillEffectAtlases.set(id,image);}));
 let heroSheet=null,heroVisual=new CharacterAnimation(),heroClock=0,idleClock=0,heroScene='',lastVisualTime=null;
-const heroAssetsReady=loadCharacterSheet($('map').dataset.hero).then(sheet=>{heroSheet=sheet;drawHeroPortraits();}).catch(error=>console.error('Character sheet:',error));
+const heroAssetsReady=loadCharacterSheet($('map').dataset.hero).then(sheet=>{heroSheet=sheet;drawHeroPortraits();}).catch(error=>{throw Error('Character: '+error.message);});
 function resetHeroVisual(){combat=createCombatFeedback();damagePopups=[];enemyAttacks=[];skillEffects=[];trapEffects=[];skillEffectScene='';heroVisual=new CharacterAnimation({x:state.player.x,y:state.player.y});heroClock=0;idleClock=0;heroScene='';lastVisualTime=null;}
 function drawHeroPortraits(){if(!heroSheet)return;const d=heroSheet.definition,f=characterFrame(d,0,0),[px,py,pw,ph]=d.portrait||[0,0,f.width,f.height];for(const id of ['portrait','camp-portrait']){const canvas=$(id),c=canvas.getContext('2d'),scale=Math.min(canvas.width/pw,canvas.height/ph);c.clearRect(0,0,canvas.width,canvas.height);c.imageSmoothingEnabled=false;c.drawImage(heroSheet.image,f.x+px,f.y+py,pw,ph,(canvas.width-pw*scale)/2,(canvas.height-ph*scale)/2,pw*scale,ph*scale);}}
-let wallSets=new Map();const wallAssetsReady=loadWallTilesets($('map').dataset.walls.split(/\s+/)).then(sets=>{wallSets=sets;}).catch(error=>console.error('Wall tileset:',error));
+let wallSets=new Map();const wallAssetsReady=loadWallTilesets($('map').dataset.walls.split(/\s+/)).then(sets=>{wallSets=sets;}).catch(error=>{throw Error('Walls: '+error.message);});
 const gambleChestIcon=new Image();gambleChestIcon.src=THEME_IMAGES.gambler;
 function draw(){
  if(showingTitle||pendingJourney||endingPreview)return;
@@ -611,11 +614,11 @@ async function enterJourney(done){
  if(waiting){$('startup-message').textContent='ダンジョンを読み込み中…';$('startup-status').hidden=false;$('title-new').disabled=true;$('title-load').disabled=true;}
  try{await gameAssetsReady;done();}finally{enteringJourney=false;$('startup-status').hidden=true;$('title-new').disabled=false;$('title-load').disabled=!hasSave;}
 }
-function playJourneyTeaser(done){
+async function playJourneyTeaser(done){
  if(pendingJourney)return;
  if(enteringJourney)return;
  if(uiSettings.skipOpening||openingVariant(state.profile)!=='mukuro'){enterJourney(done);return;}
- pendingJourney=done;paused=true;dialogWasPaused=true;document.body.classList.add('watching-teaser');$('teaser-scene').hidden=false;$('teaser-retry').hidden=true;
+ pendingJourney=done;paused=true;dialogWasPaused=true;await prepareScreenAssets([$('journey-teaser')],{enough:true});document.body.classList.add('watching-teaser');$('teaser-scene').hidden=false;$('teaser-retry').hidden=true;
  const video=$('journey-teaser');if(video.error){finishJourneyTeaser();return;}video.currentTime=0;syncTitleEffect();video.play().catch(()=>{$('teaser-retry').hidden=false;});$('teaser-skip').focus();syncSceneMusic();
 }
 function finishJourneyTeaser(){if(!pendingJourney)return;const done=pendingJourney;pendingJourney=null;$('journey-teaser').pause();$('teaser-scene').hidden=true;document.body.classList.remove('watching-teaser');enterJourney(done);}
@@ -860,8 +863,14 @@ for(const host of [$('tab-content'),$('live-orders')]){
 }
 drawHeroPortraits();render();requestAnimationFrame(loop);
 
-// Only title artwork gates startup. Gameplay images load concurrently and gate journey entry.
+// All shared visual assets and fonts are ready before the initial reveal.
 let gameAssetsLoaded=false;
-const titleAssetsReady=Promise.all(['title-background','title-logo'].map(id=>$(id).decode().catch(()=>{})));
-const gameAssetsReady=titleAssetsReady.then(()=>Promise.all([cryptAtlas,readableAtlas,trapAtlas,trapEffectAtlas,propsAtlas,mapItemsAtlas,redChestAtlas,enemyAtlas,bossAtlas].map(image=>image.decode().catch(()=>{})).concat([heroAssetsReady,wallAssetsReady,loadSkillEffectAssets()]))).then(()=>{gameAssetsLoaded=true;if(!showingTitle)draw();});
-await titleAssetsReady;
+const titleAssetsReady=Promise.all(['title-background','title-logo'].map(id=>imageReady($(id))));
+const gameAssetsReady=Promise.all([cryptAtlas,readableAtlas,trapAtlas,trapEffectAtlas,propsAtlas,mapItemsAtlas,redChestAtlas,enemyAtlas,bossAtlas].map(imageReady).concat([heroAssetsReady,wallAssetsReady,loadSkillEffectAssets()])).then(()=>{gameAssetsLoaded=true;});
+const assetCache=createAssetCache(async url=>{const image=new Image();image.src=url;await imageReady(image);return image;});
+const commonImages=[...Object.values(GOLD_ART),...Object.values(THEME_IMAGES),...Object.values(AUGMENT_IMAGES),...collectScreenImages(document)];
+$('startup-message').textContent='画面の素材を読み込み中…';
+await Promise.all([titleAssetsReady,gameAssetsReady,preloadAssets(commonImages,{load:url=>assetCache.load(url),onProgress:(done,total)=>{if($('startup-retry').hidden)$('startup-message').textContent='画面の素材を読み込み中… '+done+' / '+total;}}),screenFontsReady(document.fonts,error=>{document.documentElement.dataset.fontFallback='true';console.warn('同梱フォントを使用できないため代替フォントで表示します。',error);})]);
+await videoReady($('title-fx'),{enough:true});
+installScreenAssetGuard();
+drawHeroPortraits();draw();
