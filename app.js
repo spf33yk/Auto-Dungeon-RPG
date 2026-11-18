@@ -397,7 +397,7 @@ function renderHudAugments(){
    name.textContent=a.name;
    theme.innerHTML=themeIcon(a.themeId);
    theme.append(' '+a.theme);
-   copy.textContent=effect;
+   const [body,...growth]=effect.split('\n');copy.append(body);for(const line of growth){const row=document.createElement('div');row.className='augment-growth-line';row.textContent=line;copy.append(row);}
    tip.replaceChildren(name,theme,copy);
    tip.showPopover();
    const bounds=button.getBoundingClientRect();
@@ -490,8 +490,8 @@ function itemCard(g,ref,equipped=false){
 function syncPreparationTabFrame(){
  const scene=$('prepare-scene'),nav=$('preparation-tabs'),active=nav.querySelector('button.active');
  if(!active)return;
- scene.style.setProperty('--prep-tab-gap-left',(nav.offsetLeft+active.offsetLeft+1)+'px');
- scene.style.setProperty('--prep-tab-gap-width',Math.max(0,active.offsetWidth-2)+'px');
+ scene.style.setProperty('--prep-tab-gap-left',(nav.offsetLeft+active.offsetLeft+5)+'px');
+ scene.style.setProperty('--prep-tab-gap-width',Math.max(0,active.offsetWidth-10)+'px');
 }
 new ResizeObserver(syncPreparationTabFrame).observe($('preparation-tabs'));
 function renderTab(){

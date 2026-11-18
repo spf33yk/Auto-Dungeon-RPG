@@ -544,3 +544,13 @@ html body .fitted-card-editor .order-row-controls>.theme-empty{color:#9bada4}
 
 /* Explicit four-side geometry prevents the open edge from collapsing side slices. */
 html body.preparing #prepare-scene>#preparation-tabs button[data-tab]:before{display:block;box-sizing:border-box;left:0;right:0;top:0;bottom:-10px;width:auto;height:auto;border:7px solid transparent!important;border-bottom-width:0!important;border-image:url('art/ui/antique-gold-v1/connected-tab.svg') 9 12 1 12 / 7px 7px 0 7px / 0 repeat!important;box-shadow:none;background:none}
+
+/* Only the active tab shares the frame opening. */
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab]:not(.active):before{bottom:2px;border:5px solid transparent!important;border-image:var(--gold-field) 30 / 5px / 0 repeat!important}
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active:before{bottom:-10px}
+html body .fitted-card-editor .palette-card:disabled{background-color:transparent!important;background-blend-mode:normal;filter:grayscale(1)!important}
+html body .fitted-card-editor .palette-card:disabled>.card-placement-status{color:#fff0ba}
+.augment-growth-line{display:block;white-space:nowrap}
+
+html body .fitted-card-editor .palette-card:disabled{background:none!important;filter:none!important}
+html body .fitted-card-editor .palette-card:disabled:before{content:''!important;position:absolute;inset:0;background:var(--gold-card) center/contain no-repeat;filter:grayscale(1);z-index:-1;pointer-events:none}
