@@ -196,3 +196,5 @@ Git登録と公開配信は別管理する。Git登録ではdocs・story・テ�
 placeCardのパレット由来スキル配置時に、移動先以外の行のeffect重複を検査する。canPlaceCardも同じ判定を共有する。カード一覧は配置済みスキルを明示的にdisabledとし、カード交換は既存の原子的処理を維持する。
 
 一覧の状態札はalreadyPlacedを用いて配置中と配置不可を区別する。無効カード全体へopacity/filterを掛けず、背景のluminosity合成と状態札以外の減光を分離する。
+
+augmentGrowthTextはAUGMENT_GROWTHから4段階の全パラメータを取得し、augmentStrengthに成長一覧を付加する。割合キーと会心率のstep/capは百分率へ変換する。

@@ -1,5 +1,5 @@
 import{augmentStats,starText}from'./set-bonuses.js';
-import{growthNumber as f}from'./augment-growth.js';
+import{AUGMENT_GROWTH,growthNumber as f}from'./augment-growth.js';
 export function augmentStrength(a,s){const p=augmentStats(s,a.id),pct=key=>f(p[key]*100)+'%',grow=(period,stat,total=false)=>`${total?'旅の累計':'この階の'}${period}ターンごとに${stat}＋${f(p.step)}、最大＋${f(p.cap)}。${total?'':'次の階でリセット。'}`,r={
  'map-reader':()=>`この階で初めて入る部屋ごとに、${p.duration}ターン視界半径＋${p.sight}マス。重複時は時間を更新。`,
  scavenger:()=>`床の記憶の欠片を拾うたび、記憶の欠片を通常の取得量に加えて${p.extra}個獲得。`,
@@ -30,5 +30,10 @@ export function augmentStrength(a,s){const p=augmentStats(s,a.id),pct=key=>f(p[k
  'double-strike':()=>`通常攻撃の後、${pct('chance')}の確率で追加の通常攻撃を1回行う。攻撃スキルでは発動せず、追加攻撃から再発動しない。`,
  pity:()=>`会心でない打撃ごとに会心率＋${pct('step')}、最大＋${pct('cap')}。会心が出るか、次の階へ進むとリセット。`,
  destiny:()=>`各階で最初に開けるカード宝箱のみ、${p.chance===1?'必ず':pct('chance')+'の確率で'}当たり。アクション・条件は2枚、スキルは1枚取得。${p.chance<1?'外れた場合はカードの代わりに記憶の欠片を'+p.consolation+'個獲得。':''}抽選結果は保存される。`
-};return r[a.id]?.()||a.detail;}
+};return (r[a.id]?.()||a.detail)+augmentGrowthText(a.id);}
 export function augmentName(a,s){const stars=s?starText(s,a.id):'';return a.name+(stars?' '+stars:'');}
+
+export function augmentGrowthText(id){
+ const names={sight:'視界半径',duration:'持続ターン',extra:'追加個数',heal:'回復率',step:'増加量',cap:'上限',candidates:'候補数',shards:'欠片',attack:'ATK',uses:'回数',damage:'ダメージ倍率',perCharge:'蓄積ごとの増加率',rate:'吸命率',leech:'吸命率',defense:'DEF',reduction:'軽減率',immunity:'無効回数',chance:'確率',consolation:'外れ時の欠片'};
+ return '\n成長（☆0/★1/★2/★3）：'+Object.entries(AUGMENT_GROWTH[id]||{}).map(([key,values])=>{const pct=['heal','perCharge','rate','leech','reduction','chance'].includes(key)||(['hunter','pity'].includes(id)&&['step','cap'].includes(key));return (names[key]||key)+' '+values.map(v=>f(pct?v*100:v)+(pct?'%':'')).join('/');}).join('、');
+}
