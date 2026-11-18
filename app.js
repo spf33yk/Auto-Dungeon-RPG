@@ -490,8 +490,8 @@ function itemCard(g,ref,equipped=false){
 function syncPreparationTabFrame(){
  const scene=$('prepare-scene'),nav=$('preparation-tabs'),active=nav.querySelector('button.active');
  if(!active)return;
- scene.style.setProperty('--prep-tab-gap-left',(nav.offsetLeft+active.offsetLeft+5)+'px');
- scene.style.setProperty('--prep-tab-gap-width',Math.max(0,active.offsetWidth-10)+'px');
+ scene.style.setProperty('--prep-tab-gap-left',(nav.offsetLeft+active.offsetLeft+3)+'px');
+ scene.style.setProperty('--prep-tab-gap-width',Math.max(0,active.offsetWidth-6)+'px');
 }
 new ResizeObserver(syncPreparationTabFrame).observe($('preparation-tabs'));
 function renderTab(){

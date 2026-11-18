@@ -592,3 +592,5 @@ html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active:bef
 /* Preserve the adopted main frame; reuse its artwork on the attached tab only. */
 html body.preparing #prepare-scene:before{mask-size:100% 100%,var(--prep-tab-gap-width,0px) 10px;mask-position:0 0,var(--prep-tab-gap-left,0px) 0}
 html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active:before{content:''!important;position:absolute;inset:-1px 0 -5px;display:block;box-sizing:border-box;background:none!important;border:10px solid transparent!important;border-bottom-width:0!important;border-image:var(--gold-window) 65 65 1 65 / 10px 10px 0 10px / 0 repeat!important}
+
+html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active:before{bottom:-2px}

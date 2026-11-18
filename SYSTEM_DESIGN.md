@@ -214,3 +214,5 @@ card-editorのfoldSummaryは常時描画し、開閉ではorder-fold-bodyだけ�
 ui-settingsのtutorialEnabledを読込・保存・初期値へ追加し、maybeTutorial/startTutorialとオーグメント案内を同じ設定で制御する。resetJourneyTutorialsは完了状態だけをリセットし、表示設定を保持する。報酬リロールはchest-reroll-actionsへ移動し、横画面でもグリッド最下段全幅の中央へ配置する。
 
 主外枠は採用済みwindow.pngで全辺・角を維持し、選択タブ直下の内幅だけをマスクする。選択タブも同じ画像と10pxのborder-imageで描画し、外枠再描画用のSVGは生成しない。通常ボタンの暗色版SVGは既存PNGを埋め込み、内側のみに黒を35%重ねる。共通変数gold-button-grayを差し替えて、金縁・文字・透明外周を保持する。
+
+syncPreparationTabFrameの接続マスクは左＋3px・幅−6px。タブ擬似要素の下端は−2px。button-gray-dark.svgのpreserveAspectRatioはnoneとし、border-imageの各領域で余分な余白が生じないようにする。
