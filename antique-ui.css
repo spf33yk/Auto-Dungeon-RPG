@@ -562,3 +562,23 @@ html body.preparing #prepare-scene>#preparation-tabs button[data-tab].active:bef
 html body #prepare-scene .fitted-card-editor .board-slot[data-condition-or]{filter:none!important}
 html body #prepare-scene .fitted-card-editor .board-slot[data-condition-or]:is(:hover,:focus-within){filter:brightness(1.25)!important}
 html body #prepare-scene .fitted-card-editor .board-slot[data-condition-or]:before{content:''!important;position:absolute;inset:0;background:var(--gold-card-condition) center/contain no-repeat;filter:url(#condition-green-filter);clip-path:polygon(8% 12%,90% 12%,94% 25%,94% 38%,99% 47%,99% 54%,94% 63%,94% 76%,90% 88%,8% 88%,4% 76%,4% 64%,9% 54%,9% 46%,4% 36%,4% 24%);z-index:-1;pointer-events:none}
+
+/* Inset artwork uses the full card coordinate space; preserve the gold perimeter. */
+html body #prepare-scene .fitted-card-editor .board-slot[data-condition-or]:before{position:absolute;left:0;top:0;right:auto;bottom:auto;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;transform:none;background:var(--gold-card-condition) center/contain no-repeat;filter:hue-rotate(65deg);clip-path:polygon(5% 6%,88% 6%,92% 14%,92% 34%,98% 44%,98% 56%,92% 66%,92% 86%,88% 94%,5% 94%,2% 86%,2% 73%,7% 63%,7% 37%,2% 27%,2% 14%);z-index:-1}
+html body .fitted-card-editor .palette-card:disabled{background:var(--gold-card) center/contain no-repeat!important;filter:grayscale(1)!important;opacity:.65!important}
+html body .fitted-card-editor .palette-card:disabled:before{content:none!important}
+html body .fitted-card-editor .palette-card:disabled>:not(.card-placement-status){opacity:1}
+html body .fitted-card-editor .palette-card:disabled>.card-placement-status{visibility:hidden}
+html body .fitted-card-editor .palette-entry{position:relative}
+html body .fitted-card-editor .palette-entry[data-placement-status]:not([data-placement-status=""]):after{content:attr(data-placement-status);position:absolute;right:12px;bottom:5px;padding:2px 6px;color:#ffe29a;background:#151b1a;border:1px solid #a88c51;font-size:11px;font-weight:bold;pointer-events:none;z-index:8}
+html body #card-choice-dialog .reward-card-name{font-size:13px;line-height:1.2;font-weight:normal}
+html body #card-choice-dialog .reward-card-rarity{font-size:8px}
+html body #card-choice-dialog .chest-reroll-actions{display:flex;justify-content:center;margin:12px 0 0}
+html body .fitted-card-editor .order-fold-summary{display:flex!important}
+html body .fitted-card-editor .order-fold-body>.tray-scroll{margin-top:5px}
+html body #prepare-scene .fitted-card-editor .board-slot[data-condition-or]:before{mask:none!important;-webkit-mask:none!important}
+
+html body #card-choice-dialog .chest-reroll-actions:has(button[hidden]){display:none!important}
+@media(max-height:540px) and (min-width:621px){html body #card-choice-dialog:has(.card-reward-choice)>.chest-reroll-actions{grid-column:1/-1;grid-row:6;margin:4px 0 0;justify-content:center}}
+
+html body #card-choice-dialog .reward-card .card-kind-label{font-size:9px}

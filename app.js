@@ -59,7 +59,7 @@ import {W,H,skills,newGame as createJourney,abandonRun,stats,price,upgrade,equip
 const launchParams=new URLSearchParams(location.search);
 const verificationMode=launchParams.get('verify')==='1';if(verificationMode)document.querySelectorAll('video,audio').forEach(el=>{el.muted=true;});
 const $=id=>document.getElementById(id), key='abyss-normal-v2';
-let uiStorage;try{uiStorage=localStorage;}catch{}let uiSettings=readUiSettings(uiStorage);document.documentElement.dataset.minimapSize=uiSettings.minimap;$('minimap-size').value=uiSettings.minimap;$('skip-opening').checked=uiSettings.skipOpening;
+let uiStorage;try{uiStorage=localStorage;}catch{}let uiSettings=readUiSettings(uiStorage);document.documentElement.dataset.minimapSize=uiSettings.minimap;$('minimap-size').value=uiSettings.minimap;$('skip-opening').checked=uiSettings.skipOpening;$('tutorial-enabled').checked=uiSettings.tutorialEnabled;
 const bgm=new SceneMusic($('scene-bgm'),$('scene-bgm').dataset);
 let titleTransitionPreview=false;
 let endingPreview=false,endingPlayback=null,subtitlePreviewKind='first-end',musicAudition=null;
@@ -355,7 +355,7 @@ function renderAugments(){
   const notice=$('second-journey-notice');
   if(!notice.open)notice.showModal();
   return;
- }$('augment-reroll').hidden=false;$('augment-reroll').disabled=!offer||rerollCount(state,'augment')<1;$('augment-reroll').textContent='リロール（残り '+rerollCount(state,'augment')+'回）';$('augment-tutorial').hidden=!offer||!isTutorialJourney(state)||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){renderAugmentOwnedSkills();$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
+ }$('augment-reroll').hidden=false;$('augment-reroll').disabled=!offer||rerollCount(state,'augment')<1;$('augment-reroll').textContent='リロール（残り '+rerollCount(state,'augment')+'回）';$('augment-tutorial').hidden=!uiSettings.tutorialEnabled||!offer||!isTutorialJourney(state)||uiSettings.tutorials.explore;if(!showingTitle&&!fieldMessages.active&&offer&&!dialog.open){renderAugmentOwnedSkills();$('augment-choices').innerHTML=offer.choices.map(id=>augmentCard(augmentById[id],{choice:true,state})).join('');dialog.showModal();}
  if(state.phase==='prepare'){const info=preparationFloorInfo(state);$('prep-hint').innerHTML='<dl class="preparation-floor-list">'+[['次のフロア',info.basement+' '+info.name],['異変',info.event],['出現する魔物',info.monsters.join('、')],['発動スキル',info.skill],['スキル内容',info.skillDetail||'なし']].map(([label,value])=>'<div><dt>'+esc(label)+'</dt><dd'+(label==='発動スキル'&&info.skillDetail?' title="'+esc(info.skillDetail)+'"':'')+'>'+esc(value)+'</dd></div>').join('')+'</dl>';}
 }
 $('debug-augment').innerHTML=augments.map(a=>'<option value="'+a.id+'">'+a.rarity+' · '+a.theme+' · '+a.name+'</option>').join('');
@@ -530,8 +530,8 @@ document.body.insertAdjacentHTML('beforeend','<canvas id="tutorial-spotlight" hi
 const tutorialSpotlight=createTutorialSpotlight($('tutorial-spotlight'));
 function clearTutorialTargets(){tutorialSpotlight.clear();$('tutorial-task').hidden=true;}
 function paintTutorial(){clearTutorialTargets();tutorialActing=false;const steps=tutorialSteps,step=steps[tutorialStep];$('tutorial-progress').textContent=(tutorialKind==='explore'?'探索':'準備')+' · '+(tutorialStep+1)+' / '+steps.length;$('tutorial-copy').textContent=step.text;$('tutorial-back').disabled=tutorialStep===0;$('tutorial-next').textContent=step.selector?'操作する':tutorialStep===steps.length-1?'完了':'次へ';if(!$('tutorial-dialog').open)$('tutorial-dialog').showModal();}
-function startTutorial(kind){const steps=floorTutorialSteps(state);if(!steps.length)return;activeTutorialKey=tutorialKey(state);tutorialSteps=steps;tutorialWasPaused=document.querySelector('dialog[open]')?dialogWasPaused:paused;tutorialKind=kind;tutorialStep=0;paused=true;for(const d of document.querySelectorAll('dialog[open]'))d.close();if(kind==='prepare'){tab='orders';document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));renderTab();}paintTutorial();}
-function maybeTutorial(){const key=tutorialKey(state);if(!tutorialKind&&!showingTitle&&!pendingJourney&&!endingPreview&&!document.querySelector('dialog[open]')&&state.guidedJourney===true&&key&&!(state.tutorialFloors||[]).includes(key))startTutorial(state.phase);}
+function startTutorial(kind){if(!uiSettings.tutorialEnabled){displayMessage('チュートリアルは設定でオフになっています。');return;}const steps=floorTutorialSteps(state);if(!steps.length)return;activeTutorialKey=tutorialKey(state);tutorialSteps=steps;tutorialWasPaused=document.querySelector('dialog[open]')?dialogWasPaused:paused;tutorialKind=kind;tutorialStep=0;paused=true;for(const d of document.querySelectorAll('dialog[open]'))d.close();if(kind==='prepare'){tab='orders';document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));renderTab();}paintTutorial();}
+function maybeTutorial(){if(!uiSettings.tutorialEnabled)return;const key=tutorialKey(state);if(!tutorialKind&&!showingTitle&&!pendingJourney&&!endingPreview&&!document.querySelector('dialog[open]')&&state.guidedJourney===true&&key&&!(state.tutorialFloors||[]).includes(key))startTutorial(state.phase);}
 
 function finishTutorial(resume=false){if(activeTutorialKey){state.tutorialFloors=[...new Set([...(state.tutorialFloors||[]),activeTutorialKey])];activeTutorialKey=null;}if(tutorialKind)uiSettings=saveUiSettings(uiStorage,{...uiSettings,tutorials:{...uiSettings.tutorials,[tutorialKind]:true}});clearTutorialTargets();tutorialKind=null;tutorialActing=false;paused=resume?false:tutorialWasPaused;dialogWasPaused=paused;$('tutorial-dialog').close();last=performance.now();render();}
 function advanceTutorial(performed=false){const step=tutorialSteps[tutorialStep];clearTutorialTargets();tutorialActing=false;if(tutorialStep===tutorialSteps.length-1){finishTutorial(Boolean(performed&&step.lastAction));return;}tutorialStep++;paintTutorial();}
@@ -541,7 +541,8 @@ $('tutorial-back').onclick=()=>{if(tutorialStep>0){tutorialStep--;paintTutorial(
 $('tutorial-task-skip').onclick=()=>advanceTutorial();
 $('tutorial-dialog').addEventListener('cancel',e=>{e.preventDefault();finishTutorial();});
 $('tutorial-prepare').onclick=()=>{if(!isTutorialJourney(state)){displayMessage('チュートリアルは初回クリアまで表示します。');return;}if(floorTutorialSteps(state).length)startTutorial(state.phase);else displayMessage('階層別の案内は開始階から5階目まで表示します。');};
-$('tutorial-explore').onclick=()=>{if(!isTutorialJourney(state)){displayMessage('チュートリアルは初回クリアまで表示します。');return;}uiSettings=saveUiSettings(uiStorage,{...uiSettings,tutorials:{...uiSettings.tutorials,explore:false}});$('tutorial-explore').textContent='次のオーグメント取得時に案内します';};
+$('tutorial-enabled').onchange=()=>{uiSettings=saveUiSettings(uiStorage,{...uiSettings,tutorialEnabled:$('tutorial-enabled').checked});};
+$('tutorial-explore').onclick=()=>{if(!uiSettings.tutorialEnabled){displayMessage('チュートリアルは設定でオフになっています。');return;}if(!isTutorialJourney(state)){displayMessage('チュートリアルは初回クリアまで表示します。');return;}uiSettings=saveUiSettings(uiStorage,{...uiSettings,tutorials:{...uiSettings.tutorials,explore:false}});$('tutorial-explore').textContent='次のオーグメント取得時に案内します';};
 function tutorialOperation(e){if(!tutorialKind||!tutorialActing)return;const kind=tutorialKind,index=tutorialStep,step=tutorialSteps[index],hit=e.type===(step.event||'click')&&e.target.closest(step.selector)&&(e.type!=='change'||e.target.checkValidity());if(!hit&&!step.placement&&!step.complete)return;setTimeout(()=>{if(tutorialKind!==kind||tutorialStep!==index||!tutorialActing)return;const placed=state.orders.reduce((n,r)=>n+(r.conditions?.length||0),0)>tutorialPlacementCount;if(step.complete?!step.complete(state):step.placement?!placed:!hit)return;advanceTutorial(true);},0);}
 document.addEventListener('click',tutorialOperation,true);
 document.addEventListener('pointerup',tutorialOperation,true);
@@ -704,7 +705,8 @@ const optionsDialog=$('options-dialog');
 const optionTabs=[...optionsDialog.querySelectorAll('[role="tab"]')];
 const optionResetKeys={
  'settings-display':['brightness','cameraZoom','minimap','screenShake','optionsContrast','skipOpening'],
- 'settings-audio':['bgmEnabled','bgmVolume','soundEnabled','soundVolume']
+ 'settings-audio':['bgmEnabled','bgmVolume','soundEnabled','soundVolume'],
+ 'settings-gameplay':['tutorialEnabled']
 };
 let activeOptionTab=0,confirmedOptionAction;
 function describeSetting(row){
@@ -783,6 +785,7 @@ $('options-reset').onclick=()=>{
   uiSettings=saveUiSettings(uiStorage,{...uiSettings,...reset});
   paintOptionsContrast();paintBrightness();paintCameraSettings();paintMusicOptions();
   $('skip-opening').checked=uiSettings.skipOpening;
+  $('tutorial-enabled').checked=uiSettings.tutorialEnabled;
   $('screen-shake').checked=uiSettings.screenShake;
   $('minimap-size').value=document.documentElement.dataset.minimapSize=uiSettings.minimap;
   sound=uiSettings.soundEnabled;volume=uiSettings.soundVolume;paintSoundOptions();

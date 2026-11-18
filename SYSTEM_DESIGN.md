@@ -208,3 +208,7 @@ HUDの成長値は改行ごとにaugment-growth-lineを生成し、nowrapで本�
 選択タブの上角はtab-corner-left/right.svg、上・左右レールは独立した背景層で描画する。ゼロ高border-imageスライスに依存せず右辺を確保する。
 
 またはカードは元の金縁画像を保持し、同じ座標の内側疑似要素だけをクリップして緑化する。
+
+card-editorのfoldSummaryは常時描画し、開閉ではorder-fold-bodyだけを切り替える。旧tray-captionを生成しない。カード配置状態札はpalette-entryのdata-placement-statusと疑似要素に置き、カード画像のgrayscale/opacityから独立する。またはの内側レイヤーは旧マスクを明示解除する。
+
+ui-settingsのtutorialEnabledを読込・保存・初期値へ追加し、maybeTutorial/startTutorialとオーグメント案内を同じ設定で制御する。resetJourneyTutorialsは完了状態だけをリセットし、表示設定を保持する。報酬リロールはchest-reroll-actionsへ移動し、横画面でもグリッド最下段全幅の中央へ配置する。
