@@ -1,3 +1,5 @@
+本編では使用しない保管素材です。以下は保管用Web互換版の再現手順です。
+
 # Web compatibility build
 
 Source: PixelGameFontJP-Futogo.ttf (unaltered original). The original contains CFF outlines despite its .ttf suffix.

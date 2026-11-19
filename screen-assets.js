@@ -34,4 +34,4 @@ export function installScreenAssetGuard(doc=document){
  const observer=new MutationObserver(records=>{if(records.some(record=>record.target!==dialog&&!dialog.contains(record.target)))schedule();});observer.observe(doc.body,{subtree:true,childList:true,attributes:true,attributeFilter:['src','hidden','open']});doc.addEventListener('loadeddata',schedule,true);activeGuard={prepare,get loading(){return holds>0;},disconnect:()=>observer.disconnect()};schedule();return activeGuard;
 }
 
-export async function screenFontsReady(fonts){const loaded=await withAssetDeadline(fonts.load('14px Futogo'));if(!loaded?.length||loaded.some(face=>face.status!=='loaded'))throw Error('指定フォントを読み込めませんでした。');await withAssetDeadline(fonts.ready);return true;}
+export async function screenFontsReady(fonts){await withAssetDeadline(fonts.ready);return true;}

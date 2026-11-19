@@ -741,3 +741,8 @@ TRUE ENDの炎に添付SEを5%で追加し、映像の消え際と同じ1.5秒�
 - 専用無音ローカル4391/?verify=1で準備、報酬種類、条件/アクション報酬、Clear、旅の記録を操作。fontReady=true、EXP/HPのcomputed font/color一致と高さ22px、報酬テーマ0件、Clearから次の準備へ進んだ際の情報文字列一致を確認。1280×720・844×390で報酬名とレアリティの重なり・不要なスクロールを確認し、横画面の長い名称を調整。スキル発動と名称表示を確認し、演出の正確な秒数は単体テストで検証。画像は本体output/ui-font-polish-20261119。
 - 公開ブラウザ確認は未実施。ローカル実画面と配信URL生成チェックで確認する。実スマートフォン端末と全エンディング通し走行は未確認。
 - 最終自動テスト525件成功。node scripts/update-assets.js --check、git diff --check成功。フォント原本/生成物のハッシュと字形数、次階情報の不変性、テーマ欄の省略、フォント読込失敗を検証に含む。
+
+## フォント構成の完全復元
+- 確認基点59de3a7。3851ccbの導入差分と導入前を比較し、style.css/screens.css/antique-ui.cssのFutogo指定と@font-face、app.js/enemy-view.jsのCanvas書体指定を全て解除。各箇所に元からあるゴシック/明朝/等幅のフォールバック構成へ戻す。HUDの文字サイズ/色統一など書体以外の採用済み修正は維持。原本/WOFF/OFL/変換手順は保管するが、本編ではロードしない。
+- screenFontsReadyは標準書体のdocument.fonts.readyだけを待つ。画像/映像の準備バリアは維持。画面仕様/保存形式/バランスに変更なし。図鑑アニメーションは独立サンプルで、本コミットへ混在させない。
+- 専用無音ローカル4391/?verify=1で準備とオプションを表示。computed fontは本文Noto Sans JP/sans-serif、カードGeorgia/Yu Mincho/Hiragino Mincho ProN/serif、HP/EXP monospace、開始ボタンsans-serif。DOM全要素のFutogo指定0件、fontReady=true。Canvas指定もソース検査でFutogoなし。画像output/font-restored.jpg。自動テスト526件、配信URL整合、diff check成功。公開ブラウザ確認は未実施（ローカル表示と配信URL生成で確認）。
