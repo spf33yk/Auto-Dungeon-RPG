@@ -84,3 +84,15 @@ html body #codex-dialog #codex-close{right:-12px;top:-14px}
 #codex-dialog .codex-book-page,#codex-dialog .codex-book-page p{color:#21170e!important}
 #codex-dialog .book-detail .book-meta{color:#342518!important}
 html body #codex-dialog #codex-close{top:8px;right:0}
+/* Clear affordances on parchment for mouse, keyboard and touch. */
+html body #codex-dialog .book-toc button,html body #codex-dialog .book-entry{border:1px solid #77533499!important;background:#f5ddb426!important;border-radius:4px!important;box-shadow:0 1px 2px #4b301823!important;transition:background .12s,color .12s,border-color .12s}
+html body #codex-dialog .book-toc button::before{content:'▸'!important;position:static;display:block;flex:none;color:#694124;font-size:24px}
+html body #codex-dialog .book-toc button:hover:not(:disabled),html body #codex-dialog .book-entry:hover:not(:disabled){background:#6a4327!important;border-color:#492e1b!important;color:#fff0cd!important}
+html body #codex-dialog .book-toc button:hover::before{color:#fff0cd}
+html body #codex-dialog .book-entry.selected{background:#57341e!important;color:#fff0ce!important;border-color:#382312!important;box-shadow:inset 4px 0 #d1ae6e!important}
+html body #codex-dialog .book-pagination button{border:1px solid #765132!important;background:#ead1a977!important;border-radius:4px!important;min-width:46px;box-shadow:0 1px 2px #4b301833!important}
+html body #codex-dialog .book-pagination button:hover:not(:disabled){background:#6a4327!important;color:#fff0cd!important}
+html body #codex-dialog .book-return{border:1px solid #352314!important;border-radius:4px!important;box-shadow:0 2px 3px #4b301844!important}
+html body #codex-dialog .book-return:hover{background:#754d2d!important;color:#fff4d7!important}
+html body #codex-dialog .book-filters select{border:1px solid #765132!important;border-radius:4px;background:#f0d3a5;cursor:pointer;box-shadow:0 1px 2px #4b301833}
+html body #codex-dialog .codex-book-page button:focus-visible{outline:3px solid #75501d!important;outline-offset:3px!important}
