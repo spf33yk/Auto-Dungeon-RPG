@@ -228,3 +228,5 @@ screen-assets.jsはデコード・映像準備・30秒期限・先読み・キ�
 floor-info-view.jsのfloorInfoMarkupで準備とClearの次フロア情報を共通描画する。preparationFloorInfoのfloor引数で次階を指定し、状態を変更しない。報酬のテーマはスキルだけ描画し、指示行ではempty指定により空の銘板を維持する。スキル名ポップアップは1800ms、アトラスは1400msで、探索ターン速度は変えない。
 
 図鑑のオーグメント詳細はaugment-view.jsのaugmentCardを共用し、augment-inner-clipで黒い背景をフレーム内側へ切り抜く。フレーム・本文・背景の重なりを個別に制御し、紙面は透明な外周越しに見える。
+
+図鑑一覧は画面高550pxを境に10件／6件へ切り替え、codexBookViewとcodexPageの既定は10件とする。開く待機とCSS遷移は1000ms、閉じる待機とCSS遷移は800msに揃える。動きを減らす設定では1msを維持する。

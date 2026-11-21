@@ -96,3 +96,17 @@ html body #codex-dialog .book-return{border:1px solid #352314!important;border-r
 html body #codex-dialog .book-return:hover{background:#754d2d!important;color:#fff4d7!important}
 html body #codex-dialog .book-filters select{border:1px solid #765132!important;border-radius:4px;background:#f0d3a5;cursor:pointer;box-shadow:0 1px 2px #4b301833}
 html body #codex-dialog .codex-book-page button:focus-visible{outline:3px solid #75501d!important;outline-offset:3px!important}
+
+/* More entries within the fixed paper area; opening and closing share their full timing. */
+#codex-dialog .codex-book-page{gap:6px}
+#codex-dialog .book-entry{min-height:40px!important;padding:6px 12px!important}
+#codex-dialog .book-list{gap:5px}
+#codex-dialog .codex-open-book{transition:opacity .7s,transform 1s}
+#codex-dialog .codex-cover{transition:transform 1s cubic-bezier(.22,.7,.2,1),opacity .8s}
+#codex-dialog .codex-book-stage:not(.is-open) .codex-open-book{transition-duration:.8s}
+#codex-dialog .codex-book-stage:not(.is-open) .codex-cover{transition-duration:.8s}
+@media(max-height:550px){#codex-dialog .book-entry{min-height:52px!important;padding:5px 10px!important}}
+@media(prefers-reduced-motion:reduce){#codex-dialog .codex-open-book,#codex-dialog .codex-cover{transition-duration:.001s!important}}
+html body #codex-dialog .book-entry{height:38px;min-height:38px!important;padding:4px 12px!important;line-height:1.2!important}
+#codex-dialog .book-list{gap:4px}
+@media(max-height:550px){html body #codex-dialog .book-entry{height:52px;min-height:52px!important;padding:5px 10px!important}}

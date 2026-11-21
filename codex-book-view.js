@@ -18,12 +18,12 @@ export function codexBookRows(state,options={}){
  if(kind!=='equipment')return rows;
  return rows.filter(r=>r.slot===(options.slot||'weapon')).sort((a,b)=>Number(b.known)-Number(a.known)||(a.known&&b.known?(options.sort&&options.sort!=='acquired'?b[options.sort]-a[options.sort]:a.acquiredOrder-b.acquiredOrder):0));
 }
-export function codexPage(rows,page=0,size=6){const pages=Math.max(1,Math.ceil(rows.length/size)),index=Math.max(0,Math.min(pages-1,Math.floor(Number(page)||0)));return{page:index,pages,rows:rows.slice(index*size,(index+1)*size)};}
+export function codexPage(rows,page=0,size=10){const pages=Math.max(1,Math.ceil(rows.length/size)),index=Math.max(0,Math.min(pages-1,Math.floor(Number(page)||0)));return{page:index,pages,rows:rows.slice(index*size,(index+1)*size)};}
 const select=(key,label,value,choices)=>'<label>'+label+'<select data-book-filter="'+key+'">'+choices.map(([id,name])=>'<option value="'+id+'"'+(value===id?' selected':'')+'>'+name+'</option>').join('')+'</select></label>';
 export function codexBookView(state,options={},art={}){
  const kind=options.kind||'toc';
  if(kind==='toc')return{title:'図鑑の目次',left:'<h2>目 次</h2><nav class="book-toc" aria-label="図鑑の目次">'+Object.entries(CODEX_KINDS).map(([id,name],i)=>'<button type="button" data-book-kind="'+id+'">'+name+'<span>0'+(i+1)+'</span></button>').join('')+'</nav>',right:'<div class="book-intro"><h2>旅の記録</h2><p>見つけた魔物や装備、<br>手にしたカードと記憶を<br>読み返す。</p><p>左の目次から<br>図鑑を選んでください。</p></div>',page:0,selected:0};
- const rows=codexBookRows(state,options),part=codexPage(rows,options.page,options.pageSize||6),selected=Math.max(0,Math.min(part.rows.length-1,Math.floor(Number(options.selected)||0))),row=part.rows[selected];
+ const rows=codexBookRows(state,options),part=codexPage(rows,options.page,options.pageSize||10),selected=Math.max(0,Math.min(part.rows.length-1,Math.floor(Number(options.selected)||0))),row=part.rows[selected];
  let filters='';
  if(kind==='cards')filters=select('cardKind','種類',options.cardKind||'all',[['all','すべて'],['target','ターゲット'],['condition','条件'],['action','アクション'],['skill','スキル']]);
  if(kind==='equipment')filters=select('slot','装備',options.slot||'weapon',[['weapon','武器'],['armor','防具']])+select('sort','順序',options.sort||'acquired',[['acquired','入手順'],['attack','攻撃力順'],['defense','防御力順']]);
