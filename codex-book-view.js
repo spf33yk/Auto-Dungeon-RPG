@@ -4,7 +4,7 @@ import{cardCodexRows}from'./card-catalog.js';
 import{augments}from'./augments.js';
 import{buildThemes}from'./build-themes.js';
 import{augmentName,augmentStrength}from'./augment-strength.js';
-import{augmentIllustration}from'./augment-view.js';
+import{augmentCard}from'./augment-view.js';
 import{themeIcon,skillTitle}from'./theme-view.js';
 import{kindMark}from'./gold-ui.js';
 import{enemyFrame}from'./enemy-view.js';
@@ -34,7 +34,7 @@ export function codexBookView(state,options={},art={}){
  if(!row)detail='<p>左の一覧から項目を選んでください。</p>';
  else if(!row.known)detail='<h2>未登録</h2><p>旅で見つけると、<br>名前と詳しい情報が記録されます。</p>';
  else if(kind==='cards')detail='<div class="book-card codex-card-art" data-card-kind="'+row.kind+'">'+kindMark(row.kind)+'<span class="card-kind-label">'+esc(row.group)+'カード</span><strong class="gold-card-name">'+esc(row.name)+'</strong><small class="gold-card-rarity">'+esc(row.rarity)+'</small></div><h2>'+esc(row.name)+'</h2><p class="book-meta">'+esc(row.group)+' · '+(row.owned?'所持中':row.discovered?'過去に取得／現在未所持':'未取得')+'</p><p>'+esc(row.detail)+'</p><p class="book-meta">入手：'+(row.id==='letter'?'旧セーブから引き継ぎ':row.initial?'旅の開始時':'宝箱')+'</p>'+(row.themeId?'<p class="book-meta">'+themeIcon(row.themeId)+esc(buildThemes.find(t=>t.id===row.themeId)?.name||'')+'：スキルは探索指示へ配置して使用。'+'</p>':'');
- else if(kind==='augments')detail='<div class="book-augment-art">'+augmentIllustration(row)+'</div><h2>'+esc(augmentName(row,state))+'</h2><p class="book-meta">'+themeIcon(row.themeId)+esc(row.theme)+' · '+esc(row.rarity)+' · '+(row.owned?'所持中':row.discovered?'過去に取得':'未取得')+'</p><p>'+esc(augmentStrength(row,state)).replace(/\n/g,'<br>')+'</p><p class="book-meta">効果はこの旅に適用。取得記録は周回後も保持します。</p>';
+ else if(kind==='augments')detail='<div class="book-framed-augment">'+augmentCard(row,{state,showSetHint:false,status:row.owned?'所持中':row.discovered?'過去に取得':'未取得'})+'</div>';
  else if(kind==='monsters'){
   const boss=['boss-b20','boss-b10','boss-b1'].indexOf(row.id),frame=enemyFrame(row);let sprite='';if(boss>=0&&art.bosses)sprite='<div class="book-monster boss" style="background-image:url(&quot;'+esc(art.bosses)+'&quot;);background-position:-'+(boss*128)+'px 0"></div>';else if(frame&&art.enemies)sprite='<div class="book-monster" style="background-image:url(&quot;'+esc(art.enemies)+'&quot;);background-position:-'+frame.x+'px -'+frame.y+'px"></div>';
   detail='<div class="book-monster-art">'+sprite+'</div><h2>'+esc(row.name)+'</h2><p class="book-meta">'+esc(row.zone)+'</p><dl class="book-stats"><div><dt>HP</dt><dd>'+row.hp+'</dd></div><div><dt>攻撃</dt><dd>'+row.attack+'</dd></div><div><dt>防御</dt><dd>'+row.defense+'</dd></div><div><dt>行動間隔</dt><dd>'+row.period+'ターン</dd></div></dl><p class="book-meta">基礎能力の記録です。長期滞在の増援は強化されます。</p>';

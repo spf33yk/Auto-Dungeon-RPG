@@ -60,3 +60,15 @@ html body #codex-dialog .book-toc button{height:80px!important;min-height:80px!i
 html body #codex-dialog .book-toc button span{margin-left:auto;position:static!important;flex:none}
 html body #codex-dialog .book-toc button::after,html body #codex-dialog .book-toc button::before{content:none!important}
 html body #codex-dialog .book-card .gold-card-rarity{left:8%!important;right:auto!important;top:auto!important;bottom:13%!important;width:82%!important;text-align:center!important;transform:none!important}
+
+/* Augment cards keep paper visible around their illustrated frame. */
+html body #codex-dialog .book-framed-augment{display:flex;justify-content:center;padding:2px 0 10px}
+html body #codex-dialog .book-framed-augment .illustrated-augment{width:350px;height:525px;max-width:100%;padding:0;display:block;position:relative;isolation:isolate;background:transparent!important;border:0;box-shadow:none;margin:0}
+html body #codex-dialog .book-framed-augment .illustrated-augment::before{content:'';position:absolute;inset:0;background:#000;clip-path:url(#augment-inner-clip);z-index:0}
+html body #codex-dialog .book-framed-augment .augment-frame{z-index:1;position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+html body #codex-dialog .book-framed-augment .augment-card-content{z-index:2;position:absolute;inset:15% 12% 10%;display:flex;flex-direction:column;align-items:center;gap:10px;overflow:auto;color:#ead9b5}
+html body #codex-dialog .book-framed-augment .augment-card-content>strong{font:700 24px/1.4 serif;color:#ead9b5}
+html body #codex-dialog .book-framed-augment .augment-illustration{width:100px;height:100px;object-fit:contain;flex:none}
+html body #codex-dialog .book-framed-augment .augment-theme{font:17px/1.4 sans-serif;color:#d9c49b}
+html body #codex-dialog .book-framed-augment .augment-effect{font:18px/1.6 sans-serif;color:#ead9b5;white-space:pre-line}
+html body #codex-dialog .book-framed-augment .augment-status{font:16px/1.4 sans-serif;color:#d9c49b}

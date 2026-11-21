@@ -226,3 +226,5 @@ syncPreparationTabFrameの接続マスクは左＋3px・幅−6px。タブ擬似
 screen-assets.jsはデコード・映像準備・30秒期限・先読み・キャッシュとscreen-asset-loadingを提供する。installScreenAssetGuardはMutationObserverを1バッチへまとめ、実表示されるimg/videoを監視。複数の準備要求が重なった時は参照カウントで待機を保ち、全要求完了後に次の描画フレームで解除する。失敗は同じモーダルの再試行で処理する。従来のループのdialog[open]判定により探索ターン・字幕を停止する。開始前動画とending-title-transitionはprepareScreenAssetsを明示awaitし、素材準備前にタイマーを登録しない。
 
 floor-info-view.jsのfloorInfoMarkupで準備とClearの次フロア情報を共通描画する。preparationFloorInfoのfloor引数で次階を指定し、状態を変更しない。報酬のテーマはスキルだけ描画し、指示行ではempty指定により空の銘板を維持する。スキル名ポップアップは1800ms、アトラスは1400msで、探索ターン速度は変えない。
+
+図鑑のオーグメント詳細はaugment-view.jsのaugmentCardを共用し、augment-inner-clipで黒い背景をフレーム内側へ切り抜く。フレーム・本文・背景の重なりを個別に制御し、紙面は透明な外周越しに見える。
