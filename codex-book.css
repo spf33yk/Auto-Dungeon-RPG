@@ -72,3 +72,15 @@ html body #codex-dialog .book-framed-augment .augment-illustration{width:100px;h
 html body #codex-dialog .book-framed-augment .augment-theme{font:17px/1.4 sans-serif;color:#d9c49b}
 html body #codex-dialog .book-framed-augment .augment-effect{font:18px/1.6 sans-serif;color:#ead9b5;white-space:pre-line}
 html body #codex-dialog .book-framed-augment .augment-status{font:16px/1.4 sans-serif;color:#d9c49b}
+
+/* Adopted leather book: paper lift excludes the leather and centre binding. */
+#codex-dialog .codex-open-book{clip-path:none;background-size:contain}
+#codex-dialog .codex-open-book::before,#codex-dialog .codex-open-book::after{content:'';position:absolute;top:4.5%;bottom:6.5%;width:44.5%;background:rgba(255,245,220,.10);border-radius:10px;pointer-events:none;z-index:0}
+#codex-dialog .codex-open-book::before{left:4.8%}#codex-dialog .codex-open-book::after{right:4.8%}
+#codex-dialog .codex-book-page{top:74px;bottom:100px;width:425px;z-index:1}
+#codex-dialog .codex-book-left{left:100px}
+html body #codex-dialog #codex-body{right:100px;width:425px}
+html body #codex-dialog #codex-close{right:-12px;top:-14px}
+#codex-dialog .codex-book-page,#codex-dialog .codex-book-page p{color:#21170e!important}
+#codex-dialog .book-detail .book-meta{color:#342518!important}
+html body #codex-dialog #codex-close{top:8px;right:0}
