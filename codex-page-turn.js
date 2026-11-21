@@ -1,0 +1,29 @@
+// Seven traced poses; generated artwork supplies only paper texture.
+export const CODEX_TURN_DURATION=383.334;
+export function createCodexPageTurn(ctx,sheet){
+// Native timestamps measured from six turns in the user-uploaded MP4; median cycle 383.334ms.
+const TRACE_DURATION=383.334,TRACE_ANCHOR={x:600,y:216,w:484,h:595};
+const TRACE_POSES=[
+{at:50,tl:[.06,-.04],tr:[.94,.04],br:[.96,.98],bl:[.08,.93],tc:[.12,-.13,.52,.02],rc:[.96,.32,.95,.70],bc:[.78,1.03,.44,.84],lc:[.08,.62,.05,.17],roll:.025},
+{at:100,tl:[.06,-.08],tr:[.76,.02],br:[.78,.94],bl:[.09,.91],tc:[.18,-.18,.38,.02],rc:[.77,.32,.77,.67],bc:[.58,.96,.38,.73],lc:[.09,.61,.05,.18],roll:.045},
+{at:158.333,tl:[.02,-.08],tr:[.60,.05],br:[.63,.96],bl:[.04,.89],tc:[.12,-.19,.42,.03],rc:[.61,.32,.61,.69],bc:[.42,.97,.26,.77],lc:[.04,.60,.01,.18],roll:.075},
+{at:191.668,tl:[-.08,-.06],tr:[.20,.01],br:[.30,.91],bl:[-.10,.84],tc:[-.02,-.10,.08,-.04],rc:[.12,.29,.02,.66],bc:[.10,.85,-.03,.83],lc:[-.08,.58,-.08,.17],roll:.145},
+{at:241.667,tl:[-.42,-.02],tr:[-.12,-.12],br:[-.03,.78],bl:[-.42,.84],tc:[-.35,-.08,-.22,-.12],rc:[-.22,.18,-.26,.52],bc:[-.14,.73,-.32,.75],lc:[-.43,.56,-.43,.20],roll:.16},
+{at:291.668,tl:[-.78,.05],tr:[-.03,-.04],br:[-.04,.96],bl:[-.71,.91],tc:[-.60,.02,-.16,-.10],rc:[-.02,.29,-.03,.68],bc:[-.30,.91,-.52,.93],lc:[-.92,.70,-.88,.32],roll:.055},
+{at:333.334,tl:[-.98,.07],tr:[-.02,-.01],br:[-.03,.98],bl:[-.95,.98],tc:[-.70,.05,-.18,-.06],rc:[-.02,.30,-.02,.70],bc:[-.35,.96,-.66,.98],lc:[-1,.70,-1,.32],roll:.015}
+];
+function boundPose(raw,index){const k={...raw};if(index<=3){k.tl=[0,0];k.bl=[0,1];k.lc=[0,.66,0,.33];}else{k.tr=[0,0];k.br=[0,1];k.rc=[0,.33,0,.66];}return k;}
+const tracePoint=([x,y])=>({x:TRACE_ANCHOR.x+x*TRACE_ANCHOR.w,y:TRACE_ANCHOR.y+y*TRACE_ANCHOR.h});
+function traceFront(k){const A=tracePoint(k.tl),B=tracePoint(k.tr),C=tracePoint(k.br),D=tracePoint(k.bl),T1=tracePoint(k.tc.slice(0,2)),T2=tracePoint(k.tc.slice(2)),R1=tracePoint(k.rc.slice(0,2)),R2=tracePoint(k.rc.slice(2)),B1=tracePoint(k.bc.slice(0,2)),B2=tracePoint(k.bc.slice(2)),L1=tracePoint(k.lc.slice(0,2)),L2=tracePoint(k.lc.slice(2));ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.bezierCurveTo(T1.x,T1.y,T2.x,T2.y,B.x,B.y);ctx.bezierCurveTo(R1.x,R1.y,R2.x,R2.y,C.x,C.y);ctx.bezierCurveTo(B1.x,B1.y,B2.x,B2.y,D.x,D.y);ctx.bezierCurveTo(L1.x,L1.y,L2.x,L2.y,A.x,A.y);ctx.closePath();}
+function traceIndex(p){const t=Math.max(0,Math.min(1,p))*TRACE_DURATION;let i=-1;for(let n=0;n<TRACE_POSES.length;n++)if(t>=TRACE_POSES[n].at)i=n;return t>=TRACE_DURATION?-1:i;}
+function reverseLipPoints(k,index){const A=tracePoint(k.bl),B=tracePoint(k.bc.slice(2)),C=tracePoint(k.bc.slice(0,2)),D=tracePoint(k.br),widths=[4,7,10,16,18,7,2],points=[];for(let i=0;i<=48;i++){const t=i/48,v=1-t,x=v*v*v*A.x+3*v*v*t*B.x+3*v*t*t*C.x+t*t*t*D.x,y=v*v*v*A.y+3*v*v*t*B.y+3*v*t*t*C.y+t*t*t*D.y,dx=3*v*v*(B.x-A.x)+6*v*t*(C.x-B.x)+3*t*t*(D.x-C.x),dy=3*v*v*(B.y-A.y)+6*v*t*(C.y-B.y)+3*t*t*(D.y-C.y),len=Math.hypot(dx,dy)||1,width=widths[index]*Math.pow(Math.max(0,Math.sin(Math.PI*t)),.8);points.push({x,y,outerX:x-dy/len*width,outerY:y+Math.abs(dx/len)*width,width});}return points;}
+function drawReverseLip(k,index){const points=reverseLipPoints(k,index);ctx.save();ctx.beginPath();points.forEach((v,i)=>i?ctx.lineTo(v.x,v.y):ctx.moveTo(v.x,v.y));for(let i=points.length-1;i>=0;i--)ctx.lineTo(points[i].outerX,points[i].outerY);ctx.closePath();ctx.shadowColor='#452c2833';ctx.shadowBlur=3;ctx.shadowOffsetY=2;const ys=points.flatMap(v=>[v.y,v.outerY]),gradient=ctx.createLinearGradient(0,Math.min(...ys),0,Math.max(...ys)+.1);gradient.addColorStop(0,'#d9b589');gradient.addColorStop(.65,'#c49b74');gradient.addColorStop(1,'#a7795c');ctx.fillStyle=gradient;ctx.fill();ctx.shadowColor='transparent';ctx.strokeStyle='#895e4566';ctx.lineWidth=1.2;ctx.stroke();ctx.restore();}
+function drawPage(p){ctx.clearRect(0,0,1200,1050);const index=traceIndex(p);if(index<0)return;const k=boundPose(TRACE_POSES[index],index),C=tracePoint(k.br),D=tracePoint(k.bl),B1=tracePoint(k.bc.slice(0,2)),B2=tracePoint(k.bc.slice(2)),r=k.roll*TRACE_ANCHOR.h;ctx.save();ctx.imageSmoothingEnabled=false;
+// A thin, tapered paper edge; no enclosed underside pocket or punched ellipse.
+drawReverseLip(k,index);
+traceFront(k);ctx.save();ctx.clip();ctx.fillStyle='#efc38e';ctx.fillRect(60,120,1100,850);const X=Math.min(...[k.tl[0],k.tr[0],k.bl[0],k.br[0]]),Y=Math.min(k.tl[1],k.tr[1]),W=Math.max(k.tl[0],k.tr[0],k.bl[0],k.br[0])-X,H=Math.max(k.bl[1],k.br[1])-Y;const ox=600+X*484,oy=216+Y*595,scale=Math.max(W*484/(sheet.naturalWidth*.24),H*595/(sheet.naturalHeight*.50));const sw=sheet.naturalWidth*.24,sh=sheet.naturalHeight*.50;ctx.drawImage(sheet,sheet.naturalWidth*.18,sheet.naturalHeight*.18,sw,sh,ox,oy,sw*scale,sh*scale);const grad=ctx.createLinearGradient(ox,0,ox+Math.max(20,W*484),0);grad.addColorStop(0,'#72463c19');grad.addColorStop(.48,'#ffffff00');grad.addColorStop(1,'#71443c24');ctx.fillStyle=grad;ctx.fillRect(60,120,1100,850);ctx.restore();traceFront(k);ctx.strokeStyle='#845345';ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.stroke();ctx.save();ctx.globalCompositeOperation='source-atop';const seam=ctx.createLinearGradient(590,0,610,0);seam.addColorStop(0,'#63402b00');seam.addColorStop(.5,'#63402b35');seam.addColorStop(1,'#63402b00');ctx.fillStyle=seam;ctx.fillRect(590,216,20,595);ctx.restore();ctx.beginPath();ctx.moveTo(600,216);ctx.lineTo(600,811);ctx.strokeStyle='#6d453735';ctx.lineWidth=1;ctx.stroke();ctx.restore();}
+function drawPose(idx){drawPage((TRACE_POSES[Math.max(0,Math.min(6,idx))].at+4)/TRACE_DURATION);}
+
+return {draw:drawPage,index:traceIndex,pose:i=>boundPose(TRACE_POSES[i],i),duration:TRACE_DURATION};
+}
+

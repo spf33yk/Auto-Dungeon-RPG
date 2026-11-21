@@ -1,3 +1,5 @@
+import {installCodexBook} from './codex-book.js';
+import {CODEX_ART} from './codex-art.js';
 import {floorInfoMarkup} from './floor-info-view.js';
 import {createAssetCache,preloadAssets,imageReady,videoReady,collectScreenImages,installScreenAssetGuard,prepareScreenAssets,screenFontsReady} from './screen-assets.js';
 import {GOLD_ART} from './gold-art.js';
@@ -553,44 +555,8 @@ document.addEventListener('pointerup',tutorialOperation,true);
 document.addEventListener('change',tutorialOperation,true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&tutorialKind&&tutorialActing){e.preventDefault();finishTutorial();}});
 function finishDialog(){if(tutorialKind)return;if(!document.querySelector('dialog[open]')){paused=dialogWasPaused;last=performance.now();render();}}
-let cardBookKind='all';
-function renderCardBook(){const names={all:'すべて',target:'ターゲット',condition:'条件',action:'アクション',skill:'スキル'};const all=cardCodexRows(state),rows=all.filter(c=>cardBookKind==='all'||c.kind===cardBookKind);$('codex-title').textContent='カード図鑑';$('codex-note').textContent='未所持カードもすべて公開。取得記録は周回後も保持し、所持と効果はその旅だけ。全スキルは取得後、探索指示への配置が必要です。';$('codex-body').innerHTML='<div class="subtabs">'+Object.entries(names).map(([id,name])=>'<button data-card-book-kind="'+id+'" aria-pressed="'+(cardBookKind===id)+'">'+kindIcon(id)+name+'</button>').join('')+'</div><p class="section-caption">この旅の所持 '+all.filter(c=>c.owned).length+' / '+all.length+' · 取得記録 '+all.filter(c=>c.discovered).length+'</p><div class="card-codex-grid">'+rows.map(c=>'<article class="item-card card-codex-item '+c.rarity+'" tabindex="0" title="'+esc(skillTitle(c,state))+'"><div><div class="codex-card-art" data-card-kind="'+c.kind+'">'+kindMark(c.kind)+'<strong class="gold-card-name">'+esc(c.name)+'</strong><span class="gold-card-rarity">'+c.rarity+'</span></div><small>'+esc(c.group)+' · '+(c.owned?'所持中':c.discovered?'過去に取得／現在未所持':'未取得')+'</small><p>'+esc(c.detail)+'</p>'+(skillSetActive(state,c.id)?'<small class="active-set-note">同テーマのオーグメント強化に寄与</small>':'')+'<small>入手：'+(c.id==='letter'?'旧セーブから引き継ぎ':c.initial?'旅の開始時':'宝箱')+(c.modifier&&c.kind==='skill'?' · 配置した条件の成立中に有効':'')+'</small></div></article>').join('')+'</div>';}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-card-book-kind]');if(b){cardBookKind=b.dataset.cardBookKind;renderCodex();}});
-let augmentBookOrder='theme';
-function renderAugmentBook(){
- $('codex-title').textContent='オーグメント図鑑';
- $('codex-note').textContent='開始時とB20・B10のボス撃破時に選択。効果は旅ごとにリセットし、取得記録は引き継ぎます。数値は仮バランス。';
- const groups=augmentBookOrder==='theme'
-  ?buildThemes.map(theme=>({name:theme.name,cards:augments.filter(a=>a.themeId===theme.id)}))
-  :['NORMAL','EPIC','LEGENDARY'].map(rarity=>({name:rarity,cards:augments.filter(a=>a.rarity===rarity)}));
- const card=a=>augmentCard(a,{state,showSetHint:false,status:state.augments.includes(a.id)?'所持中':state.profile.augments?.includes(a.id)?'過去に取得':'未取得'});
- $('codex-body').innerHTML='<div class="sort-controls" role="group" aria-label="オーグメントの並べ替え">'+
-  [['theme','テーマ順'],['rarity','レアリティ順']].map(([order,label])=>'<button type="button" data-augment-order="'+order+'" aria-pressed="'+(augmentBookOrder===order)+'">'+label+'</button>').join('')+
-  '</div>'+groups.map(group=>'<section class="augment-codex-group"><h3>'+esc(group.name)+'</h3><div class="augment-codex-grid">'+group.cards.map(card).join('')+'</div></section>').join('');
-}
-$('codex-body').addEventListener('click',event=>{
- const button=event.target.closest('[data-augment-order]');
- if(!button||button.dataset.augmentOrder===augmentBookOrder)return;
- augmentBookOrder=button.dataset.augmentOrder;
- renderAugmentBook();
- $('codex-body').scrollTop=0;
- $('codex-body').querySelector('[data-augment-order="'+augmentBookOrder+'"]').focus();
-});
-function renderCodex(){$('codex-dialog').dataset.kind=codexKind;if(codexKind==='augments'){renderAugmentBook();return;}if(codexKind==='cards'){renderCardBook();return;}if(codexKind==='skills'){codexKind='cards';renderCardBook();return;}let rows=codexRows(state,codexKind);if(codexKind==='equipment')rows=rows.filter(r=>r.slot===codexSlot).sort((a,b)=>Number(b.known)-Number(a.known)||(a.known&&b.known?(codexSorts[codexSlot]==='acquired'?a.acquiredOrder-b.acquiredOrder:b[codexSorts[codexSlot]]-a[codexSorts[codexSlot]]):0));$('codex-title').textContent=codexKind==='monsters'?'モンスター図鑑':'装備図鑑';$('codex-note').textContent=codexKind==='monsters'?'視認した種類を登録。図鑑は基礎能力です。増援は長期滞在で強化されます。記録は周回でも引き継ぎます。':'入手した種類の名前と能力を登録。記録は周回でも引き継ぎます。';$('codex-body').innerHTML=(codexKind==='equipment'?categoryTabs('codex',codexSlot)+sortButtons('codex',codexSorts[codexSlot]):'')+`<p class="section-caption">公開済み ${rows.filter(r=>r.known).length} / ${rows.length}</p><table class="codex-table"><thead><tr><th>名前</th><th>攻撃</th><th>防御</th></tr></thead><tbody>${rows.map(r=>r.known?`<tr><td>${codexKind==='equipment'?'<span class="equipment-icon '+r.slot+'" aria-hidden="true"></span>':''}${esc(r.name)}${r.zone?`<small>${esc(r.zone)}</small>`:''}</td><td>${r.attack}</td><td>${r.defense}</td></tr>`:'<tr><td><span aria-label="未登録">？</span></td><td>―</td><td>―</td></tr>').join('')}</tbody></table>`;}
-const codexNavigation=$('codex-dialog').querySelector('nav');
-function selectCodex(kind){
- codexKind=kind;
- for(const button of codexNavigation.querySelectorAll('[data-codex-kind]')){
-  button.setAttribute('aria-pressed',String(button.dataset.codexKind===kind));
- }
- renderCodex();
- $('codex-body').scrollTop=0;
-}
-codexNavigation.addEventListener('click',event=>{
- const button=event.target.closest('[data-codex-kind]');
- if(button)selectCodex(button.dataset.codexKind);
-});
-function showCodex(kind){selectCodex(kind);openDialog('codex-dialog');}
+const codexBook=installCodexBook($('codex-dialog'),{getState:()=>state,art:$('map').dataset});
+function showCodex(){openDialog('codex-dialog');codexBook.open();}
 const getRef=r=>r.startsWith('i')?Number(r.slice(1)):r;
 document.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('dragstart',e=>e.preventDefault(),{capture:true});
@@ -602,7 +568,6 @@ $('tab-content').onclick=e=>{if(tab==='extensions')return;if(e.target.closest('[
 $('live-orders').onclick=e=>handleOrderClick(e,$('live-orders'));
 $('live-orders').onchange=e=>{if(tab!=='extensions')handleOrderChange(e);};;
 $('tab-content').onchange=e=>{if(tab!=='extensions')handleOrderChange(e);};;
-$('codex-body').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.category)codexSlot=b.dataset.value;else if(b.dataset.sort)codexSorts[codexSlot]=b.dataset.value;renderCodex();};
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));renderTab();});
 document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{speed=Number(b.dataset.speed);document.querySelectorAll('[data-speed]').forEach(x=>x.classList.toggle('active',x===b));});
 let skillPopup=null;
@@ -869,9 +834,9 @@ let gameAssetsLoaded=false;
 const titleAssetsReady=Promise.all(['title-background','title-logo'].map(id=>imageReady($(id))));
 const gameAssetsReady=Promise.all([cryptAtlas,readableAtlas,trapAtlas,trapEffectAtlas,propsAtlas,mapItemsAtlas,redChestAtlas,enemyAtlas,bossAtlas].map(imageReady).concat([heroAssetsReady,wallAssetsReady,loadSkillEffectAssets()])).then(()=>{gameAssetsLoaded=true;});
 const assetCache=createAssetCache(async url=>{const image=new Image();image.src=url;await imageReady(image);return image;});
-const commonImages=[...Object.values(GOLD_ART),...Object.values(THEME_IMAGES),...Object.values(AUGMENT_IMAGES),...collectScreenImages(document)];
+const commonImages=[...Object.values(GOLD_ART),...Object.values(CODEX_ART),...Object.values(THEME_IMAGES),...Object.values(AUGMENT_IMAGES),...collectScreenImages(document)];
 $('startup-message').textContent='画面の素材を読み込み中…';
-await Promise.all([titleAssetsReady,gameAssetsReady,preloadAssets(commonImages,{load:url=>assetCache.load(url),onProgress:(done,total)=>{if($('startup-retry').hidden)$('startup-message').textContent='画面の素材を読み込み中… '+done+' / '+total;}}),screenFontsReady(document.fonts).then(()=>{document.documentElement.dataset.fontReady='true';})]);
+await Promise.all([titleAssetsReady,gameAssetsReady,codexBook.ready,preloadAssets(commonImages,{load:url=>assetCache.load(url),onProgress:(done,total)=>{if($('startup-retry').hidden)$('startup-message').textContent='画面の素材を読み込み中… '+done+' / '+total;}}),screenFontsReady(document.fonts).then(()=>{document.documentElement.dataset.fontReady='true';})]);
 await videoReady($('title-fx'),{enough:true});
 installScreenAssetGuard();
 drawHeroPortraits();draw();

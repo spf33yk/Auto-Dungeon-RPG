@@ -746,3 +746,12 @@ TRUE ENDの炎に添付SEを5%で追加し、映像の消え際と同じ1.5秒�
 - 確認基点59de3a7。3851ccbの導入差分と導入前を比較し、style.css/screens.css/antique-ui.cssのFutogo指定と@font-face、app.js/enemy-view.jsのCanvas書体指定を全て解除。各箇所に元からあるゴシック/明朝/等幅のフォールバック構成へ戻す。HUDの文字サイズ/色統一など書体以外の採用済み修正は維持。原本/WOFF/OFL/変換手順は保管するが、本編ではロードしない。
 - screenFontsReadyは標準書体のdocument.fonts.readyだけを待つ。画像/映像の準備バリアは維持。画面仕様/保存形式/バランスに変更なし。図鑑アニメーションは独立サンプルで、本コミットへ混在させない。
 - 専用無音ローカル4391/?verify=1で準備とオプションを表示。computed fontは本文Noto Sans JP/sans-serif、カードGeorgia/Yu Mincho/Hiragino Mincho ProN/serif、HP/EXP monospace、開始ボタンsans-serif。DOM全要素のFutogo指定0件、fontReady=true。Canvas指定もソース検査でFutogoなし。画像output/font-restored.jpg。自動テスト526件、配信URL整合、diff check成功。公開ブラウザ確認は未実施（ローカル表示と配信URL生成で確認）。
+
+
+## 図鑑の本編統合（2026-11-21）
+
+- 確認基準コミット：f59f720。表紙→左ページの目次→4図鑑→目次へ戻るを実装。登録・所持・効果は現行stateを参照し、保存形式は変更しない。
+- ローカル専用検証（verify=1、音声停止）で4図鑑、カード絞り込み、装備切替、ページ送り、目次復帰、×で閉じて再表示を確認。通常表示と844×390の横画面を確認し、一覧は6件／4件で不要な内部スクロールがない。
+- ページ描画の未定義canvas参照を修正し、全姿勢の描画テストを追加。目次への旧スタイル混入、カードのレアリティ位置も修正。
+- 公開版の操作確認は未実施。ローカル本編と配信ハッシュを確認する変更のため公開走行は省略。実機スマートフォンと動きを減らすOS設定での表示は未確認。
+- 最終検証：npm test 532件成功、update-assets.js --check成功、git diff --check成功。Escapeで閉じて準備画面へ戻ることを確認。最終画面のブラウザエラー0件。
